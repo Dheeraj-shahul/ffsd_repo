@@ -1,0 +1,478 @@
+<!-- register.ejs -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register | RentEase</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@100;200;300;400;500;600;700;800;900&display=swap');
+
+        html {
+        height: 100%;
+        margin: 0;
+        padding: 0;
+    }
+
+    body {
+        font-family: 'Poppins', sans-serif;
+        display: flex;
+        align-items: flex-start; 
+        justify-content: center;
+        margin: 0;
+        background-image: url('/images/login.jpg');
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
+        min-height: 100vh; 
+        padding: 40px 20px;
+        overflow-y: auto; 
+    }
+
+    .container {
+        background-color: #333;
+        border-radius: 20px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+        width: 400px;
+        padding: 30px 50px;
+        margin: 20px 0; 
+    }
+
+        .header {
+            text-align: center;
+            margin-bottom: 25px;
+        }
+
+        .header h1 {
+            color: #FFC107;
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            color: white;
+            font-size: 14px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            font-size: 14px;
+            color: white;
+            display: block;
+            margin-top: 10px;
+        }
+
+        input, select {
+            background-color: #fafaf9;
+            color: black;
+            border: none;
+            padding: 10px;
+            border-radius: 10px;
+            font-size: 14px;
+            width: 95%;
+        }
+        select{
+            width: 100%;
+        }
+
+        button {
+            background-color: #FFC107;
+            color: black;
+            border: none;
+            padding: 12px;
+            border-radius: 10px;
+            font-size: 16px;
+            cursor: pointer;
+            font-weight: bold;
+            width: 100%;
+            margin-top: 15px;
+            transition: background-color 0.3s;
+        }
+
+        button:hover {
+            background-color: #ff6f00;
+        }
+
+        .error {
+            color: #ff4444;
+            font-size: 12px;
+            margin-top: 5px;
+            display: none;
+        }
+
+        .links {
+            text-align: center;
+            margin-top: 15px;
+        }
+
+        .links a {
+            color: rgb(34, 125, 244);
+            text-decoration: underline;
+            font-size: 14px;
+            cursor: pointer;
+        }
+
+        .form-row {
+            display: flex;
+            gap: 15px;
+        }
+
+        .divider {
+            margin: 20px 0;
+            text-align: center;
+            position: relative;
+        }
+
+        .divider::before {
+            content: "";
+            position: absolute;
+            top: 50%;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background-color: #666;
+        }
+
+        .divider span {
+            position: relative;
+            background-color: #333;
+            padding: 0 15px;
+            color: white;
+            font-size: 14px;
+        }
+
+        .social-login {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .social-btn {
+            background-color: #fdfdfb;
+            color: black;
+            border: none;
+            padding: 10px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            width: 100%;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .social-btn:hover {
+            background-color: #e0d2a1;
+        }
+
+        .social-btn img {
+            width: 20px;
+            height: 20px;
+        }
+
+        .location-fields {
+            display: none;
+        }
+        #first{
+            margin-right: 5px;
+        }
+
+        @media (max-height: 600px) {
+    body {
+        align-items: flex-start;
+        padding-top: 20px;
+        padding-bottom: 20px;
+    }
+}
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Join RentEase</h1>
+            <p>Create your account today</p>
+        </div>
+        
+        <form id="registerForm" action="/register" method="POST">
+            <div class="form-group">
+                <label for="userType">I am a</label>
+                <select id="userType" name="userType" onchange="handleUserTypeChange()">
+                    <option value="tenant" <%= userType === 'tenant' ? 'selected' : '' %>>Tenant/Renter</option>
+                    <option value="owner" <%= userType === 'owner' ? 'selected' : '' %>>Homeowner/Property Owner</option>
+                    <option value="worker" <%= userType === 'worker' ? 'selected' : '' %>>Domestic Worker</option>
+                </select>
+            </div>
+            
+            <div class="form-row">
+                <div class="form-group" id="first">
+                    <label for="firstName">First Name</label>
+                    <input type="text" 
+                           id="firstName" 
+                           name="firstName" 
+                           placeholder="First name" 
+                           value="<%= typeof firstName !== 'undefined' ? firstName : '' %>">
+                    <div id="firstNameError" class="error"><%= typeof errors !== 'undefined' && errors.firstName ? errors.firstName : '' %></div>
+                </div>
+                
+                <div class="form-group" id="last">
+                    <label for="lastName">Last Name</label>
+                    <input type="text" 
+                           id="lastName" 
+                           name="lastName" 
+                           placeholder="Last name"
+                           value="<%= typeof lastName !== 'undefined' ? lastName : '' %>">
+                    <div id="lastNameError" class="error"><%= typeof errors !== 'undefined' && errors.lastName ? errors.lastName : '' %></div>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label for="email">Email</label>
+                <input type="email" 
+                       id="email" 
+                       name="email" 
+                       placeholder="Enter your email"
+                       value="<%= typeof email !== 'undefined' ? email : '' %>">
+                <div id="emailError" class="error"><%= typeof errors !== 'undefined' && errors.email ? errors.email : '' %></div>
+            </div>
+            
+            <div class="form-group">
+                <label for="phone">Phone Number</label>
+                <input type="tel" 
+                       id="phone" 
+                       name="phone" 
+                       placeholder="Enter your phone number"
+                       value="<%= typeof phone !== 'undefined' ? phone : '' %>">
+                <div id="phoneError" class="error"><%= typeof errors !== 'undefined' && errors.phone ? errors.phone : '' %></div>
+            </div>
+            
+            <div class="form-group">
+                <label for="location">Primary Location</label>
+                <input type="text" 
+                       id="location" 
+                       name="location" 
+                       placeholder="City, State, Country"
+                       value="<%= typeof location !== 'undefined' ? location : '' %>">
+                <div id="locationError" class="error"><%= typeof errors !== 'undefined' && errors.location ? errors.location : '' %></div>
+            </div>
+            
+            <!-- Worker-specific fields -->
+            <div id="workerFields" class="location-fields" style="display: <%= (typeof userType !== 'undefined' && userType === 'worker') ? 'block' : 'none' %>">
+                <div class="form-group">
+                    <label for="serviceType">Service Type</label>
+                    <select id="serviceType" name="serviceType">
+                        <option value="" disabled <%= typeof serviceType === 'undefined' || !serviceType ? 'selected' : '' %>>Select service type</option>
+                        <option value="cooking" <%= serviceType === 'cooking' ? 'selected' : '' %>>Cooking</option>
+                        <option value="cleaning" <%= serviceType === 'cleaning' ? 'selected' : '' %>>Cleaning</option>
+                        <option value="laundry" <%= serviceType === 'laundry' ? 'selected' : '' %>>Laundry</option>
+                        <option value="childcare" <%= serviceType === 'childcare' ? 'selected' : '' %>>Childcare</option>
+                        <option value="eldercare" <%= serviceType === 'eldercare' ? 'selected' : '' %>>Elder Care</option>
+                        <option value="gardening" <%= serviceType === 'gardening' ? 'selected' : '' %>>Gardening</option>
+                        <option value="other" <%= serviceType === 'other' ? 'selected' : '' %>>Other</option>
+                    </select>
+                    <div id="serviceTypeError" class="error"><%= typeof errors !== 'undefined' && errors.serviceType ? errors.serviceType : '' %></div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="experience">Experience (years)</label>
+                    <input type="number" 
+                           id="experience" 
+                           name="experience" 
+                           min="0" 
+                           placeholder="Years of experience"
+                           value="<%= typeof experience !== 'undefined' ? experience : '' %>">
+                </div>
+            </div>
+            
+            <!-- Homeowner-specific fields -->
+            <div id="homeownerFields" class="location-fields" style="display: <%= (typeof userType !== 'undefined' && userType === 'homeowner') ? 'block' : 'none' %>">
+                <div class="form-group">
+                    <label for="numProperties">Number of Properties</label>
+                    <input type="number" 
+                           id="numProperties" 
+                           name="numProperties" 
+                           min="1" 
+                           placeholder="How many properties do you own?"
+                           value="<%= typeof numProperties !== 'undefined' ? numProperties : '' %>">
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input type="password" 
+                       id="password" 
+                       name="password" 
+                       placeholder="Create a password">
+                <div id="passwordError" class="error"><%= typeof errors !== 'undefined' && errors.password ? errors.password : '' %></div>
+            </div>
+            
+            <div class="form-group">
+                <label for="confirmPassword">Confirm Password</label>
+                <input type="password" 
+                       id="confirmPassword" 
+                       name="confirmPassword" 
+                       placeholder="Confirm your password">
+                <div id="confirmPasswordError" class="error"><%= typeof errors !== 'undefined' && errors.confirmPassword ? errors.confirmPassword : '' %></div>
+            </div>
+            
+            <button type="submit">Register</button>
+            
+            <div class="divider">
+                <span>OR</span>
+            </div>
+            
+            <div class="social-login">
+                <button type="button" class="social-btn" onclick="registerWithGoogle()">
+                    <img src="https://cdn2.iconfinder.com/data/icons/social-media-2259/512/search-512.png" alt="Google">
+                    Register with Google
+                </button>
+            </div>
+            
+            <div class="links">
+                <p>Already have an account? <a href="/login">Login</a></p>
+            </div>
+        </form>
+    </div>
+
+    <script>
+        function handleUserTypeChange() {
+            const userType = document.getElementById('userType').value;
+            
+            // Hide all specific fields first
+            document.getElementById('workerFields').style.display = 'none';
+            document.getElementById('homeownerFields').style.display = 'none';
+            
+            // Show fields based on user type
+            if (userType === 'worker') {
+                document.getElementById('workerFields').style.display = 'block';
+            }else if (userType === 'homeowner') {
+                document.getElementById('homeownerFields').style.display = 'block';
+            }
+        }
+        
+        // Run on page load to set initial state
+        handleUserTypeChange();
+        
+        document.getElementById('registerForm').addEventListener('submit', function(event) {
+            let isValid = true;
+            
+            // Basic validation for required fields
+            const firstName = document.getElementById('firstName').value;
+            const lastName = document.getElementById('lastName').value;
+            const email = document.getElementById('email').value;
+            const phone = document.getElementById('phone').value;
+            const location = document.getElementById('location').value;
+            const password = document.getElementById('password').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+            const userType = document.getElementById('userType').value;
+            
+            // First Name validation
+            if (!firstName) {
+                document.getElementById('firstNameError').textContent = 'First name is required';
+                document.getElementById('firstNameError').style.display = 'block';
+                isValid = false;
+            } else {
+                document.getElementById('firstNameError').style.display = 'none';
+            }
+            
+            // Last Name validation
+            if (!lastName) {
+                document.getElementById('lastNameError').textContent = 'Last name is required';
+                document.getElementById('lastNameError').style.display = 'block';
+                isValid = false;
+            } else {
+                document.getElementById('lastNameError').style.display = 'none';
+            }
+            
+            
+            // Email validation
+            if (!email) {
+                document.getElementById('emailError').textContent = 'Email is required';
+                document.getElementById('emailError').style.display = 'block';
+                isValid = false;
+            } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+                document.getElementById('emailError').textContent = 'Please enter a valid email address';
+                document.getElementById('emailError').style.display = 'block';
+                isValid = false;
+            } else {
+                document.getElementById('emailError').style.display = 'none';
+            }
+            
+            // Phone validation
+            if (!phone) {
+                document.getElementById('phoneError').textContent = 'Phone number is required';
+                document.getElementById('phoneError').style.display = 'block';
+                isValid = false;
+            } else if (!/^[0-9]{10}$/.test(phone)) {
+                document.getElementById('phoneError').textContent = 'Please enter a valid 10-digit phone number';
+                document.getElementById('phoneError').style.display = 'block';
+                isValid = false;
+            } else {
+                document.getElementById('phoneError').style.display = 'none';
+            }
+            
+            // Location validation
+            if (!location) {
+                document.getElementById('locationError').textContent = 'Location is required';
+                document.getElementById('locationError').style.display = 'block';
+                isValid = false;
+            } else {
+                document.getElementById('locationError').style.display = 'none';
+            }
+            
+            // Service type validation for workers
+            if (userType === 'worker') {
+                const serviceType = document.getElementById('serviceType').value;
+                if (!serviceType) {
+                    document.getElementById('serviceTypeError').textContent = 'Please select a service type';
+                    document.getElementById('serviceTypeError').style.display = 'block';
+                    isValid = false;
+                } else {
+                    document.getElementById('serviceTypeError').style.display = 'none';
+                }
+            }
+            
+            // Password validation
+            if (!password) {
+                document.getElementById('passwordError').textContent = 'Password is required';
+                document.getElementById('passwordError').style.display = 'block';
+                isValid = false;
+            } else if (password.length < 8) {
+                document.getElementById('passwordError').textContent = 'Password must be at least 8 characters';
+                document.getElementById('passwordError').style.display = 'block';
+                isValid = false;
+            } else if (!/[A-Z]/.test(password) || !/[a-z]/.test(password) || !/[0-9]/.test(password)) {
+                document.getElementById('passwordError').textContent = 'Password must contain uppercase, lowercase letters and numbers';
+                document.getElementById('passwordError').style.display = 'block';
+                isValid = false;
+            } else {
+                document.getElementById('passwordError').style.display = 'none';
+            }
+            
+            // Confirm Password validation
+            if (!confirmPassword) {
+                document.getElementById('confirmPasswordError').textContent = 'Please confirm your password';
+                document.getElementById('confirmPasswordError').style.display = 'block';
+                isValid = false;
+            } else if (confirmPassword !== password) {
+                document.getElementById('confirmPasswordError').textContent = 'Passwords do not match';
+                document.getElementById('confirmPasswordError').style.display = 'block';
+                isValid = false;
+            } else {
+                document.getElementById('confirmPasswordError').style.display = 'none';
+            }
+            
+            if (!isValid) {
+                event.preventDefault();
+            }
+        });
+        
+        function registerWithGoogle() {
+            alert("login successfully--");
+            console.log('Register with Google clicked');
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,1055 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>RentEase</title>
+    <link rel="stylesheet" type="text/css" href="css/index.css" />
+    <!-- <link rel="stylesheet" href="styles.css" /> -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.0/css/all.min.css"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <!-- Navbar -->
+    <%- include('../partials/header') %>
+  
+
+
+    <!-- Background Container -->
+    <div class="background-container">
+      <img src="images/login.jpg" alt="" />
+      <main class="main-section">
+        <div class="main-overlay">
+          <h1>Welcome to RentEase</h1>
+          <p>
+            Your one-stop solution for finding rental properties and domestic
+            services.
+          </p>
+        </div>
+      </main>
+
+      <!-- Search Section -->
+      <section class="hidden-section search-section">
+        <form action="/search" method="GET">
+          <div class="search-container">
+            <div class="search-bar">
+              <select
+                name="location"
+                id="location"
+                class="location-select"
+                required
+              >
+                <option value="" disabled selected hidden>Location ▼</option>
+                <option value="" disabled>Top Cities</option>
+                <% 
+                      const locations = [
+                        'Chennai', 'Kolkata', 'Visakhapatnam', 'Mumbai', 
+                        'Hyderabad', 'Bangalore', 'Delhi'
+                      ];
+                      locations.forEach(location => { 
+                    %>
+                    <option value="<%= location.toLowerCase() %>"><%= location %></option>
+                    <% }); %>
+              </select>
+              <input
+                type="text"
+                name="query"
+                placeholder="Search for places..."
+                required
+              />
+            </div>
+            <div class="filters">
+              <select
+                name="category"
+                id="category"
+                class="category-select"
+                required
+              >
+                <option value="" disabled selected>Select Category</option>
+                <% 
+                const categories = [
+                  { value: 'all', label: 'All' },
+                  { value: 'house', label: 'House' },
+                  { value: 'flat', label: 'Flat' },
+                  { value: 'apartment', label: 'Apartment' },
+                  { value: 'villa', label: 'Villa' }
+                ];
+                categories.forEach(category => { 
+              %>
+                <option value="<%= category.value %>"><%= category.label %></option>
+              <% }); %>
+              </select>
+              <button type="submit">Search</button>
+            </div>
+          </div>
+        </form>
+      </section>
+    </div>
+
+    <!-- Feature Container -->
+    <!-- <div class="hidden-section feature-container">
+      <section class="features">
+        <h2 class="side-heading">Simplify Your Home Needs</h2>
+        <div class="feature-boxes">
+          <div class="feature-item">
+            <div
+              class="feature-box"
+              style="
+                background-image: url('https://thumbs.dreamstime.com/b/wooden-house-blue-background-inscription-rent-rental-property-apartments-services-realtor-affordable-hou-housing-124267048.jpg');
+              "
+              onclick="loadContent('renthome.html', 'Rent Home')"
+            ></div>
+            <p class="feature-label">Rent Home</p>
+          </div>
+          <div class="feature-item">
+            <div
+              class="feature-box"
+              style="
+                background-image: url('https://wallpapers.com/images/hd/real-estate-digital-art-0kmi22tcj2x60lim.jpg');
+              "
+              onclick="loadContent('listproperty.html', 'List Your Properties')"
+            ></div>
+            <p class="feature-label">List Your Properties</p>
+          </div>
+          <div class="feature-item">
+            <div
+              class="feature-box"
+              style="
+                background-image: url('https://img.freepik.com/free-photo/man-doing-professional-home-cleaning-service_23-2150359014.jpg');
+              "
+              onclick="loadContent('domesticServices.html', 'Book Domestic Services')"
+            ></div>
+            <p class="feature-label">Book Domestic Services</p>
+          </div>
+          <div class="feature-item">
+            <div
+              class="feature-box"
+              style="
+                background-image: url('https://img.freepik.com/premium-photo/rent-text-with-house-model-property-insurance-business-real-estate_384948-14218.jpg');
+              "
+              onclick="loadContent('payrent.html', 'Pay Rent Online')"
+            ></div>
+            <p class="feature-label">Pay Rent Online</p>
+          </div>
+        </div>
+      </section>
+    </div> -->
+
+    <!-- Iframe Container -->
+    <!-- <div class="iframe-container" id="iframeSection">
+      <p class="iframe-label" id="iframeLabel"></p>
+      <iframe id="contentFrame"></iframe>
+    </div> -->
+
+    <!-- feature section -->
+
+    <section class="features-section">
+      <div class="container">
+        <div class="section-header">
+          <h2>Comprehensive Home Solutions</h2>
+        </div>
+        <div class="features-grid">
+          <div class="feature-card" onclick="location.href='rent-home.html'">
+            <div class="feature-icon">
+              <i class="fas fa-home"></i>
+            </div>
+            <h3>Rent Home</h3>
+            <p>
+              Find your perfect rental property from thousands of verified
+              listings
+            </p>
+          </div>
+          <div
+            class="feature-card"
+            onclick="location.href='list-property.html'"
+          >
+            <div class="feature-icon">
+              <i class="fas fa-list"></i>
+            </div>
+            <h3>List Your Property</h3>
+            <p>
+              Reach thousands of potential tenants and manage your properties
+              efficiently
+            </p>
+          </div>
+          <div class="feature-card" onclick="location.href='services.html'">
+            <div class="feature-icon">
+              <i class="fas fa-broom"></i>
+            </div>
+            <h3>Domestic Services</h3>
+            <p>
+              Book reliable cleaning, repair, and maintenance services with
+              verified professionals
+            </p>
+          </div>
+          <div class="feature-card" onclick="location.href='payment.html'">
+            <div class="feature-icon">
+              <i class="fas fa-rupee-sign"></i>
+            </div>
+            <h3>Pay Rent Online</h3>
+            <p>
+              Hassle-free online rent payments with instant confirmations and
+              receipts
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Popular Listings -->
+    <div class="hidden-section listings">
+      <h2 class="side-heading">Popular Listings</h2>
+      <div class="listing-container">
+        <div class="info" id="property-info">
+          <h2>Hyderabad</h2>
+          <p>Duplex House</p>
+        </div>
+        <div class="image">
+          <img id="property-image" src="image1.jpg" alt="House Image" />
+        </div>
+        <div class="price-container">
+          <div class="price">&#8377; 50,000</div>
+          <button class="contact-btn">Contact Now</button>
+        </div>
+        <div class="controls">
+          <button onclick="prevProperty()">&#8249;</button>
+          <button onclick="nextProperty()">&#8250;</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Slider-container-->
+    <div class="hidden-section slider-container">
+      <button class="nav-button prev" onclick="prevSlide1()">&#10094;</button>
+      <div class="slider">
+        <div class="card">
+          <div
+            class="slider-image"
+            style="
+              background-image: url('https://mkone.in/wp-content/uploads/2022/05/clubhouse.jpeg');
+            "
+          ></div>
+          <div class="content">
+            <h2>MK One - Luxury 3BHK</h2>
+            <p>
+              Located in Yendada, Visakhapatnam. Premium flats with world-class
+              amenities.
+            </p>
+            <a class="button" href="property_detail.html?id=1">View Details</a>
+          </div>
+        </div>
+        <div class="card">
+          <div
+            class="slider-image"
+            style="
+              background-image: url('https://mkbuilders.in/wp-content/uploads/2022/02/12-1024x520.jpg');
+            "
+          ></div>
+          <div class="content">
+            <h2>MK One - Luxury 4BHK</h2>
+            <p>Spacious 4BHK with sea-facing balconies and modern interiors.</p>
+            <a class="button" href="property_detail.html?id=2">View Details</a>
+          </div>
+        </div>
+        <div class="card">
+          <div
+            class="slider-image"
+            style="
+              background-image: url('https://imagecdn.99acres.com/media1/21999/8/439988362O-1725432430520.jpg');
+            "
+          ></div>
+          <div class="content">
+            <h2>Green Residency</h2>
+            <p>Eco-friendly homes with lush greenery and serene views.</p>
+            <a class="button" href="property_detail.html?id=3">View Details</a>
+          </div>
+        </div>
+        <div class="card">
+          <div
+            class="slider-image"
+            style="
+              background-image: url('https://images.skyscrapercenter.com/building/skylinetowers_(c)tamniyatglobal.jpg');
+            "
+          ></div>
+          <div class="content">
+            <h2>Skyline Towers</h2>
+            <p>
+              High-rise apartments offering luxury living with stunning city
+              views.
+            </p>
+            <a class="button" href="property_detail.html?id=4">View Details</a>
+          </div>
+        </div>
+
+        <div class="card">
+          <div
+            class="slider-image"
+            style="
+              background-image: url('https://is1-3.housingcdn.com/4f2250e8/a64f1d7aa6c9efee555452a30d318c64/v0/fs/lakeview_apartment-birati-kolkata-balaji_developers_kolkata.jpeg');
+            "
+          ></div>
+          <div class="content">
+            <h2>Lakeview Apartments</h2>
+            <p>
+              Exclusive lakeside properties with breathtaking natural beauty.
+            </p>
+            <a class="button" href="property_detail.html?id=5">View Details</a>
+          </div>
+        </div>
+
+        <div class="card">
+          <div
+            class="slider-image"
+            style="
+              background-image: url('https://storage.googleapis.com/denovamobility-b82f5.appspot.com/properties/CityScape%20Residences/gallery/dfinFeu9JclpGNx_url_1564882006.jpg?GoogleAccessId=firebase-adminsdk-abh1t%40denovamobility-b82f5.iam.gserviceaccount.com&Expires=33123375190&Signature=XueHbvUt8xhQVdpETxhf%2FeXgbbWYH%2BZ2sw5k1xG%2FlQJr2drRLi1Xyqefh8lX1hwH0bxul5bsFJg9VElMb5geFlmvLu6xQS8DDqIy3uSwcI0ICqG1roo5kpQ1pcvDGEaeasOVzlwf8gFMKSjGIvFXhcb%2Fldck7%2BmSJLVoR1Rb9RZqLpoanUK%2F6VLyo%2BIwUTxMasUtDr3rsSgo%2FUEjfCbpQXptYwxbwrIJQAS31O5g6uBzYv%2B7zlMtw5wj3Avf5CKuCYhta6qKGfqw3yNxt2dGpCuNWbIKa9YOkZfWWqKrwyHKFat9uVXQAATnhm%2FgzfbJHfCOoFIoW%2BGhFOm7rXgr5A%3D%3D&generation=1566466390446638');
+            "
+          ></div>
+          <div class="content">
+            <h2>Cityscape Residences</h2>
+            <p>
+              Modern urban homes with smart technology for comfortable living.
+            </p>
+            <a class="button" href="property_detail.html?id=6">View Details</a>
+          </div>
+        </div>
+
+        <div class="card">
+          <div
+            class="slider-image"
+            style="
+              background-image: url('https://content.jdmagicbox.com/comp/nashik/c1/0253px253.x253.180630100800.e9c1/catalogue/the-orchid-villa-nashik-6krtjcwgej.jpg');
+            "
+          ></div>
+          <div class="content">
+            <h2>Orchid Villas</h2>
+            <p>
+              Luxury villas in a peaceful environment, perfect for family
+              living.
+            </p>
+            <a class="button" href="property_detail.html?id=7">View Details</a>
+          </div>
+        </div>
+      </div>
+      <button class="nav-button next" onclick="nextSlide1()">&#10095;</button>
+    </div>
+
+    <!--news section-->
+
+    <div class="hidden-section news-container">
+      <div class="news-heading">
+        <h2>Latest News</h2>
+      </div>
+      <div class="news-content">
+        <marquee behavior="scroll" direction="left" scrollamount="5">
+          <span class="news-item"
+            >🌟 New properties added in Hyderabad! Check them out now. 🌟</span
+          >
+          <span class="news-item"
+            >🔥 Exclusive offer: Get 10% off on domestic services this week!
+            🔥</span
+          >
+          <span class="news-item">🏡 RentEase now available in Mumbai! 🏡</span>
+          <span class="news-item"
+            >🎉 Pay your rent online and win exciting prizes! 🎉</span
+          >
+        </marquee>
+      </div>
+    </div>
+
+    <!-- Articles Section -->
+    <div class="hidden-section articles-container">
+      <div class="articles-heading">
+        <h2>Featured Articles</h2>
+      </div>
+      <div class="articles-grid" id="articlesGrid">
+        <!-- Article 1 -->
+        <div class="article-card">
+          <div class="article-image">
+            <img
+              src="https://www.homebazaar.com/knowledge/wp-content/uploads/2022/06/Tips-For-Renting-A-House.jpg"
+              alt="Article Image"
+            />
+          </div>
+          <div class="article-content">
+            <h3>Top 10 Tips for Renting a Home</h3>
+            <p>
+              Discover the best tips and tricks to find your dream rental home
+              without breaking the bank.
+            </p>
+            <a href="#" class="read-more">Read More</a>
+          </div>
+        </div>
+
+        <!-- Article 2 -->
+        <div class="article-card">
+          <div class="article-image">
+            <img
+              src="https://unitedsettlement.com/wp-content/uploads/2022/06/How-to-Negotiate-a-Settlement-With-Your-Landlord-United-Settlement-scaled.jpg"
+              alt="Article Image"
+            />
+          </div>
+          <div class="article-content">
+            <h3>How to Negotiate Rent Like a Pro</h3>
+            <p>
+              Learn the art of negotiation and save money on your next rental
+              agreement.
+            </p>
+            <a href="#" class="read-more">Read More</a>
+          </div>
+        </div>
+
+        <!-- Article 3 -->
+        <div class="article-card">
+          <div class="article-image">
+            <img
+              src="https://www.homebazaar.com/knowledge/wp-content/uploads/2022/06/Features-Of-Renting-A-House.jpg"
+              alt="Article Image"
+            />
+          </div>
+          <div class="article-content">
+            <h3>5 Must-Have Features in a Rental Home</h3>
+            <p>
+              Find out what features you should look for when renting a new
+              home.
+            </p>
+            <a href="#" class="read-more">Read More</a>
+          </div>
+        </div>
+
+        <!-- Article 4 -->
+        <div class="article-card">
+          <div class="article-image">
+            <img
+              src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQERWRE2zkiLeaEP0qFmkPrFrCccwR23Wq6pg&s"
+              alt="Article Image"
+            />
+          </div>
+          <div class="article-content">
+            <h3>Understanding Rental Agreements</h3>
+            <p>
+              A comprehensive guide to understanding rental agreements and
+              avoiding common pitfalls.
+            </p>
+            <a href="#" class="read-more">Read More</a>
+          </div>
+        </div>
+
+        <!-- Article 5 -->
+        <div class="article-card">
+          <div class="article-image">
+            <img
+              src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSkNelc-rDqi-V0GtNokDY-rNQvQyu95_zGoQ&s"
+              alt="Article Image"
+            />
+          </div>
+          <div class="article-content">
+            <h3>Moving Checklist for Renters</h3>
+            <p>
+              Everything you need to know before moving into your new rental
+              home.
+            </p>
+            <a href="#" class="read-more">Read More</a>
+          </div>
+        </div>
+
+        <!-- Article 6 -->
+        <div class="article-card">
+          <div class="article-image">
+            <img
+              src="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wCEAAkGBxISEBAPEBIPDxUPEA8QDxAPDw8PEA8QFRUXFhYVFRUYHSggGBolGxUVITEhJikrLy4uFx8zODMtNygtLisBCgoKDg0OGRAQGi0lHyItLy0tLS0wLS0tLS0tLSstKystLS0tLS8tLSstLS0rKy0tLS0tLS0tKy0tLS0tLS0tLf/AABEIALcBEwMBIgACEQEDEQH/xAAbAAABBQEBAAAAAAAAAAAAAAACAAEDBAUGB//EAD0QAAICAQIDBgMFBgUEAwAAAAECAAMRBBIFEyEGIjFBUWFxgZEHFDJSoSNCkrHB8DNicoLRJFNjsmTC4f/EABkBAQEBAQEBAAAAAAAAAAAAAAABAgMEBf/EACYRAQEAAgIBBAEEAwAAAAAAAAABAhEDEiETMUFRBBQiYYEycfD/2gAMAwEAAhEDEQA/APJY8UcCdWSEeLEeAo4EQEICAgIYEYQwJQgsICEBCVYAgQsQgsLbAACGoj4hgQBAj7YWIQEAAsfbDAjgSCMCIiSbYsSiPEbEm29ItsiosRsSUrG2wIsQWWTbYxWBBGMmKwSsCLEQh7Y+IARxCxGAgNiLEKKAMULEUDKxHAjxQhAQsRCOBAQEMCICGogMBDAjhYaiUJVhKscCEBAQEMiPiOBCgxDVY+JKiSAVSGtc6rgPYu/UKLGxp6z1FloOWHqieJ+JwPedRR2Y4bR/il72HiXs2L8lTGPmTPPyfkY4t44WvMFpjmmerpdwxeg0+mPxrDn6nMc6DhVvTlIhPmj2VkfIHH6Tl+rn036VeSmuCVnpfEvs9Vl36O4N/wCO7HX4WL0+oHxnC8R4bZS5rtRq2XxVhj5j1HuJ6MOXHL2c7jYzTHCyRkiAnVkO2MwkuI2yQQhI5SS4jYgVykFklnbBKQKpWLbJ2WDtlEWIxEl2xtkCILD2wsRBZAGIpJtigYuI8LEcCVDAQgI4EMCUMFkgEQENVgICGBCUQ1WAIEICGBCAgDiFiEBCAkDJXO/7McAqoqXXawBiQGopYZGPJ2Hn7D5zA7I8MW68Gz/DqHMt9wPBfmek9F4Po21lzXWDNVbYRCO6zDwGPQTyfkcl/wAY64Y/LG4jxXUWsoOaUt6qxDfh9feUdZpKz0ra1mGNxcAK3qR6Ceo6zhyOmx1DAjwPkfUHyM5HWcG5b7AQwJyGz3wD5MPD5z5vJlcL5erCSuWXSY9PjHXRHPp5Tp14YPT/AIMdOHgEDbn4npn39py/UOvpoeB8A1BVra7uVhsIOrLZ0659s9PA+cu6vZqMaPiNfLsOeReBjr6q3h16dM4PngzsNFplVFRegUY//YuJ8LrurNbj3U46o35h7/znv4+PKzs8mWU3p4P2g4HZpbmqs8uqNjo6eTCZBWes8a0B1Omt09vXUaE5RvOyvyPvkY/T1nl1idZ7OLk7RyymlcCOFkoWEEnXbCHZG2SztjlY2qrsjFZZKxcuNipy4DVy4UgtXGxSKxtktGuLlxsVhXFslnZH2RsVeXHlrZFGxzQEICOBHAm2TAQ1WOBDAgJVkiiJRJFEBKsMLHUQwIDBYQEcCEBIGAjqsLENRIOz4Fp+Vot/g17E5/yL4fr/ACnqHZ6gVU1p+VRn/UerfqTPP78116cKRhKqhg+HebrO2p4ko6MyD2JAM+Vny6y7PTjjuab1hGD7DJnPanT7mLHxMs6riA2YDKSceflmNUfDPnnr18R0xPJ+Ryzkskd+LG4TaFdMMYj/AHUZ69ZeVPj9BGdff6CcfS+W+6bSWbcKevof6GXOcJi3M2Mrn6ZMP76QoJRycdQAo6/Mz1cP5NxnVxz4t+VLi6bdVRd0xYGot/zKfw/1+k8v7V6Dk6q1PIncPn4/rmdjxbiNturqQgKtdisFBz1I8SfPxmX9pNWLqm82qwfkc/8A2M9fBnvL/blnNRxQEIJC2wgJ7nEISFthAQlEANkErLAEQWTYrGuCUlsrBKRsVSkE1Sya4xSNivy44rk22OFl2IhXFLG2KTauMEKMIQnZgSiSBYKyQCAQEkUQVEkEB1EMCIQwJAyiHiICFIGAhqsUJIo9O02k+86PcuMmpcE+WOs6Hs3wiuupCoUsVG98ZZm8+p95zP2caoNW9LeKHIHqjTs+DrynahvDJeo+qnxHyP8AOfJzw/f1vtt6ccv2rGq4cHHXxHUGRUU4GM/hOevlnx/pNiU9SuDnzPT4+n8pOf8AGxx/dGsOW3xUa4A6xWp+sGm3xz+UwtQ2WPxxOO50a89h6fTjGf7/AL8I9+mGOok1R6fCRa67avv5fGenphOPbn2yuTnjw2k3tZh8gjz6dBON7fX7tQq/9usfUkn+WJ6GlQVMsfVmM8k41rObdZb5Oxx/pHRf0Aj8bG7OSszEPbGEcGfQecYEcRgY8inAhbYOY+YD7Y2IoiYULCCRHYwC0BERxI90W+BJmPI98UaHICEBGUQwJ3YEslWAgkyiA6yQCMqyQLIHWSARKkkCwBAhAQ1SFtkABY4EPbCCyDW7M8R5F9duTtBw+PND4/H1+U9iuYPWHQglAHRh1yPH6ETwyqei9g+MZT7uxyUGa8/vJ5r8v5H2nj/Iw+XXCu/0twdFYfvAGVuIPhc+hlbhFm17KfIYsr/0MfD5GT8VU8twPTI+I6zzcmVy4nXGSZqYvzny6E/qIrtRhyPjM3QhjzC3dUbgC3QZO046/OLVK7W9wblbcQV6gnp/Qn6T5f7v+/t6tR0NFndB9hKmofdYgz4ZJH8v6yUttX4D+Uo6SwKjW2HAAZmPoo6z2+brFw8TdZnbbinLp5Snv3ZB/wAtfn9fD6zzO09Zr8c17X2vafM4UflUeA/v3mSyz6XDjqPPnUSxxJBXH2Tu5gjw9sIJII44h7I22FAYLGSFYBWBGxgM0kKyJ1mhGzQd0dhAlBb40GKEYKrDFcnWuSLXNohSuTpXJUqlhKo2K61SZKpZSmTJTM7FVaZKKZcSiSrRM9hSWmEKZoCiHyJOwzRRCFM0hp4Qok7DNWmaHDLWqsSxfFGB+PqPmMj5w/u8NapnK7izw9L01oLVXL1BBU+6MNw/UTS4jqEFTFiAApJ+E4d+JGnS1HqcqpAHorlP6RantCl1YTJUsVDHB6AdScfKePVksk8OssvlopSmW1pUsrjITBO2zGGYgeJz0HTwHwltNFuvW7qqM27yXLbc4I985/2zPu4mvI5FQbIVWDHoSCB4+80KuMArdUy/4RL78j8xwf0nmx4pt3vI1uJONm1fE4GfiZzfa2/ZQtK9OY3e/wBC4/qR9IOr48u3IO7vL/Me8pdp33vWfLlgj5kz0447y243Lw5ayuRjTzS5McUT1S6cmeKI/ImkKIuRHYZw08f7vNHkR+THYZ3IgtTNPkxjRHY0y+TAaiajUQGol7GmS1Mheqa7USJqZey6ZDUyM0zVemRtRNdk0zeTFNDkxo7DAFMlWqXFoky0TfZnSpXVLFdMtV6eWq9PMXJVSuiWK9PLldEs10zFyNKSaeTLRLy0yVaJnsumeNPJBRNBaIYpk7GmcKIQomjyY4pk2aZ3IjiiaPJj8mNiDUaNraUUYwgZR0/M+f6yWjsjZgE/8SzTrOQCxUuuRlQAT16TTHaqnHXnKMfvaW1iPp09ZnfwsjDTRlbHBHglaHJ8P7xNPR6IvZqhj8Q25/3NMK/j+nax25uSwAxsKHoSR4+HlNXTceRN7Zcq5BGymywgZyeig58TOO9Xy6a8C1PAEUYZerYxg+P0kPGKBuQDyrA9fMyZ+PBzhFtLN3VazT6mtR795cfrK74H4jk/U/pOkyYsUxRC5MuIAcY658PeHy5raaURRC5MvCuLlxsUeTFyZe5cflxsUeTBNM0OXBNcbVnmmRtTNE1wGrjYzGpkT0zTauRNXLsZTUyM0zTaqAapdozuTGmhyo0uxirTJVqjqZIpm7UOlUsV1yNTJkaZonSuWESQI0nRpkTKklVJErSVWkVIEhBIAaRW6+tWCM6KxOArMAxPw8ZBaCR9ka3usE3KzEZAQlj4ZiVwVVgwO7PTvblI8iMZk3PtdUW2LbAR8nGQPdu6v1PST6LTPa5VAen4nKtyx/uxg+PlG4aqnxJf2NndZ+6chMBseq+48flK3D9Opp/DxUg57rU1MPh4H+cPtZdTp62rs1AQsDtZVbKsPDyIznHQxcAsW3T7hq7X8Rla23N8NnQn4ZMt9mpK8/4rXp11BDV2Kd2SuoqqQg+wCTtuCaVSicvS3EeIKimtT6ddpM5DWpY2rYV28za2Dz0wwPuGIM67QkK6VW6nXixvCjSKu3+HYcD5y56upsjS1FN6r3qnqQH8Vl62NnqAMADAldHwQneOSAMIzBf8xAGcDI6x+N/ctN+11NuprbB2CxG1D4Pj3EXAPvPP9NeurtZq7Na75YczcKxp0ye8H2oKxjB64x8fHh6e7v4dJXotqPSLHLI4ZsaVeYvKZgu1VL+R8WPuZYpqYOOdbWvTHLCugbHiysQSfoR08ZwOs4vVd/0i3ajjDKv7R0qpIrwOhbUttUqMHq24RcJ7V6Q/9LZprbgnRFp1LXnIGPyqifEtia6U8Ou4hx2mhsWEgN1Swr+yI9N6krn3zj3E0+B3JqKecCrKzPsatiy7QSvj65BBGOkxz2bo1dLiuy+g2AkJdqNLaU6dNwrRgQMZzvz6mcv2V4hqeEM+l1vJfTvflLaLq7hW7jDd1TuUHaDgjxBHiwmfjXbydZv2ei3VFfcHwP8AfhI8yj2s7RLpNNzwBYGaodDlQjMBvyPiMSdeM1tRpdTVWro1gXU46mrunrj4kH0x9ZrHK2brFw+k+YxM0NFbRqQ5QD9nY9Z6FGypxn4HxEg1XDHXqnfHt+If8zcrNmlMmRtETBaVAPImkjSJhAAwDDIgkSgYoW2NAxQsMLCUQsToyZRJVmHf2jqAJXBAz33fl1/xAMfoJzWv7ZW7zySjrnGa6XI+Tsev8I+Env4XrXo6GTjpOQ4J2r5q8q3R394dba7WrYe5JY/ymNx7hOozv0ttoXrlL7lc+2DsA+vtMdt5asa6eNu2s7T6RX2G0E+ZUFlA9dw6H5ZlDjXbrSVqRTbZYfzrUNvQ9QMsOuJgaHhXEHRhqmFinBWteSzvjqeuME+GAc5l/h9dFTnei1pYqivVbS5FmetWp3ZetsnHXpnw9JfCzFb4VbdxQkpc9FFQ22YxW7WHrt/ZsSRtwTl/Pzky/ZugJPPSkEk760As+bE/pIODaitWvS5K9ElVoLWqaqaL1dSjAN4cwDDjGfw4OMyzbxHRZP8A1tVgZAHRLAF3bSrlT5Z7rDOcHI65nO2y+GtNfgfCKdLvRbGtORud3zv8D4eHmP7HQuNdpNNpArX27OZnYBXaxbHwBAkNNulsFlql3rNdht2OpZAyqLduCcdVWxSfAhlOAczG49xHh9lWzV7rkZUHO0+MooGF1CKfxI37wHeRsjrnMx13fKp9H2/0Dtg28vOer12BfmduJzdvauvSaq20AcQ5lm+o82vbSp/cDsjAL6BQpGTkmYOm7PaQXM1mqezTqQVOmpa26xcnPTOFwPGdmnF+zYrWmrT0v3cF9TVfXYT/AKxnr75nXpjj7S1N1p6jWWcQpF3LqrONycttbaM+7rpDXj3DQ+zfHKQeRdqKqL8BQyMVJHo5ZQp9MMD7Yj9ne0KWEVab7oEHdFdjnnv6bLCxLn3O6F2k4coXmX3UBAQGNtCuinOO/tIZVz+93vgBOeX1ZpufbH7Udp9fpb/udm1k1GOXYi47pIDEKc59hnz8fIdX2b4NpbAa9KbL2XIttuvzVv8A3gqr3Wweh5ageRZiOnD9ruK1HTDSOibsZ01mmsN+ndvACseKN8gfLPWaPB+0NPB9ENPdZv1Ni/tKaerUjxCswOF8umfliXz1mk+XUcV1Q09g0tv3axGb/BOmGpRT6lDk/MkmR8d7B6DW6djprl0NjKN9enoGnouZOq8ynAJxk+BHj8J5/X9pThy1dFOfLmM56end2jE09T9qP3mv7vrdBRZU3jygW2nybYR5exBlmOePwlsrC7OaTFlmk1B216Z9raRCahqX/Pc3Qsvh4nGMDoJb7S6+lcCkJgd3NQFWnTHTaHwN/p0Hl+94zC4P2d1Oou5iLZXTZkq1mbu5+6hGctjw6kDp19JpcR4dVprwbqrtdtwSzq5rA9ERcDGMe3X2mr1uXv8A0k3r2bHZPtotA2rULsD8Tvp9JSv+q63LY+GPhMH7ReLrqjW4r0SOHI3aTWNqXIIztfI69QMEeHX1mvrftD0tdYrp4Jou6NvM1lCNn/YF6fxTjU4pW9pddLUj2MMVUcw1ZPTalZJ8T5ZPtiaxw1e0iXLfh1XYuvXa3T2cPel7aHUqlzEKdM3iMZ6sucHHlnp6S9ToOI8FXdZbo7UZSHoXUgu9Y8Ry3Clse2T6TT4Dw7iV1P7W99DWOi01giwD3VCoUexJ+EDXfZ9Vb/i6rV2YJIBavAPn4qf5zz3lx7WWzTp18Of4V2wu0tranTOLqbCC+ndv2lP+UfnX0I6+w8/WeyvbXS61Qa222Y71Dnvj1Iz+IfD5gTzk/ZXRnK6i4ezKjA+3dxJOL9mNNp9MG5Zqatt33vTNg1j1s3kswz5AH4iXLl47qT3SYZfL1XiOnDK1iAllBOBjNg9PjOW0PHtPb+FwCf3XIVgfQjynNaHtQFp2V63W6hym0PaNNVWGxjcMobPHrgmUOEtcADlNbacCwaXUaiohevfYq6rn8Izjzmpue7Nxj0Lmr07y9fAblzHImJw02DrZUhw2FJ1Kah0+Lu275ZM2Ax9JZWMpo5WNiEIsTSAxFDIjQOfa4D+zKWv4kURmTaSB0DZAJmqaAZFbw4HzI+k6yxlwKdnxdZztSxJc7tiZ29fUnr8hidJXoKQAOWvdGB0HQegHgJcPZtuuzUWJk5xsrYD4ZHSZ2p7JXMTnWXY9FAUfQGS+fluWRadq61JOysDGSxVFA9yf5SvprhqabPu7DccqlmAxUeu0kYPmM/pM237OS3VtQ7fECQn7PHXrXcVPr3gf0MnSfa927qOMMKqtOWFJqrFbvcV32YTbnocD18T1xOZ1VNiqSurouBGLAzKQU/KctlsD06+81tF2V1CgpZYl6+Qc2KR8GU5lXW9iWJyqqvqBbc3/ALGWYyHZxmt1RJA3cwLkBgGwAfIbuuOg+kpjUmeo6CoaSvawsK/vI9NVu34NgkzI4lxfSZyED+obS8vr8VWXHPftCz+XI8O57sfu6WuR+LlBi2DnxA8vGX+H9mdfYTsosrGe8bf2SqxHj3vb0E2dH2j0tZytDofNqnurJ/hAl3RfaCVtKtVa1JOQXLvYp9cn+UW5/ENT7Zum7Aa5W3I+nQ5B/wASzH/pNbU9grL6ma00V6hR3LKTmu/2cYGG/wA3j6k+E0T29pXqE3Dy7+G+hER+0Kr/ALF7dRkJ3jj26TlfVvws6x51b2b11Vm3kXqw8CgJB9wwm2+k4jfTttUptGNz5AdfDBUDGQBjpjpnPXrO44jxKrW6X9k7U42ttsYVWBxno/UHb5909fWcvdotM5Je9FYeWNQ4J+O8xObt7zzP4dPQyjF4Zww6S2u7UsoRTlccxtrn97AIIIl7iNPDbSF0dXNsbLMWu1Ck+vRmPr6ze0vZLTOu8Waa3A/DZXqifkqv4/GZlnYhTuNdXEEYMdrLSpRl8tveBX5iXHkxyvvUy48sZ5jLr4MKSH1GnRUP/wAqsnHwW3P6S1Tx1q3FXDkrWuzCmm5q7Fz59bvX4xJ2V1gbupqz5ftKFZf1M2+H/Z/Zb3rmtpI8BXp61/UtN5WTzkxP4QWabi2lVtQBVSniyJqNIy/JQMD5TB03amhn36hNXk+Jo1O3J9dp6fIdJ1CdluJ03sdManQEbH1W13PQZyOsvcT7LcQ1VezUPoE6gnlaUF+hz+I+E59cfmTz8zxTs5jQ9t1rc7Uqsr/dGrQPZ82USjxPtgbLq7q6dPp2qcOj11L+If5ioOD1yOk7B/s7Zsbm0akDxr0vLz8cNL/Dewa1HLHT2DzV9OWU/IvE4+KXtryd8rNOe03bC0czUKDVZdtLIl1V9DlVCkhPxV9AOh3exhp2+1rNtFWmf0DDZ+pYTreL9jqb1VcpQFIONLRRRkg5GSFyfrIl7G1hNnMBP520+nNg/wB4UH9Zj0+O+dNd79s+ntPeqB700q58Kqy5tz7AsAflMHjHafU6xGqrororbo/M3MbR5jAzj6zp6ew6q277xb/BX/WdHpOHrWm0OT08eXSh+qrmZ9LDG7k2vqWzTxzTrapHd0eAT6g+hGQROz0eq3UCusUizoMoxtI6+rv0nQWdltESWOnpJJJJKAkk+JJ9ZLp+AaVOq6egY/8AGv8AxN5445MzOxy9Gg4gSQ76ZyRndYCD/ClhH6Rx2d1ZbLHSfAcwA/ICdwtSL0VVX4AD+ULpNzKxi1iaDgm1e+lIb8ytef0LAfpNdUI6STMWZk2DEePHhGSBCiim0OsWIooBrGxFFICQQxFFAL6QWrX8q/QRRQCShfyr9BJU06/lX6CKKQH93T8q/wAIki0L+VfoIopBPsX0H0EcVL+Vf4RFFI0Pdj2jboooAsYg0UUAWMjeKKAdayN/GKKQODBYRRQB6xRRShFYgkUUB9sW2KKA+2LbFFAbbGiigf/Z"
+              alt="Article Image"
+            />
+          </div>
+          <div class="article-content">
+            <h3>How to Save Money on Utilities</h3>
+            <p>
+              Practical tips to reduce your utility bills in your rental home.
+            </p>
+            <a href="#" class="read-more">Read More</a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Navigation Buttons -->
+      <button class="nav-button left" onclick="moveLeft()">&#8249;</button>
+      <button class="nav-button right" onclick="moveRight()">&#8250;</button>
+    </div>
+
+    <div class="hidden-section cta">
+      <section class="cta-section">
+        <h2>Ready to Find Your Perfect Home?</h2>
+        <p>
+          Join thousands of satisfied customers and start your journey today.
+        </p>
+        <a href="register.html" class="cta-button">Sign Up Now</a>
+      </section>
+    </div>
+
+    <!-- Footer -->
+    <footer class="hidden-section footer">
+      <div class="container">
+        <div class="footer-main">
+          <div class="footer-column footer-brand">
+            <div class="footer-logo">
+              <span>Rent<span class="accent">Ease</span></span>
+            </div>
+            <p>
+              RentEase is India's premier platform for finding and listing
+              rental properties and domestic services, making the renting
+              experience seamless and hassle-free.
+            </p>
+            <div class="footer-social">
+              <a href="#" aria-label="Facebook"
+                ><i class="fab fa-facebook-f"></i
+              ></a>
+              <a href="#" aria-label="Twitter"
+                ><i class="fab fa-twitter"></i
+              ></a>
+              <a href="" aria-label="Instagram"
+                ><i class="fab fa-instagram"></i
+              ></a>
+              <a href="#" aria-label="LinkedIn"
+                ><i class="fab fa-linkedin-in"></i
+              ></a>
+            </div>
+          </div>
+          <div class="footer-column">
+            <h3>Quick Links</h3>
+            <ul class="footer-links">
+              <li><a href="index.html">Home</a></li>
+              <li><a href="properties.html">Properties</a></li>
+              <li><a href="services.html">Services</a></li>
+              <li><a href="aboutus.html">About Us</a></li>
+              <li><a href="contactus.html">Contact</a></li>
+            </ul>
+          </div>
+          <div class="footer-column">
+            <h3>Services</h3>
+            <ul class="footer-links">
+              <li><a href="renthome.html">Rent a Home</a></li>
+              <li><a href="listproperty.html">List Your Property</a></li>
+              <li><a href="domesticServices.html">Domestic Services</a></li>
+              <li><a href="payment.html">Online Rent Payment</a></li>
+              <li>
+                <a href="property-management.html">Property Management</a>
+              </li>
+            </ul>
+          </div>
+          <div class="footer-column">
+            <h3>Contact Us</h3>
+            <ul class="footer-contact">
+              <li>
+                <i class="fas fa-map-marker-alt"></i> Sri City, Andhra Pradesh,
+                India
+              </li>
+              <li><i class="fas fa-phone"></i> +91 9949169887</li>
+              <li><i class="fas fa-envelope"></i> contact@rentease.com</li>
+            </ul>
+            <div class="footer-newsletter">
+              <h4>Subscribe to our newsletter</h4>
+              <form class="newsletter-form">
+                <input type="email" placeholder="Enter your email" required />
+                <button type="submit" aria-label="Subscribe">
+                  <i class="fas fa-paper-plane"></i>
+                </button>
+              </form>
+            </div>
+          </div>
+        </div>
+        <div class="footer-bottom">
+          <div class="copyright">
+            <p>&copy; 2025 RentEase. All Rights Reserved.</p>
+          </div>
+          <div class="footer-bottom-links">
+            <a href="privacy-policy.html">Privacy Policy</a>
+            <a href="terms-of-service.html">Terms of Service</a>
+            <a href="cookie-policy.html">Cookie Policy</a>
+          </div>
+        </div>
+      </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script>
+      // document.addEventListener("DOMContentLoaded", function () {
+      //   fetch("./navbar2.html")
+      //     .then((response) => response.text())
+      //     .then((data) => {
+      //       const navbarContainer = document.getElementById("navbar-container");
+      //       navbarContainer.innerHTML = data;
+
+      //       // Execute scripts inside navbar.html
+      //       navbarContainer.querySelectorAll("script").forEach((oldScript) => {
+      //         const newScript = document.createElement("script");
+      //         newScript.textContent = oldScript.textContent;
+      //         document.body.appendChild(newScript);
+      //       });
+      //     })
+      //     .catch((error) => console.error("Error loading navbar:", error));
+      // });
+
+      // document.addEventListener("DOMContentLoaded", function () {
+      //   fetch("./dynamic_navbar.html")
+      //     .then((response) => response.text())
+      //     .then((data) => {
+      //       const navbarContainer = document.getElementById("navbar-container");
+      //       navbarContainer.innerHTML = data;
+
+      //       navbarContainer.querySelectorAll("script").forEach((oldScript) => {
+      //         const newScript = document.createElement("script");
+      //         newScript.textContent = oldScript.textContent;
+      //         document.body.appendChild(newScript);
+      //       });
+      //     })
+      //     .catch((error) => console.error("Error loading navbar:", error));
+      // });
+
+      // Fetch and insert the header
+      // Fetch and insert navbar inside a Shadow DOM
+     
+
+      const properties = [
+        {
+          place: "Hyderabad",
+          type: "Duplex House",
+          image: "image1.jpg",
+          price: "₹ 50,000",
+        },
+        {
+          place: "Bangalore",
+          type: "Box Type Apartment",
+          image: "image2.jpg",
+          price: "₹ 40,000",
+        },
+        {
+          place: "Chennai",
+          type: "Flat",
+          image: "image3.jpg",
+          price: "₹ 35,000",
+        },
+        {
+          place: "Mumbai",
+          type: "Villa",
+          image: "image4.jpg",
+          price: "₹ 70,000",
+        },
+      ];
+
+      let currentIndex1 = 0;
+      let carouselInterval1;
+      let touchStartX1 = 0;
+      let touchEndX1 = 0;
+      let lastScrollTime1 = 0; // Track the last scroll time for throttling
+      const scrollThreshold1 = 10; // Minimum horizontal scroll distance to trigger a swipe
+      const throttleTime1 = 500; // Minimum time (in milliseconds) between swipes
+      const swipeThreshold1 = 10; // Consistent threshold for swipe detection
+
+      // Ensure 'properties' array exists before proceeding
+      if (typeof properties === "undefined" || properties.length === 0) {
+        console.error("Error: 'properties' array is not defined or empty.");
+      } else {
+        // Function to update the displayed property
+        function updateProperty() {
+          document.getElementById(
+            "property-info"
+          ).innerHTML = `<h2>${properties[currentIndex1].place}</h2><p>${properties[currentIndex1].type}</p>`;
+          document.getElementById("property-image").src =
+            properties[currentIndex1].image;
+          document.querySelector(".price").textContent =
+            properties[currentIndex1].price;
+        }
+
+        // Function to go to the next property
+        function nextProperty() {
+          stopCarousel(); // Stop the carousel first
+          currentIndex1 = (currentIndex1 + 1) % properties.length;
+          updateProperty();
+          startCarousel(); // Restart the carousel after changing property
+        }
+
+        // Function to go to the previous property
+        function prevProperty() {
+          stopCarousel(); // Stop the carousel first
+          currentIndex1 =
+            (currentIndex1 - 1 + properties.length) % properties.length;
+          updateProperty();
+          startCarousel(); // Restart the carousel after changing property
+        }
+
+        // Function to start the carousel
+        function startCarousel() {
+          stopCarousel(); // Clear any existing intervals before starting
+          carouselInterval1 = setInterval(nextProperty, 10000);
+        }
+
+        // Function to stop the carousel
+        function stopCarousel() {
+          clearInterval(carouselInterval1);
+        }
+
+        // REMOVED: Don't add event listeners since we're using inline onclick attributes
+        // The inline onclick attributes will call prevProperty() and nextProperty() directly
+
+        // Get listing container safely
+        const listingContainer = document.querySelector(".listing-container");
+
+        if (listingContainer) {
+          // Touch event listeners for mobile devices
+          listingContainer.addEventListener(
+            "touchstart",
+            (e) => {
+              touchStartX1 = e.touches[0].clientX;
+              stopCarousel(); // Stop during user interaction
+            },
+            { passive: true }
+          );
+
+          listingContainer.addEventListener(
+            "touchend",
+            (e) => {
+              touchEndX1 = e.changedTouches[0].clientX;
+              handleSwipe();
+              startCarousel(); // Restart carousel after interaction
+            },
+            { passive: true }
+          );
+
+          // Mouse event listeners for desktops
+          listingContainer.addEventListener("mousedown", (e) => {
+            touchStartX1 = e.clientX;
+            stopCarousel();
+          });
+
+          listingContainer.addEventListener("mouseup", (e) => {
+            touchEndX1 = e.clientX;
+            handleSwipe();
+            startCarousel();
+          });
+
+          // Wheel event listener for two-finger gestures on laptops
+          listingContainer.addEventListener(
+            "wheel",
+            (e) => {
+              const currentTime = Date.now();
+
+              // Check if horizontal scroll is significant
+              if (Math.abs(e.deltaX) > Math.abs(e.deltaY)) {
+                // Don't use preventDefault here - use passive listener instead
+
+                if (currentTime - lastScrollTime1 > throttleTime1) {
+                  if (e.deltaX > scrollThreshold1) {
+                    prevProperty();
+                  } else if (e.deltaX < -scrollThreshold1) {
+                    nextProperty();
+                  }
+                  lastScrollTime1 = currentTime; // Update last scroll time
+                }
+              }
+            },
+            { passive: true }
+          );
+        } else {
+          console.error(
+            "Error: '.listing-container' not found in the document."
+          );
+        }
+
+        // Function to handle swipe gestures
+        function handleSwipe() {
+          if (touchStartX1 - touchEndX1 > swipeThreshold1) {
+            nextProperty();
+          } else if (touchEndX1 - touchStartX1 > swipeThreshold1) {
+            prevProperty();
+          }
+        }
+
+        // Initialize the first property and start the carousel
+        updateProperty();
+        startCarousel();
+      }
+
+      // Make the functions available globally
+      window.prevProperty = prevProperty;
+      window.nextProperty = nextProperty;
+
+      // Slider functionality
+      let currentIndex2 = 0; // Renamed from currentIndexone for consistency
+
+      function getVisibleCards() {
+        const screenWidth = window.innerWidth;
+        if (screenWidth >= 1024) return 2;
+        if (screenWidth >= 768) return 1;
+        if (screenWidth <= 480) return 1; // Explicitly handle 480px and smaller screens
+        return 1;
+      }
+
+      function updateSlider1() {
+        const slider = document.querySelector(".slider");
+        if (!slider) return;
+
+        const cards = document.querySelectorAll(".card");
+        if (cards.length === 0) return;
+
+        // Get the actual width of a card including margin
+        const card = cards[0];
+        const cardStyle = window.getComputedStyle(card);
+        const marginRight = parseInt(cardStyle.marginRight) || 0;
+        const marginLeft = parseInt(cardStyle.marginLeft) || 0;
+
+        // Calculate total width including margins
+        const totalCardWidth = card.offsetWidth + marginRight + marginLeft;
+
+        // Apply the transform with the proper width calculation
+        slider.style.transform = `translateX(-${
+          currentIndex2 * totalCardWidth
+        }px)`;
+      }
+
+      function nextSlide1() {
+        const totalCards = document.querySelectorAll(".card").length;
+        const visibleCards = getVisibleCards();
+        const maxIndex = Math.max(0, totalCards - visibleCards);
+
+        if (currentIndex2 < maxIndex) {
+          currentIndex2++;
+          updateSlider1();
+        }
+      }
+
+      function prevSlide1() {
+        if (currentIndex2 > 0) {
+          currentIndex2--;
+          updateSlider1();
+        }
+      }
+
+      // Initialize slider on page load and window resize
+      window.addEventListener("load", updateSlider1);
+      window.addEventListener("resize", () => {
+        // Reset index if we're beyond the max index after resize
+        const totalCards = document.querySelectorAll(".card").length;
+        const visibleCards = getVisibleCards();
+        const maxIndex = Math.max(0, totalCards - visibleCards);
+
+        if (currentIndex2 > maxIndex) {
+          currentIndex2 = maxIndex;
+        }
+
+        updateSlider1();
+      });
+
+      // Make the functions available globally
+      window.prevSlide1 = prevSlide1;
+      window.nextSlide1 = nextSlide1;
+      window.updateSlider1 = updateSlider1;
+      window.getVisibleCards = getVisibleCards;
+
+      // Articles grid functionality
+      let currentIndex = 0;
+      const articlesGrid = document.getElementById("articlesGrid");
+      let totalArticles = 0;
+      let articlesPerPage;
+
+      // Check if articlesGrid exists before continuing
+      if (articlesGrid) {
+        totalArticles = document.querySelectorAll(".article-card").length;
+
+        function updateArticlesPerPage() {
+          if (window.innerWidth <= 480) {
+            articlesPerPage = 1; // Mobile: 1 per view
+          } else if (window.innerWidth <= 768) {
+            articlesPerPage = 2; // Tablet: 2 per view
+          } else {
+            articlesPerPage = 4; // Desktop: 4 per view
+          }
+        }
+
+        function moveLeft() {
+          if (currentIndex > 0) {
+            currentIndex--;
+            updateGrid();
+          }
+        }
+
+        function moveRight() {
+          const maxIndex = Math.ceil(totalArticles / articlesPerPage) - 1;
+          if (currentIndex < maxIndex) {
+            currentIndex++;
+            updateGrid();
+          }
+        }
+
+        function updateGrid() {
+          const offset = -currentIndex * 100;
+          articlesGrid.style.transform = `translateX(${offset}%)`;
+        }
+
+        // Improved Touch Event Listeners
+        let touchStartX = 0;
+        let touchStartY = 0;
+        let touchEndX = 0;
+        let touchEndY = 0;
+
+        articlesGrid.addEventListener(
+          "touchstart",
+          (e) => {
+            touchStartX = e.touches[0].clientX;
+            touchStartY = e.touches[0].clientY;
+          },
+          { passive: true }
+        );
+
+        articlesGrid.addEventListener(
+          "touchmove",
+          (e) => {
+            touchEndX = e.touches[0].clientX;
+            touchEndY = e.touches[0].clientY;
+          },
+          { passive: true }
+        );
+
+        articlesGrid.addEventListener(
+          "touchend",
+          () => {
+            handleArticlesSwipe();
+          },
+          { passive: true }
+        );
+
+        function handleArticlesSwipe() {
+          const xDiff = touchStartX - touchEndX;
+          const yDiff = touchStartY - touchEndY;
+
+          // Only trigger swipe if the horizontal movement is greater than vertical movement
+          if (Math.abs(xDiff) > Math.abs(yDiff)) {
+            if (xDiff > swipeThreshold1) {
+              // Swipe left → Load next articles
+              moveRight();
+            } else if (xDiff < -swipeThreshold1) {
+              // Swipe right → Load previous articles
+              moveLeft();
+            }
+          }
+          // Otherwise, allow vertical scrolling
+        }
+
+        // Update articles per page on window resize
+        window.addEventListener("resize", () => {
+          updateArticlesPerPage();
+          updateGrid();
+        });
+
+        // Initialize
+        updateArticlesPerPage();
+      }
+
+      // Function to observe sections
+      function observeSections() {
+        const sections = document.querySelectorAll(".hidden-section");
+
+        if (sections.length === 0) {
+          return; // No sections to observe
+        }
+
+        // Options for the observer
+        const options = {
+          root: null, // Use the viewport as the root
+          rootMargin: "0px", // No margin
+          threshold: 0.09, // Trigger when 9% of the section is visible
+        };
+
+        // Callback function for the observer
+        const callback = (entries, observer) => {
+          entries.forEach((entry) => {
+            if (entry.isIntersecting) {
+              // Add the "show" class when the section is in view
+              entry.target.classList.add("show");
+              // Optionally stop observing after the section is shown
+              observer.unobserve(entry.target);
+            }
+          });
+        };
+
+        // Create the observer
+        const observer = new IntersectionObserver(callback, options);
+
+        // Observe each section
+        sections.forEach((section) => {
+          observer.observe(section);
+        });
+      }
+
+      // Run the observer when the page loads
+      window.addEventListener("load", observeSections);
+
+      // Add touch swipe functionality to the slider
+      function addTouchSwipeToSlider() {
+        const sliderContainer = document.querySelector(".slider-container");
+        if (!sliderContainer) return;
+
+        let touchStartX = 0;
+        let touchEndX = 0;
+        const swipeThreshold = 10; // Minimum distance required for swipe
+
+        // Touch event listeners
+        sliderContainer.addEventListener(
+          "touchstart",
+          (e) => {
+            touchStartX = e.touches[0].clientX;
+          },
+          { passive: true }
+        );
+
+        sliderContainer.addEventListener(
+          "touchmove",
+          (e) => {
+            touchEndX = e.touches[0].clientX;
+          },
+          { passive: true }
+        );
+
+        sliderContainer.addEventListener(
+          "touchend",
+          () => {
+            handleSliderSwipe();
+          },
+          { passive: true }
+        );
+
+        // Function to handle swipe
+        function handleSliderSwipe() {
+          // Calculate swipe distance
+          const swipeDistance = touchStartX - touchEndX;
+
+          // Check if swipe was significant enough
+          if (Math.abs(swipeDistance) > swipeThreshold) {
+            if (swipeDistance > 0) {
+              // Swiped left - go to next slide
+              nextSlide1();
+            } else {
+              // Swiped right - go to previous slide
+              prevSlide1();
+            }
+          }
+        }
+      }
+
+      // Call the function when the document is loaded
+      document.addEventListener("DOMContentLoaded", () => {
+        addTouchSwipeToSlider();
+      });
+    </script>
+  </body>
+</html>

@@ -1,0 +1,710 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Tenant Dashboard - RentEase</title>
+    <link rel="stylesheet" href="css/user_dashboard.css" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css"
+      integrity="sha512-Evv84Mr4kqVGRNSgIGL/F/aIDqQb7xQ2vcrdIwxfjThSH8CSR7PBEakCr51Ck+w+/U6swU2Im1vVX0SVk9ABhg=="
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    />
+  </head>
+  <body>
+    <!-- Header -->
+    <div id="header">
+      <div id="logo">
+        <div id="brandid">RentEase</div>
+        <div id="tagline">Your One-Stop Rental Solution</div>
+      </div>
+
+      <!-- Nav Toggle Button -->
+      <button class="nav-toggle" onclick="toggleNav()">☰</button>
+
+      <!-- Navbar -->
+      <nav id="nav-menu">
+        <a href="/">Home</a>
+        <a href="#">My Properties</a>
+        <a href="#">Payments</a>
+        <a href="#">Tenants</a>
+        <a href="#">Complaints</a>
+        <a href="#">Reports</a>
+      </nav>
+
+      <!-- <div class="cta">
+        <a href="#">Add Property</a>
+        <a href="./mainpage.html">Logout</a>
+      </div> -->
+    </div>
+
+    <div class="overlay" id="overlay"></div>
+    <button class="menu-toggle" onclick="toggleMenu()">
+      <strong>></strong>
+    </button>
+    <div class="dashboard-container">
+      <!-- Sidebar Navigation -->
+      <div class="sidebar" id="sidebar">
+        <h2>Tenant Dashboard</h2>
+        <ul>
+          <li onclick="showSection('home')">
+            <i class="fa-solid fa-house"></i> Home
+          </li>
+          <li onclick="showSection('rentPayments')">
+            <i class="fa-solid fa-hand-holding-dollar"></i> Rent Payments
+          </li>
+          <li onclick="showSection('maintenance')">
+            <i class="fa-solid fa-screwdriver-wrench"></i> Maintenance
+          </li>
+          <li onclick="showSection('complaints')">
+            <i class="fa-solid fa-comments"></i> Complaints
+          </li>
+          <li onclick="showSection('movers')">
+            <i class="fa-solid fa-users"></i> Domestic Workers
+          </li>
+          <li onclick="showSection('history')">
+            <i class="fa-solid fa-clock-rotate-left"></i> Rental History
+          </li>
+          <li onclick="showSection('savedListings')">
+            <i class="fa-solid fa-bookmark"></i> Saved Listings
+          </li>
+          <li onclick="showSection('ratings')">
+            <i class="fa-solid fa-star-half-stroke"></i>Reviews & Ratings
+          </li>
+          <li onclick="showSection('settings')">
+            <i class="fa-solid fa-gears"></i> Settings
+          </li>
+        </ul>
+      </div>
+
+      <!-- Main Content -->
+      <div class="main-content">
+        <!-- Home Section -->
+        <div id="home" class="section active">
+          <h3>Welcome, <%=user.firstName%> <%=user.lastName%></h3>
+          <div class="property-summary">
+            <h4>Currently Renting</h4>
+            <div class="property-card" id="home_proprty_card">
+              <div class="img_container">
+                <img src="./resources/2_bhk.jpg" alt="Property Image" />
+              </div>
+              <div class="property-details">
+                <p><strong>Property:</strong> 2BHK Apartment, Downtown City</p>
+                <p>
+                  <strong>Address:</strong> 123 Main Street, Apt 4B, Hyderabad
+                </p>
+                <p><strong>Owner:</strong> Mr. Anand Patel</p>
+                <p><strong>Contact:</strong> anand.patel@email.com</p>
+                <p><strong>Monthly Rent:</strong> ₹25,000</p>
+                <p><strong>Due Date:</strong> 5th of every month</p>
+                <p>
+                  <strong>Lease Period:</strong> Jan 15, 2023 - Jan 14, 2024
+                </p>
+              </div>
+            </div>
+          </div>
+          <div class="quick-stats">
+            <div class="stat-box">
+              <h4>Next Rent Due</h4>
+              <p>₹25,000</p>
+              <p>Due in 7 days</p>
+            </div>
+            <div class="stat-box">
+              <h4>Active Maintenance</h4>
+              <p>2 Pending Requests</p>
+            </div>
+            <div class="stat-box">
+              <h4>Saved Properties</h4>
+              <p>4 Properties</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Rent Payments Section -->
+        <div id="rentPayments" class="section">
+          <h3>Rent Payments</h3>
+          <div class="current-rent">
+            <p>Next Rent Due: <strong>₹25,000</strong> on 5th April, 2023</p>
+            <button class="pay-buttons">Pay Now</button>
+          </div>
+
+          <h4>Payment History</h4>
+          <div id="payment-history-container">
+            <table class="payment-history">
+              <thead>
+                <tr>
+                  <th>Date</th>
+                  <th>Amount</th>
+                  <th>Payment Method</th>
+                  <th>Status</th>
+                  <th>Receipt</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>March 5, 2023</td>
+                  <td>₹25,000</td>
+                  <td>UPI</td>
+                  <td class="paid">Paid</td>
+                  <td><a href="#">View</a></td>
+                </tr>
+                <tr>
+                  <td>February 5, 2023</td>
+                  <td>₹25,000</td>
+                  <td>Credit Card</td>
+                  <td class="paid">Paid</td>
+                  <td><a href="#">View</a></td>
+                </tr>
+                <tr>
+                  <td>January 5, 2023</td>
+                  <td>₹25,000</td>
+                  <td>Net Banking</td>
+                  <td class="paid">Paid</td>
+                  <td><a href="#">View</a></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Maintenance Request Section -->
+        <div id="maintenance" class="section">
+          <h3>Maintenance Requests</h3>
+          <button class="book-button">Submit New Request</button>
+
+          <h4>Active Requests</h4>
+          <div class="maintenance-cards">
+            <div class="maintenance-card">
+              <div class="maintenance-header">
+                <h5>Plumbing Issue</h5>
+                <span class="status pending">Pending</span>
+              </div>
+              <p><strong>Date Reported:</strong> March 25, 2023</p>
+              <p>
+                <strong>Description:</strong> Leaking tap in the kitchen sink
+              </p>
+              <p><strong>Assigned To:</strong> Awaiting assignment</p>
+              <button class="small-button">Update</button>
+            </div>
+
+            <div class="maintenance-card">
+              <div class="maintenance-header">
+                <h5>Electrical Issue</h5>
+                <span class="status in-progress">In Progress</span>
+              </div>
+              <p><strong>Date Reported:</strong> March 22, 2023</p>
+              <p>
+                <strong>Description:</strong> Power socket in living room not
+                working
+              </p>
+              <p><strong>Assigned To:</strong> Ram Kumar (Electrician)</p>
+              <p><strong>Scheduled For:</strong> March 28, 2023, 10:00 AM</p>
+              <button class="small-button">Update</button>
+            </div>
+          </div>
+
+          <h4>Completed Requests</h4>
+          <div class="maintenance-cards">
+            <div class="maintenance-card">
+              <div class="maintenance-header">
+                <h5>AC Servicing</h5>
+                <span class="status completed">Completed</span>
+              </div>
+              <p><strong>Date Reported:</strong> March 10, 2023</p>
+              <p><strong>Date Completed:</strong> March 12, 2023</p>
+              <p><strong>Description:</strong> Regular servicing of AC units</p>
+              <p><strong>Serviced By:</strong> CoolAir Services</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Complaint Submission Section -->
+        <div id="complaints" class="section">
+          <h3>Submit a Query / Complaint</h3>
+          <form class="query-form">
+            <select required>
+              <option value="" disabled selected>Select Category</option>
+              <option value="rent">Rent Related</option>
+              <option value="property">Property Issues</option>
+              <option value="neighbor">Neighbor Complaints</option>
+              <option value="service">Service Quality</option>
+              <option value="other">Other</option>
+            </select>
+            <input
+              type="text"
+              placeholder="Subject"
+              class="query-text-input"
+              required
+            />
+            <textarea
+              class="query-text-input"
+              rows="4"
+              placeholder="Describe your issue..."
+              required
+            ></textarea>
+
+            <button type="submit">Submit Complaint</button>
+          </form>
+
+          <h4>Previous Complaints</h4>
+          <div class="complaints-history">
+            <div class="complaint-item">
+              <div class="complaint-header">
+                <h5>Noisy Neighbors</h5>
+                <span class="status resolved">Resolved</span>
+              </div>
+              <p><strong>Date:</strong> February 15, 2023</p>
+              <p>
+                <strong>Description:</strong> Constant loud music from apartment
+                4C
+              </p>
+              <p>
+                <strong>Response:</strong> Management has spoken with the tenant
+                in 4C and they've agreed to keep noise levels down after 10 PM.
+              </p>
+            </div>
+
+            <div class="complaint-item">
+              <div class="complaint-header">
+                <h5>Water Supply Issue</h5>
+                <span class="status in-progress">In Progress</span>
+              </div>
+              <p><strong>Date:</strong> March 20, 2023</p>
+              <p>
+                <strong>Description:</strong> Inconsistent water supply in
+                mornings
+              </p>
+              <p>
+                <strong>Response:</strong> Maintenance team is checking the
+                building's water pump system. Expected resolution by March 30,
+                2023.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Domestic Workers Booking -->
+        <div id="movers" class="section">
+          <h3>Domestic Worker Services</h3>
+          <p>
+            Book verified domestic workers nearby to complete your daily chores.
+          </p>
+
+          <div class="service-categories">
+            <div class="service-category">
+              <h4>Cleaning Services</h4>
+              <p>Professional house cleaning</p>
+              <button class="book-button">Find Cleaners</button>
+            </div>
+
+            <div class="service-category">
+              <h4>Cooking Services</h4>
+              <p>Skilled cooks for daily meals</p>
+              <button class="book-button">Find Cooks</button>
+            </div>
+
+            <div class="service-category">
+              <h4>Laundry Services</h4>
+              <p>Washing and ironing services</p>
+              <button class="book-button">Find Help</button>
+            </div>
+          </div>
+
+          <h4>Your Current Service Providers</h4>
+          <div class="worker-cards">
+            <div class="worker-card">
+              <img
+                src="./resources/domestic_worker_woman.jpg"
+                alt="Worker Photo"
+              />
+              <div class="worker-details">
+                <h5>Lakshmi Devi</h5>
+                <p><strong>Service:</strong> Cooking</p>
+                <p><strong>Schedule:</strong> Mon-Fri, 7 AM - 9 AM</p>
+                <p><strong>Monthly Fee:</strong> ₹7,500</p>
+                <div class="rating"><span>⭐⭐⭐⭐⭐</span> 5.0</div>
+              </div>
+            </div>
+
+            <div class="worker-card">
+              <img
+                src="./resources/domestic_worker_man.jpg"
+                alt="Worker Photo"
+              />
+              <div class="worker-details">
+                <h5>Raju K.</h5>
+                <p><strong>Service:</strong> Cleaning</p>
+                <p><strong>Schedule:</strong> Tue, Thu, Sat, 10 AM - 12 PM</p>
+                <p><strong>Monthly Fee:</strong> ₹4,500</p>
+                <div class="rating"><span>⭐⭐⭐⭐</span> 4.2</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Rental History -->
+        <div id="history" class="section">
+          <h3>Rental History</h3>
+          <div class="history-timeline">
+            <div class="history-item">
+              <div class="timeline-dot"></div>
+              <div class="history-content">
+                <h4>2BHK Apartment, Downtown City</h4>
+                <p><strong>Period:</strong> January 2023 - Present</p>
+                <p><strong>Monthly Rent:</strong> ₹25,000</p>
+                <p><strong>Owner:</strong> Mr. Anand Patel</p>
+                <p>
+                  <strong>Address:</strong> 123 Main Street, Apt 4B, Hyderabad
+                </p>
+                <p>
+                  <strong>Status:</strong>
+                  <span class="status current">Current</span>
+                </p>
+              </div>
+            </div>
+
+            <div class="history-item">
+              <div class="timeline-dot"></div>
+              <div class="history-content">
+                <h4>3BHK Villa, Green Valley</h4>
+                <p><strong>Period:</strong> January 2022 - December 2022</p>
+                <p><strong>Monthly Rent:</strong> ₹35,000</p>
+                <p><strong>Owner:</strong> Mrs. Priya Gupta</p>
+                <p>
+                  <strong>Address:</strong> 45 Park Road, Green Valley,
+                  Hyderabad
+                </p>
+                <p>
+                  <strong>Status:</strong>
+                  <span class="status completed">Completed</span>
+                </p>
+                <p>
+                  <strong>Reason for Moving:</strong> Relocated closer to
+                  workplace
+                </p>
+              </div>
+            </div>
+
+            <div class="history-item">
+              <div class="timeline-dot"></div>
+              <div class="history-content">
+                <h4>Studio Apartment, College Park</h4>
+                <p><strong>Period:</strong> June 2021 - December 2021</p>
+                <p><strong>Monthly Rent:</strong> ₹15,000</p>
+                <p><strong>Owner:</strong> Mr. Vikram Singh</p>
+                <p>
+                  <strong>Address:</strong> 78 College Road, Apt 12, Hyderabad
+                </p>
+                <p>
+                  <strong>Status:</strong>
+                  <span class="status completed">Completed</span>
+                </p>
+                <p><strong>Reason for Moving:</strong> Needed larger space</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Saved Listings -->
+        <div id="savedListings" class="section">
+          <h3>Saved Listings</h3>
+          <p>You have saved 4 properties for future reference.</p>
+
+          <div class="saved-properties">
+            <div class="property-card">
+              <div class="img_container">
+                <img
+                  src="./resources/3bhk_apartment.avif"
+                  alt="Property Image"
+                />
+              </div>
+              <div class="property-info">
+                <h4>Luxury 3BHK Apartment</h4>
+                <p><strong>Location:</strong> Jubilee Hills, Hyderabad</p>
+                <p><strong>Rent:</strong> ₹45,000/month</p>
+                <p><strong>Available From:</strong> May 1, 2023</p>
+                <div class="property-features">
+                  <span>3 BHK</span>
+                  <span>1800 sq.ft</span>
+                  <span>Furnished</span>
+                </div>
+                <div class="card-actions">
+                  <button class="book-button">View Details</button>
+                  <button class="remove-button">Remove</button>
+                </div>
+              </div>
+            </div>
+
+            <div class="property-card">
+              <div class="img_container">
+                <img
+                  src="./resources/2bhk_with_garden.jpeg"
+                  alt="Property Image"
+                />
+              </div>
+              <div class="property-info">
+                <h4>Modern 2BHK with Garden</h4>
+                <p><strong>Location:</strong> Gachibowli, Hyderabad</p>
+                <p><strong>Rent:</strong> ₹30,000/month</p>
+                <p><strong>Available From:</strong> April 15, 2023</p>
+                <div class="property-features">
+                  <span>2 BHK</span>
+                  <span>1200 sq.ft</span>
+                  <span>Semi-Furnished</span>
+                </div>
+                <div class="card-actions">
+                  <button class="book-button">View Details</button>
+                  <button class="remove-button">Remove</button>
+                </div>
+              </div>
+            </div>
+
+            <div class="property-card">
+              <div class="img_container">
+                <img src="./resources/1bhk.avif" alt="Property Image" />
+              </div>
+              <div class="property-info">
+                <h4>Spacious 1BHK Near Metro</h4>
+                <p><strong>Location:</strong> Ameerpet, Hyderabad</p>
+                <p><strong>Rent:</strong> ₹18,000/month</p>
+                <p><strong>Available From:</strong> Immediate</p>
+                <div class="property-features">
+                  <span>1 BHK</span>
+                  <span>750 sq.ft</span>
+                  <span>Unfurnished</span>
+                </div>
+                <div class="card-actions">
+                  <button class="book-button">View Details</button>
+                  <button class="remove-button">Remove</button>
+                </div>
+              </div>
+            </div>
+
+            <div class="property-card">
+              <div class="img_container">
+                <img
+                  src="./resources/moto_background_2.jpg"
+                  alt="Property Image"
+                />
+              </div>
+              <div class="property-info">
+                <h4>Premium 4BHK Villa</h4>
+                <p><strong>Location:</strong> Banjara Hills, Hyderabad</p>
+                <p><strong>Rent:</strong> ₹65,000/month</p>
+                <p><strong>Available From:</strong> June 1, 2023</p>
+                <div class="property-features">
+                  <span>4 BHK</span>
+                  <span>2500 sq.ft</span>
+                  <span>Fully Furnished</span>
+                </div>
+                <div class="card-actions">
+                  <button class="book-button">View Details</button>
+                  <button class="remove-button">Remove</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Reviews & Ratings Section -->
+        <div id="ratings" class="section">
+          <h3>Reviews & Ratings</h3>
+
+          <h4>Your Property Reviews</h4>
+          <div class="review-form">
+            <h5>Review Your Current Property</h5>
+            <div class="star-rating">
+              <span>Rate your experience: </span>
+              <div class="stars">
+                <span>⭐</span><span>⭐</span><span>⭐</span><span>⭐</span
+                ><span>⭐</span>
+              </div>
+            </div>
+            <textarea
+              rows="4"
+              placeholder="Share your experience living here..."
+            ></textarea>
+            <button type="submit">Submit Review</button>
+          </div>
+
+          <h4>Past Reviews</h4>
+          <div class="past-reviews">
+            <div class="review-card">
+              <div class="review-header">
+                <h5>3BHK Villa, Green Valley</h5>
+                <div class="rating">⭐⭐⭐⭐ 4.0</div>
+              </div>
+              <p class="review-date">Reviewed on: Jan 5, 2023</p>
+              <p class="review-text">
+                Spacious and well-maintained property with excellent amenities.
+                The neighborhood was peaceful and safe. Only downside was
+                occasional water supply issues.
+              </p>
+            </div>
+
+            <div class="review-card">
+              <div class="review-header">
+                <h5>Studio Apartment, College Park</h5>
+                <div class="rating">⭐⭐⭐⭐⭐ 5.0</div>
+              </div>
+              <p class="review-date">Reviewed on: Dec 20, 2021</p>
+              <p class="review-text">
+                Perfect for a single person. Great location with all necessary
+                amenities nearby. The landlord was very responsive to
+                maintenance requests.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Settings -->
+        <div id="settings" class="section">
+          <h3>Account Settings</h3>
+
+          <div class="settings-container">
+            <div id="profile-section">
+              <h4>Personal Information</h4>
+              <form class="profile-form">
+                <div class="form-group">
+                  <label for="fullname">Full Name</label>
+                  <input
+                    type="text"
+                    id="fullname"
+                    value="<%=user.firstName%> <%=user.lastName%>"
+                  />
+                </div>
+                <div class="form-group">
+                  <label for="email">Email Address</label>
+                  <input type="email" id="email" value="<%=user.email%>" />
+                </div>
+                <div class="form-group">
+                  <label for="phone">Phone Number</label>
+                  <input type="tel" id="phone" value="<%=user.phone%>" />
+                </div>
+                <div class="form-group">
+                  <label for="address">Current Address</label>
+                  <textarea id="address">
+                  <%=user.location%></textarea
+                  >
+                </div>
+                <button type="submit" class="settings-submission-class">
+                  Update Profile
+                </button>
+              </form>
+            </div>
+
+            <div id="security-section">
+              <h4>Security Settings</h4>
+              <form class="password-form">
+                <div class="form-group">
+                  <label for="current-password">Current Password</label>
+                  <input type="password" id="current-password" />
+                </div>
+                <div class="form-group">
+                  <label for="new-password">New Password</label>
+                  <input type="password" id="new-password" />
+                </div>
+                <div class="form-group">
+                  <label for="confirm-password">Confirm New Password</label>
+                  <input type="password" id="confirm-password" />
+                </div>
+                <button type="submit" class="settings-submission-class">
+                  Change Password
+                </button>
+              </form>
+            </div>
+
+            <div id="preferences-section">
+              <h4>Notification Preferences</h4>
+              <form class="notification-form">
+                <div class="checkbox-group">
+                  <label for="email-notifications">Email Notifications</label>
+                  <input type="checkbox" id="email-notifications" checked />
+                  <label for="email-notifications" class="button"></label>
+                </div>
+                <div class="checkbox-group">
+                  <label for="sms-notifications">SMS Notifications</label>
+                  <input type="checkbox" id="sms-notifications" checked />
+                  <label for="sms-notifications" class="button"></label>
+                </div>
+                <div class="checkbox-group">
+                  <label for="rent-reminders">Rent Due Reminders</label>
+                  <input type="checkbox" id="rent-reminders" checked />
+                  <label for="rent-reminders" class="button"></label>
+                </div>
+                <div class="checkbox-group">
+                  <label for="maintenance-updates">Maintenance Updates</label>
+                  <input type="checkbox" id="maintenance-updates" checked />
+                  <label for="maintenance-updates" class="button"></label>
+                </div>
+                <div class="checkbox-group">
+                  <label for="new-listings">New Property Listings</label>
+                  <input type="checkbox" id="new-listings" checked />
+                  <label for="new-listings" class="button"></label>
+                </div>
+                <button type="submit" class="settings-submission-class">
+                  Save Preferences
+                </button>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      function showSection(sectionId) {
+        // Hide all sections
+        const sections = document.querySelectorAll(".section");
+        sections.forEach((section) => section.classList.remove("active"));
+
+        // Show the selected section
+        document.getElementById(sectionId).classList.add("active");
+
+        // Close the sidebar on mobile screens
+        const sidebar = document.querySelector(".sidebar");
+        const menuButton = document.querySelector(".menu-toggle");
+
+        // Check if we're on a mobile screen (you can adjust the width as needed)
+        if (window.innerWidth <= 768) {
+          sidebar.classList.remove("active");
+          menuButton.innerHTML = "<strong>></strong>"; // Change button to ">" when sidebar is closed
+        }
+      }
+
+      function toggleMenu() {
+        const sidebar = document.querySelector(".sidebar");
+        const menuButton = document.querySelector(".menu-toggle");
+        const overlay = document.getElementById("overlay");
+
+        // Toggle the sidebar
+        sidebar.classList.toggle("active");
+
+        // Change button text based on sidebar state
+        if (sidebar.classList.contains("active")) {
+          menuButton.innerHTML = "<strong><</strong>"; // Change to "<" when sidebar is open
+        } else {
+          menuButton.innerHTML = "<strong>></strong>"; // Change back to ">" when closed
+        }
+      }
+
+      function toggleNav() {
+        const navMenu = document.getElementById("nav-menu");
+        if (navMenu.classList.contains("active")) {
+          navMenu.classList.remove("active");
+          overlay.classList.remove("active");
+        } else {
+          navMenu.classList.add("active");
+          overlay.classList.add("active");
+        }
+      }
+      document.getElementById("overlay").addEventListener("click", function () {
+        const navMenu = document.getElementById("nav-menu");
+        navMenu.classList.remove("active");
+        this.classList.remove("active");
+      });
+    </script>
+  </body>
+</html>
