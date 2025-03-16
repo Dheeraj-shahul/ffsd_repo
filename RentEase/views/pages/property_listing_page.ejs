@@ -1,0 +1,580 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="css/property_listing_page.css" />
+    <style>
+      @import url("https://fonts.googleapis.com/css2?family=Poppins:wght@700&display=swap");
+    </style>
+    <title>RENT EASE - List Your Property</title>
+    <link rel="icon" type="image/x-icon" href="" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css"
+      integrity="sha512-Evv84Mr4kqVGRNSgIGL/F/aIDqQb7xQ2vcrdIwxfjThSH8CSR7PBEakCr51Ck+w+/U6swU2Im1vVX0SVk9ABhg=="
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    />
+  </head>
+
+  <body>
+    <!-- <div id="header">
+      <div id="logo">
+        <div id="brandid">RentEase</div>
+        <div id="tagline">Your One-Stop Rental Solution</div>
+      </div>
+     
+      <button class="nav-toggle" onclick="toggleNav()">☰</button>
+
+      <nav id="nav-menu">
+        <a href="#">Home</a>
+        <a href="#">Properties</a>
+        <a href="#">Services</a>
+        <a href="#">About Us</a>
+        <a href="#">Contact Us</a>
+        <a href="#">FAQs</a>
+      </nav>
+      <div class="cta">
+        <a href="./loginpage.html">Login/SignUp</a>
+      </div>
+      <div class="overlay" id="overlay"></div>
+    </div> -->
+    <%- include('../partials/header') %>
+
+    <div class="page-container">
+      <div class="page-header">
+        <h1>List Your Property</h1>
+        <p>Complete the form below to list your property on RentEase</p>
+      </div>
+
+      <div class="listing-form-container">
+        <form id="property-listing-form">
+          <div class="form-section">
+            <h2>Basic Information</h2>
+            <div class="form-row">
+              <div class="form-group">
+                <label for="property-title">Property Title*</label>
+                <input
+                  type="text"
+                  id="property-title"
+                  name="property-title"
+                  required
+                  placeholder="e.g., Spacious 2BHK Apartment"
+                />
+              </div>
+              <div class="form-group">
+                <label for="property-type">Property Type*</label>
+                <select id="property-type" name="property-type" required>
+                  <option value="">Select Property Type</option>
+                  <option value="apartment">Apartment</option>
+                  <option value="house">House</option>
+                  <option value="villa">Villa</option>
+                  <option value="pg">PG/Hostel</option>
+                  <option value="commercial">Commercial Space</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label for="bedrooms">Bedrooms*</label>
+                <select id="bedrooms" name="bedrooms" required>
+                  <option value="">Select</option>
+                  <option value="1">1 BHK</option>
+                  <option value="2">2 BHK</option>
+                  <option value="3">3 BHK</option>
+                  <option value="4">4 BHK</option>
+                  <option value="5+">5+ BHK</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label for="bathrooms">Bathrooms*</label>
+                <select id="bathrooms" name="bathrooms" required>
+                  <option value="">Select</option>
+                  <option value="1">1</option>
+                  <option value="2">2</option>
+                  <option value="3">3</option>
+                  <option value="4+">4+</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label for="furnishing">Furnishing Status</label>
+                <select id="furnishing" name="furnishing">
+                  <option value="">Select</option>
+                  <option value="unfurnished">Unfurnished</option>
+                  <option value="semi-furnished">Semi-Furnished</option>
+                  <option value="fully-furnished">Fully Furnished</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group full-width">
+                <label for="property-description">Property Description*</label>
+                <textarea
+                  id="property-description"
+                  name="property-description"
+                  rows="4"
+                  required
+                  placeholder="Describe your property in detail, including special features and nearby amenities"
+                ></textarea>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-section">
+            <h2>Location Details</h2>
+            <div class="form-row">
+              <div class="form-group">
+                <label for="address">Complete Address*</label>
+                <input
+                  type="text"
+                  id="address"
+                  name="address"
+                  required
+                  placeholder="Street address"
+                />
+              </div>
+              <div class="form-group">
+                <label for="landmark">Landmark</label>
+                <input
+                  type="text"
+                  id="landmark"
+                  name="landmark"
+                  placeholder="Nearby landmark for easy navigation"
+                />
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label for="city">City*</label>
+                <input
+                  type="text"
+                  id="city"
+                  name="city"
+                  required
+                  placeholder="City"
+                />
+              </div>
+              <div class="form-group">
+                <label for="state">State*</label>
+                <input
+                  type="text"
+                  id="state"
+                  name="state"
+                  required
+                  placeholder="State"
+                />
+              </div>
+              <div class="form-group">
+                <label for="pincode">Pincode*</label>
+                <input
+                  type="text"
+                  id="pincode"
+                  name="pincode"
+                  required
+                  placeholder="Pincode"
+                />
+              </div>
+            </div>
+          </div>
+
+          <div class="form-section">
+            <h2>Rental Details</h2>
+            <div class="form-row">
+              <div class="form-group">
+                <label for="rent-amount">Monthly Rent (₹)*</label>
+                <input
+                  type="number"
+                  id="rent-amount"
+                  name="rent-amount"
+                  required
+                  placeholder="e.g., 15000"
+                />
+              </div>
+              <div class="form-group">
+                <label for="security-deposit">Security Deposit (₹)*</label>
+                <input
+                  type="number"
+                  id="security-deposit"
+                  name="security-deposit"
+                  required
+                  placeholder="e.g., 30000"
+                />
+              </div>
+              <div class="form-group">
+                <label for="maintenance">Maintenance Charges (₹)</label>
+                <input
+                  type="number"
+                  id="maintenance"
+                  name="maintenance"
+                  placeholder="e.g., 1500"
+                />
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label for="available-from">Available From*</label>
+                <input
+                  type="date"
+                  id="available-from"
+                  name="available-from"
+                  required
+                />
+              </div>
+              <div class="form-group">
+                <label for="preferred-tenants">Preferred Tenants</label>
+                <select id="preferred-tenants" name="preferred-tenants">
+                  <option value="any">Any</option>
+                  <option value="family">Family</option>
+                  <option value="bachelors">Bachelors</option>
+                  <option value="company">Company</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label for="lease-duration">Minimum Lease Duration*</label>
+                <select id="lease-duration" name="lease-duration" required>
+                  <option value="">Select</option>
+                  <option value="3">3 months</option>
+                  <option value="6">6 months</option>
+                  <option value="11">11 months</option>
+                  <option value="12">12 months</option>
+                  <option value="24">24 months</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-section">
+            <h2>Amenities & Facilities</h2>
+            <div class="amenities-grid">
+              <div class="amenity-checkbox">
+                <input
+                  type="checkbox"
+                  id="parking"
+                  name="amenities"
+                  value="parking"
+                />
+                <label for="parking">Parking</label>
+              </div>
+              <div class="amenity-checkbox">
+                <input
+                  type="checkbox"
+                  id="lift"
+                  name="amenities"
+                  value="lift"
+                />
+                <label for="lift">Lift</label>
+              </div>
+              <div class="amenity-checkbox">
+                <input
+                  type="checkbox"
+                  id="Balcony"
+                  name="amenities"
+                  value="Balcony"
+                />
+                <label for="power-backup">Balcony</label>
+              </div>
+              <div class="amenity-checkbox">
+                <input
+                  type="checkbox"
+                  id="security"
+                  name="amenities"
+                  value="security"
+                />
+                <label for="security">Security</label>
+              </div>
+              <div class="amenity-checkbox">
+                <input type="checkbox" id="gym" name="amenities" value="gym" />
+                <label for="gym">Gym</label>
+              </div>
+              <div class="amenity-checkbox">
+                <input
+                  type="checkbox"
+                  id="swimming-pool"
+                  name="amenities"
+                  value="swimming-pool"
+                />
+                <label for="swimming-pool">Swimming Pool</label>
+              </div>
+              <div class="amenity-checkbox">
+                <input
+                  type="checkbox"
+                  id="children-play-area"
+                  name="amenities"
+                  value="children-play-area"
+                />
+                <label for="children-play-area">Children's Play Area</label>
+              </div>
+              <div class="amenity-checkbox">
+                <input
+                  type="checkbox"
+                  id="club-house"
+                  name="amenities"
+                  value="club-house"
+                />
+                <label for="club-house">Club House</label>
+              </div>
+              <div class="amenity-checkbox">
+                <input
+                  type="checkbox"
+                  id="gated-community"
+                  name="amenities"
+                  value="gated-community"
+                />
+                <label for="gated-community">Gated Community</label>
+              </div>
+              <div class="amenity-checkbox">
+                <input
+                  type="checkbox"
+                  id="wifi"
+                  name="amenities"
+                  value="wifi"
+                />
+                <label for="wifi">Wi-Fi</label>
+              </div>
+              <div class="amenity-checkbox">
+                <input type="checkbox" id="ac" name="amenities" value="ac" />
+                <label for="ac">Water supply</label>
+              </div>
+
+              <div class="amenity-checkbox">
+                <input
+                  type="checkbox"
+                  id="gas-pipeline"
+                  name="amenities"
+                  value="gas-pipeline"
+                />
+                <label for="gas-pipeline">Gas Pipeline</label>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-section">
+            <h2>Property Photos</h2>
+            <div class="form-row">
+              <div class="form-group full-width">
+                <label for="property-photos">Upload Photos (Max 10)*</label>
+                <div class="file-upload-container">
+                  <input
+                    type="file"
+                    id="property-photos"
+                    name="property-photos"
+                    multiple
+                    accept="image/*"
+                    required
+                  />
+                  <div class="file-upload-button">
+                    <span>Choose Files</span>
+                  </div>
+                </div>
+                <div id="preview-container" class="preview-container"></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-section">
+            <h2>Contact Information</h2>
+            <div class="form-row">
+              <div class="form-group">
+                <label for="owner-name">Owner Name*</label>
+                <input
+                  type="text"
+                  id="owner-name"
+                  name="owner-name"
+                  required
+                  placeholder="Full Name"
+                />
+              </div>
+              <div class="form-group">
+                <label for="contact-number">Contact Number*</label>
+                <input
+                  type="tel"
+                  id="contact-number"
+                  name="contact-number"
+                  required
+                  placeholder="10-digit mobile number"
+                  pattern="[0-9]{10}"
+                />
+              </div>
+              <div class="form-group">
+                <label for="alternative-number">Alternative Number</label>
+                <input
+                  type="tel"
+                  id="alternative-number"
+                  name="alternative-number"
+                  placeholder="Alternative contact number"
+                  pattern="[0-9]{10}"
+                />
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group full-width">
+                <label for="contact-email">Email Address*</label>
+                <input
+                  type="email"
+                  id="contact-email"
+                  name="contact-email"
+                  required
+                  placeholder="Email address"
+                />
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group full-width">
+                <div class="agreement-checkbox">
+                  <input
+                    type="checkbox"
+                    id="terms-agreement"
+                    name="terms-agreement"
+                    required
+                  />
+                  <label for="terms-agreement"
+                    >I agree to RentEase's
+                    <a href="#">Terms & Conditions</a> and
+                    <a href="#">Privacy Policy</a>*</label
+                  >
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-actions">
+            <button
+              type="button"
+              class="secondary-button"
+              onclick="resetForm()"
+            >
+              Clear All
+            </button>
+            <button type="submit" class="primary-button">Submit Listing</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <script>
+      // Toggle Navigation Menu Function
+      function toggleNav() {
+        const navMenu = document.getElementById("nav-menu");
+        const overlay = document.getElementById("overlay");
+
+        if (navMenu.classList.contains("active")) {
+          navMenu.classList.remove("active");
+          overlay.classList.remove("active");
+        } else {
+          navMenu.classList.add("active");
+          overlay.classList.add("active");
+        }
+      }
+
+      // Add event listener to overlay
+      document.getElementById("overlay").addEventListener("click", function () {
+        const navMenu = document.getElementById("nav-menu");
+        navMenu.classList.remove("active");
+        this.classList.remove("active");
+      });
+
+      // Function to reset the form
+      function resetForm() {
+        document.getElementById("property-listing-form").reset();
+        document.getElementById("preview-container").innerHTML = "";
+      }
+
+      // Function to handle file uploads and create previews
+      document
+        .getElementById("property-photos")
+        .addEventListener("change", function (event) {
+          const files = event.target.files;
+          const previewContainer = document.getElementById("preview-container");
+
+          // Clear previous previews if any
+          previewContainer.innerHTML = "";
+
+          // Limit to maximum 10 images
+          const maxFiles = 10;
+          const fileCount = files.length > maxFiles ? maxFiles : files.length;
+
+          for (let i = 0; i < fileCount; i++) {
+            const file = files[i];
+
+            // Check if the file is an image
+            if (!file.type.match("image.*")) {
+              continue;
+            }
+
+            const reader = new FileReader();
+
+            reader.onload = function (e) {
+              const previewWrapper = document.createElement("div");
+              previewWrapper.className = "preview-item";
+
+              const img = document.createElement("img");
+              img.src = e.target.result;
+              img.title = file.name;
+
+              const removeBtn = document.createElement("span");
+              removeBtn.className = "remove-preview";
+              removeBtn.innerHTML = "×";
+              removeBtn.addEventListener("click", function () {
+                previewWrapper.remove();
+              });
+
+              previewWrapper.appendChild(img);
+              previewWrapper.appendChild(removeBtn);
+              previewContainer.appendChild(previewWrapper);
+            };
+
+            reader.readAsDataURL(file);
+          }
+
+          if (files.length > maxFiles) {
+            alert(
+              `You can only upload a maximum of ${maxFiles} images. The first ${maxFiles} images have been selected.`
+            );
+          }
+        });
+
+      // Form validation and submission
+      document
+        .getElementById("property-listing-form")
+        .addEventListener("submit", function (event) {
+          event.preventDefault();
+
+          // Simple form validation
+          const requiredFields = document.querySelectorAll("[required]");
+          let isValid = true;
+
+          requiredFields.forEach((field) => {
+            if (!field.value) {
+              isValid = false;
+              field.classList.add("error");
+            } else {
+              field.classList.remove("error");
+            }
+          });
+
+          if (!isValid) {
+            alert("Please fill in all required fields marked with *");
+            return;
+          }
+
+          // If validation passes, show success message
+          alert(
+            "Property listing submitted successfully! Our team will review your listing and it will be live soon."
+          );
+          resetForm();
+        });
+
+      // Custom styling for file input
+      document
+        .querySelector(".file-upload-button")
+        .addEventListener("click", function () {
+          document.getElementById("property-photos").click();
+        });
+    </script>
+  </body>
+</html>

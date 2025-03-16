@@ -1,0 +1,1075 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Owner Dashboard - RentEase</title>
+    <link rel="stylesheet" href="css/property_owner.css" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css"
+      integrity="sha512-Evv84Mr4kqVGRNSgIGL/F/aIDqQb7xQ2vcrdIwxfjThSH8CSR7PBEakCr51Ck+w+/U6swU2Im1vVX0SVk9ABhg=="
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    />
+  </head>
+  <body>
+    <%- include('../partials/header') %>
+    <button class="menu-toggle" onclick="toggleMenu()">
+      <strong>></strong>
+    </button>
+
+    <div class="dashboard-container">
+      <div class="sidebar">
+        <h2>Owner Dashboard</h2>
+        <h2 id="house_owner_name">Hey,<%=user.firstName%><%=user.lastName%></h2>
+        <ul>
+          <li onclick="showSection('properties')">
+            <i class="fa-solid fa-house"></i> My Properties
+          </li>
+          <li onclick="showSection('tenants')">
+            <i class="fa-solid fa-user"></i> My Tenants
+          </li>
+          <li onclick="showSection('payments')">
+            <i class="fa-solid fa-hand-holding-dollar"></i> Rent Payments
+          </li>
+          <li onclick="showSection('maintenance')">
+            <i class="fa-solid fa-screwdriver-wrench"></i> Maintenance Requests
+          </li>
+          <li onclick="showSection('complaints')">
+            <i class="fa-solid fa-message"></i> Complaints
+          </li>
+          <li onclick="showSection('reports')">
+            <i class="fa-solid fa-chart-column"></i> Reports & Analytics
+          </li>
+          <li onclick="showSection('agreements')">
+            <i class="fa-solid fa-file-contract"></i> Rental Agreements
+          </li>
+          <li onclick="showSection('settings')">
+            <i class="fa-solid fa-gears"></i> Settings
+          </li>
+        </ul>
+      </div>
+
+      <div class="main-content">
+        <div id="properties" class="section active">
+          <h3>My Properties</h3>
+          <div id="prop_container">
+            <div id="gs_container" class="after_scroll_container">
+              <div class="sc_image_cotainer">
+                <img src="images/2_bhk.jpg" class="sc_image" />
+              </div>
+              <div class="main_sen">2 BHK APARTMENT</div>
+              <div class="sc_text">
+                <div class="prop_details">
+                  <ul>
+                    <li>
+                      <strong>Location:</strong> 8-173/b, beside police station
+                    </li>
+                    <li><strong>City:</strong> VIJAYAWADA</li>
+                    <li><strong>Monthly Rent:</strong> ₹15,000</li>
+                    <li><strong>Current status:</strong> RENTED</li>
+                  </ul>
+                </div>
+
+                <div id="prop_view">
+                  <button class="prop_button">Property Details</button>
+                  <button class="prop_button" onclick="showSection('payments')">
+                    Rent Details
+                  </button>
+                  <button
+                    class="prop_button"
+                    onclick="showSection('complaints')"
+                  >
+                    View Complaints
+                  </button>
+                </div>
+              </div>
+            </div>
+            <div id="gs_container" class="after_scroll_container">
+              <div class="sc_image_cotainer">
+                <img src="images/1bhk.avif" class="sc_image" />
+              </div>
+              <div class="main_sen">Single Bedroom Flat</div>
+              <div class="sc_text">
+                <div class="prop_details">
+                  <ul>
+                    <li><strong>Location:</strong> 5-12/b, Krishnalanka</li>
+                    <li><strong>City:</strong> VIZAG</li>
+                    <li><strong>Monthly Rent:</strong> ₹8,500</li>
+                    <li><strong>Current status:</strong> VACANT</li>
+                  </ul>
+                </div>
+
+                <div id="prop_view">
+                  <button class="prop_button">Property Details</button>
+                  <!-- <button class="prop_button">List Property</button> -->
+                </div>
+              </div>
+            </div>
+            <div id="gs_container" class="after_scroll_container">
+              <div class="sc_image_cotainer">
+                <img src="images/login.jpg" class="sc_image" />
+              </div>
+              <div class="main_sen">3 BHK Luxury Villa</div>
+              <div class="sc_text">
+                <div class="prop_details">
+                  <ul>
+                    <li><strong>Location:</strong> Benz Circle, MG Road</li>
+                    <li><strong>City:</strong> VIJAYAWADA</li>
+                    <li><strong>Monthly Rent:</strong> ₹25,000</li>
+                    <li><strong>Current status:</strong> RENTED</li>
+                  </ul>
+                </div>
+
+                <div id="prop_view">
+                  <button class="prop_button">Property Details</button>
+                  <button class="prop_button" onclick="showSection('payments')">
+                    Rent Details
+                  </button>
+                  <button
+                    class="prop_button"
+                    onclick="showSection('complaints')"
+                  >
+                    View Complaints
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+          <button
+            class="add-button"
+            onclick="location.href='/property_listing_page'"
+          >
+            Add New Property
+          </button>
+        </div>
+
+        <div id="tenants" class="section">
+          <h3>My Tenants</h3>
+          <div class="messages">
+            <div class="tentant_details">
+              <ul>
+                <li><strong>JOHN DOE</strong></li>
+                <li>
+                  <strong>PROPERTY:</strong> <a href="#">2-BHK Apartment</a>
+                </li>
+                <li><strong>Contact:</strong> 9876543210</li>
+                <li><strong>Email:</strong> john.doe@email.com</li>
+                <li><strong>Occupation:</strong> Software Engineer</li>
+                <li><strong>Lease Period:</strong> Jan 2025 - Dec 2025</li>
+              </ul>
+              <button class="msg_button">View Messages</button>
+              <button class="msg_button contact_tenant_button">
+                Contact Tenant
+              </button>
+            </div>
+            <div class="tentant_details">
+              <ul>
+                <li><strong>MAHESH KUMAR</strong></li>
+                <li>
+                  <strong>PROPERTY:</strong> <a href="#">3 BHK Luxury Villa</a>
+                </li>
+                <li><strong>Contact:</strong> 8765432109</li>
+                <li><strong>Email:</strong> mahesh.kumar@email.com</li>
+                <li><strong>Occupation:</strong> Bank Manager</li>
+                <li><strong>Lease Period:</strong> Mar 2025 - Feb 2026</li>
+              </ul>
+              <button class="msg_button">View Messages</button>
+              <button class="msg_button contact_tenant_button">
+                Contact Tenant
+              </button>
+            </div>
+            <!-- <div class="tentant_details">
+              <ul>
+                <li><strong>PREVIOUS TENANTS</strong></li>
+                <li><strong>Total Previous Tenants:</strong> 5</li>
+              </ul>
+              <button class="msg_button">View History</button>
+            </div> -->
+          </div>
+        </div>
+
+        <div id="payments" class="section">
+          <h3>Rent Payments</h3>
+          <p>Monthly Revenue: <strong>₹40,000</strong></p>
+          <p>Upcoming Payments: <strong>₹40,000</strong></p>
+
+          <div class="payment-table-container">
+            <h4>Recent Transactions</h4>
+            <table class="payment-table">
+              <thead>
+                <tr>
+                  <th>Date</th>
+                  <th>Tenant</th>
+                  <th>Property</th>
+                  <th>Amount</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>03/01/2025</td>
+                  <td>John Doe</td>
+                  <td>2 BHK Apartment</td>
+                  <td>₹15,000</td>
+                  <td><span class="status-paid">Paid</span></td>
+                </tr>
+                <tr>
+                  <td>03/05/2025</td>
+                  <td>Mahesh Kumar</td>
+                  <td>3 BHK Luxury Villa</td>
+                  <td>₹25,000</td>
+                  <td><span class="status-paid">Paid</span></td>
+                </tr>
+                <tr>
+                  <td>02/01/2025</td>
+                  <td>John Doe</td>
+                  <td>2 BHK Apartment</td>
+                  <td>₹15,000</td>
+                  <td><span class="status-paid">Paid</span></td>
+                </tr>
+                <tr>
+                  <td>02/04/2025</td>
+                  <td>Mahesh Kumar</td>
+                  <td>3 BHK Luxury Villa</td>
+                  <td>₹25,000</td>
+                  <td><span class="status-paid">Paid</span></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="payment-summary">
+            <div class="summary-card">
+              <h4>Total Revenue</h4>
+              <p class="amount">₹80,000</p>
+              <p class="period">Last 2 Months</p>
+            </div>
+            <div class="summary-card">
+              <h4>Website Commission</h4>
+              <p class="amount">₹4,000</p>
+              <p class="period">5% of Revenue</p>
+            </div>
+            <div class="summary-card">
+              <h4>Net Income</h4>
+              <p class="amount">₹76,000</p>
+              <p class="period">After Commission</p>
+            </div>
+          </div>
+
+          <button class="pay-button">View All Transactions</button>
+          <button class="pay-button">Download Statement</button>
+        </div>
+
+        <div id="maintenance" class="section">
+          <h3>Maintenance Requests</h3>
+          <div class="maintenance-requests">
+            <div class="request-card">
+              <div class="request-header">
+                <h4>Plumbing Issue</h4>
+                <span class="request-status pending">Pending</span>
+              </div>
+              <div class="request-details">
+                <p><strong>Property:</strong> 2 BHK Apartment</p>
+                <p><strong>Tenant:</strong> John Doe</p>
+                <p><strong>Date Submitted:</strong> 03/05/2025</p>
+                <p>
+                  <strong>Description:</strong> Water leakage under the kitchen
+                  sink causing damage to the cabinet.
+                </p>
+              </div>
+              <div class="request-actions">
+                <button class="update_sts">Update Status</button>
+                <button class="update_sts">Mark Resolved</button>
+              </div>
+            </div>
+
+            <div class="request-card">
+              <div class="request-header">
+                <h4>Electrical Problem</h4>
+                <span class="request-status in-progress">In Progress</span>
+              </div>
+              <div class="request-details">
+                <p><strong>Property:</strong> 3 BHK Luxury Villa</p>
+                <p><strong>Tenant:</strong> Mahesh Kumar</p>
+                <p><strong>Date Submitted:</strong> 03/02/2025</p>
+                <p>
+                  <strong>Description:</strong> Power socket in the living room
+                  not working properly. Causes sparks when plugged in.
+                </p>
+                <!-- <p><strong>Assigned To:</strong> Raju (Electrician)</p>
+                <p><strong>Scheduled Date:</strong> 03/11/2025</p> -->
+              </div>
+              <div class="request-actions">
+                <button class="update_sts">Update Status</button>
+                <button class="update_sts">Mark Resolved</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div id="complaints" class="section">
+          <h3>Tenant Complaints</h3>
+          <div class="complaint_container">
+            <div class="res_complaint">
+              <ul>
+                <strong><li>2 BHK Apartment</li></strong>
+                <ul>
+                  <li><strong>Issue:</strong> Water leakage in bathroom</li>
+                  <li><strong>Reported by:</strong> John Doe</li>
+                  <li><strong>Date reported:</strong> 03/05/2025</li>
+                  <li><strong>Current status:</strong> Pending</li>
+                </ul>
+              </ul>
+              <button class="update_sts">Update Current Status</button>
+              <button class="update_sts">Contact Tenant</button>
+            </div>
+            <div class="res_complaint">
+              <ul>
+                <strong><li>3 BHK Luxury Villa</li></strong>
+                <ul>
+                  <li><strong>Issue:</strong> AC not cooling properly</li>
+                  <li><strong>Reported by:</strong> Mahesh Kumar</li>
+                  <li><strong>Date reported:</strong> 03/02/2025</li>
+                  <li>
+                    <strong>Current status:</strong> Worker arriving today
+                  </li>
+                </ul>
+              </ul>
+              <button class="update_sts">Update Current Status</button>
+              <button class="update_sts">Contact Tenant</button>
+            </div>
+            <div class="res_complaint">
+              <ul>
+                <strong><li>3 BHK Luxury Villa</li></strong>
+                <ul>
+                  <li>
+                    <strong>Issue:</strong> Security concern - Main gate lock
+                    broken
+                  </li>
+                  <li><strong>Reported by:</strong> Mahesh Kumar</li>
+                  <li><strong>Date reported:</strong> 03/07/2025</li>
+                  <li>
+                    <strong>Current status:</strong> High priority - Worker
+                    scheduled
+                  </li>
+                </ul>
+              </ul>
+              <button class="update_sts">Update Current Status</button>
+              <button class="update_sts">Contact Tenant</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- complaint updation -->
+
+        <!-- Overlay and Update Status Popup -->
+        <div id="statusUpdateOverlay" class="popup-overlay">
+          <div class="popup-container">
+            <h4 class="popup-title">Update Status</h4>
+
+            <div class="status-options">
+              <p>Select new status:</p>
+              <div class="status-option">
+                <input
+                  type="radio"
+                  name="status"
+                  id="status-pending"
+                  value="pending"
+                />
+                <label for="status-pending">Pending</label>
+              </div>
+              <div class="status-option">
+                <input
+                  type="radio"
+                  name="status"
+                  id="status-inprogress"
+                  value="in-progress"
+                />
+                <label for="status-inprogress">In Progress</label>
+              </div>
+              <div class="status-option">
+                <input
+                  type="radio"
+                  name="status"
+                  id="status-resolved"
+                  value="resolved"
+                />
+                <label for="status-resolved">Resolved</label>
+              </div>
+            </div>
+
+            <div class="popup-buttons">
+              <button id="cancelUpdateStatus" class="cancel-button">
+                Cancel
+              </button>
+              <button id="confirmUpdateStatus" class="confirm-button">
+                Yes, Update
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Overlay and Mark Resolved Popup -->
+        <div id="markResolvedOverlay" class="popup-overlay">
+          <div class="popup-container">
+            <h4 class="popup-title">Mark as Resolved?</h4>
+
+            <p class="popup-message">
+              Are you sure you want to mark this request as resolved?
+            </p>
+
+            <div class="popup-buttons">
+              <button id="cancelMarkResolved" class="cancel-button">
+                Cancel
+              </button>
+              <button id="confirmMarkResolved" class="confirm-button">
+                Yes, Mark Resolved
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div id="reports" class="section">
+          <h3>Reports & Analytics</h3>
+          <div class="reports-summary">
+            <div class="report-card">
+              <h4>Monthly Revenue</h4>
+              <p class="amount">₹40,000</p>
+              <div class="trend positive">↑ 5% from last month</div>
+            </div>
+            <div class="report-card">
+              <h4>Occupancy Rate</h4>
+              <p class="amount">66.7%</p>
+              <div class="trend neutral">2 of 3 properties rented</div>
+            </div>
+            <div class="report-card">
+              <h4>Maintenance Costs</h4>
+              <p class="amount">₹5,500</p>
+              <div class="trend negative">↑ 12% from last month</div>
+            </div>
+          </div>
+
+          <div class="chart-container">
+            <h4>Monthly Revenue (Last 6 Months)</h4>
+            <div class="chart-placeholder">
+              <!-- Placeholder for chart -->
+              <div class="bar-chart">
+                <div class="bar" style="height: 60%">
+                  <span class="value">₹30,000</span>
+                  <span class="month">Oct</span>
+                </div>
+                <div class="bar" style="height: 70%">
+                  <span class="value">₹35,000</span>
+                  <span class="month">Nov</span>
+                </div>
+                <div class="bar" style="height: 70%">
+                  <span class="value">₹35,000</span>
+                  <span class="month">Dec</span>
+                </div>
+                <div class="bar" style="height: 76%">
+                  <span class="value">₹38,000</span>
+                  <span class="month">Jan</span>
+                </div>
+                <div class="bar" style="height: 80%">
+                  <span class="value">₹40,000</span>
+                  <span class="month">Feb</span>
+                </div>
+                <div class="bar" style="height: 80%">
+                  <span class="value">₹40,000</span>
+                  <span class="month">Mar</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <button class="report-button">Generate Detailed Report</button>
+          <button class="report-button">Download as PDF</button>
+        </div>
+
+        <div id="agreements" class="section">
+          <h3>Rental Agreements</h3>
+          <div class="agreements-container">
+            <div class="agreement-card">
+              <h4>2 BHK Apartment - John Doe</h4>
+              <ul class="agreement-details">
+                <li><strong>Start Date:</strong> January 1, 2025</li>
+                <li><strong>End Date:</strong> December 31, 2025</li>
+                <li><strong>Monthly Rent:</strong> ₹15,000</li>
+                <li><strong>Security Deposit:</strong> ₹30,000</li>
+                <li>
+                  <strong>Status:</strong>
+                  <span class="active-status">Active</span>
+                </li>
+              </ul>
+              <div class="agreement-actions">
+                <button class="prop_button">View Agreement</button>
+                <button class="prop_button">Print Copy</button>
+                <button class="prop_button">Extend Agreement</button>
+              </div>
+            </div>
+
+            <div class="agreement-card">
+              <h4>3 BHK Luxury Villa - Mahesh Kumar</h4>
+              <ul class="agreement-details">
+                <li><strong>Start Date:</strong> March 1, 2025</li>
+                <li><strong>End Date:</strong> February 28, 2026</li>
+                <li><strong>Monthly Rent:</strong> ₹25,000</li>
+                <li><strong>Security Deposit:</strong> ₹50,000</li>
+                <li>
+                  <strong>Status:</strong>
+                  <span class="active-status">Active</span>
+                </li>
+              </ul>
+              <div class="agreement-actions">
+                <button class="prop_button">View Agreement</button>
+                <button class="prop_button">Print Copy</button>
+                <button class="prop_button">Modify Terms</button>
+              </div>
+            </div>
+
+            <div class="agreement-card">
+              <h4>Single Bedroom Flat - Available</h4>
+              <ul class="agreement-details">
+                <li><strong>Last Tenant:</strong> Priya Sharma</li>
+                <li><strong>Agreement Ended:</strong> February 15, 2025</li>
+                <li>
+                  <strong>Property Status:</strong>
+                  <span class="vacant-status">Vacant</span>
+                </li>
+              </ul>
+              <div class="agreement-actions">
+                <button class="prop_button">Create New Agreement</button>
+                <button class="prop_button">List Property</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div id="settings" class="section">
+          <h3>Account Settings</h3>
+
+          <form id="settingsForm">
+            <div class="settings-container">
+              <div class="settings-section">
+                <h4>Personal Information</h4>
+
+                <div class="form-row">
+                  <div class="form-group">
+                    <label for="settingsFirstName">First Name</label>
+                    <input
+                      type="text"
+                      id="settingsFirstName"
+                      name="firstName"
+                      placeholder="First name"
+                      value="<%=user.firstName%>"
+                    />
+                    <div id="settingsFirstNameError" class="error"></div>
+                  </div>
+
+                  <div class="form-group">
+                    <label for="settingsLastName">Last Name</label>
+                    <input
+                      type="text"
+                      id="settingsLastName"
+                      name="lastName"
+                      placeholder="Last name"
+                      value="<%=user.lastName%>"
+                    />
+                    <div id="settingsLastNameError" class="error"></div>
+                  </div>
+                </div>
+
+                <!-- <div class="form-group">
+                  <label for="settingsUsername">Username</label>
+                  <input
+                    type="text"
+                    id="settingsUsername"
+                    name="username"
+                    placeholder="Username"
+                    value="johndoe"
+                    disabled
+                  />
+                  <small class="helper-text">Username cannot be changed</small>
+                </div> -->
+
+                <div class="form-group">
+                  <label for="settingsEmail">Email</label>
+                  <input
+                    type="email"
+                    id="settingsEmail"
+                    name="email"
+                    placeholder="Enter your email"
+                    value="<%=user.email%>"
+                  />
+                  <div id="settingsEmailError" class="error"></div>
+                </div>
+
+                <div class="form-group">
+                  <label for="settingsPhone">Phone Number</label>
+                  <input
+                    type="tel"
+                    id="settingsPhone"
+                    name="phone"
+                    placeholder="Enter your phone number"
+                    value="<%=user.phone%>"
+                  />
+                  <div id="settingsPhoneError" class="error"></div>
+                </div>
+              </div>
+
+              <div class="settings-section">
+                <h4>Owner Information</h4>
+
+                <div class="form-group">
+                  <label for="settingsLocation">Primary Location</label>
+                  <input
+                    type="text"
+                    id="settingsLocation"
+                    name="location"
+                    placeholder="City, State, Country"
+                    value="<%=user.location%>"
+                  />
+                  <div id="settingsLocationError" class="error"></div>
+                </div>
+
+                <div class="form-group">
+                  <label for="settingsNumProperties"
+                    >Number of Properties</label
+                  >
+                  <input
+                    type="number"
+                    id="settingsNumProperties"
+                    name="numProperties"
+                    min="1"
+                    placeholder="How many properties do you own?"
+                    value="3"
+                  />
+                </div>
+
+                <div class="form-group">
+                  <label for="settingsPaymentInfo">Payment Information</label>
+                  <input
+                    type="text"
+                    id="settingsPaymentInfo"
+                    name="paymentInfo"
+                    placeholder="Bank Account Number"
+                    value="<%=user.accountNo%>"
+                  />
+                </div>
+
+                <div class="form-group">
+                  <label for="settingsUPI">UPI ID</label>
+                  <input
+                    type="text"
+                    id="settingsUPI"
+                    name="upiID"
+                    placeholder="Your UPI ID"
+                    value="<%=user.upiid%>"
+                  />
+                </div>
+              </div>
+
+              <div class="settings-section">
+                <h4>Change Password</h4>
+
+                <div class="form-group">
+                  <label for="settingsCurrentPassword">Current Password</label>
+                  <input
+                    type="password"
+                    id="settingsCurrentPassword"
+                    name="currentPassword"
+                    placeholder="Current password"
+                  />
+                  <div id="settingsCurrentPasswordError" class="error"></div>
+                </div>
+
+                <div class="form-group">
+                  <label for="settingsNewPassword">New Password</label>
+                  <input
+                    type="password"
+                    id="settingsNewPassword"
+                    name="newPassword"
+                    placeholder="New password"
+                  />
+                  <div id="settingsNewPasswordError" class="error"></div>
+                </div>
+
+                <div class="form-group">
+                  <label for="settingsConfirmPassword"
+                    >Confirm New Password</label
+                  >
+                  <input
+                    type="password"
+                    id="settingsConfirmPassword"
+                    name="confirmPassword"
+                    placeholder="Confirm new password"
+                  />
+                  <div id="settingsConfirmPasswordError" class="error"></div>
+                </div>
+              </div>
+
+              <div class="settings-section">
+                <h4>Notification Preferences</h4>
+
+                <div class="checkbox-group">
+                  <label for="emailNotifications">Email notifications</label>
+                  <input
+                    type="checkbox"
+                    id="emailNotifications"
+                    name="emailNotifications"
+                    checked
+                  />
+                  <label for="emailNotifications" class="button"></label>
+                </div>
+
+                <div class="checkbox-group">
+                  <label for="smsNotifications">SMS notifications</label>
+                  <input
+                    type="checkbox"
+                    id="smsNotifications"
+                    name="smsNotifications"
+                    checked
+                  />
+                  <label for="smsNotifications" class="button"></label>
+                </div>
+
+                <div class="checkbox-group">
+                  <label for="paymentReminders">Payment reminders</label>
+                  <input
+                    type="checkbox"
+                    id="paymentReminders"
+                    name="paymentReminders"
+                    checked
+                  />
+                  <label for="paymentReminders" class="button"></label>
+                </div>
+
+                <div class="checkbox-group">
+                  <label for="complaintAlerts">Complaint alerts</label>
+                  <input
+                    type="checkbox"
+                    id="complaintAlerts"
+                    name="complaintAlerts"
+                    checked
+                  />
+                  <label for="complaintAlerts" class="button"></label>
+                </div>
+
+                <div class="checkbox-group">
+                  <label for="maintenanceAlerts">Maintenance alerts</label>
+                  <input
+                    type="checkbox"
+                    id="maintenanceAlerts"
+                    name="maintenanceAlerts"
+                    checked
+                  />
+                  <label for="maintenanceAlerts" class="button"></label>
+                </div>
+
+                <!-- <div class="checkbox-group">
+                  <input
+                    type="checkbox"
+                    id="serviceNotifications"
+                    name="serviceNotifications"
+                    checked
+                  />
+                  <label for="serviceNotifications"
+                    >Domestic service bookings</label
+                  >
+                </div> -->
+              </div>
+            </div>
+
+            <div class="button-container">
+              <button
+                type="submit"
+                id="saveSettingsBtn"
+                class="settings-button primary-button"
+              >
+                Save Changes
+              </button>
+              <button
+                type="button"
+                id="cancelSettingsBtn"
+                class="settings-button secondary-button"
+              >
+                Cancel
+              </button>
+            </div>
+          </form>
+
+          <div id="settingsSuccessMessage" class="success-message">
+            Your settings have been updated successfully!
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      function showSection(sectionId) {
+        // Hide all sections
+        const sections = document.querySelectorAll(".section");
+        sections.forEach((section) => {
+          section.classList.remove("active");
+        });
+
+        // Show the selected section
+        const activeSection = document.getElementById(sectionId);
+        if (activeSection) {
+          activeSection.classList.add("active");
+        }
+
+        // Close the sidebar after clicking (on mobile screens)
+        if (window.innerWidth <= 768) {
+          document.querySelector(".sidebar").classList.remove("active");
+          document.querySelector(".menu-toggle").innerHTML =
+            "<strong>></strong>";
+        }
+      }
+
+      function toggleMenu() {
+        const sidebar = document.querySelector(".sidebar");
+        const menuButton = document.querySelector(".menu-toggle");
+        const overlay = document.getElementById("overlay");
+
+        // Toggle the sidebar
+        sidebar.classList.toggle("active");
+
+        // Change button text based on sidebar state
+        if (sidebar.classList.contains("active")) {
+          menuButton.innerHTML = "<strong><</strong>"; // Change to "<" when sidebar is open
+        } else {
+          menuButton.innerHTML = "<strong>></strong>"; // Change back to ">" when closed
+        }
+      }
+
+      function toggleNav() {
+        const navMenu = document.getElementById("nav-menu");
+        const overlay = document.getElementById("overlay");
+
+        if (navMenu.classList.contains("active")) {
+          navMenu.classList.remove("active");
+          overlay.classList.remove("active");
+        } else {
+          navMenu.classList.add("active");
+          overlay.classList.add("active");
+        }
+      }
+
+      // Add event listener to overlay
+      document.getElementById("overlay").addEventListener("click", function () {
+        const navMenu = document.getElementById("nav-menu");
+        navMenu.classList.remove("active");
+        this.classList.remove("active");
+      });
+
+      ///contact the tenant
+      // Get all buttons with the class 'contact_tenant_button'
+      const contactButtons = document.querySelectorAll(
+        ".contact_tenant_button"
+      );
+
+      // Add event listener to each button
+      contactButtons.forEach((button) => {
+        button.addEventListener("click", function () {
+          // Find the closest tenant details container
+          const tenantDetails = this.closest(".tentant_details");
+
+          if (tenantDetails) {
+            // Find the contact information within this specific tenant's container
+            const phoneElement =
+              tenantDetails.querySelector("ul li:nth-child(3)");
+
+            if (phoneElement) {
+              // Extract just the phone number from the text content
+              const phoneText = phoneElement.textContent;
+              const phoneNumber = phoneText.replace(/[^0-9]/g, "");
+
+              // Check if we successfully got a phone number
+              if (phoneNumber) {
+                // Create the tel: URI and open it
+                const telURI = "tel:" + phoneNumber;
+                window.location.href = telURI;
+              } else {
+                console.error("Could not extract a valid phone number");
+                alert("Could not find a valid phone number for this tenant");
+              }
+            } else {
+              console.error("Phone number element not found");
+              alert("Could not find contact information for this tenant");
+            }
+          }
+        });
+      });
+
+      /// updation of complaints
+
+      document.addEventListener("DOMContentLoaded", function () {
+        // Get all request cards
+        const requestCards = document.querySelectorAll(".request-card");
+
+        // Get popup elements
+        const statusUpdateOverlay = document.getElementById(
+          "statusUpdateOverlay"
+        );
+        const markResolvedOverlay = document.getElementById(
+          "markResolvedOverlay"
+        );
+
+        // Get confirmation buttons
+        const confirmUpdateStatusBtn = document.getElementById(
+          "confirmUpdateStatus"
+        );
+        const confirmMarkResolvedBtn = document.getElementById(
+          "confirmMarkResolved"
+        );
+
+        // Get cancel buttons
+        const cancelUpdateStatusBtn =
+          document.getElementById("cancelUpdateStatus");
+        const cancelMarkResolvedBtn =
+          document.getElementById("cancelMarkResolved");
+
+        // Variable to store the current status element being updated
+        let currentStatusElement = null;
+
+        // Add event listeners to each card's buttons
+        requestCards.forEach((card) => {
+          const statusElement = card.querySelector(".request-status");
+          const buttons = card.querySelectorAll(".request-actions button");
+
+          // "Update Status" button click
+          buttons[0].addEventListener("click", function () {
+            currentStatusElement = statusElement;
+
+            // Get the current status to pre-select the correct radio button
+            const currentStatus = statusElement.textContent.toLowerCase();
+
+            // Clear previous selections
+            document
+              .querySelectorAll('input[name="status"]')
+              .forEach((radio) => {
+                radio.checked = false;
+              });
+
+            // Set the appropriate radio button as checked
+            if (currentStatus === "pending") {
+              document.getElementById("status-pending").checked = true;
+            } else if (currentStatus === "in progress") {
+              document.getElementById("status-inprogress").checked = true;
+            } else if (currentStatus === "resolved") {
+              document.getElementById("status-resolved").checked = true;
+            }
+
+            // Show the update status popup
+            statusUpdateOverlay.style.display = "flex";
+          });
+
+          // "Mark Resolved" button click
+          buttons[1].addEventListener("click", function () {
+            currentStatusElement = statusElement;
+
+            // Show the mark resolved popup
+            markResolvedOverlay.style.display = "flex";
+          });
+        });
+
+        // Confirm update status
+        confirmUpdateStatusBtn.addEventListener("click", function () {
+          // Get the selected status
+          const selectedRadio = document.querySelector(
+            'input[name="status"]:checked'
+          );
+
+          if (selectedRadio && currentStatusElement) {
+            const newStatus = selectedRadio.value;
+            updateRequestStatus(currentStatusElement, newStatus);
+          }
+
+          // Hide the popup
+          statusUpdateOverlay.style.display = "none";
+        });
+
+        // Confirm mark resolved
+        confirmMarkResolvedBtn.addEventListener("click", function () {
+          if (currentStatusElement) {
+            updateRequestStatus(currentStatusElement, "resolved");
+          }
+
+          // Hide the popup
+          markResolvedOverlay.style.display = "none";
+        });
+
+        // Cancel update status
+        cancelUpdateStatusBtn.addEventListener("click", function () {
+          statusUpdateOverlay.style.display = "none";
+        });
+
+        // Cancel mark resolved
+        cancelMarkResolvedBtn.addEventListener("click", function () {
+          markResolvedOverlay.style.display = "none";
+        });
+
+        // Function to update the request status display
+        function updateRequestStatus(statusElement, newStatus) {
+          // Remove all existing status classes
+          statusElement.classList.remove("pending", "in-progress", "resolved");
+
+          // Update text and add appropriate class
+          switch (newStatus) {
+            case "pending":
+              statusElement.textContent = "Pending";
+              statusElement.classList.add("pending");
+              break;
+            case "in-progress":
+              statusElement.textContent = "In Progress";
+              statusElement.classList.add("in-progress");
+              break;
+            case "resolved":
+              statusElement.textContent = "Resolved";
+              statusElement.classList.add("resolved");
+              break;
+          }
+        }
+
+        // Close popups when clicking outside
+        window.addEventListener("click", function (event) {
+          if (event.target === statusUpdateOverlay) {
+            statusUpdateOverlay.style.display = "none";
+          }
+
+          if (event.target === markResolvedOverlay) {
+            markResolvedOverlay.style.display = "none";
+          }
+        });
+      });
+
+      // Form validation and submission for settings
+      document
+        .getElementById("settingsForm")
+        .addEventListener("submit", function (e) {
+          e.preventDefault();
+
+          // Show success message
+          document.getElementById("settingsSuccessMessage").style.display =
+            "block";
+
+          // Hide success message after 3 seconds
+          setTimeout(function () {
+            document.getElementById("settingsSuccessMessage").style.display =
+              "none";
+          }, 3000);
+        });
+
+      // Cancel button event listener
+      document
+        .getElementById("cancelSettingsBtn")
+        .addEventListener("click", function () {
+          // Reset form or redirect as needed
+          document.getElementById("settingsForm").reset();
+        });
+    </script>
+  </body>
+</html>

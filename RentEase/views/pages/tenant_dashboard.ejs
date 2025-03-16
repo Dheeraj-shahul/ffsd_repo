@@ -15,30 +15,7 @@
   </head>
   <body>
     <!-- Header -->
-    <div id="header">
-      <div id="logo">
-        <div id="brandid">RentEase</div>
-        <div id="tagline">Your One-Stop Rental Solution</div>
-      </div>
-
-      <!-- Nav Toggle Button -->
-      <button class="nav-toggle" onclick="toggleNav()">☰</button>
-
-      <!-- Navbar -->
-      <nav id="nav-menu">
-        <a href="/">Home</a>
-        <a href="#">My Properties</a>
-        <a href="#">Payments</a>
-        <a href="#">Tenants</a>
-        <a href="#">Complaints</a>
-        <a href="#">Reports</a>
-      </nav>
-
-      <!-- <div class="cta">
-        <a href="#">Add Property</a>
-        <a href="./mainpage.html">Logout</a>
-      </div> -->
-    </div>
+    <%- include('../partials/header') %>
 
     <div class="overlay" id="overlay"></div>
     <button class="menu-toggle" onclick="toggleMenu()">
@@ -88,7 +65,10 @@
             <h4>Currently Renting</h4>
             <div class="property-card" id="home_proprty_card">
               <div class="img_container">
-                <img src="./resources/2_bhk.jpg" alt="Property Image" />
+                <img
+                  src="https://imagecdn.99acres.com/media1/28616/12/572332807M-1740402437859.webp"
+                  alt="Property Image"
+                />
               </div>
               <div class="property-details">
                 <p><strong>Property:</strong> 2BHK Apartment, Downtown City</p>
@@ -220,6 +200,55 @@
           </div>
         </div>
 
+        <div id="maintenance-request-popup" class="popup-container">
+          <div class="popup-content">
+            <span class="close-btn">&times;</span>
+            <h3>Submit Maintenance Request</h3>
+            <form id="maintenance-request-form">
+              <div class="form-group">
+                <label for="issue-type">Issue Type:</label>
+                <select id="issue-type" required>
+                  <option value="">Select an issue type</option>
+                  <option value="Plumbing">Plumbing</option>
+                  <option value="Electrical">Electrical</option>
+                  <option value="HVAC">HVAC/AC</option>
+                  <option value="Appliance">Appliance</option>
+                  <option value="Structural">Structural</option>
+                  <option value="Other">Other</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label for="description">Description:</label>
+                <textarea
+                  id="description"
+                  rows="4"
+                  placeholder="Please describe the issue in detail"
+                  required
+                ></textarea>
+              </div>
+
+              <div class="form-group">
+                <label for="location">Location:</label>
+                <input
+                  type="text"
+                  id="location"
+                  placeholder="e.g., Kitchen, Bathroom, Living Room"
+                  required
+                />
+              </div>
+
+              <div class="form-group">
+                <label for="preferred-date">Date</label>
+                <input type="date" id="preferred-date" />
+              </div>
+              <div class="form-group">
+                <button type="submit" class="submit-btn">Submit Request</button>
+              </div>
+            </form>
+          </div>
+        </div>
+
         <!-- Complaint Submission Section -->
         <div id="complaints" class="section">
           <h3>Submit a Query / Complaint</h3>
@@ -296,19 +325,34 @@
             <div class="service-category">
               <h4>Cleaning Services</h4>
               <p>Professional house cleaning</p>
-              <button class="book-button">Find Cleaners</button>
+              <button
+                class="book-button"
+                onclick="location.href='/worker_register'"
+              >
+                Find Cleaners
+              </button>
             </div>
 
             <div class="service-category">
               <h4>Cooking Services</h4>
               <p>Skilled cooks for daily meals</p>
-              <button class="book-button">Find Cooks</button>
+              <button
+                class="book-button"
+                onclick="location.href='/worker_register'"
+              >
+                Find Cooks
+              </button>
             </div>
 
             <div class="service-category">
               <h4>Laundry Services</h4>
               <p>Washing and ironing services</p>
-              <button class="book-button">Find Help</button>
+              <button
+                class="book-button"
+                onclick="location.href='/worker_register'"
+              >
+                Find Help
+              </button>
             </div>
           </div>
 
@@ -416,7 +460,7 @@
             <div class="property-card">
               <div class="img_container">
                 <img
-                  src="./resources/3bhk_apartment.avif"
+                  src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR0Acy0iN7moUa_rwh57gkUCRuSiBbrslFCQA&s"
                   alt="Property Image"
                 />
               </div>
@@ -440,7 +484,7 @@
             <div class="property-card">
               <div class="img_container">
                 <img
-                  src="./resources/2bhk_with_garden.jpeg"
+                  src="https://imagecdn.99acres.com/media1/26835/7/536707293M-1738721192640.webp"
                   alt="Property Image"
                 />
               </div>
@@ -463,7 +507,10 @@
 
             <div class="property-card">
               <div class="img_container">
-                <img src="./resources/1bhk.avif" alt="Property Image" />
+                <img
+                  src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTpzko2cckPQQt7_ufax8x6_EeXkCBz8Ssxtg&s"
+                  alt="Property Image"
+                />
               </div>
               <div class="property-info">
                 <h4>Spacious 1BHK Near Metro</h4>
@@ -484,10 +531,7 @@
 
             <div class="property-card">
               <div class="img_container">
-                <img
-                  src="./resources/moto_background_2.jpg"
-                  alt="Property Image"
-                />
+                <img src="/images/login.jpg" alt="Property Image" />
               </div>
               <div class="property-info">
                 <h4>Premium 4BHK Villa</h4>
@@ -704,6 +748,92 @@
         const navMenu = document.getElementById("nav-menu");
         navMenu.classList.remove("active");
         this.classList.remove("active");
+      });
+
+      // JavaScript to handle the popup functionality
+      document.addEventListener("DOMContentLoaded", function () {
+        // Get the popup elements
+        const popup = document.getElementById("maintenance-request-popup");
+        const bookButton = document.querySelector(".book-button");
+        const closeBtn = document.querySelector(".close-btn");
+        const form = document.getElementById("maintenance-request-form");
+
+        // Open popup when book button is clicked
+        bookButton.addEventListener("click", function () {
+          popup.style.display = "flex";
+        });
+
+        // Close popup when close button is clicked
+        closeBtn.addEventListener("click", function () {
+          popup.style.display = "none";
+        });
+
+        // Close popup when clicking outside the popup content
+        window.addEventListener("click", function (event) {
+          if (event.target === popup) {
+            popup.style.display = "none";
+          }
+        });
+
+        // Handle form submission
+        form.addEventListener("submit", function (event) {
+          event.preventDefault();
+
+          // Get form values
+          const issueType = document.getElementById("issue-type").value;
+          const description = document.getElementById("description").value;
+          const location = document.getElementById("location").value;
+          const preferredDate = document.getElementById("preferred-date").value;
+
+          // Here you would typically send this data to your backend
+          // For now, we'll just show a success message
+          alert("Maintenance request successfully submitted!");
+
+          // Clear form and close popup
+          form.reset();
+          popup.style.display = "none";
+
+          // Optional: Add the new request to the active requests section
+          addNewRequest(issueType, description, location, preferredDate);
+        });
+
+        // Function to add a new request to the UI (optional)
+        function addNewRequest(
+          issueType,
+          description,
+          location,
+          preferredDate
+        ) {
+          const activeRequestsContainer =
+            document.querySelector(".maintenance-cards");
+          const today = new Date().toLocaleDateString();
+
+          const newCard = document.createElement("div");
+          newCard.className = "maintenance-card";
+          newCard.innerHTML = `
+      <div class="maintenance-header">
+        <h5>${issueType} Issue</h5>
+        <span class="status pending">Pending</span>
+      </div>
+      <p><strong>Date Reported:</strong> ${today}</p>
+      <p><strong>Description:</strong> ${description}</p>
+      <p><strong>Location:</strong> ${location}</p>
+      ${
+        preferredDate
+          ? `<p><strong>Preferred Date:</strong> ${preferredDate}</p>`
+          : ""
+      }
+      
+      <p><strong>Assigned To:</strong> Awaiting assignment</p>
+      <button class="small-button">Update</button>
+    `;
+
+          // Insert the new card at the beginning of the list
+          activeRequestsContainer.insertBefore(
+            newCard,
+            activeRequestsContainer.firstChild
+          );
+        }
       });
     </script>
   </body>

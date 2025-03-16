@@ -24,8 +24,6 @@
   <body>
     <!-- Navbar -->
     <%- include('../partials/header') %>
-  
-
 
     <!-- Background Container -->
     <div class="background-container">
@@ -34,7 +32,7 @@
         <div class="main-overlay">
           <h1>Welcome to RentEase</h1>
           <p>
-            Your one-stop solution for finding rental properties and domestic
+            Your one-stop solution for managing rental properties and domestic
             services.
           </p>
         </div>
@@ -53,15 +51,13 @@
               >
                 <option value="" disabled selected hidden>Location ▼</option>
                 <option value="" disabled>Top Cities</option>
-                <% 
-                      const locations = [
-                        'Chennai', 'Kolkata', 'Visakhapatnam', 'Mumbai', 
-                        'Hyderabad', 'Bangalore', 'Delhi'
-                      ];
-                      locations.forEach(location => { 
-                    %>
-                    <option value="<%= location.toLowerCase() %>"><%= location %></option>
-                    <% }); %>
+                <% const locations = [ 'Chennai', 'Kolkata', 'Visakhapatnam',
+                'Mumbai', 'Hyderabad', 'Bangalore', 'Delhi' ];
+                locations.forEach(location => { %>
+                <option value="<%= location.toLowerCase() %>">
+                  <%= location %>
+                </option>
+                <% }); %>
               </select>
               <input
                 type="text"
@@ -78,18 +74,14 @@
                 required
               >
                 <option value="" disabled selected>Select Category</option>
-                <% 
-                const categories = [
-                  { value: 'all', label: 'All' },
-                  { value: 'house', label: 'House' },
-                  { value: 'flat', label: 'Flat' },
-                  { value: 'apartment', label: 'Apartment' },
-                  { value: 'villa', label: 'Villa' }
-                ];
-                categories.forEach(category => { 
-              %>
-                <option value="<%= category.value %>"><%= category.label %></option>
-              <% }); %>
+                <% const categories = [ { value: 'all', label: 'All' }, { value:
+                'house', label: 'House' }, { value: 'flat', label: 'Flat' }, {
+                value: 'apartment', label: 'Apartment' }, { value: 'villa',
+                label: 'Villa' } ]; categories.forEach(category => { %>
+                <option value="<%= category.value %>">
+                  <%= category.label %>
+                </option>
+                <% }); %>
               </select>
               <button type="submit">Search</button>
             </div>
@@ -161,7 +153,7 @@
           <h2>Comprehensive Home Solutions</h2>
         </div>
         <div class="features-grid">
-          <div class="feature-card" onclick="location.href='rent-home.html'">
+          <div class="feature-card" onclick="location.href='#'">
             <div class="feature-icon">
               <i class="fas fa-home"></i>
             </div>
@@ -171,10 +163,7 @@
               listings
             </p>
           </div>
-          <div
-            class="feature-card"
-            onclick="location.href='list-property.html'"
-          >
+          <div class="feature-card" onclick="location.href='#'">
             <div class="feature-icon">
               <i class="fas fa-list"></i>
             </div>
@@ -184,7 +173,7 @@
               efficiently
             </p>
           </div>
-          <div class="feature-card" onclick="location.href='services.html'">
+          <div class="feature-card" onclick="location.href='#'">
             <div class="feature-icon">
               <i class="fas fa-broom"></i>
             </div>
@@ -194,7 +183,7 @@
               verified professionals
             </p>
           </div>
-          <div class="feature-card" onclick="location.href='payment.html'">
+          <div class="feature-card" onclick="location.href='#'">
             <div class="feature-icon">
               <i class="fas fa-rupee-sign"></i>
             </div>
@@ -493,7 +482,7 @@
         <p>
           Join thousands of satisfied customers and start your journey today.
         </p>
-        <a href="register.html" class="cta-button">Sign Up Now</a>
+        <a href="/register" class="cta-button">Sign Up Now</a>
       </section>
     </div>
 
@@ -528,20 +517,20 @@
           <div class="footer-column">
             <h3>Quick Links</h3>
             <ul class="footer-links">
-              <li><a href="index.html">Home</a></li>
-              <li><a href="properties.html">Properties</a></li>
-              <li><a href="services.html">Services</a></li>
-              <li><a href="aboutus.html">About Us</a></li>
-              <li><a href="contactus.html">Contact</a></li>
+              <li><a href="/">Home</a></li>
+              <li><a href="/search">Properties</a></li>
+              <li><a href="/workerDetails">Services</a></li>
+              <li><a href="/about_us">About Us</a></li>
+              <li><a href="/contact_us">Contact</a></li>
             </ul>
           </div>
           <div class="footer-column">
             <h3>Services</h3>
             <ul class="footer-links">
-              <li><a href="renthome.html">Rent a Home</a></li>
-              <li><a href="listproperty.html">List Your Property</a></li>
-              <li><a href="domesticServices.html">Domestic Services</a></li>
-              <li><a href="payment.html">Online Rent Payment</a></li>
+              <li><a href="/search">Rent a Home</a></li>
+              <li><a href="/property_listing_page">List Your Property</a></li>
+              <li><a href="/workerDetails">Domestic Services</a></li>
+              <li><a href="/tenant_dashboard">Online Rent Payment</a></li>
               <li>
                 <a href="property-management.html">Property Management</a>
               </li>
@@ -573,7 +562,7 @@
             <p>&copy; 2025 RentEase. All Rights Reserved.</p>
           </div>
           <div class="footer-bottom-links">
-            <a href="privacy-policy.html">Privacy Policy</a>
+            <a href="/privacy_policy">Privacy Policy</a>
             <a href="terms-of-service.html">Terms of Service</a>
             <a href="cookie-policy.html">Cookie Policy</a>
           </div>
@@ -618,7 +607,6 @@
 
       // Fetch and insert the header
       // Fetch and insert navbar inside a Shadow DOM
-     
 
       const properties = [
         {

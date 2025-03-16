@@ -1,0 +1,563 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Domestic Worker Dashboard - RentEase</title>
+    <link rel="stylesheet" href="css/domestic_worker_dahboard.css" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css"
+      integrity="sha512-Evv84Mr4kqVGRNSgIGL/F/aIDqQb7xQ2vcrdIwxfjThSH8CSR7PBEakCr51Ck+w+/U6swU2Im1vVX0SVk9ABhg=="
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    />
+  </head>
+  <body>
+    <%- include('../partials/header') %>
+    <button class="menu-toggle" onclick="toggleMenu()">
+      <strong>></strong>
+    </button>
+
+    <div class="dashboard-container">
+      <div class="sidebar">
+        <h2>Worker Dashboard</h2>
+        <h2><%=user.firstName%> <%=user.lastName%></h2>
+        <ul>
+          <li onclick="showSection('services')">
+            <i class="fa-solid fa-rectangle-list"></i> My Services
+          </li>
+          <li onclick="showSection('bookings')">
+            <i class="fa-solid fa-clipboard-list" id="mybooking_icon"></i> My
+            Bookings
+          </li>
+          <li onclick="showSection('clients')">
+            <i class="fa-solid fa-users"></i> My Clients
+          </li>
+          <li onclick="showSection('earnings')">
+            <i class="fa-solid fa-hand-holding-dollar"></i> Earnings
+          </li>
+          <li onclick="showSection('reviews')">
+            <i class="fa-solid fa-star-half-stroke"></i> Reviews & Ratings
+          </li>
+          <li onclick="showSection('settings')">
+            <i class="fa-solid fa-gears"></i> Settings
+          </li>
+        </ul>
+      </div>
+
+      <div class="main-content">
+        <div id="services" class="section active">
+          <h3>My Services</h3>
+          <div id="prop_container">
+            <div id="gs_container" class="after_scroll_container">
+              <div class="sc_image_cotainer">
+                <img
+                  src="./resources/home_cleaning_service.jpg"
+                  class="sc_image"
+                />
+              </div>
+              <div class="main_sen">Home Cleaning</div>
+              <div class="sc_text">
+                <div class="prop_details">
+                  <ul>
+                    <li><strong>Rate : </strong>₹300 per hour</li>
+                    <li><strong>Experience :</strong> 4 years</li>
+                    <li><strong>Status :</strong> Available</li>
+                  </ul>
+                </div>
+
+                <div id="prop_view">
+                  <button class="prop_button">service details</button>
+                  <button class="prop_button">edit service</button>
+                  <button class="prop_button">toggle availability</button>
+                </div>
+              </div>
+            </div>
+            <div id="gs_container" class="after_scroll_container">
+              <div class="sc_image_cotainer">
+                <img src="./resources/cooking_service.jpg" class="sc_image" />
+              </div>
+              <div class="main_sen">Cooking Services</div>
+              <div class="sc_text">
+                <div class="prop_details">
+                  <ul>
+                    <li><strong>Rate : </strong>₹500 per meal</li>
+                    <li><strong>Experience :</strong> 6 years</li>
+                    <li><strong>Status :</strong> Booked</li>
+                  </ul>
+                </div>
+
+                <div id="prop_view">
+                  <button class="prop_button">service details</button>
+                  <button class="prop_button">edit service</button>
+                  <button class="prop_button">toggle availability</button>
+                </div>
+              </div>
+            </div>
+          </div>
+          <button class="add-button">Add New Service</button>
+        </div>
+
+        <div id="bookings" class="section">
+          <h3>My Bookings</h3>
+          <div class="complaint_container">
+            <div class="res_complaint">
+              <ul>
+                <strong> <li>Home Cleaning</li></strong>
+                <ul>
+                  <li><strong>Client:</strong> Pavan Kumar</li>
+                  <li>
+                    <strong>Address:</strong> 8-173/b, beside police station,
+                    VIJAYAWADA
+                  </li>
+                  <li><strong>Date:</strong> March 15, 2025</li>
+                  <li><strong>Time:</strong> 10:00 AM - 1:00 PM</li>
+                  <li><strong>Status:</strong> Confirmed</li>
+                </ul>
+              </ul>
+              <button class="update_sts">Accept Booking</button>
+              <button class="update_sts">Decline Booking</button>
+            </div>
+            <div class="res_complaint">
+              <ul>
+                <strong> <li>Cooking Services</li></strong>
+                <ul>
+                  <li><strong>Client:</strong> Anitha Reddy</li>
+                  <li><strong>Address:</strong> 5-12/b, Krishnalanka, VIZAG</li>
+                  <li><strong>Date:</strong> March 12-18, 2025 (Weekly)</li>
+                  <li><strong>Time:</strong> 6:00 PM - 8:00 PM</li>
+                  <li><strong>Status:</strong> In Progress</li>
+                </ul>
+              </ul>
+              <button class="update_sts">Mark as Complete</button>
+              <button class="update_sts">Request Rescheduling</button>
+            </div>
+          </div>
+        </div>
+
+        <div id="clients" class="section">
+          <h3>My Clients</h3>
+          <div class="messages">
+            <div class="tentant_details">
+              <ul>
+                <li><strong>PAVAN KUMAR</strong></li>
+                <li>
+                  <strong>SERVICE :</strong> <a href="#">Home Cleaning</a>
+                </li>
+                <li><strong>CONTACT :</strong> +91 9876543210</li>
+              </ul>
+              <button class="msg_button">view messages</button>
+            </div>
+            <div class="tentant_details">
+              <ul>
+                <li><strong>ANITHA REDDY</strong></li>
+                <li>
+                  <strong>SERVICE :</strong> <a href="#">Cooking Services</a>
+                </li>
+                <li><strong>CONTACT :</strong> +91 9876543211</li>
+              </ul>
+              <button class="msg_button">view messages</button>
+            </div>
+            <div class="tentant_details">
+              <ul>
+                <li><strong>RAMESH SINGH</strong></li>
+                <li>
+                  <strong>SERVICE :</strong> <a href="#">Home Cleaning</a>
+                </li>
+                <li><strong>CONTACT :</strong> +91 9876543212</li>
+              </ul>
+              <button class="msg_button">view messages</button>
+            </div>
+          </div>
+        </div>
+
+        <div id="earnings" class="section">
+          <h3>My Earnings</h3>
+          <p>This Month's Earnings: <strong>₹12,500</strong></p>
+          <p>Pending Payments: <strong>₹3,500</strong></p>
+          <div class="complaint_container">
+            <div class="res_complaint">
+              <ul>
+                <strong> <li>Recent Transactions</li></strong>
+                <ul>
+                  <li><strong>Service:</strong> Home Cleaning</li>
+                  <li><strong>Client:</strong> Pavan Kumar</li>
+                  <li><strong>Date:</strong> March 7, 2025</li>
+                  <li><strong>Amount:</strong> ₹900</li>
+                  <li><strong>Status:</strong> Completed</li>
+                </ul>
+              </ul>
+            </div>
+            <div class="res_complaint">
+              <ul>
+                <strong> <li>Weekly Contract</li></strong>
+                <ul>
+                  <li><strong>Service:</strong> Cooking Services</li>
+                  <li><strong>Client:</strong> Anitha Reddy</li>
+                  <li><strong>Period:</strong> March 1-7, 2025</li>
+                  <li><strong>Amount:</strong> ₹3,500</li>
+                  <li><strong>Status:</strong> Paid</li>
+                </ul>
+              </ul>
+            </div>
+          </div>
+          <button class="pay-button">View All Transactions</button>
+        </div>
+
+        <div id="reviews" class="section">
+          <h3>Reviews & Ratings</h3>
+          <p>Overall Rating: <strong>4.8/5</strong> (42 reviews)</p>
+          <div class="complaint_container">
+            <div class="res_complaint">
+              <ul>
+                <strong> <li>Pavan Kumar - ⭐⭐⭐⭐⭐</li></strong>
+                <ul>
+                  <li><strong>Service:</strong> Home Cleaning</li>
+                  <li><strong>Date:</strong> March 7, 2025</li>
+                  <li>
+                    <strong>Comment:</strong> "Very thorough and professional.
+                    Left my home spotless!"
+                  </li>
+                </ul>
+              </ul>
+            </div>
+            <div class="res_complaint">
+              <ul>
+                <strong> <li>Anitha Reddy - ⭐⭐⭐⭐</li></strong>
+                <ul>
+                  <li><strong>Service:</strong> Cooking Services</li>
+                  <li><strong>Date:</strong> March 1, 2025</li>
+                  <li>
+                    <strong>Comment:</strong> "Excellent cooking skills. Family
+                    loved the meals. Would appreciate more variety."
+                  </li>
+                </ul>
+              </ul>
+            </div>
+            <div class="res_complaint">
+              <ul>
+                <strong> <li>Ramesh Singh - ⭐⭐⭐⭐⭐</li></strong>
+                <ul>
+                  <li><strong>Service:</strong> Home Cleaning</li>
+                  <li><strong>Date:</strong> February 28, 2025</li>
+                  <li>
+                    <strong>Comment:</strong> "Prompt, efficient and friendly.
+                    Best cleaner I've had!"
+                  </li>
+                </ul>
+              </ul>
+            </div>
+          </div>
+          <button class="report-button">View All Reviews</button>
+        </div>
+
+        <div id="settings" class="section">
+          <h3>Account Settings</h3>
+
+          <form id="settingsForm">
+            <div class="settings-container">
+              <div class="settings-section">
+                <h4>Personal Information</h4>
+
+                <div class="form-row">
+                  <div class="form-group">
+                    <label for="settingsFirstName">First Name</label>
+                    <input
+                      type="text"
+                      id="settingsFirstName"
+                      name="firstName"
+                      placeholder="First name"
+                      value="<%=user.firstName%>"
+                    />
+                    <div id="settingsFirstNameError" class="error"></div>
+                  </div>
+
+                  <div class="form-group">
+                    <label for="settingsLastName">Last Name</label>
+                    <input
+                      type="text"
+                      id="settingsLastName"
+                      name="lastName"
+                      placeholder="Last name"
+                      value="<%=user.lastName%>"
+                    />
+                    <div id="settingsLastNameError" class="error"></div>
+                  </div>
+                </div>
+
+                <!-- <div class="form-group">
+                  <label for="settingsUsername">Username</label>
+                  <input
+                    type="text"
+                    id="settingsUsername"
+                    name="username"
+                    placeholder="Username"
+                    value="lakshmid"
+                    disabled
+                  />
+                  <small class="helper-text">Username cannot be changed</small>
+                </div> -->
+
+                <div class="form-group">
+                  <label for="settingsEmail">Email</label>
+                  <input
+                    type="email"
+                    id="settingsEmail"
+                    name="email"
+                    placeholder="Enter your email"
+                    value="<%=user.email%>"
+                  />
+                  <div id="settingsEmailError" class="error"></div>
+                </div>
+
+                <div class="form-group">
+                  <label for="settingsPhone">Phone Number</label>
+                  <input
+                    type="tel"
+                    id="settingsPhone"
+                    name="phone"
+                    placeholder="Enter your phone number"
+                    value="<%=user.phone%>"
+                  />
+                  <div id="settingsPhoneError" class="error"></div>
+                </div>
+              </div>
+
+              <div class="settings-section">
+                <h4>Worker Information</h4>
+
+                <div class="form-group">
+                  <label for="settingsLocation">Service Area</label>
+                  <input
+                    type="text"
+                    id="settingsLocation"
+                    name="location"
+                    placeholder="City, State, Country"
+                    value="<%=user.location%>"
+                  />
+                  <div id="settingsLocationError" class="error"></div>
+                </div>
+
+                <div class="form-group">
+                  <label for="settingsExperience">Years of Experience</label>
+                  <input
+                    type="number"
+                    id="settingsExperience"
+                    name="experience"
+                    min="0"
+                    placeholder="Years of experience"
+                    value="<%=user.experience%>"
+                  />
+                </div>
+
+                <div class="form-group">
+                  <label for="settingsAvailability">Availability</label>
+                  <select id="settingsAvailability" name="availability">
+                    <option value="full-time">Full Time</option>
+                    <option value="part-time" selected>Part Time</option>
+                    <option value="weekends">Weekends Only</option>
+                  </select>
+                </div>
+
+                <div class="form-group">
+                  <label>Services Offered</label>
+                  <div class="checkbox-group">
+                    <input
+                      type="checkbox"
+                      id="cleaning"
+                      name="cleaning"
+                      checked
+                    />
+                    <label for="cleaning">Home Cleaning</label>
+                  </div>
+                  <div class="checkbox-group">
+                    <input
+                      type="checkbox"
+                      id="cooking"
+                      name="cooking"
+                      checked
+                    />
+                    <label for="cooking">Cooking</label>
+                  </div>
+                  <!-- <div class="checkbox-group">
+                    <input type="checkbox" id="laundry" name="laundry" />
+                    <label for="laundry">Laundry</label>
+                  </div>
+                  <div class="checkbox-group">
+                    <input type="checkbox" id="gardening" name="gardening" />
+                    <label for="gardening">Gardening</label>
+                  </div> -->
+                </div>
+              </div>
+
+              <div class="settings-section">
+                <h4>Change Password</h4>
+
+                <div class="form-group">
+                  <label for="settingsCurrentPassword">Current Password</label>
+                  <input
+                    type="password"
+                    id="settingsCurrentPassword"
+                    name="currentPassword"
+                    placeholder="Current password"
+                  />
+                  <div id="settingsCurrentPasswordError" class="error"></div>
+                </div>
+
+                <div class="form-group">
+                  <label for="settingsNewPassword">New Password</label>
+                  <input
+                    type="password"
+                    id="settingsNewPassword"
+                    name="newPassword"
+                    placeholder="New password"
+                  />
+                  <div id="settingsNewPasswordError" class="error"></div>
+                </div>
+
+                <div class="form-group">
+                  <label for="settingsConfirmPassword"
+                    >Confirm New Password</label
+                  >
+                  <input
+                    type="password"
+                    id="settingsConfirmPassword"
+                    name="confirmPassword"
+                    placeholder="Confirm new password"
+                  />
+                  <div id="settingsConfirmPasswordError" class="error"></div>
+                </div>
+              </div>
+
+              <div class="settings-section">
+                <h4>Notification Preferences</h4>
+
+                <div class="checkbox-group">
+                  <label for="emailNotifications">Email notifications</label>
+                  <input
+                    type="checkbox"
+                    id="emailNotifications"
+                    name="emailNotifications"
+                    checked
+                  />
+                  <label for="emailNotifications" class="button"></label>
+                </div>
+
+                <div class="checkbox-group">
+                  <label for="smsNotifications">SMS notifications</label>
+                  <input
+                    type="checkbox"
+                    id="smsNotifications"
+                    name="smsNotifications"
+                    checked
+                  />
+                  <label for="smsNotifications" class="button"></label>
+                </div>
+
+                <div class="checkbox-group">
+                  <label for="bookingAlerts">New booking alerts</label>
+                  <input
+                    type="checkbox"
+                    id="bookingAlerts"
+                    name="bookingAlerts"
+                    checked
+                  />
+                  <label for="bookingAlerts" class="button"></label>
+                </div>
+
+                <div class="checkbox-group">
+                  <label for="paymentAlerts">Payment alerts</label>
+                  <input
+                    type="checkbox"
+                    id="paymentAlerts"
+                    name="paymentAlerts"
+                    checked
+                  />
+                  <label for="paymentAlerts" class="button"></label>
+                </div>
+              </div>
+            </div>
+
+            <div class="button-container">
+              <button
+                type="submit"
+                id="saveSettingsBtn"
+                class="settings-button primary-button"
+              >
+                Save Changes
+              </button>
+              <button
+                type="button"
+                id="cancelSettingsBtn"
+                class="settings-button secondary-button"
+              >
+                Cancel
+              </button>
+            </div>
+          </form>
+
+          <div id="settingsSuccessMessage" class="success-message">
+            Your settings have been updated successfully!
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      function showSection(sectionId) {
+        // Hide all sections
+        const sections = document.querySelectorAll(".section");
+        sections.forEach((section) => {
+          section.classList.remove("active");
+        });
+
+        // Show the selected section
+        const activeSection = document.getElementById(sectionId);
+        if (activeSection) {
+          activeSection.classList.add("active");
+        }
+
+        // Close the sidebar after clicking (on mobile screens)
+        if (window.innerWidth <= 768) {
+          document.querySelector(".sidebar").classList.remove("active");
+          document.querySelector(".menu-toggle").innerHTML =
+            "<strong>></strong>";
+        }
+      }
+
+      function toggleMenu() {
+        const sidebar = document.querySelector(".sidebar");
+        const menuButton = document.querySelector(".menu-toggle");
+        const overlay = document.getElementById("overlay");
+
+        // Toggle the sidebar
+        sidebar.classList.toggle("active");
+
+        // Change button text based on sidebar state
+        if (sidebar.classList.contains("active")) {
+          menuButton.innerHTML = "<strong><</strong>"; // Change to "<" when sidebar is open
+        } else {
+          menuButton.innerHTML = "<strong>></strong>"; // Change back to ">" when closed
+        }
+      }
+
+      function toggleNav() {
+        const navMenu = document.getElementById("nav-menu");
+        const overlay = document.getElementById("overlay");
+        if (navMenu.classList.contains("active")) {
+          navMenu.classList.remove("active");
+          overlay.classList.remove("active");
+        } else {
+          navMenu.classList.add("active");
+          overlay.classList.add("active");
+        }
+      }
+
+      document.getElementById("overlay").addEventListener("click", function () {
+        document.getElementById("nav-menu").classList.remove("active");
+        document.getElementById("overlay").classList.remove("active");
+      });
+    </script>
+  </body>
+</html>

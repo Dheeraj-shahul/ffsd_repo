@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Contact Us - RentEase</title>
+    <style>
+      @import url("https://fonts.googleapis.com/css2?family=Poppins:wght@700&display=swap");
+
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: "Poppins", sans-serif;
+      }
+
+      body {
+        background-color: rgba(226, 194, 187, 0.445);
+        color: #333;
+        line-height: 1.6;
+      }
+
+      .tagline {
+        font-size: 0.9rem;
+        color: #fff;
+      }
+
+      
+
+      .nav-button {
+        background-color: #ffcc00;
+        color: #000;
+        padding: 8px 16px;
+        border-radius: 4px;
+        text-decoration: none;
+        font-weight: bold;
+      }
+      .whole_container {
+        position: relative;
+        top: 10vh;
+        width: 100vw;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+      }
+      .container {
+        width: 80%;
+        max-width: 1200px;
+        margin: 2rem auto;
+        padding: 0 15px;
+      }
+
+      .contact-section {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 2rem;
+        border-radius: 10px;
+      }
+
+      @media (min-width: 768px) {
+        .contact-section {
+          grid-template-columns: 1fr 1fr;
+        }
+      }
+
+      .contact-info {
+        background: white;
+        padding: 2rem;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        border-radius: 10px;
+      }
+
+      .contact-info h2 {
+        margin-bottom: 1.5rem;
+        color: #333;
+        font-size: 1.8rem;
+      }
+
+      .info-item {
+        margin-bottom: 1.5rem;
+      }
+
+      .info-item h3 {
+        font-size: 1.2rem;
+        margin-bottom: 0.5rem;
+        color: #ffcc00;
+      }
+
+      .contact-form {
+        background: white;
+        padding: 2rem;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        border-radius: 10px;
+      }
+
+      .contact-form h2 {
+        margin-bottom: 1.5rem;
+        color: #333;
+        font-size: 1.8rem;
+      }
+
+      .form-group {
+        margin-bottom: 1.5rem;
+      }
+
+      .form-group label {
+        display: block;
+        margin-bottom: 0.5rem;
+        font-weight: bold;
+      }
+
+      .form-control {
+        width: 100%;
+        padding: 0.75rem;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        font-size: 1rem;
+      }
+
+      textarea.form-control {
+        min-height: 150px;
+        resize: vertical;
+      }
+
+      .btn {
+        background: #ffcc00;
+        color: #000;
+        border: none;
+        padding: 0.75rem 1.5rem;
+        font-size: 1rem;
+        border-radius: 4px;
+        cursor: pointer;
+        font-weight: bold;
+      }
+    </style>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
+    />
+  </head>
+  <body>
+    <%- include('../partials/header') %>
+    <div class="whole_container">
+      <div class="container">
+        <div class="contact-section">
+          <div class="contact-info">
+            <h2>Get in Touch</h2>
+
+            <div class="info-item">
+              <h3>Address</h3>
+              <p>Sri City, Andhra Pradesh, India</p>
+              <p>194025</p>
+            </div>
+
+            <div class="info-item">
+              <h3>Phone</h3>
+              <p>Customer Support: +91 9949169887</p>
+              <p>Business Inquiries: +91 890-765-4321</p>
+            </div>
+
+            <div class="info-item">
+              <h3>Email</h3>
+              <p>contact@rentease.com</p>
+            </div>
+
+            <div class="info-item">
+              <h3>Office Hours</h3>
+              <p>Monday to Friday: 9:00 AM - 6:00 PM</p>
+              <p>Saturday: 10:00 AM - 4:00 PM</p>
+              <p>Sunday: Closed</p>
+            </div>
+          </div>
+
+          <div class="contact-form">
+            <h2>Send us a Message</h2>
+            <form id="contactForm">
+              <div class="form-group">
+                <label for="name">Your Name</label>
+                <input type="text" id="name" class="form-control" required />
+              </div>
+
+              <div class="form-group">
+                <label for="email">Email Address</label>
+                <input type="email" id="email" class="form-control" required />
+              </div>
+
+              <div class="form-group">
+                <label for="phone">Phone Number</label>
+                <input type="tel" id="phone" class="form-control" />
+              </div>
+
+              <div class="form-group">
+                <label for="subject">Subject</label>
+                <input type="text" id="subject" class="form-control" required />
+              </div>
+
+              <div class="form-group">
+                <label for="message">Your Message</label>
+                <textarea id="message" class="form-control" required></textarea>
+              </div>
+
+              <button type="submit" class="btn">Submit Message</button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      document
+        .getElementById("contactForm")
+        .addEventListener("submit", function (e) {
+          e.preventDefault();
+          alert("Thank you for your message! We will get back to you shortly.");
+          this.reset();
+        });
+    </script>
+  </body>
+</html>

@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>FAQs - RentEase</title>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
+    />
+
+    <style>
+      @import url("https://fonts.googleapis.com/css2?family=Poppins:wght@100;200;300;400;500;600;700;800;900&display=swap");
+
+      body {
+        font-family: "Poppins", sans-serif;
+        background-color: #fafafa;
+        color: #333;
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      .container {
+        position: relative;
+        top: 10vh;
+        max-width: 800px;
+        margin: 50px auto;
+        padding: 20px;
+        background-color: #ffffff;
+        border-radius: 12px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+      }
+
+      h1 {
+        text-align: center;
+        font-size: 32px;
+        color: #1a1a1a;
+        margin-bottom: 10px;
+      }
+
+      .subheading {
+        text-align: center;
+        font-size: 18px;
+        color: #777;
+        margin-bottom: 30px;
+      }
+
+      .faq-item {
+        border-bottom: 1px solid #eee;
+      }
+
+      .faq-question {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 16px 20px;
+        background-color: #ffffff;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+        font-size: 18px;
+        font-weight: 500;
+        color: #1a1a1a;
+        border: none;
+        width: 100%;
+        text-align: left;
+        outline: none;
+      }
+
+      .faq-question:hover {
+        background-color: #f9f9f9;
+      }
+
+      .faq-question i {
+        color: #ffcc00;
+        margin-right: 12px;
+        font-size: 20px;
+      }
+
+      .toggle-icon {
+        color: #ffcc00;
+        font-size: 18px;
+        transition: transform 0.3s ease;
+      }
+
+      .faq-answer {
+        padding: 0 20px;
+        background-color: #fafafa;
+        color: #555;
+        font-size: 16px;
+        line-height: 1.5;
+        display: none;
+        overflow: hidden;
+      }
+
+      .faq-answer.active {
+        display: block;
+        padding-bottom: 16px;
+      }
+
+      .rotate {
+        transform: rotate(180deg);
+      }
+
+      .contact {
+        margin-top: 30px;
+        text-align: center;
+        font-size: 16px;
+        color: #777;
+      }
+
+      .contact a {
+        color: #ffcc00;
+        text-decoration: none;
+        font-weight: 500;
+        transition: color 0.2s ease;
+      }
+
+      .contact a:hover {
+        color: #e6b800;
+      }
+    </style>
+  </head>
+  <body>
+    <%- include('../partials/header') %>
+    <div class="container">
+      <div class="header">
+        <div style="text-align: center; margin-bottom: 20px">
+          <i class="fas fa-question-circle fa-3x" style="color: #ffcc00"></i>
+        </div>
+        <h1>Frequently Asked Questions</h1>
+        <p class="subheading">
+          Find answers to common questions about RentEase's rental and service
+          platform
+        </p>
+      </div>
+
+      <!-- FAQ Items -->
+      <div class="faq-list">
+        <!-- FAQ 1 -->
+        <div class="faq-item">
+          <button class="faq-question">
+            <div>
+              <i class="fas fa-house-user"></i>
+              How does RentEase work?
+            </div>
+            <span class="toggle-icon"><i class="fas fa-chevron-down"></i></span>
+          </button>
+          <div class="faq-answer">
+            RentEase is your one-stop rental solution that connects property
+            seekers with landlords and service providers. Browse listings,
+            schedule viewings, and even book maintenance services all in one
+            platform.
+          </div>
+        </div>
+
+        <!-- FAQ 2 -->
+        <div class="faq-item">
+          <button class="faq-question">
+            <div>
+              <i class="fas fa-clock"></i>
+              How long does the rental application process take?
+            </div>
+            <span class="toggle-icon"><i class="fas fa-chevron-down"></i></span>
+          </button>
+          <div class="faq-answer">
+            The rental application process typically takes 24-48 hours. Once you
+            submit your application with required documents, our team reviews it
+            promptly.
+          </div>
+        </div>
+
+        <!-- FAQ 3 -->
+        <div class="faq-item">
+          <button class="faq-question">
+            <div>
+              <i class="fas fa-dollar-sign"></i>
+              What are the fees involved?
+            </div>
+            <span class="toggle-icon"><i class="fas fa-chevron-down"></i></span>
+          </button>
+          <div class="faq-answer">
+            Our platform is free to browse. Application fees vary by property
+            but typically range from 0.1% - 0.5%.
+          </div>
+        </div>
+
+        <!-- FAQ 4 -->
+        <div class="faq-item">
+          <button class="faq-question">
+            <div>
+              <i class="fas fa-shield-alt"></i>
+              How is my security deposit protected?
+            </div>
+            <span class="toggle-icon"><i class="fas fa-chevron-down"></i></span>
+          </button>
+          <div class="faq-answer">
+            Your security deposit is held in a secure escrow account throughout
+            your tenancy.
+          </div>
+        </div>
+
+        <!-- FAQ 5 -->
+        <div class="faq-item">
+          <button class="faq-question">
+            <div>
+              <i class="fas fa-tools"></i>
+              What maintenance services are available?
+            </div>
+            <span class="toggle-icon"><i class="fas fa-chevron-down"></i></span>
+          </button>
+          <div class="faq-answer">
+            We offer a wide range of maintenance services including plumbing,
+            electrical work, appliance repair, and cleaning.
+          </div>
+        </div>
+
+        <!-- FAQ 6 -->
+        <div class="faq-item">
+          <button class="faq-question">
+            <div>
+              <i class="fas fa-key"></i>
+              How do I schedule a property viewing?
+            </div>
+            <span class="toggle-icon"><i class="fas fa-chevron-down"></i></span>
+          </button>
+          <div class="faq-answer">
+            Simply click the "Schedule Viewing" button on any property listing.
+            You can choose from available time slots and receive instant
+            confirmation.
+          </div>
+        </div>
+      </div>
+
+      <!-- Contact -->
+      <div class="contact">
+        Still have questions?
+        <a href="mailto:support@rentease.com">Contact our support team</a>
+      </div>
+    </div>
+
+    <script>
+      // Toggle FAQ answers
+      document.querySelectorAll(".faq-question").forEach((button) => {
+        button.addEventListener("click", () => {
+          const answer = button.nextElementSibling;
+          const icon = button.querySelector(".toggle-icon i");
+
+          // Close all other answers
+          document.querySelectorAll(".faq-answer").forEach((item) => {
+            if (item !== answer) {
+              item.classList.remove("active");
+            }
+          });
+
+          // Rotate other icons back
+          document.querySelectorAll(".toggle-icon i").forEach((item) => {
+            if (item !== icon) {
+              item.classList.remove("rotate");
+            }
+          });
+
+          // Toggle current answer and icon
+          answer.classList.toggle("active");
+          icon.classList.toggle("rotate");
+        });
+      });
+    </script>
+  </body>
+</html>

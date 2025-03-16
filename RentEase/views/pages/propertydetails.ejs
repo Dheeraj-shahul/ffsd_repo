@@ -1,489 +1,509 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Property Details - Rentease</title>
     <style>
-        /* Base styles */
-        body {
-            font-family: 'Segoe UI', Arial, sans-serif;
-            margin: 0;
-            padding: 0;
-            background: #f5f5f5;
-            color: #333;
-            line-height: 1.6;
-        }
+      /* Base styles */
+      body {
+        font-family: "Segoe UI", Arial, sans-serif;
+        margin: 0;
+        padding: 0;
+        background: #f5f5f5;
+        color: #333;
+        line-height: 1.6;
+      }
 
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 20px;
-            
-        }
+      .container {
+        max-width: 1200px;
+        margin: 0 auto;
+        position: relative;
+        top: 10vh;
+        padding: 20px;
+      }
 
-        /* Image gallery styles */
-        .property-gallery {
-            width: 100%;
-            margin: 0 auto 30px;
-            position: relative;
-        }
+      /* Image gallery styles */
+      .property-gallery {
+        width: 100%;
+        margin: 0 auto 30px;
+        position: relative;
+      }
 
-        .main-image-container {
-            position: relative;
-            overflow: hidden;
-            border-radius: 0px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-            height: 500px;
-        }
+      .main-image-container {
+        position: relative;
+        overflow: hidden;
+        border-radius: 0px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        height: 500px;
+      }
 
-        .main-image {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            transition: transform 0.3s ease-out;
-            
-        }
+      .main-image {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform 0.3s ease-out;
+      }
 
-        /* Navigation buttons */
-        .nav-button {
-            position: absolute;
-            top: 50%;
-            transform: translateY(-50%);
-            background: rgba(0, 0, 0, 0.5);
-            color: white;
-            border: none;
-            border-radius:0px;
-            width: 50px;
-            height: 50px;
-            font-size: 24px;
-            cursor: pointer;
-            z-index: 10;
-            transition: background 0.3s, transform 0.2s;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
+      /* Navigation buttons */
+      .nav-button {
+        position: absolute;
+        top: 50%;
+        transform: translateY(-50%);
+        background: rgba(0, 0, 0, 0.5);
+        color: white;
+        border: none;
+        border-radius: 0px;
+        width: 50px;
+        height: 50px;
+        font-size: 24px;
+        cursor: pointer;
+        z-index: 10;
+        transition: background 0.3s, transform 0.2s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
 
-        .nav-button:hover {
-            background: rgba(0, 0, 0, 0.8);
-            transform: translateY(-50%) scale(1.05);
-        }
+      .nav-button:hover {
+        background: rgba(0, 0, 0, 0.8);
+        transform: translateY(-50%) scale(1.05);
+      }
 
-        .nav-button:focus {
-            outline: none;
-        }
+      .nav-button:focus {
+        outline: none;
+      }
 
-        .prev-button {
-            left: 15px;
-        }
+      .prev-button {
+        left: 15px;
+      }
 
-        .next-button {
-            right: 15px;
-        }
+      .next-button {
+        right: 15px;
+      }
 
-        /* Thumbnail gallery */
-        .thumbnail-gallery {
-            display: flex;
-            gap: 10px;
-            overflow-x: auto;
-            padding: 15px 0;
-            scroll-behavior: smooth;
-            -webkit-overflow-scrolling: touch;
-            scrollbar-width: thin;
-        }
+      /* Thumbnail gallery */
+      .thumbnail-gallery {
+        display: flex;
+        gap: 10px;
+        overflow-x: auto;
+        padding: 15px 0;
+        scroll-behavior: smooth;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: thin;
+      }
 
-        .thumbnail-gallery::-webkit-scrollbar {
-            height: 6px;
-        }
+      .thumbnail-gallery::-webkit-scrollbar {
+        height: 6px;
+      }
 
-        .thumbnail-gallery::-webkit-scrollbar-track {
-            background: #f1f1f1;
-            border-radius: 0px;
-        }
+      .thumbnail-gallery::-webkit-scrollbar-track {
+        background: #f1f1f1;
+        border-radius: 0px;
+      }
 
-        .thumbnail-gallery::-webkit-scrollbar-thumb {
-            background: #ccc;
-            border-radius: 0px;
-        }
+      .thumbnail-gallery::-webkit-scrollbar-thumb {
+        background: #ccc;
+        border-radius: 0px;
+      }
 
-        .thumbnail {
-            width: 120px;
-            height: 80px;
-            object-fit: cover;
-            border-radius: 0px;
-            cursor: pointer;
-            transition: all 0.2s;
-            border: 2px solid transparent;
-            flex-shrink: 0;
-        }
+      .thumbnail {
+        width: 120px;
+        height: 80px;
+        object-fit: cover;
+        border-radius: 0px;
+        cursor: pointer;
+        transition: all 0.2s;
+        border: 2px solid transparent;
+        flex-shrink: 0;
+      }
 
-        .thumbnail:hover {
-            opacity: 0.8;
-        }
+      .thumbnail:hover {
+        opacity: 0.8;
+      }
 
-        .thumbnail.active {
-            border: 2px solid #ff6600;
-        }
+      .thumbnail.active {
+        border: 2px solid #ff6600;
+      }
 
-        /* Property header section */
+      /* Property header section */
+      .property-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 30px;
+        padding-bottom: 20px;
+        border-bottom: 1px solid #e0e0e0;
+      }
+
+      .property-title-section {
+        flex: 1;
+      }
+
+      .property-title {
+        font-size: 2.2rem;
+        font-weight: 700;
+        margin: 0 0 5px 0;
+        color: #333;
+      }
+
+      .property-location {
+        font-size: 1.1rem;
+        color: #666;
+        margin: 0 0 15px 0;
+        display: flex;
+        align-items: center;
+      }
+
+      .property-location svg {
+        margin-right: 5px;
+      }
+
+      .property-price-section {
+        text-align: right;
+        padding-left: 20px;
+      }
+
+      .price {
+        font-size: 1.8rem;
+        font-weight: 700;
+        color: #ff6600;
+        margin-bottom: 10px;
+      }
+
+      .contact-now {
+        display: inline-block;
+        padding: 12px 25px;
+        background: #ffc109;
+        color: black;
+        border: none;
+        border-radius: 0px;
+        font-size: 1rem;
+        font-weight: 600;
+        cursor: pointer;
+        text-decoration: none;
+        transition: all 0.2s;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+      }
+
+      .contact-now:hover {
+        background: #f2e2b2;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+        transform: translateY(-2px);
+      }
+
+      /* Property sections */
+      .section {
+        background: white;
+        border-radius: 0px;
+        box-shadow: 0 0 15px rgba(0, 0, 0, 0.05);
+        padding: 25px;
+        margin-bottom: 30px;
+        transition: box-shadow 0.3s;
+      }
+
+      .section:hover {
+        box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+      }
+
+      .section-title {
+        font-size: 1.5rem;
+        font-weight: 600;
+        margin-top: 0;
+        margin-bottom: 20px;
+        border-bottom: 2px solid #ff6600;
+        padding-bottom: 10px;
+        color: #333;
+      }
+
+      /* Property info grid */
+      .property-info {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 20px;
+      }
+
+      .info-item {
+        display: flex;
+        align-items: center;
+      }
+
+      .info-icon {
+        color: #ff6600;
+        margin-right: 10px;
+        font-size: 1.2rem;
+      }
+
+      .info-text {
+        font-size: 1rem;
+      }
+
+      .property-description {
+        line-height: 1.8;
+        color: #444;
+        margin-top: 15px;
+      }
+
+      /* Amenities list */
+      .amenities-list {
+        list-style: none;
+        padding: 0;
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 15px;
+      }
+
+      .amenities-list li {
+        padding: 10px;
+        border-bottom: 1px solid #f0f0f0;
+        display: flex;
+        align-items: center;
+      }
+
+      /* Location map */
+      .map-container {
+        width: 100%;
+        height: 400px;
+        border-radius: 0px;
+        overflow: hidden;
+      }
+
+      .map-container iframe {
+        width: 100%;
+        height: 100%;
+        border: none;
+      }
+
+      /* Contact form */
+      .contact-form {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 15px;
+      }
+
+      .form-field {
+        margin-bottom: 15px;
+      }
+
+      .full-width {
+        grid-column: 1 / span 2;
+      }
+
+      .contact-form input,
+      .contact-form textarea {
+        width: 100%;
+        padding: 12px;
+        border: 1px solid #ddd;
+        border-radius: 0px;
+        font-size: 1rem;
+        box-sizing: border-box;
+        transition: border-color 0.2s;
+      }
+
+      .contact-form input:focus,
+      .contact-form textarea:focus {
+        border-color: #ff6600;
+        outline: none;
+        box-shadow: 0 0 0 2px rgba(255, 102, 0, 0.1);
+      }
+
+      .submit-btn {
+        background: #ffc109;
+        color: black;
+        border: none;
+        padding: 12px 20px;
+        font-size: 1rem;
+        font-weight: 600;
+        border-radius: 5px;
+        cursor: pointer;
+        transition: all 0.2s;
+        width: 100%;
+      }
+
+      .submit-btn:hover {
+        background: #ff6f00;
+        transform: translateY(-2px);
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+      }
+
+      /* Loader/Skeleton for images */
+      .loader {
+        background: linear-gradient(
+          90deg,
+          #f0f0f0 25%,
+          #e0e0e0 50%,
+          #f0f0f0 75%
+        );
+        background-size: 200% 100%;
+        animation: loading 1.5s infinite;
+      }
+
+      @keyframes loading {
+        0% {
+          background-position: 200% 0;
+        }
+        100% {
+          background-position: -200% 0;
+        }
+      }
+
+      /* Responsive design */
+      @media (max-width: 768px) {
         .property-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            margin-bottom: 30px;
-            padding-bottom: 20px;
-            border-bottom: 1px solid #e0e0e0;
-        }
-
-        .property-title-section {
-            flex: 1;
-        }
-
-        .property-title {
-            font-size: 2.2rem;
-            font-weight: 700;
-            margin: 0 0 5px 0;
-            color: #333;
-        }
-
-        .property-location {
-            font-size: 1.1rem;
-            color: #666;
-            margin: 0 0 15px 0;
-            display: flex;
-            align-items: center;
-        }
-
-        .property-location svg {
-            margin-right: 5px;
+          flex-direction: column;
         }
 
         .property-price-section {
-            text-align: right;
-            padding-left: 20px;
+          text-align: left;
+          padding-left: 0;
+          margin-top: -20px;
         }
 
-        .price {
-            font-size: 1.8rem;
-            font-weight: 700;
-            color: #ff6600;
-            margin-bottom: 10px;
-        }
-
-        .contact-now {
-            display: inline-block;
-            padding: 12px 25px;
-            background: #ffc109;
-            color: black;
-            border: none;
-            border-radius: 0px;
-            font-size: 1rem;
-            font-weight: 600;
-            cursor: pointer;
-            text-decoration: none;
-            transition: all 0.2s;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-        }
-
-        .contact-now:hover {
-            background: #f2e2b2;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
-            transform: translateY(-2px);
-        }
-
-        /* Property sections */
-        .section {
-            background: white;
-            border-radius: 0px;
-            box-shadow: 0 0 15px rgba(0, 0, 0, 0.05);
-            padding: 25px;
-            margin-bottom: 30px;
-            transition: box-shadow 0.3s;
-        }
-
-        .section:hover {
-            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
-        }
-
-        .section-title {
-            font-size: 1.5rem;
-            font-weight: 600;
-            margin-top: 0;
-            margin-bottom: 20px;
-            border-bottom: 2px solid #ff6600;
-            padding-bottom: 10px;
-            color: #333;
-        }
-
-        /* Property info grid */
         .property-info {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 20px;
+          grid-template-columns: repeat(2, 1fr);
         }
 
-        .info-item {
-            display: flex;
-            align-items: center;
-        }
-
-        .info-icon {
-            color: #ff6600;
-            margin-right: 10px;
-            font-size: 1.2rem;
-        }
-
-        .info-text {
-            font-size: 1rem;
-        }
-
-        .property-description {
-            line-height: 1.8;
-            color: #444;
-            margin-top:15px;
-        }
-
-        /* Amenities list */
         .amenities-list {
-            list-style: none;
-            padding: 0;
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 15px;
+          grid-template-columns: 1fr;
         }
 
-        .amenities-list li {
-            padding: 10px;
-            border-bottom: 1px solid #f0f0f0;
-            display: flex;
-            align-items: center;
-        }
-
-        /* Location map */
-        .map-container {
-            width: 100%;
-            height: 400px;
-            border-radius: 0px;
-            overflow: hidden;
-        }
-
-        .map-container iframe {
-            width: 100%;
-            height: 100%;
-            border: none;
-        }
-
-        /* Contact form */
         .contact-form {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 15px;
-        }
-
-        .form-field {
-            margin-bottom: 15px;
+          grid-template-columns: 1fr;
         }
 
         .full-width {
-            grid-column: 1 / span 2;
+          grid-column: 1;
         }
 
-        .contact-form input, 
-        .contact-form textarea {
-            width: 100%;
-            padding: 12px;
-            border: 1px solid #ddd;
-            border-radius: 0px;
-            font-size: 1rem;
-            box-sizing: border-box;
-            transition: border-color 0.2s;
+        .main-image-container {
+          height: 350px;
         }
 
-        .contact-form input:focus, 
-        .contact-form textarea:focus {
-            border-color: #ff6600;
-            outline: none;
-            box-shadow: 0 0 0 2px rgba(255, 102, 0, 0.1);
+        .nav-button {
+          width: 40px;
+          height: 40px;
+          font-size: 18px;
         }
 
-        .submit-btn {
-            background:  #ffc109;
-            color: black;
-            border: none;
-            padding: 12px 20px;
-            font-size: 1rem;
-            font-weight: 600;
-            border-radius: 5px;
-            cursor: pointer;
-            transition: all 0.2s;
-            width: 100%;
+        .thumbnail {
+          width: 80px;
+          height: 60px;
         }
-
-        .submit-btn:hover {
-            background:  #ff6f00;
-            transform: translateY(-2px);
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        .contact-now {
+          display: inline-block;
+          padding: 12px 25px;
+          background: #ffc109;
+          color: black;
+          border: none;
+          border-radius: 0px;
+          font-size: 1rem;
+          font-weight: 600;
+          cursor: pointer;
+          text-decoration: none;
+          transition: all 0.2s;
+          box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
         }
+      }
 
-        /* Loader/Skeleton for images */
-        .loader {
-            background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
-            background-size: 200% 100%;
-            animation: loading 1.5s infinite;
+      @media (max-width: 480px) {
+        .info-item {
+          margin-right: -20px;
+          margin-left: -24px;
         }
-
-        @keyframes loading {
-            0% {
-                background-position: 200% 0;
-            }
-            100% {
-                background-position: -200% 0;
-            }
+        .info-icon {
+          margin-left: 20px;
         }
-
-        /* Responsive design */
-        @media (max-width: 768px) {
-            .property-header {
-                flex-direction: column;
-            }
-
-            .property-price-section {
-                text-align: left;
-                padding-left: 0;
-                margin-top: -20px;
-                
-            }
-
-            .property-info {
-                grid-template-columns: repeat(2, 1fr);
-               
-            }
-
-            .amenities-list {
-                grid-template-columns: 1fr;
-                
-            }
-
-            .contact-form {
-                grid-template-columns: 1fr;
-            }
-
-            .full-width {
-                grid-column: 1;
-            }
-
-            .main-image-container {
-                height: 350px;
-            }
-            
-            .nav-button {
-                width: 40px;
-                height: 40px;
-                font-size: 18px;
-            }
-            
-            .thumbnail {
-                width: 80px;
-                height: 60px;
-            }
-            .contact-now {
-            display: inline-block;
-            padding: 12px 25px;
-            background: #ffc109;
-            color: black;
-            border: none;
-            border-radius: 0px;
-            font-size: 1rem;
-            font-weight: 600;
-            cursor: pointer;
-            text-decoration: none;
-            transition: all 0.2s;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        .contact-now {
+          width: 83px;
+          height: 20px;
+          font-size: 14px;
+          padding-bottom: 14px;
         }
+        #property-title {
+          font-size: 1.7rem;
+          margin-bottom: 10px;
         }
-
-        @media(max-width:480px){
-            .info-item{
-                margin-right:-20px; 
-                margin-left:-24px;
-                
-               
-            }
-            .info-icon{
-                margin-left:20px;
-                
-            }
-            .contact-now{
-                width: 83px;
-                height: 20px;
-                font-size: 14px;
-                padding-bottom:14px;
-            }
-            #property-title{
-                font-size: 1.7rem;
-                margin-bottom: 10px;
-            }
-            #property-price{
-                font-size: 1.5rem;
-                margin-bottom: 10px;
-            }
-            
-
+        #property-price {
+          font-size: 1.5rem;
+          margin-bottom: 10px;
         }
+      }
 
-        .property-address {
-            font-size: 1.1rem;
-            color: #666;
-            margin: 5px 0 0 0;
-            }
+      .property-address {
+        font-size: 1.1rem;
+        color: #666;
+        margin: 5px 0 0 0;
+      }
 
-            .property-rating-reviews {
-            font-size: 1rem;
-            color: #666;
-            margin: 5px 0 0 0;
-            }
+      .property-rating-reviews {
+        font-size: 1rem;
+        color: #666;
+        margin: 5px 0 0 0;
+      }
 
-            .property-address strong,
-            .property-rating-reviews strong {
-            color: #333;
-            }
+      .property-address strong,
+      .property-rating-reviews strong {
+        color: #333;
+      }
     </style>
-</head>
-<body>
-
+  </head>
+  <body>
     <%- include('../partials/header') %>
     <div class="overlay" id="overlay"></div>
+
     <div class="container">
       <!-- Main Property Gallery -->
       <div class="property-gallery">
         <div class="main-image-container">
-          <img id="main-image" class="main-image" src="<%= property.images[0] %>" alt="Property Image">
+          <img
+            id="main-image"
+            class="main-image"
+            src="<%= property.images[0] %>"
+            alt="Property Image"
+          />
           <button class="nav-button prev-button" id="prev-button">❮</button>
           <button class="nav-button next-button" id="next-button">❯</button>
         </div>
-        
+
         <!-- Thumbnail Gallery -->
         <div class="thumbnail-gallery" id="thumbnail-gallery">
           <% property.images.forEach((image, index) => { %>
-            <img class="thumbnail <%= index === 0 ? 'active' : '' %>" src="<%= image %>" alt="Thumbnail <%= index + 1 %>" data-index="<%= index %>">
+          <img
+            class="thumbnail <%= index === 0 ? 'active' : '' %>"
+            src="<%= image %>"
+            alt="Thumbnail <%= index + 1 %>"
+            data-index="<%= index %>"
+          />
           <% }); %>
         </div>
       </div>
-    
+
       <!-- Property Header -->
       <div class="property-header">
         <div class="property-title-section">
-          <h1 class="property-title" id="property-title"><%= property.name %></h1>
+          <h1 class="property-title" id="property-title">
+            <%= property.name %>
+          </h1>
           <p class="property-location" id="property-location">
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="#666" viewBox="0 0 16 16">
-              <path d="M8 16s6-5.686 6-10A6 6 0 0 0 2 6c0 4.314 6 10 6 10zm0-7a3 3 0 1 1 0-6 3 3 0 0 1 0 6z"/>
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="16"
+              height="16"
+              fill="#666"
+              viewBox="0 0 16 16"
+            >
+              <path
+                d="M8 16s6-5.686 6-10A6 6 0 0 0 2 6c0 4.314 6 10 6 10zm0-7a3 3 0 1 1 0-6 3 3 0 0 1 0 6z"
+              />
             </svg>
             <%= property.location %>
           </p>
-          <p class="property-address"><strong>Address:</strong> <%= property.address %></p>
+          <p class="property-address">
+            <strong>Address:</strong> <%= property.address %>
+          </p>
           <p class="property-rating-reviews">
-            <strong>Rating:</strong> <%= property.rating %>/5 (<%= property.reviews %> Reviews)
+            <strong>Rating:</strong> <%= property.rating %>/5 (<%=
+            property.reviews %> Reviews)
           </p>
         </div>
         <div class="property-price-section">
@@ -491,14 +511,16 @@
           <a href="tel:+919876543210" class="contact-now">Contact Now</a>
         </div>
       </div>
-    
+
       <!-- Property Details -->
       <section class="section">
         <h2 class="section-title">Property Details</h2>
         <div class="property-info" id="property-info">
           <div class="info-item">
             <span class="info-icon">🏠</span>
-            <span class="info-text">Type: <%= property.type %> (<%= property.subtype %>)</span>
+            <span class="info-text"
+              >Type: <%= property.type %> (<%= property.subtype %>)</span
+            >
           </div>
           <div class="info-item">
             <span class="info-icon">🛏️</span>
@@ -521,42 +543,78 @@
             <span class="info-text">Furnished: <%= property.furnished %></span>
           </div>
         </div>
-        <div class="property-description" id="property-description"><%= property.description %></div>
+        <div class="property-description" id="property-description">
+          <%= property.description %>
+        </div>
       </section>
-    
+
       <!-- Property Features -->
       <section class="section">
         <h2 class="section-title">Property Amenities</h2>
         <ul class="amenities-list" id="property-amenities">
           <% property.amenities.forEach(amenity => { %>
-            <li><%= amenity %></li>
+          <li><%= amenity %></li>
           <% }); %>
         </ul>
       </section>
-    
+
       <!-- Property Location -->
       <section class="section">
         <h2 class="section-title">Property Location</h2>
         <div class="map-container">
-          <iframe id="property-map" src="<%= property.map %>" loading="lazy" allowfullscreen></iframe>
+          <iframe
+            id="property-map"
+            src="<%= property.map %>"
+            loading="lazy"
+            allowfullscreen
+          ></iframe>
         </div>
       </section>
-      
+
       <!-- Contact Form -->
       <section class="section">
         <h2 class="section-title">Send Query to Owner</h2>
-        <form id="contact-form" class="contact-form" action="/contact" method="POST">
+        <form
+          id="contact-form"
+          class="contact-form"
+          action="/contact"
+          method="POST"
+        >
           <div class="form-field">
-            <input type="text" id="name" name="name" placeholder="Your Name" required>
+            <input
+              type="text"
+              id="name"
+              name="name"
+              placeholder="Your Name"
+              required
+            />
           </div>
           <div class="form-field">
-            <input type="tel" id="phone" name="phone" placeholder="Your Phone Number" required>
+            <input
+              type="tel"
+              id="phone"
+              name="phone"
+              placeholder="Your Phone Number"
+              required
+            />
           </div>
           <div class="form-field full-width">
-            <input type="email" id="email" name="email" placeholder="Your Email" required>
+            <input
+              type="email"
+              id="email"
+              name="email"
+              placeholder="Your Email"
+              required
+            />
           </div>
           <div class="form-field full-width">
-            <textarea id="query" name="query" rows="4" placeholder="Your Query" required></textarea>
+            <textarea
+              id="query"
+              name="query"
+              rows="4"
+              placeholder="Your Query"
+              required
+            ></textarea>
           </div>
           <div class="form-field full-width">
             <button type="submit" class="submit-btn">Send Query</button>
@@ -565,102 +623,99 @@
       </section>
     </div>
 
-<script>
-  // Pass property.images from EJS to JavaScript
-  const images = <%- JSON.stringify(property.images) %>;
+    <script>
+      // Pass property.images from EJS to JavaScript
+      const images = <%- JSON.stringify(property.images) %>;
 
-  document.addEventListener('DOMContentLoaded', function() {
-    // Handle contact form submission
-    document.getElementById('contact-form').addEventListener('submit', function(event) {
-      event.preventDefault();
-      alert('Your query has been sent to the owner!');
-      this.reset();
-    });
-
-    // Image navigation functionality
-    let currentImageIndex = 0;
-
-    function setupImageNavigation(images) {
-      const prevButton = document.getElementById("prev-button");
-      const nextButton = document.getElementById("next-button");
-      const mainImage = document.getElementById("main-image");
-
-      function updateMainImage(index) {
-        mainImage.src = images[index];
-        document.querySelectorAll(".thumbnail").forEach((thumb, i) => {
-          thumb.classList.toggle("active", i === index);
+      document.addEventListener('DOMContentLoaded', function() {
+        // Handle contact form submission
+        document.getElementById('contact-form').addEventListener('submit', function(event) {
+          event.preventDefault();
+          alert('Your query has been sent to the owner!');
+          this.reset();
         });
-        currentImageIndex = index;
-      }
 
-      // Navigation buttons for laptop
-      prevButton.addEventListener("click", function() {
-        let newIndex = currentImageIndex - 1;
-        if (newIndex < 0) newIndex = images.length - 1;
-        updateMainImage(newIndex);
-      });
+        // Image navigation functionality
+        let currentImageIndex = 0;
 
-      nextButton.addEventListener("click", function() {
-        let newIndex = currentImageIndex + 1;
-        if (newIndex >= images.length) newIndex = 0;
-        updateMainImage(newIndex);
-      });
+        function setupImageNavigation(images) {
+          const prevButton = document.getElementById("prev-button");
+          const nextButton = document.getElementById("next-button");
+          const mainImage = document.getElementById("main-image");
 
-      // Touch swipe for mobile
-      const mainImageContainer = document.querySelector(".main-image-container");
-      let touchStartX = 0;
-      let touchMoveX = 0;
-      let isSwiping = false;
+          function updateMainImage(index) {
+            mainImage.src = images[index];
+            document.querySelectorAll(".thumbnail").forEach((thumb, i) => {
+              thumb.classList.toggle("active", i === index);
+            });
+            currentImageIndex = index;
+          }
 
-      mainImageContainer.addEventListener("touchstart", e => {
-        touchStartX = e.touches[0].clientX;
-        isSwiping = true;
-      });
+          // Navigation buttons for laptop
+          prevButton.addEventListener("click", function() {
+            let newIndex = currentImageIndex - 1;
+            if (newIndex < 0) newIndex = images.length - 1;
+            updateMainImage(newIndex);
+          });
 
-      mainImageContainer.addEventListener("touchmove", e => {
-        if (!isSwiping) return;
-        touchMoveX = e.touches[0].clientX;
-        const diffX = touchStartX - touchMoveX;
-        mainImage.style.transform = `translateX(${-diffX}px)`;
-      });
+          nextButton.addEventListener("click", function() {
+            let newIndex = currentImageIndex + 1;
+            if (newIndex >= images.length) newIndex = 0;
+            updateMainImage(newIndex);
+          });
 
-      mainImageContainer.addEventListener("touchend", e => {
-        if (!isSwiping) return;
-        isSwiping = false;
-        const diffX = touchStartX - touchMoveX;
-        const swipeThreshold = 50;
+          // Touch swipe for mobile
+          const mainImageContainer = document.querySelector(".main-image-container");
+          let touchStartX = 0;
+          let touchMoveX = 0;
+          let isSwiping = false;
 
-        if (diffX > swipeThreshold) {
-          let newIndex = currentImageIndex + 1;
-          if (newIndex >= images.length) newIndex = 0;
-          updateMainImage(newIndex);
-        } else if (diffX < -swipeThreshold) {
-          let newIndex = currentImageIndex - 1;
-          if (newIndex < 0) newIndex = images.length - 1;
-          updateMainImage(newIndex);
+          mainImageContainer.addEventListener("touchstart", e => {
+            touchStartX = e.touches[0].clientX;
+            isSwiping = true;
+          });
+
+          mainImageContainer.addEventListener("touchmove", e => {
+            if (!isSwiping) return;
+            touchMoveX = e.touches[0].clientX;
+            const diffX = touchStartX - touchMoveX;
+            mainImage.style.transform = `translateX(${-diffX}px)`;
+          });
+
+          mainImageContainer.addEventListener("touchend", e => {
+            if (!isSwiping) return;
+            isSwiping = false;
+            const diffX = touchStartX - touchMoveX;
+            const swipeThreshold = 50;
+
+            if (diffX > swipeThreshold) {
+              let newIndex = currentImageIndex + 1;
+              if (newIndex >= images.length) newIndex = 0;
+              updateMainImage(newIndex);
+            } else if (diffX < -swipeThreshold) {
+              let newIndex = currentImageIndex - 1;
+              if (newIndex < 0) newIndex = images.length - 1;
+              updateMainImage(newIndex);
+            }
+            mainImage.style.transform = "translateX(0)";
+          });
+
+          mainImageContainer.addEventListener("touchcancel", () => {
+            isSwiping = false;
+            mainImage.style.transform = "translateX(0)";
+          });
+
+          // Thumbnail click functionality
+          document.querySelectorAll(".thumbnail").forEach((thumbnail, index) => {
+            thumbnail.addEventListener("click", function() {
+              updateMainImage(index);
+            });
+          });
         }
-        mainImage.style.transform = "translateX(0)";
+
+        // Initialize image navigation
+        setupImageNavigation(images);
       });
-
-      mainImageContainer.addEventListener("touchcancel", () => {
-        isSwiping = false;
-        mainImage.style.transform = "translateX(0)";
-      });
-
-      // Thumbnail click functionality
-      document.querySelectorAll(".thumbnail").forEach((thumbnail, index) => {
-        thumbnail.addEventListener("click", function() {
-          updateMainImage(index);
-        });
-      });
-    }
-
-    // Initialize image navigation
-    setupImageNavigation(images);
-  });
-
-   
-   
-</script>
-</body>
+    </script>
+  </body>
 </html>
