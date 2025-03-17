@@ -107,7 +107,7 @@
           <h3>Rent Payments</h3>
           <div class="current-rent">
             <p>Next Rent Due: <strong>₹25,000</strong> on 5th April, 2023</p>
-            <button class="pay-buttons">Pay Now</button>
+            <button class="pay-buttons" onclick="">Pay Now</button>
           </div>
 
           <h4>Payment History</h4>
@@ -327,7 +327,7 @@
               <p>Professional house cleaning</p>
               <button
                 class="book-button"
-                onclick="location.href='/worker_register'"
+                onclick="location.href='/workerDetails'"
               >
                 Find Cleaners
               </button>
@@ -338,7 +338,7 @@
               <p>Skilled cooks for daily meals</p>
               <button
                 class="book-button"
-                onclick="location.href='/worker_register'"
+                onclick="location.href='/workerDetails'"
               >
                 Find Cooks
               </button>
@@ -349,7 +349,7 @@
               <p>Washing and ironing services</p>
               <button
                 class="book-button"
-                onclick="location.href='/worker_register'"
+                onclick="location.href='/workerDetails'"
               >
                 Find Help
               </button>
@@ -570,7 +570,7 @@
               rows="4"
               placeholder="Share your experience living here..."
             ></textarea>
-            <button type="submit">Submit Review</button>
+            <button type="submit" id="review-submission">Submit Review</button>
           </div>
 
           <h4>Past Reviews</h4>

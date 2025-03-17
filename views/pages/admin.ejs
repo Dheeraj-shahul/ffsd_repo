@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Admin Dashboard</title>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css"
+      integrity="sha512-Evv84Mr4kqVGRNSgIGL/F/aIDqQb7xQ2vcrdIwxfjThSH8CSR7PBEakCr51Ck+w+/U6swU2Im1vVX0SVk9ABhg=="
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    />
+    <style>
+      @import url("https://fonts.googleapis.com/css2?family=Poppins:wght@100;200;300;400;500;600;700;800;900&display=swap");
+      #page_container {
+        top: 15vh;
+        margin-top: 70px;
+        width: 100vw;
+      }
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: "Poppins", Arial, sans-serif;
+      }
+
+      body {
+        display: flex;
+        background-color: #f5f5f5;
+        color: #333;
+      }
+
+      /* Sidebar */
+      .sidebar {
+        width: 20vw;
+        height: 100vh;
+        background-color: #333;
+        color: white;
+        padding: 20px 0;
+        position: fixed;
+      }
+
+      .sidebar-header h2 {
+        padding: 0 20px;
+        font-size: 20px;
+        color: #ffc109;
+        border-bottom: 1px solid #444;
+        padding-bottom: 15px;
+      }
+
+      .sidebar-menu {
+        list-style: none;
+        padding: 20px 0;
+      }
+
+      .sidebar-menu li {
+        padding: 15px 20px;
+        cursor: pointer;
+        transition: background 0.3s;
+      }
+
+      .sidebar-menu li:hover {
+        background-color: #444;
+      }
+
+    
+      .sidebar ul li i{
+        margin-right: 20px;
+        color: #ffc109;
+      }
+
+      /* Content */
+      .content {
+        position: relative;
+        flex: 1;
+        margin-left: 20vw;
+        padding: 30px;
+        
+      }
+
+      .header h3 {
+        font-size: 18px;
+        color: #666;
+        margin-bottom: 20px;
+      }
+
+      /* Stats Grid */
+      .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        gap: 20px;
+        margin: 20px 0;
+      }
+
+      .stat-card {
+        background-color: white;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        text-align: center;
+      }
+
+      .stat-card h3 {
+        font-size: 14px;
+        color: #666;
+        margin-bottom: 10px;
+      }
+
+      .stat-card .value {
+        font-size: 24px;
+        color: #ffc109;
+        font-weight: bold;
+      }
+
+      /* Sections */
+      .section {
+        background-color: white;
+        padding: 20px;
+        border-radius: 8px;
+        margin-bottom: 20px;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+      }
+
+      .section h2 {
+        font-size: 18px;
+        color: #ffc109;
+        margin-bottom: 15px;
+        border-bottom: 1px solid #eee;
+        padding-bottom: 10px;
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+      }
+
+      th,
+      td {
+        padding: 12px;
+        text-align: left;
+        border-bottom: 1px solid #eee;
+      }
+
+      th {
+        background-color: #ffc109;
+        color: white;
+        font-weight: 500;
+      }
+      /* #dashboard-overview{
+         display: flex;
+      } */
+
+      tr:hover {
+        background-color: #f9f9f9;
+      }
+
+      /* Action Buttons */
+      .action-btn {
+        background: none;
+        border: 1px solid #ffc109;
+        color: #ffc109;
+        padding: 5px 10px;
+        margin-right: 5px;
+        cursor: pointer;
+        border-radius: 4px;
+        transition: all 0.3s;
+      }
+
+      .action-btn:hover {
+        background-color: #ffc109;
+        color: white;
+      }
+
+      /* Chart Container */
+      .chart-container {
+        margin-top: 20px;
+        max-width: 400px;
+        margin-left: auto;
+        margin-right: auto;
+      }
+    </style>
+    <!-- Include Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  </head>
+  <body>
+    <%- include('../partials/header') %>
+    <div id="page_container">
+      <!-- Sidebar -->
+      <div class="sidebar">
+        <div class="sidebar-header">
+          <h2>Admin Dashboard</h2>
+        </div>
+        <ul class="sidebar-menu">
+          <li data-section="dashboard-overview" class="active">
+            <i class="fa-solid fa-gauge-high"></i>Dashboard Overview
+          </li>
+          <li data-section="property-management">
+            <i class="fa-solid fa-building-user"></i> Property Management
+          </li>
+          <li data-section="user-management">
+            <i class="fa-solid fa-users"></i>User Management
+          </li>
+          <li data-section="service-bookings">
+            <i class="fa-solid fa-broom"></i> Service Bookings
+          </li>
+          <li data-section="payments-transactions">
+            <i class="fa-solid fa-hand-holding-dollar"></i> Payments &
+            Transactions
+          </li>
+          <li data-section="notifications-requests">
+            <i class="fa-solid fa-comments"></i>Notifications & Requests
+          </li>
+          <li data-section="reports-analytics">
+            <i class="fa-solid fa-square-poll-vertical"></i> Reports & Analytics
+          </li>
+          <li data-section="settings-configurations">
+            <i class="fa-solid fa-square-poll-vertical"></i> Settings &
+            Configurations
+          </li>
+        </ul>
+      </div>
+
+      <!-- Main Content -->
+      <div class="content">
+        <div class="header">
+          <h3>Welcome to your rental management hub!</h3>
+        </div>
+
+        <!-- 📊 Dashboard Overview -->
+        <div id="dashboard-overview" class="section">
+          <h2>Dashboard Overview</h2>
+          <div class="stats-grid">
+            <div class="stat-card">
+              <h3>Total Properties</h3>
+              <div class="value"><%= stats.totalProperties %></div>
+            </div>
+            <div class="stat-card">
+              <h3>Active Rentals</h3>
+              <div class="value"><%= stats.activeRentals %></div>
+            </div>
+            <div class="stat-card">
+              <h3>Renters</h3>
+              <div class="value"><%= stats.renters %></div>
+            </div>
+            <div class="stat-card">
+              <h3>Total Revenue</h3>
+              <div class="value">$<%= stats.totalRevenue.toFixed(2) %></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 🏠 Property Management -->
+        <div id="property-management" class="section" style="display: none">
+          <h2>Property Management</h2>
+          <table>
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Name</th>
+                <th>Owner</th>
+                <th>Status</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% properties.forEach(property => { %>
+              <tr>
+                <td><%= property.id %></td>
+                <td><%= property.name %></td>
+                <td><%= property.owner %></td>
+                <td><%= property.status %></td>
+                <td>
+                  <button class="action-btn">Edit</button>
+                  <button class="action-btn">Delete</button>
+                </td>
+              </tr>
+              <% }) %>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- 👥 User Management -->
+        <div id="user-management" class="section" style="display: none">
+          <h2>User Management</h2>
+          <table>
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Name</th>
+                <th>Role</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% users.forEach(user => { %>
+              <tr>
+                <td><%= user.id %></td>
+                <td><%= user.name %></td>
+                <td><%= user.role %></td>
+                <td>
+                  <button class="action-btn">Edit</button>
+                  <button class="action-btn">Delete</button>
+                </td>
+              </tr>
+              <% }) %>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- 💼 Service Bookings -->
+        <div id="service-bookings" class="section" style="display: none">
+          <h2>Service Bookings</h2>
+          <table>
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>User</th>
+                <th>Property</th>
+                <th>Status</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% bookings.forEach(booking => { %>
+              <tr>
+                <td><%= booking.id %></td>
+                <td><%= booking.user %></td>
+                <td><%= booking.property %></td>
+                <td><%= booking.status %></td>
+                <td>
+                  <button class="action-btn">View</button>
+                  <button class="action-btn">Cancel</button>
+                </td>
+              </tr>
+              <% }) %>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- 💸 Payments & Transactions -->
+        <div id="payments-transactions" class="section" style="display: none">
+          <h2>Payments & Transactions</h2>
+          <table>
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>User</th>
+                <th>Amount</th>
+                <th>Status</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% payments.forEach(payment => { %>
+              <tr>
+                <td><%= payment.id %></td>
+                <td><%= payment.user %></td>
+                <td>$<%= payment.amount.toFixed(2) %></td>
+                <td><%= payment.status %></td>
+                <td>
+                  <button class="action-btn">View</button>
+                  <button class="action-btn">Refund</button>
+                </td>
+              </tr>
+              <% }) %>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- 🔔 Notifications & Requests -->
+        <div id="notifications-requests" class="section" style="display: none">
+          <h2>Notifications & Requests</h2>
+          <table>
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Type</th>
+                <th>Message</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% notifications.forEach(notification => { %>
+              <tr>
+                <td><%= notification.id %></td>
+                <td><%= notification.type %></td>
+                <td><%= notification.message %></td>
+                <td>
+                  <button class="action-btn">Review</button>
+                  <button class="action-btn">Dismiss</button>
+                </td>
+              </tr>
+              <% }) %>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- 📈 Reports & Analytics -->
+        <div id="reports-analytics" class="section" style="display: none">
+          <h2>Reports & Analytics</h2>
+          <div class="stats-grid">
+            <div class="stat-card">
+              <h3>Monthly Revenue</h3>
+              <div class="value">$<%= stats.totalRevenue.toFixed(2) %></div>
+            </div>
+            <div class="stat-card">
+              <h3>User Growth</h3>
+              <div class="value"><%= users.length %></div>
+            </div>
+            <div class="stat-card">
+              <h3>Property Performance</h3>
+              <div class="value"><%= bookings.length %> Bookings</div>
+            </div>
+          </div>
+          <!-- Pie Chart -->
+          <div class="chart-container">
+            <canvas id="bookingStatusChart"></canvas>
+          </div>
+        </div>
+
+        <!-- ⚙ Settings & Configurations -->
+        <div id="settings-configurations" class="section" style="display: none">
+          <h2>Settings & Configurations</h2>
+          <table>
+            <thead>
+              <tr>
+                <th>Setting</th>
+                <th>Value</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% settings.forEach(setting => { %>
+              <tr>
+                <td><%= setting.name %></td>
+                <td><%= setting.value %></td>
+                <td><button class="action-btn">Edit</button></td>
+              </tr>
+              <% }) %>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <script>
+              document.addEventListener('DOMContentLoaded', () => {
+          const menuItems = document.querySelectorAll('.sidebar-menu li');
+          const sections = document.querySelectorAll('.section');
+
+          menuItems.forEach(item => {
+              item.addEventListener('click', () => {
+                  menuItems.forEach(i => i.classList.remove('active'));
+                  item.classList.add('active');
+                  sections.forEach(section => section.style.display = 'none');
+                  const sectionId = item.getAttribute('data-section');
+                  document.getElementById(sectionId).style.display = 'block';
+
+                  // Initialize pie chart when Reports & Analytics is clicked
+                  if (sectionId === 'reports-analytics' && !window.bookingChart) {
+                      const ctx = document.getElementById('bookingStatusChart').getContext('2d');
+                      window.bookingChart = new Chart(ctx, {
+                          type: 'pie',
+                          data: {
+                              labels: ['Active', 'Pending', 'Cancelled'],
+                              datasets: [{
+                                  data: [<%= stats.activeRentals %>, <%= stats.pendingBookings %>, <%= stats.cancelledBookings %>],
+                                  backgroundColor: ['#ffc109', '#28a745', '#dc3545'],
+                                  borderColor: ['#fff', '#fff', '#fff'],
+                                  borderWidth: 2
+                              }]
+                          },
+                          options: {
+                              responsive: true,
+                              plugins: {
+                                  legend: {
+                                      position: 'top',
+                                      labels: {
+                                          font: {
+                                              size: 14
+                                          },
+                                          color: '#333'
+                                      }
+                                  },
+                                  title: {
+                                      display: true,
+                                      text: 'Booking Status Distribution',
+                                      font: {
+                                          size: 16
+                                      },
+                                      color: '#ffc109'
+                                  }
+                              }
+                          }
+                      });
+                  }
+              });
+          });
+
+          console.log('Admin dashboard loaded');
+      });
+    </script>
+  </body>
+</html>

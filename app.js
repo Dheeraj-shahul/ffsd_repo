@@ -4,6 +4,7 @@ const path = require("path");
 const session = require("express-session"); // Add this import
 const app = express();
 const PORT = 3000;
+const sqlite3 = require("sqlite3").verbose(); // Add this line to import sqlite3
 
 // import data
 const properties = require("./properties.js");
@@ -263,6 +264,117 @@ app.get("/contact_us", (req, res) => {
 app.get("/about_us", (req, res) => {
   res.render("pages/about_us");
 });
+
+// In-memory SQLite database
+const db = new sqlite3.Database(":memory:");
+
+// Initialize database and seed data
+db.serialize(() => {
+  db.run(
+    `CREATE TABLE properties (id TEXT PRIMARY KEY, name TEXT, owner TEXT, status TEXT)`
+  );
+  db.run(`CREATE TABLE users (id TEXT PRIMARY KEY, name TEXT, role TEXT)`);
+  db.run(
+    `CREATE TABLE bookings (id TEXT PRIMARY KEY, user TEXT, property TEXT, status TEXT)`
+  );
+  db.run(
+    `CREATE TABLE payments (id TEXT PRIMARY KEY, user TEXT, amount REAL, status TEXT)`
+  );
+  db.run(
+    `CREATE TABLE notifications (id TEXT PRIMARY KEY, type TEXT, message TEXT)`
+  );
+  db.run(`CREATE TABLE settings (id TEXT PRIMARY KEY, name TEXT, value TEXT)`);
+
+  db.run(
+    "INSERT INTO properties VALUES ('P1', 'Beach Villa', 'John Doe', 'Active')"
+  );
+  db.run(
+    "INSERT INTO properties VALUES ('P2', 'City Loft', 'Jane Smith', 'Pending')"
+  );
+  db.run("INSERT INTO users VALUES ('U1', 'Alice', 'Renter')");
+  db.run("INSERT INTO users VALUES ('U2', 'Bob', 'Owner')");
+  db.run(
+    "INSERT INTO bookings VALUES ('B1', 'Alice', 'Beach Villa', 'Active')"
+  );
+  db.run("INSERT INTO bookings VALUES ('B2', 'Bob', 'City Loft', 'Pending')");
+  db.run(
+    "INSERT INTO bookings VALUES ('B3', 'Alice', 'Beach Villa', 'Cancelled')"
+  );
+  db.run("INSERT INTO payments VALUES ('T1', 'Alice', 500.00, 'Completed')");
+  db.run("INSERT INTO payments VALUES ('T2', 'Bob', 300.00, 'Pending')");
+  db.run(
+    "INSERT INTO notifications VALUES ('N1', 'Property', 'New property submitted')"
+  );
+  db.run(
+    "INSERT INTO notifications VALUES ('N2', 'Booking', 'New booking request')"
+  );
+  db.run("INSERT INTO settings VALUES ('S1', 'Website Title', 'RentEase')");
+  db.run("INSERT INTO settings VALUES ('S2', 'Payment Gateway', 'Stripe')");
+});
+
+app.get("/admin", (req, res) => {
+  db.all("SELECT * FROM properties", (err, properties) => {
+    db.all("SELECT * FROM users", (err, users) => {
+      db.all("SELECT * FROM bookings", (err, bookings) => {
+        db.all("SELECT * FROM payments", (err, payments) => {
+          db.all("SELECT * FROM notifications", (err, notifications) => {
+            db.all("SELECT * FROM settings", (err, settings) => {
+              db.get(
+                "SELECT COUNT(*) as count FROM properties",
+                (err, propCount) => {
+                  db.get(
+                    'SELECT COUNT(*) as count FROM bookings WHERE status = "Active"',
+                    (err, activeBookings) => {
+                      db.get(
+                        'SELECT COUNT(*) as count FROM bookings WHERE status = "Pending"',
+                        (err, pendingBookings) => {
+                          db.get(
+                            'SELECT COUNT(*) as count FROM bookings WHERE status = "Cancelled"',
+                            (err, cancelledBookings) => {
+                              db.get(
+                                'SELECT COUNT(*) as count FROM users WHERE role = "Renter"',
+                                (err, renters) => {
+                                  db.get(
+                                    'SELECT SUM(amount) as total FROM payments WHERE status = "Completed"',
+                                    (err, revenue) => {
+                                      const stats = {
+                                        totalProperties: propCount.count,
+                                        activeRentals: activeBookings.count,
+                                        pendingBookings: pendingBookings.count,
+                                        cancelledBookings:
+                                          cancelledBookings.count,
+                                        renters: renters.count,
+                                        totalRevenue: revenue.total || 0,
+                                      };
+                                      res.render("pages/admin", {
+                                        properties,
+                                        users,
+                                        bookings,
+                                        payments,
+                                        notifications,
+                                        settings,
+                                        stats,
+                                      });
+                                    }
+                                  );
+                                }
+                              );
+                            }
+                          );
+                        }
+                      );
+                    }
+                  );
+                }
+              );
+            });
+          });
+        });
+      });
+    });
+  });
+});
+
 // Start server
 app.listen(PORT, () => {
   console.log(`Server running at http://127.0.0.1:${PORT}`);
