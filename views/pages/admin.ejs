@@ -64,8 +64,7 @@
         background-color: #444;
       }
 
-    
-      .sidebar ul li i{
+      .sidebar ul li i {
         margin-right: 20px;
         color: #ffc109;
       }
@@ -76,7 +75,6 @@
         flex: 1;
         margin-left: 20vw;
         padding: 30px;
-        
       }
 
       .header h3 {
@@ -179,6 +177,45 @@
         margin-left: auto;
         margin-right: auto;
       }
+      .menu-toggle {
+        display: none;
+        font-size: 24px;
+        background: none;
+        border: none;
+        color: white;
+        width: 40px;
+        cursor: pointer;
+        margin: 0px;
+      }
+
+      @media (max-width: 768px) {
+        .menu-toggle {
+          display: block;
+          position: fixed;
+          z-index: 1000;
+          background-color: #333;
+          color: #ffc107;
+          top: 10vh;
+          padding-bottom: 5px;
+          border-radius: 0px 3px 3px 0px;
+        }
+
+        .sidebar {
+          width: 50%;
+          height: 100%;
+          position: fixed;
+          left: -100%;
+          top: 10vh;
+          background: #333;
+          transition: left 0.3s ease-in-out;
+          z-index: 100;
+          padding: 20px;
+        }
+
+        .sidebar.active {
+          left: 0;
+        }
+      }
     </style>
     <!-- Include Chart.js CDN -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -186,6 +223,9 @@
   <body>
     <%- include('../partials/header') %>
     <div id="page_container">
+      <button class="menu-toggle" onclick="toggleMenu()">
+        <strong>></strong>
+      </button>
       <!-- Sidebar -->
       <div class="sidebar">
         <div class="sidebar-header">
@@ -445,61 +485,77 @@
     </div>
 
     <script>
-              document.addEventListener('DOMContentLoaded', () => {
-          const menuItems = document.querySelectorAll('.sidebar-menu li');
-          const sections = document.querySelectorAll('.section');
 
-          menuItems.forEach(item => {
-              item.addEventListener('click', () => {
-                  menuItems.forEach(i => i.classList.remove('active'));
-                  item.classList.add('active');
-                  sections.forEach(section => section.style.display = 'none');
-                  const sectionId = item.getAttribute('data-section');
-                  document.getElementById(sectionId).style.display = 'block';
+      function toggleMenu() {
+              const sidebar = document.querySelector(".sidebar");
+              const menuButton = document.querySelector(".menu-toggle");
+              const overlay = document.getElementById("overlay");
 
-                  // Initialize pie chart when Reports & Analytics is clicked
-                  if (sectionId === 'reports-analytics' && !window.bookingChart) {
-                      const ctx = document.getElementById('bookingStatusChart').getContext('2d');
-                      window.bookingChart = new Chart(ctx, {
-                          type: 'pie',
-                          data: {
-                              labels: ['Active', 'Pending', 'Cancelled'],
-                              datasets: [{
-                                  data: [<%= stats.activeRentals %>, <%= stats.pendingBookings %>, <%= stats.cancelledBookings %>],
-                                  backgroundColor: ['#ffc109', '#28a745', '#dc3545'],
-                                  borderColor: ['#fff', '#fff', '#fff'],
-                                  borderWidth: 2
-                              }]
-                          },
-                          options: {
-                              responsive: true,
-                              plugins: {
-                                  legend: {
-                                      position: 'top',
-                                      labels: {
-                                          font: {
-                                              size: 14
-                                          },
-                                          color: '#333'
-                                      }
-                                  },
-                                  title: {
-                                      display: true,
-                                      text: 'Booking Status Distribution',
-                                      font: {
-                                          size: 16
-                                      },
-                                      color: '#ffc109'
-                                  }
-                              }
-                          }
-                      });
-                  }
-              });
-          });
+              // Toggle the sidebar
+              sidebar.classList.toggle("active");
 
-          console.log('Admin dashboard loaded');
-      });
+              // Change button text based on sidebar state
+              if (sidebar.classList.contains("active")) {
+                menuButton.innerHTML = "<strong><</strong>"; // Change to "<" when sidebar is open
+              } else {
+                menuButton.innerHTML = "<strong>></strong>"; // Change back to ">" when closed
+              }
+            }
+                    document.addEventListener('DOMContentLoaded', () => {
+                const menuItems = document.querySelectorAll('.sidebar-menu li');
+                const sections = document.querySelectorAll('.section');
+
+                menuItems.forEach(item => {
+                    item.addEventListener('click', () => {
+                        menuItems.forEach(i => i.classList.remove('active'));
+                        item.classList.add('active');
+                        sections.forEach(section => section.style.display = 'none');
+                        const sectionId = item.getAttribute('data-section');
+                        document.getElementById(sectionId).style.display = 'block';
+
+                        // Initialize pie chart when Reports & Analytics is clicked
+                        if (sectionId === 'reports-analytics' && !window.bookingChart) {
+                            const ctx = document.getElementById('bookingStatusChart').getContext('2d');
+                            window.bookingChart = new Chart(ctx, {
+                                type: 'pie',
+                                data: {
+                                    labels: ['Active', 'Pending', 'Cancelled'],
+                                    datasets: [{
+                                        data: [<%= stats.activeRentals %>, <%= stats.pendingBookings %>, <%= stats.cancelledBookings %>],
+                                        backgroundColor: ['#ffc109', '#28a745', '#dc3545'],
+                                        borderColor: ['#fff', '#fff', '#fff'],
+                                        borderWidth: 2
+                                    }]
+                                },
+                                options: {
+                                    responsive: true,
+                                    plugins: {
+                                        legend: {
+                                            position: 'top',
+                                            labels: {
+                                                font: {
+                                                    size: 14
+                                                },
+                                                color: '#333'
+                                            }
+                                        },
+                                        title: {
+                                            display: true,
+                                            text: 'Booking Status Distribution',
+                                            font: {
+                                                size: 16
+                                            },
+                                            color: '#ffc109'
+                                        }
+                                    }
+                                }
+                            });
+                        }
+                    });
+                });
+
+                console.log('Admin dashboard loaded');
+            });
     </script>
   </body>
 </html>
