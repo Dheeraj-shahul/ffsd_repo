@@ -163,9 +163,9 @@
           Complete the form below to register as a service provider on RentEase
         </p>
       </div>
-
+    
       <div class="registration-form-container">
-        <form id="worker-registration-form">
+        <form id="worker-registration-form" enctype="multipart/form-data">
           <div class="form-section">
             <h2>Personal Information</h2>
             <div class="form-row">
@@ -191,7 +191,7 @@
                 />
               </div>
             </div>
-
+    
             <div class="form-row">
               <div class="form-group">
                 <label for="email">Email Address</label>
@@ -224,7 +224,7 @@
               </div>
             </div>
           </div>
-
+    
           <div class="form-section">
             <h2>Service Details</h2>
             <div class="form-row">
@@ -251,7 +251,7 @@
                 />
               </div>
             </div>
-
+    
             <div class="form-row">
               <div class="form-group full-width">
                 <label for="skills">Skills & Expertise*</label>
@@ -264,12 +264,10 @@
                 ></textarea>
               </div>
             </div>
-
+    
             <div class="form-row">
               <div class="form-group">
-                <label for="expected-salary"
-                  >Expected Monthly Salary (₹)*</label
-                >
+                <label for="expected-salary">Expected Monthly Salary (₹)*</label>
                 <input
                   type="number"
                   id="expected-salary"
@@ -289,7 +287,7 @@
               </div>
             </div>
           </div>
-
+    
           <div class="form-section">
             <h2>Location Details</h2>
             <div class="form-row">
@@ -311,20 +309,10 @@
               </div>
             </div>
           </div>
-
+    
           <div class="form-section">
             <h2>Documents</h2>
             <div class="form-row">
-              <div class="form-group">
-                <label for="id-proof">ID Proof (Aadhar/PAN)*</label>
-                <input
-                  type="file"
-                  id="id-proof"
-                  name="id-proof"
-                  required
-                  accept="image/*,.pdf"
-                />
-              </div>
               <div class="form-group">
                 <label for="photo">Recent Photo*</label>
                 <input
@@ -337,7 +325,7 @@
               </div>
             </div>
           </div>
-
+    
           <div class="form-section">
             <div class="form-row">
               <div class="form-group full-width">
@@ -357,7 +345,7 @@
               </div>
             </div>
           </div>
-
+    
           <div class="form-actions">
             <button
               type="button"
@@ -373,7 +361,7 @@
         </form>
       </div>
     </div>
-
+    
     <script>
       // Area data
       const areasByCity = {
@@ -382,25 +370,25 @@
         bangalore: ["koramangala", "indiranagar", "whitefield", "jp nagar"],
         chennai: ["t nagar", "anna nagar", "adyar", "mylapore"],
       };
-
+    
       // Update areas based on selected city
       function updateAreas() {
         const citySelect = document.getElementById("city");
         const areaSelect = document.getElementById("area");
         const selectedCity = citySelect.value;
-
+    
         // Reset area dropdown
         areaSelect.innerHTML = '<option value="">Select Area</option>';
-
+    
         if (!selectedCity) {
           areaSelect.disabled = true;
           return;
         }
-
+    
         // Enable and populate area dropdown
         areaSelect.disabled = false;
         const areas = areasByCity[selectedCity] || [];
-
+    
         areas.forEach((area) => {
           const option = document.createElement("option");
           option.value = area;
@@ -408,7 +396,7 @@
           areaSelect.appendChild(option);
         });
       }
-
+    
       // Reset form
       function resetForm() {
         document.getElementById("worker-registration-form").reset();
@@ -416,17 +404,17 @@
           '<option value="">Select Area</option>';
         document.getElementById("area").disabled = true;
       }
-
+    
       // Form submission
       document
         .getElementById("worker-registration-form")
         .addEventListener("submit", function (event) {
           event.preventDefault();
-
+    
           // Validate form
           const requiredFields = document.querySelectorAll("[required]");
           let isValid = true;
-
+    
           requiredFields.forEach((field) => {
             if (!field.value) {
               isValid = false;
@@ -435,17 +423,34 @@
               field.classList.remove("error");
             }
           });
-
+    
           if (!isValid) {
             alert("Please fill in all required fields marked with *");
             return;
           }
-
-          // If validation passes, show success message
-          alert(
-            "Registration submitted successfully! Our team will review your application and contact you soon."
-          );
-          resetForm();
+    
+          // Submit form via AJAX
+          const form = document.getElementById("worker-registration-form");
+          const formData = new FormData(form);
+    
+          fetch("/api/workers/register", {
+            method: "POST",
+            body: formData,
+          })
+            .then((response) => response.json())
+            .then((data) => {
+              if (data.success) {
+                alert(
+                  "Registration submitted successfully! Our team will review your application and contact you soon."
+                );
+                resetForm();
+              } else {
+                alert("Error submitting registration: " + data.error);
+              }
+            })
+            .catch((error) => {
+              alert("Error submitting registration: " + error.message);
+            });
         });
     </script>
   </body>

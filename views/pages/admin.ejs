@@ -260,13 +260,13 @@
           </li>
         </ul>
       </div>
-
+  
       <!-- Main Content -->
       <div class="content">
         <div class="header">
           <h3>Welcome to your rental management hub!</h3>
         </div>
-
+  
         <!-- 📊 Dashboard Overview -->
         <div id="dashboard-overview" class="section">
           <h2>Dashboard Overview</h2>
@@ -276,20 +276,64 @@
               <div class="value"><%= stats.totalProperties %></div>
             </div>
             <div class="stat-card">
+              <h3>Total Renters</h3>
+              <div class="value"><%= stats.renters %></div>
+            </div>
+            <div class="stat-card">
+              <h3>Total Owners</h3>
+              <div class="value"><%= stats.totalOwners %></div>
+            </div>
+            <div class="stat-card">
+              <h3>Total Workers</h3>
+              <div class="value"><%= stats.totalWorkers %></div>
+            </div>
+            <div class="stat-card">
               <h3>Active Rentals</h3>
               <div class="value"><%= stats.activeRentals %></div>
             </div>
             <div class="stat-card">
-              <h3>Renters</h3>
-              <div class="value"><%= stats.renters %></div>
+              <h3>Pending Bookings</h3>
+              <div class="value"><%= stats.pendingBookings %></div>
+            </div>
+            <div class="stat-card">
+              <h3>Cancelled Bookings</h3>
+              <div class="value"><%= stats.cancelledBookings %></div>
+            </div>
+            <div class="stat-card">
+              <h3>Active Users</h3>
+              <div class="value"><%= stats.activeUsers %></div>
             </div>
             <div class="stat-card">
               <h3>Total Revenue</h3>
-              <div class="value">$<%= stats.totalRevenue.toFixed(2) %></div>
+              <div class="value">₹<%= (stats.totalRevenue || 0).toFixed(2) %></div>
+            </div>
+            <div class="stat-card">
+              <h3>Daily Revenue</h3>
+              <div class="value">₹<%= (stats.revenueDaily || 0).toFixed(2) %></div>
+            </div>
+            <div class="stat-card">
+              <h3>Weekly Revenue</h3>
+              <div class="value">₹<%= (stats.revenueWeekly || 0).toFixed(2) %></div>
+            </div>
+            <div class="stat-card">
+              <h3>Monthly Revenue</h3>
+              <div class="value">₹<%= (stats.revenueMonthly || 0).toFixed(2) %></div>
+            </div>
+            <div class="stat-card">
+              <h3>Active Properties</h3>
+              <div class="value"><%= stats.propertiesActive %></div>
+            </div>
+            <div class="stat-card">
+              <h3>Pending Properties</h3>
+              <div class="value"><%= stats.propertiesPending %></div>
+            </div>
+            <div class="stat-card">
+              <h3>Available Workers</h3>
+              <div class="value"><%= stats.workersAvailable %></div>
             </div>
           </div>
         </div>
-
+  
         <!-- 🏠 Property Management -->
         <div id="property-management" class="section" style="display: none">
           <h2>Property Management</h2>
@@ -319,7 +363,7 @@
             </tbody>
           </table>
         </div>
-
+  
         <!-- 👥 User Management -->
         <div id="user-management" class="section" style="display: none">
           <h2>User Management</h2>
@@ -336,8 +380,8 @@
               <% users.forEach(user => { %>
               <tr>
                 <td><%= user.id %></td>
-                <td><%= user.name %></td>
-                <td><%= user.role %></td>
+                <td><%= user.firstName %> <%= user.lastName %></td>
+                <td><%= user.userType %></td>
                 <td>
                   <button class="action-btn">Edit</button>
                   <button class="action-btn">Delete</button>
@@ -347,7 +391,7 @@
             </tbody>
           </table>
         </div>
-
+  
         <!-- 💼 Service Bookings -->
         <div id="service-bookings" class="section" style="display: none">
           <h2>Service Bookings</h2>
@@ -365,8 +409,8 @@
               <% bookings.forEach(booking => { %>
               <tr>
                 <td><%= booking.id %></td>
-                <td><%= booking.user %></td>
-                <td><%= booking.property %></td>
+                <td><%= booking.userName %></td>
+                <td><%= booking.propertyName %></td>
                 <td><%= booking.status %></td>
                 <td>
                   <button class="action-btn">View</button>
@@ -377,7 +421,7 @@
             </tbody>
           </table>
         </div>
-
+  
         <!-- 💸 Payments & Transactions -->
         <div id="payments-transactions" class="section" style="display: none">
           <h2>Payments & Transactions</h2>
@@ -395,7 +439,7 @@
               <% payments.forEach(payment => { %>
               <tr>
                 <td><%= payment.id %></td>
-                <td><%= payment.user %></td>
+                <td><%= payment.userName %></td>
                 <td>$<%= payment.amount.toFixed(2) %></td>
                 <td><%= payment.status %></td>
                 <td>
@@ -407,7 +451,7 @@
             </tbody>
           </table>
         </div>
-
+  
         <!-- 🔔 Notifications & Requests -->
         <div id="notifications-requests" class="section" style="display: none">
           <h2>Notifications & Requests</h2>
@@ -435,14 +479,14 @@
             </tbody>
           </table>
         </div>
-
+  
         <!-- 📈 Reports & Analytics -->
         <div id="reports-analytics" class="section" style="display: none">
           <h2>Reports & Analytics</h2>
           <div class="stats-grid">
             <div class="stat-card">
               <h3>Monthly Revenue</h3>
-              <div class="value">$<%= stats.totalRevenue.toFixed(2) %></div>
+              <div class="value">$<%= (stats.totalRevenue || 0).toFixed(2) %></div>
             </div>
             <div class="stat-card">
               <h3>User Growth</h3>
@@ -458,7 +502,7 @@
             <canvas id="bookingStatusChart"></canvas>
           </div>
         </div>
-
+  
         <!-- ⚙ Settings & Configurations -->
         <div id="settings-configurations" class="section" style="display: none">
           <h2>Settings & Configurations</h2>
@@ -483,79 +527,79 @@
         </div>
       </div>
     </div>
-
+  
     <script>
-
       function toggleMenu() {
-              const sidebar = document.querySelector(".sidebar");
-              const menuButton = document.querySelector(".menu-toggle");
-              const overlay = document.getElementById("overlay");
-
-              // Toggle the sidebar
-              sidebar.classList.toggle("active");
-
-              // Change button text based on sidebar state
-              if (sidebar.classList.contains("active")) {
-                menuButton.innerHTML = "<strong><</strong>"; // Change to "<" when sidebar is open
-              } else {
-                menuButton.innerHTML = "<strong>></strong>"; // Change back to ">" when closed
-              }
+        const sidebar = document.querySelector(".sidebar");
+        const menuButton = document.querySelector(".menu-toggle");
+        const overlay = document.getElementById("overlay");
+  
+        // Toggle the sidebar
+        sidebar.classList.toggle("active");
+  
+        // Change button text based on sidebar state
+        if (sidebar.classList.contains("active")) {
+          menuButton.innerHTML = "<strong><</strong>"; // Change to "<" when sidebar is open
+        } else {
+          menuButton.innerHTML = "<strong>></strong>"; // Change back to ">" when closed
+        }
+      }
+  
+      document.addEventListener('DOMContentLoaded', () => {
+        const menuItems = document.querySelectorAll('.sidebar-menu li');
+        const sections = document.querySelectorAll('.section');
+  
+        menuItems.forEach(item => {
+          item.addEventListener('click', () => {
+            menuItems.forEach(i => i.classList.remove('active'));
+            item.classList.add('active');
+            sections.forEach(section => section.style.display = 'none');
+            const sectionId = item.getAttribute('data-section');
+            document.getElementById(sectionId).style.display = 'block';
+  
+            // Initialize pie chart when Reports & Analytics is clicked
+            if (sectionId === 'reports-analytics' && !window.bookingChart) {
+              const ctx = document.getElementById('bookingStatusChart').getContext('2d');
+              window.bookingChart = new Chart(ctx, {
+                type: 'pie',
+                data: {
+                  labels: ['Active', 'Pending', 'Cancelled'],
+                  datasets: [{
+                    data: [<%= stats.activeRentals %>, <%= stats.pendingBookings %>, <%= stats.cancelledBookings %>],
+                    backgroundColor: ['#ffc109', '#28a745', '#dc3545'],
+                    borderColor: ['#fff', '#fff', '#fff'],
+                    borderWidth: 2
+                  }]
+                },
+                options: {
+                  responsive: true,
+                  plugins: {
+                    legend: {
+                      position: 'top',
+                      labels: {
+                        font: {
+                          size: 14
+                        },
+                        color: '#333'
+                      }
+                    },
+                    title: {
+                      display: true,
+                      text: 'Booking Status Distribution',
+                      font: {
+                        size: 16
+                      },
+                      color: '#ffc109'
+                    }
+                  }
+                }
+              });
             }
-                    document.addEventListener('DOMContentLoaded', () => {
-                const menuItems = document.querySelectorAll('.sidebar-menu li');
-                const sections = document.querySelectorAll('.section');
-
-                menuItems.forEach(item => {
-                    item.addEventListener('click', () => {
-                        menuItems.forEach(i => i.classList.remove('active'));
-                        item.classList.add('active');
-                        sections.forEach(section => section.style.display = 'none');
-                        const sectionId = item.getAttribute('data-section');
-                        document.getElementById(sectionId).style.display = 'block';
-
-                        // Initialize pie chart when Reports & Analytics is clicked
-                        if (sectionId === 'reports-analytics' && !window.bookingChart) {
-                            const ctx = document.getElementById('bookingStatusChart').getContext('2d');
-                            window.bookingChart = new Chart(ctx, {
-                                type: 'pie',
-                                data: {
-                                    labels: ['Active', 'Pending', 'Cancelled'],
-                                    datasets: [{
-                                        data: [<%= stats.activeRentals %>, <%= stats.pendingBookings %>, <%= stats.cancelledBookings %>],
-                                        backgroundColor: ['#ffc109', '#28a745', '#dc3545'],
-                                        borderColor: ['#fff', '#fff', '#fff'],
-                                        borderWidth: 2
-                                    }]
-                                },
-                                options: {
-                                    responsive: true,
-                                    plugins: {
-                                        legend: {
-                                            position: 'top',
-                                            labels: {
-                                                font: {
-                                                    size: 14
-                                                },
-                                                color: '#333'
-                                            }
-                                        },
-                                        title: {
-                                            display: true,
-                                            text: 'Booking Status Distribution',
-                                            font: {
-                                                size: 16
-                                            },
-                                            color: '#ffc109'
-                                        }
-                                    }
-                                }
-                            });
-                        }
-                    });
-                });
-
-                console.log('Admin dashboard loaded');
-            });
+          });
+        });
+  
+        console.log('Admin dashboard loaded');
+      });
     </script>
   </body>
 </html>

@@ -1,10 +1,10 @@
 {
   "name": "rentease",
   "version": "1.0.0",
-  "description": "",
+  "description": "FFSD PROJECT REPO 2025\r today is evalution",
   "main": "app.js",
   "scripts": {
-    "start": "nodemon app.js",
+    "start": "node app.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
@@ -15,10 +15,20 @@
     "ejs": "^3.1.10",
     "express": "^4.21.2",
     "express-session": "^1.18.1",
+    "formidable": "^3.5.4",
+    "mongoose": "^8.13.2",
     "sqlite": "^5.1.1",
     "sqlite3": "^5.1.7"
   },
   "devDependencies": {
     "nodemon": "^3.1.9"
-  }
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Dheeraj-shahul/ffsd_repo.git"
+  },
+  "bugs": {
+    "url": "https://github.com/Dheeraj-shahul/ffsd_repo/issues"
+  },
+  "homepage": "https://github.com/Dheeraj-shahul/ffsd_repo#readme"
 }

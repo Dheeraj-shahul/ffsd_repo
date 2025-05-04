@@ -49,20 +49,10 @@
       </div>
 
       <div class="listing-form-container">
-        <form id="property-listing-form">
+        <form id="property-listing-form" enctype="multipart/form-data">
           <div class="form-section">
             <h2>Basic Information</h2>
             <div class="form-row">
-              <div class="form-group">
-                <label for="property-title">Property Title*</label>
-                <input
-                  type="text"
-                  id="property-title"
-                  name="property-title"
-                  required
-                  placeholder="e.g., Spacious 2BHK Apartment"
-                />
-              </div>
               <div class="form-group">
                 <label for="property-type">Property Type*</label>
                 <select id="property-type" name="property-type" required>
@@ -74,7 +64,23 @@
                   <option value="commercial">Commercial Space</option>
                 </select>
               </div>
-            </div>
+
+
+              <div class="form-group">
+                <label for="property-subtype">Property Subtype*</label>
+                <select id="property-subtype" name="property-subtype" required>
+                  <option value="">Select Property Subtype</option>
+                  <option value="1bhk">1 BHK</option>
+                  <option value="2bhk">2 BHK</option>
+                  <option value="3bhk">3 BHK</option>
+                  <option value="4bhk">4 BHK</option>
+                  <option value="duplex">Duplex</option>
+                  <option value="box">Box Type</option>
+                  <option value="studio">Studio</option>
+                  <option value="other">Other</option>
+                </select>
+              </div>
+              
 
             <div class="form-row">
               <div class="form-group">
@@ -461,7 +467,7 @@
       function toggleNav() {
         const navMenu = document.getElementById("nav-menu");
         const overlay = document.getElementById("overlay");
-
+    
         if (navMenu.classList.contains("active")) {
           navMenu.classList.remove("active");
           overlay.classList.remove("active");
@@ -470,84 +476,127 @@
           overlay.classList.add("active");
         }
       }
-
+    
       // Add event listener to overlay
       document.getElementById("overlay").addEventListener("click", function () {
         const navMenu = document.getElementById("nav-menu");
         navMenu.classList.remove("active");
         this.classList.remove("active");
       });
-
+    
       // Function to reset the form
       function resetForm() {
         document.getElementById("property-listing-form").reset();
         document.getElementById("preview-container").innerHTML = "";
+        selectedFiles = []; // Clear selected files
       }
-
+    
+      // Store selected files globally
+      let selectedFiles = [];
+    
       // Function to handle file uploads and create previews
       document
         .getElementById("property-photos")
         .addEventListener("change", function (event) {
           const files = event.target.files;
           const previewContainer = document.getElementById("preview-container");
-
-          // Clear previous previews if any
-          previewContainer.innerHTML = "";
-
-          // Limit to maximum 10 images
-          const maxFiles = 10;
-          const fileCount = files.length > maxFiles ? maxFiles : files.length;
-
-          for (let i = 0; i < fileCount; i++) {
-            const file = files[i];
-
-            // Check if the file is an image
+    
+          // Add new files to selectedFiles, ensuring no duplicates
+          const newFiles = Array.from(files).filter(
+            file => !selectedFiles.some(existing => existing.name === file.name && existing.size === file.size)
+          );
+          selectedFiles = [...selectedFiles, ...newFiles].slice(0, 10); // Limit to 10
+    
+          // Update previews
+          previewContainer.innerHTML = ""; // Clear existing previews
+    
+          selectedFiles.forEach((file, index) => {
             if (!file.type.match("image.*")) {
-              continue;
+              return;
             }
-
+    
             const reader = new FileReader();
-
             reader.onload = function (e) {
               const previewWrapper = document.createElement("div");
               previewWrapper.className = "preview-item";
-
+    
               const img = document.createElement("img");
               img.src = e.target.result;
               img.title = file.name;
-
+              img.style.maxWidth = "100px"; // Ensure visibility
+    
               const removeBtn = document.createElement("span");
               removeBtn.className = "remove-preview";
               removeBtn.innerHTML = "×";
               removeBtn.addEventListener("click", function () {
                 previewWrapper.remove();
+                selectedFiles.splice(index, 1); // Remove from selectedFiles
+                // Refresh previews
+                previewContainer.innerHTML = "";
+                selectedFiles.forEach((f, i) => {
+                  const r = new FileReader();
+                  r.onload = function (ev) {
+                    const wrapper = document.createElement("div");
+                    wrapper.className = "preview-item";
+                    const img = document.createElement("img");
+                    img.src = ev.target.result;
+                    img.title = f.name;
+                    img.style.maxWidth = "100px";
+                    const btn = document.createElement("span");
+                    btn.className = "remove-preview";
+                    btn.innerHTML = "×";
+                    btn.addEventListener("click", function () {
+                      wrapper.remove();
+                      selectedFiles.splice(i, 1);
+                      previewContainer.innerHTML = "";
+                      selectedFiles.forEach((f2) => {
+                        const r2 = new FileReader();
+                        r2.onload = function (ev2) {
+                          const w = document.createElement("div");
+                          w.className = "preview-item";
+                          const img2 = document.createElement("img");
+                          img2.src = ev2.target.result;
+                          img2.title = f2.name;
+                          img2.style.maxWidth = "100px";
+                          w.appendChild(img2);
+                          previewContainer.appendChild(w);
+                        };
+                        r2.readAsDataURL(f2);
+                      });
+                    });
+                    wrapper.appendChild(img);
+                    wrapper.appendChild(btn);
+                    previewContainer.appendChild(wrapper);
+                  };
+                  r.readAsDataURL(f);
+                });
               });
-
+    
               previewWrapper.appendChild(img);
               previewWrapper.appendChild(removeBtn);
               previewContainer.appendChild(previewWrapper);
             };
-
             reader.readAsDataURL(file);
-          }
-
-          if (files.length > maxFiles) {
-            alert(
-              `You can only upload a maximum of ${maxFiles} images. The first ${maxFiles} images have been selected.`
-            );
+          });
+    
+          if (selectedFiles.length > 10) {
+            alert("You can only upload a maximum of 10 images. The first 10 images have been selected.");
           }
         });
-
+    
       // Form validation and submission
       document
         .getElementById("property-listing-form")
-        .addEventListener("submit", function (event) {
+        .addEventListener("submit", async function (event) {
           event.preventDefault();
-
+    
+          // Log form submission
+          console.log("Form submitted");
+    
           // Simple form validation
           const requiredFields = document.querySelectorAll("[required]");
           let isValid = true;
-
+    
           requiredFields.forEach((field) => {
             if (!field.value) {
               isValid = false;
@@ -556,19 +605,66 @@
               field.classList.remove("error");
             }
           });
-
+    
           if (!isValid) {
             alert("Please fill in all required fields marked with *");
             return;
           }
-
-          // If validation passes, show success message
-          alert(
-            "Property listing submitted successfully! Our team will review your listing and it will be live soon."
-          );
-          resetForm();
+    
+          // Validate images
+          if (selectedFiles.length === 0) {
+            alert("Please upload at least one image");
+            return;
+          }
+    
+          // Prepare form data
+          const formData = new FormData();
+    
+          // Append images
+          selectedFiles.forEach((file, index) => {
+            if (file.type.match("image.*")) {
+              formData.append("property-photos", file);
+            }
+          });
+    
+          // Append other form fields
+          for (const [key, value] of new FormData(this).entries()) {
+            if (key !== "property-photos") {
+              formData.append(key, value);
+            }
+          }
+    
+          // Log FormData entries for debugging
+          const formDataEntries = [...formData.entries()].map(([key, value]) => ({
+            key,
+            value: key === "property-photos" ? value.name : value,
+          }));
+          console.log("FormData entries:", formDataEntries);
+    
+          // Submit to backend
+          console.log("Sending fetch to /api/property/list-property");
+          try {
+            const response = await fetch("/api/property/list-property", {
+              method: "POST",
+              body: formData,
+            });
+    
+            const result = await response.json();
+    
+            if (response.ok) {
+              alert(
+                "Property listing submitted successfully! Our team will review your listing and it will be live soon."
+              );
+              resetForm();
+            } else {
+              alert(result.error || "Error listing property");
+            }
+          } catch (error) {
+            console.error("Error:", error);
+            alert(`Error submitting form: ${error.message}`);
+          }
         });
-
+    
       // Custom styling for file input
       document
         .querySelector(".file-upload-button")

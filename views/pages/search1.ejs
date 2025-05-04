@@ -420,335 +420,284 @@
     <div class="container">
         <!-- Small Filter icon (mobile only) -->
         <div class="filter-icon" id="filter-icon">
-            <img src="https://cdn-icons-png.flaticon.com/128/3839/3839020.png" alt="Filter" width="25" height="25">
+          <img src="https://cdn-icons-png.flaticon.com/128/3839/3839020.png" alt="Filter" width="25" height="25">
         </div>
-
+    
         <!-- Overlay for mobile -->
         <div class="overlay" id="overlay"></div>
-
+    
         <!-- Sidebar Filters -->
         <aside id="sidebar">
-            <h2>Apply Filters</h2>
-            <form action="/search" method="GET">
-                <div class="filters">
-                    <div class="filter-group">
-                        <label for="location">Location:</label>
-                        <select name="location" id="location">
-                            <option value="">Select Location</option>
-                            <option value="chennai">Chennai</option>
-                            <option value="kolkata">Kolkata</option>
-                            <option value="visakhapatnam">Visakhapatnam</option>
-                            <option value="mumbai">Mumbai</option>
-                            <option value="hyderabad">Hyderabad</option>
-                            <option value="bangalore">Bangalore</option>
-                            <option value="delhi">Delhi</option>
-                        </select>
-                    </div>
-
-                    <div class="filter-group">
-                        <label for="property-type">Property Type:</label>
-                        <select name="property-type" id="property-type">
-                            <option value="">Select Type</option>
-                            <option value="flat">Flat</option>
-                            <option value="house">House</option>
-                            <option value="apartment">Apartment</option>
-                        </select>
-                    </div>
-
-                    <div class="filter-group">
-                        <label for="price-range">Price Range:</label>
-                        <input type="range" id="price-range" name="price" min="3500" max="100000" step="1000" oninput="priceValue.innerText = this.value">
-                        <span id="priceValue">15000</span>
-                    </div>
-
-                    <div class="filter-group">
-                        <label for="bedrooms">Bedrooms:</label>
-                        <select name="bedroom-no" id="bedroom-no">
-                            <option value="">Select No. of Bedrooms</option>
-                            <option value="1">1</option>
-                            <option value="2">2</option>
-                            <option value="3">3</option>
-                            <option value="4">4</option>
-                            
-                        </select>
-                    </div>
-
-                    <div class="filter-group">
-                        <label for="bathrooms">Bathrooms:</label>
-                        <select name="bathroom-no" id="bathroom-no">
-                            <option value="">Select No. of Bathrooms</option>
-                            <option value="1">1</option>
-                            <option value="2">2</option>
-                            <option value="3">3</option>
-                            
-                            
-                        </select>
-                    </div>
-
-                    <div class="filter-group">
-                        <label for="furnishing">Furnishing:</label>
-                        <select name="furnishing" id="furnishing">
-                            <option value="">Select Furnishing Type</option>
-                            <option value="furnished">Furnished</option>
-                            <option value="unfurnished">Unfurnished</option>
-                            <option value="semi-furnished">Semi-Furnished</option>
-                        </select>
-                    </div>
-
-
-                    <fieldset>
-                        <legend>Amenities:</legend>
-                        <div class="amenities-group">
-                            <label><input type="checkbox" name="amenities" value="parking"> Parking</label>
-                            <label><input type="checkbox" name="amenities" value="wifi"> WiFi</label>
-                            <label><input type="checkbox" name="amenities" value="pool"> Pool</label>
-                            <label><input type="checkbox" name="amenities" value="gym"> Gym</label>
-                            <label><input type="checkbox" name="amenities" value="security"> Security</label>
-                            <label><input type="checkbox" name="amenities" value="balcony"> Balcony</label>
-                            <label><input type="checkbox" name="amenities" value="water supply"> Water Supply</label>
-                            <label><input type="checkbox" name="amenities" value="kids play area"> Kids Play Area</label>
-                            <label><input type="checkbox" name="amenities" value="lift"> Lift</label>
-                        </div>
-                    </fieldset>
-
-                    <button type="submit">Search Homes</button>
+          <h2>Apply Filters</h2>
+          <form action="/search" method="GET">
+            <div class="filters">
+              <div class="filter-group">
+                <label for="location">Location:</label>
+                <select name="location" id="location">
+                  <option value="">Select Location</option>
+                  <option value="chennai">Chennai</option>
+                  <option value="kolkata">Kolkata</option>
+                  <option value="visakhapatnam">Visakhapatnam</option>
+                  <option value="mumbai">Mumbai</option>
+                  <option value="hyderabad">Hyderabad</option>
+                  <option value="bangalore">Bangalore</option>
+                  <option value="delhi">Delhi</option>
+                </select>
+              </div>
+    
+              <div class="filter-group">
+                <label for="property-type">Property Type:</label>
+                <select name="property-type" id="property-type">
+                  <option value="">Select Type</option>
+                  <option value="flat">Flat</option>
+                  <option value="house">House</option>
+                  <option value="apartment">Apartment</option>
+                </select>
+              </div>
+    
+              <div class="filter-group">
+                <label for="price-range">Price Range:</label>
+                <input type="range" id="price-range" name="price" min="3500" max="100000" step="1000" oninput="priceValue.innerText = this.value">
+                <span id="priceValue">15000</span>
+              </div>
+    
+              <div class="filter-group">
+                <label for="bedrooms">Bedrooms:</label>
+                <select name="bedroom-no" id="bedroom-no">
+                  <option value="">Select No. of Bedrooms</option>
+                  <option value="1">1</option>
+                  <option value="2">2</option>
+                  <option value="3">3</option>
+                  <option value="4">4</option>
+                </select>
+              </div>
+    
+              <div class="filter-group">
+                <label for="bathrooms">Bathrooms:</label>
+                <select name="bathroom-no" id="bathroom-no">
+                  <option value="">Select No. of Bathrooms</option>
+                  <option value="1">1</option>
+                  <option value="2">2</option>
+                  <option value="3">3</option>
+                </select>
+              </div>
+    
+              <div class="filter-group">
+                <label for="furnishing">Furnishing:</label>
+                <select name="furnishing" id="furnishing">
+                  <option value="">Select Furnishing Type</option>
+                  <option value="furnished">Furnished</option>
+                  <option value="unfurnished">Unfurnished</option>
+                  <option value="semi-furnished">Semi-Furnished</option>
+                </select>
+              </div>
+    
+              <fieldset>
+                <legend>Amenities:</legend>
+                <div class="amenities-group">
+                  <label><input type="checkbox" name="amenities" value="parking"> Parking</label>
+                  <label><input type="checkbox" name="amenities" value="wifi"> WiFi</label>
+                  <label><input type="checkbox" name="amenities" value="pool"> Pool</label>
+                  <label><input type="checkbox" name="amenities" value="gym"> Gym</label>
+                  <label><input type="checkbox" name="amenities" value="security"> Security</label>
+                  <label><input type="checkbox" name="amenities" value="balcony"> Balcony</label>
+                  <label><input type="checkbox" name="amenities" value="water supply"> Water Supply</label>
+                  <label><input type="checkbox" name="amenities" value="kids play area"> Kids Play Area</label>
+                  <label><input type="checkbox" name="amenities" value="lift"> Lift</label>
                 </div>
-            </form>
+              </fieldset>
+    
+              <button type="submit">Search Homes</button>
+            </div>
+          </form>
         </aside>
-
+    
         <!-- Main Content -->
         <section class="content">
-            <h2>Search Results</h2>
-
-            <!-- Sorting Options -->
-            <div class="sort-options">
-                <label for="sort">Sort by:</label>
-                <select id="sort">
-                    <option value="rating">Rating</option>
-                    <option value="price-low-to-high">Price: Low to High</option>
-                    <option value="price-high-to-low">Price: High to Low</option>
-                    <option value="availability-soon">Availability: Soon</option>
-                </select>
-            </div>
-
-            <!-- Results Section -->
-            <div class="results">
-                <h2 class="section-title">Featured Houses</h2>
-                <ul id="result-list" class="property-grid">
-                  <% 
-                    // Extract query parameters from the request (passed from app.js)
-                    const queryParams = request.query || {};
-                    const location = (queryParams.location || '').toLowerCase();
-                    const place = (queryParams.query || '').toLowerCase();
-                    const category = (queryParams.category || '').toLowerCase();
-            
-                    // Filtering logic directly in EJS
-                    function extractPlace(address) {
-                      const parts = address.split(',').map(part => part.trim());
-                      return parts[parts.length - 1];
-                    }
-            
-                    const filteredProperties = properties.filter(property => {
-                      const propertyPlace = extractPlace(property.address).toLowerCase();
-                      return (
-                        (!location || property.location.toLowerCase() === location) &&
-                        (!place || propertyPlace.includes(place)) &&
-                        (category === 'all' || !category || property.type.toLowerCase() === category)
-                      );
-                    });
-            
-                    if (filteredProperties.length > 0) { 
-                      filteredProperties.forEach(property => { 
-                  %>
-                    <li class="property-card">
-                      <div class="property-image">
-                        <img src="<%= property.images[0] %>" alt="Property Image">
-                        <div class="property-type"><%= property.subtype %></div>
+          <h2>Search Results</h2>
+    
+          <!-- Sorting Options -->
+          <div class="sort-options">
+            <label for="sort">Sort by:</label>
+            <select id="sort">
+              <option value="rating">Rating</option>
+              <option value="price-low-to-high">Price: Low to High</option>
+              <option value="price-high-to-low">Price: High to Low</option>
+              <option value="availability-soon">Availability: Soon</option>
+            </select>
+          </div>
+    
+          <!-- Results Section -->
+          <div class="results">
+            <h2 class="section-title">Featured Houses</h2>
+            <ul id="result-list" class="property-grid">
+              <% if (properties && properties.length > 0) { %>
+                <% properties.forEach(property => { %>
+                  <li class="property-card">
+                    <div class="property-image">
+                      <img src="<%= property.images[0] %>" alt="Property Image">
+                      <div class="property-type"><%= property.subtype %></div>
+                    </div>
+                    <div class="property-info">
+                      <h3 class="property-name"><%= property.name %></h3>
+                      <p class="property-address"><%= property.address %></p>
+                      <p class="property-category">Type: <%= property.type %></p>
+                      <div class="property-features">
+                        <div class="feature"><span class="feature-icon">🛏️</span> <%= property.beds %> Beds</div>
+                        <div class="feature"><span class="feature-icon">🛁</span> <%= property.baths %> Baths</div>
+                        <div class="feature"><span class="feature-icon">🛋️</span> <%= property.furnished %></div>
                       </div>
-                      <div class="property-info">
-                        <h3 class="property-name"><%= property.name %></h3>
-                        <p class="property-address"><%= property.address %></p>
-                        <p class="property-category">Type: <%= property.type %></p>
-                        <div class="property-features">
-                          <div class="feature"><span class="feature-icon">🛏️</span> <%= property.beds %> Beds</div>
-                          <div class="feature"><span class="feature-icon">🛁</span> <%= property.baths %> Baths</div>
-                          <div class="feature"><span class="feature-icon">🛋️</span> <%= property.furnished %></div>
-                        </div>
-                       
-                        <!-- Dynamic Star Rating -->
-                        <div class="rating">
-                            <div class="stars">
-                            <% for (let i = 1; i <= 5; i++) { %>
-                                <% if (i <= property.rating) { %>
-                                    ★
-                                <% } else { %>
-                                    ☆
-
-                                <% } %>
+                      <div class="rating">
+                        <div class="stars">
+                          <% for (let i = 1; i <= 5; i++) { %>
+                            <% if (i <= property.rating) { %>
+                              ★
+                            <% } else { %>
+                              ☆
                             <% } %>
-                            </div>
-                            <div class="review-count">(<%= property.reviews %> reviews)</div>
+                          <% } %>
                         </div>
-
-                        <div class="property-price"><%= property.price %></div>
-                        <p class="property-location">Location: <%= property.location %></p>
-                        <div class="property-amenities">
-                          <strong>Amenities:</strong>
-                          <% property.amenities.forEach(amenity => { %>
-                            <span class="amenity"><%= amenity %></span><%= amenity !== property.amenities[property.amenities.length - 1] ? ', ' : '' %>
-                          <% }); %>
-                        </div>
-                        <div class="property-footer">
-                            <a href="/property<% if (property && property.id) { %>?id=<%= property.id %><% } %>" class="btn">View Details</a>
-                          <button class="btn wishlist-btn">❤ Save</button>
-                        </div>
+                        <div class="review-count">(<%= property.reviews %> reviews)</div>
                       </div>
-                    </li>
-                  <% }); %>
-                  <% } else { %>
-                    <li>No results found</li>
-                  <% } %>
-                </ul>
-              </div>
-            <a href="/">Back to Home</a>
+                      <div class="property-price">₹<%= property.price %></div>
+                      <p class="property-location">Location: <%= property.location %></p>
+                      <div class="property-amenities">
+                        <strong>Amenities:</strong>
+                        <% property.amenities.forEach(amenity => { %>
+                          <span class="amenity"><%= amenity %></span><%= amenity !== property.amenities[property.amenities.length - 1] ? ', ' : '' %>
+                        <% }); %>
+                      </div>
+                      <div class="property-footer">
+                        <a href="/property?id=<%= property._id %>" class="btn">View Details</a>
+                        <button class="btn wishlist-btn">❤ Save</button>
+                      </div>
+                    </div>
+                  </li>
+                <% }); %>
+              <% } else { %>
+                <li>No results found</li>
+              <% } %>
+            </ul>
+          </div>
+          <a href="/">Back to Home</a>
         </section>
-    </div>
-
+      </div>
     
- 
-    <script>
-
-    //Sorting Script
-    const initialProperties = <%- JSON.stringify(filteredProperties) %>;
-    document.addEventListener("DOMContentLoaded",function(){
-        const sortSelect = document.getElementById("sort");
-        const resultList=document.getElementById("resultList");
-
-        // Sort and re-render when dropdown changes
-        sortSelect.addEventListener('change', function() {
-      const sortBy = this.value;
-      let sortedProperties = [...initialProperties]; // Copy to avoid mutating original
-
-      switch (sortBy) {
-        case 'rating':
-          sortedProperties.sort((a, b) => b.rating - a.rating); // Highest rating first
-          break;
-        case 'price-low-to-high':
-          sortedProperties.sort((a, b) => parsePrice(a.price) - parsePrice(b.price));
-          break;
-        case 'price-high-to-low':
-          sortedProperties.sort((a, b) => parsePrice(b.price) - parsePrice(a.price));
-          break;
-        case 'availability-soon':
-          // Placeholder: Add availability field to properties.js if needed
-          sortedProperties.sort((a, b) => {
-            const dateA = a.availability ? new Date(a.availability) : new Date(0);
-            const dateB = b.availability ? new Date(b.availability) : new Date(0);
-            return dateA - dateB; // Earliest first
+      <script>
+        // Sorting Script
+        const initialProperties = <%- JSON.stringify(properties) %>;
+        document.addEventListener("DOMContentLoaded", function() {
+          const sortSelect = document.getElementById("sort");
+          const resultList = document.getElementById("result-list");
+    
+          // Sort and re-render when dropdown changes
+          sortSelect.addEventListener('change', function() {
+            const sortBy = this.value;
+            let sortedProperties = [...initialProperties];
+    
+            switch (sortBy) {
+              case 'rating':
+                sortedProperties.sort((a, b) => b.rating - a.rating);
+                break;
+              case 'price-low-to-high':
+                sortedProperties.sort((a, b) => a.price - b.price);
+                break;
+              case 'price-high-to-low':
+                sortedProperties.sort((a, b) => b.price - a.price);
+                break;
+              case 'availability-soon':
+                sortedProperties.sort((a, b) => {
+                  const dateA = a.availableFrom ? new Date(a.availableFrom) : new Date(9999, 0, 1);
+                  const dateB = b.availableFrom ? new Date(b.availableFrom) : new Date(9999, 0, 1);
+                  return dateA - dateB;
+                });
+                break;
+            }
+    
+            renderProperties(sortedProperties);
           });
-          break;
-      }
-
-      renderProperties(sortedProperties);
-    });
-
-    // Function to render properties
-    function renderProperties(props) {
-      resultList.innerHTML = ''; // Clear existing list
-      if (props.length === 0) {
-        resultList.innerHTML = '<li>No results found</li>';
-        return;
-      }
-
-      props.forEach(property => {
-        const li = document.createElement('li');
-        li.className = 'property-card';
-        li.innerHTML = `
-          <div class="property-image">
-            <img src="${property.images[0]}" alt="Property Image">
-            <div class="property-type">${property.subtype}</div>
-          </div>
-          <div class="property-info">
-            <h3 class="property-name">${property.name}</h3>
-            <p class="property-address">${property.address}</p>
-            <p class="property-category">Type: ${property.type}</p>
-            <div class="property-features">
-              <div class="feature"><span class="feature-icon">🛏️</span> ${property.beds} Beds</div>
-              <div class="feature"><span class="feature-icon">🛁</span> ${property.baths} Baths</div>
-              <div class="feature"><span class="feature-icon">🛋️</span> ${property.furnished}</div>
-            </div>
-            <div class="rating">
-              <div class="stars">
-                ${Array(5).fill(0).map((_, i) => i < property.rating ? '★' : '☆').join('')}
-              </div>
-              <div class="review-count">(${property.reviews} reviews)</div>
-            </div>
-            <div class="property-price">${property.price}</div>
-            <p class="property-location">Location: ${property.location}</p>
-            <div class="property-amenities">
-              <strong>Amenities:</strong>
-              ${property.amenities.map((amenity, idx) => `<span class="amenity">${amenity}</span>${idx < property.amenities.length - 1 ? ', ' : ''}`).join('')}
-            </div>
-            <div class="property-footer">
-              <a href="/property?id=${property.id}" class="btn">View Details</a>
-              <button class="btn wishlist-btn">❤ Save</button>
-            </div>
-          </div>
-        `;
-        resultList.appendChild(li);
-      });
-    }
-
-    // Helper function to parse price
-    function parsePrice(priceStr) {
-      return parseInt(priceStr.replace(/[^0-9]/g, ''), 10) || 0;
-    }
-  });
-
     
+          // Function to render properties
+          function renderProperties(props) {
+            resultList.innerHTML = '';
+            if (props.length === 0) {
+              resultList.innerHTML = '<li>No results found</li>';
+              return;
+            }
     
+            props.forEach(property => {
+              const li = document.createElement('li');
+              li.className = 'property-card';
+              li.innerHTML = `
+                <div class="property-image">
+                  <img src="${property.images[0]}" alt="Property Image">
+                  <div class="property-type">${property.subtype}</div>
+                </div>
+                <div class="property-info">
+                  <h3 class="property-name">${property.name}</h3>
+                  <p class="property-address">${property.address}</p>
+                  <p class="property-category">Type: ${property.type}</p>
+                  <div class="property-features">
+                    <div class="feature"><span class="feature-icon">🛏️</span> ${property.beds} Beds</div>
+                    <div class="feature"><span class="feature-icon">🛁</span> ${property.baths} Baths</div>
+                    <div class="feature"><span class="feature-icon">🛋️</span> ${property.furnished}</div>
+                  </div>
+                  <div class="rating">
+                    <div class="stars">
+                      ${Array(5).fill(0).map((_, i) => i < property.rating ? '★' : '☆').join('')}
+                    </div>
+                    <div class="review-count">(${property.reviews} reviews)</div>
+                  </div>
+                  <div class="property-price">₹${property.price}</div>
+                  <p class="property-location">Location: ${property.location}</p>
+                  <div class="property-amenities">
+                    <strong>Amenities:</strong>
+                    ${property.amenities.map((amenity, idx) => `<span class="amenity">${amenity}</span>${idx < property.amenities.length - 1 ? ', ' : ''}`).join('')}
+                  </div>
+                  <div class="property-footer">
+                    <a href="/property?id=${property._id}" class="btn">View Details</a>
+                    <button class="btn wishlist-btn">❤ Save</button>
+                  </div>
+                </div>
+              `;
+              resultList.appendChild(li);
+            });
+          }
     
-    document.addEventListener("DOMContentLoaded", function() {
-        const filterIcon = document.getElementById("filter-icon");
-        const sidebar = document.getElementById("sidebar");
-        const overlay = document.getElementById("overlay");
-
-        // Function to toggle sidebar
-        function toggleSidebar() {
+          // Sidebar toggle for mobile
+          const filterIcon = document.getElementById("filter-icon");
+          const sidebar = document.getElementById("sidebar");
+          const overlay = document.getElementById("overlay");
+    
+          function toggleSidebar() {
             const isActive = sidebar.classList.contains("active");
             if (isActive) {
-                sidebar.classList.remove("active");
-                overlay.classList.remove("active");
-                filterIcon.style.display = "block"; // show filter icon when sidebar closes
+              sidebar.classList.remove("active");
+              overlay.classList.remove("active");
+              filterIcon.style.display = "block";
             } else {
-                sidebar.classList.add("active");
-                overlay.classList.add("active");
-                filterIcon.style.display = "none"; // hide filter icon when sidebar opens
+              sidebar.classList.add("active");
+              overlay.classList.add("active");
+              filterIcon.style.display = "none";
             }
-        }
-
-        // Click event for filter icon
-        filterIcon.addEventListener("click", toggleSidebar);
-
-        // Click event for overlay to close sidebar and show filter icon again
-        overlay.addEventListener("click", function() {
+          }
+    
+          filterIcon.addEventListener("click", toggleSidebar);
+          overlay.addEventListener("click", function() {
             sidebar.classList.remove("active");
             overlay.classList.remove("active");
-            filterIcon.style.display = "block"; // show filter icon when sidebar closes
-        });
-
-        // Display selected price range value dynamically
-        const priceInput = document.getElementById("price-range");
-        const priceValue = document.getElementById("priceValue");
-
-        if (priceInput) {
+            filterIcon.style.display = "block";
+          });
+    
+          // Display selected price range value
+          const priceInput = document.getElementById("price-range");
+          const priceValue = document.getElementById("priceValue");
+          if (priceInput) {
             priceInput.addEventListener("input", function() {
-                priceValue.innerText = this.value;
+              priceValue.innerText = this.value;
             });
-        }
-    });
-
-   
-</script>
+          }
+        });
+      </script>
 </body>
 </html>

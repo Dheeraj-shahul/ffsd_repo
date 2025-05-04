@@ -526,7 +526,7 @@
     </button>
     <main>
       <h1 class="page-title">Domestic Worker Services</h1>
-
+    
       <div class="page-layout">
         <div class="filters-sidebar">
           <div class="filter-container">
@@ -558,7 +558,7 @@
               </button>
             </div>
           </div>
-
+    
           <div class="filter-container">
             <h2 class="filter-title">Filters</h2>
             <div class="filter-group">
@@ -607,506 +607,305 @@
           <div class="workers-grid" id="workersGrid"></div>
         </div>
       </div>
-
+    
       <!-- Worker Details Modal -->
       <div id="workerModal" class="modal">
         <div class="modal-content">
-          <span class="close" onclick="closeModal()">&times;</span>
+          <span class="close" onclick="closeModal()">×</span>
           <div id="modalContent"></div>
         </div>
       </div>
     </main>
-
+    
     <script>
-      // Sample worker data
-      const workers = [
-        {
-          id: 1,
-          name: "Priya Singh",
-          image:
-            "https://media.istockphoto.com/id/1449552590/photo/portrait-of-indian-woman-enjoying-while-cooking-meal-in-the-kitchen-stock-photo.jpg?s=612x612&w=0&k=20&c=sSSFGWffGnjDJEX_VCA3YQ5B3T1jQ_0kCbPTL0BItlg=",
-          serviceType: "Cooking",
-          rating: 4.8,
-          location: "delhi",
-          area: "karol bagh",
-          price: 8000,
-          experience: "5 years",
-          description: "Experienced cook specializing in North Indian cuisine.",
-          availability: ["Monday", "Tuesday", "Wednesday", "Friday"],
-          reviews: [
-            {
-              user: "Rahul M.",
-              rating: 5,
-              date: "2024-01-15",
-              comment: "Amazing food and very professional.",
-            },
-            {
-              user: "Anjali K.",
-              rating: 4.5,
-              date: "2024-01-10",
-              comment: "Great with meal planning and variety.",
-            },
-          ],
-        },
-        {
-          id: 2,
-          name: "Rajesh Kumar",
-          image:
-            "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRWrUwZFj0nlGLQzEZXtwsYih-cOoSSSxXrNYayPnvfL5S0d5b_jnIKA3L8pdeo4vbeSNs&usqp=CAU",
-          serviceType: "Cleaning",
-          rating: 4.5,
-          location: "mumbai",
-          area: "bandra",
-          price: 12000,
-          experience: "8 years",
-          description: "Professional cleaner with expertise in deep cleaning.",
-          availability: ["Monday", "Wednesday", "Thursday", "Saturday"],
-          reviews: [
-            {
-              user: "Sneha P.",
-              rating: 4.5,
-              date: "2024-01-12",
-              comment: "Very thorough and punctual.",
-            },
-          ],
-        },
-        {
-          id: 3,
-          name: "Meera Patel",
-          image:
-            "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQj0XfxMbdcZq_xITpjFKmsmrtlIiLXjOpHWg&s",
-          serviceType: "Child Care",
-          rating: 4.6,
-          location: "delhi",
-          area: "dwarka",
-          price: 9000,
-          experience: "4 years",
-          description:
-            "Dedicated child care provider with a nurturing approach.",
-          availability: ["Tuesday", "Wednesday", "Thursday", "Saturday"],
-          reviews: [
-            {
-              user: "Amit S.",
-              rating: 4.5,
-              date: "2024-01-18",
-              comment: "Great with kids and very reliable.",
-            },
-          ],
-        },
-        {
-          id: 4,
-          name: "Suresh Iyer",
-          image:
-            "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcStJ66qMv2mblO0jsaWdItEd9XfbZWvnqlGAQ&s",
-          serviceType: "Gardening",
-          rating: 4.9,
-          location: "mumbai",
-          area: "andheri",
-          price: 15000,
-          experience: "10 years",
-          description:
-            "Expert gardener specializing in landscaping and plant care.",
-          availability: ["Monday", "Tuesday", "Thursday", "Friday"],
-          reviews: [
-            {
-              user: "Priya R.",
-              rating: 5,
-              date: "2024-01-20",
-              comment: "Transformed my garden beautifully!",
-            },
-          ],
-        },
-        {
-          id: 5,
-          name: "Anita Desai",
-          image:
-            "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ305w-rKlUVKrufMk-B9h8JT3R1MAWoq7c1A&s",
-          serviceType: "Laundry",
-          rating: 4.7,
-          location: "bangalore",
-          area: "koramangala",
-          price: 7000,
-          experience: "3 years",
-          description: "Professional laundry service with attention to detail.",
-          availability: ["Monday", "Wednesday", "Friday", "Saturday"],
-          reviews: [
-            {
-              user: "Ravi K.",
-              rating: 4.5,
-              date: "2024-01-22",
-              comment: "Excellent service and very reliable.",
-            },
-          ],
-        },
-        {
-          id: 6,
-          name: "Ramesh Kumar",
-          image:
-            "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQmKlJWvsGOafAMr0EC1nVYN0DUmVM4h2qPcg&s",
-          serviceType: "Cleaning",
-          rating: 4.3,
-          location: "chennai",
-          area: "t nagar",
-          price: 10000,
-          experience: "6 years",
-          description:
-            "Professional cleaner with expertise in office cleaning.",
-          availability: ["Monday", "Tuesday", "Thursday", "Friday"],
-          reviews: [
-            {
-              user: "Karthik S.",
-              rating: 4.5,
-              date: "2024-01-25",
-              comment: "Very efficient and reliable.",
-            },
-          ],
-        },
-        {
-          id: 7,
-          name: "Sunita Sharma",
-          image:
-            "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR1w8vwRSEllrM9GBr4D4cpT2jiwaBjQ73OCg&s",
-          serviceType: "Child Care",
-          rating: 4.7,
-          location: "hyderabad",
-          area: "hitech city",
-          price: 11000,
-          experience: "7 years",
-          description:
-            "Experienced child care provider with a focus on early education.",
-          availability: ["Monday", "Wednesday", "Friday", "Saturday"],
-          reviews: [
-            {
-              user: "Priya R.",
-              rating: 4.7,
-              date: "2024-01-28",
-              comment: "Great with kids and very caring.",
-            },
-          ],
-        },
-        {
-          id: 8,
-          name: "Vijay Reddy",
-          image:
-            "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTK-OyiBlfVJnc4gHbnJEKOSpNflsz8tO9pNA&s",
-          serviceType: "Gardening",
-          rating: 4.8,
-          location: "kolkata",
-          area: "salt lake",
-          price: 13000,
-          experience: "9 years",
-          description: "Expert gardener with a passion for organic gardening.",
-          availability: ["Tuesday", "Wednesday", "Thursday", "Saturday"],
-          reviews: [
-            {
-              user: "Rahul M.",
-              rating: 4.8,
-              date: "2024-01-30",
-              comment: "Transformed my garden into a paradise!",
-            },
-          ],
-        },
-        {
-          id: 9,
-          name: "Anjali Gupta",
-          image:
-            "https://www.shutterstock.com/image-photo/indian-woman-doing-laundry-260nw-796939462.jpg",
-          serviceType: "Laundry",
-          rating: 4.6,
-          location: "pune",
-          area: "koregaon park",
-          price: 9000,
-          experience: "5 years",
-          description:
-            "Professional laundry service with expertise in delicate fabrics.",
-          availability: ["Monday", "Tuesday", "Thursday", "Friday"],
-          reviews: [
-            {
-              user: "Sneha P.",
-              rating: 4.6,
-              date: "2024-02-01",
-              comment: "Excellent service and very reliable.",
-            },
-          ],
-        },
-      ];
-
-      // Initialize the page
-      document.addEventListener("DOMContentLoaded", () => {
-        displayWorkers(workers); // Display all workers initially
+    // Location data
+    const areasByCity = {
+      delhi: ["karol bagh", "connaught place", "dwarka", "rohini"],
+      mumbai: ["andheri", "bandra", "juhu", "colaba"],
+      bangalore: ["koramangala", "indiranagar", "whitefield", "jp nagar"],
+      chennai: ["t nagar", "anna nagar", "adyar", "mylapore"],
+      hyderabad: ["hitech city", "banjara hills", "jubilee hills", "secunderabad"],
+      kolkata: ["salt lake", "park street", "howrah", "new town"],
+      pune: ["koregaon park", "hinjewadi", "wakad", "baner"],
+    };
+    
+    // Initialize the page
+    document.addEventListener("DOMContentLoaded", () => {
+      // Fetch workers from the server
+      fetchWorkers();
+    });
+    
+    // Fetch workers from the server
+    async function fetchWorkers() {
+      try {
+        const response = await fetch('/api/workers');
+        if (!response.ok) {
+          throw new Error(`Server responded with status: ${response.status}`);
+        }
+        const workers = await response.json();
+        displayWorkers(workers);
+      } catch (error) {
+        console.error('Error fetching workers:', error);
+        document.getElementById("workersGrid").innerHTML = '<p style="text-align: center; padding: 2rem;">Error loading workers: ' + error.message + '</p>';
+      }
+    }
+    
+    // Display workers in the grid
+    function displayWorkers(workers) {
+      const grid = document.getElementById("workersGrid");
+      
+      // Clear the grid
+      grid.innerHTML = "";
+      
+      // Check if there are any workers
+      if (!workers || workers.length === 0) {
+        grid.innerHTML = '<p style="text-align: center; padding: 2rem;">No workers found</p>';
+        return;
+      }
+      
+      // Create and append worker cards
+      workers.forEach((worker) => {
+        const card = document.createElement("div");
+        card.className = "worker-card";
+        
+        // Handle potential undefined values
+        const firstName = worker.firstName || 'Unknown';
+        const lastName = worker.lastName || '';
+        const location = worker.location ? worker.location.charAt(0).toUpperCase() + worker.location.slice(1) : 'Location unknown';
+        const serviceType = worker.serviceType || 'General Services';
+        const experience = worker.experience || 0;
+        const price = worker.price ? `₹${worker.price.toLocaleString()}` : 'Contact for price';
+        const rating = worker.ratingId?.average ? worker.ratingId.average : 'N/A';
+        const image = worker.image || '/images/default-worker.jpg';
+        
+        card.innerHTML = `
+          <div class="worker-image">
+            <img src="${image}" alt="${firstName} ${lastName}" onerror="this.src='/images/default-worker.jpg'">
+            <div class="worker-service-type">${serviceType}</div>
+            <div class="worker-rating">★ <span>${rating}</span></div>
+          </div>
+          <div class="worker-details">
+            <h3 class="worker-name">${firstName} ${lastName}</h3>
+            <p class="worker-location">📍 ${location}</p>
+            <p class="worker-price">${price}/month</p>
+            <p class="worker-experience">${experience} years</p>
+            <button class="view-details-btn" onclick="showWorkerDetails('${worker._id}')">View Details</button>
+          </div>
+        `;
+        
+        grid.appendChild(card);
       });
-
-      // Display workers in the grid
-      function displayWorkers(workersToDisplay) {
-        const grid = document.getElementById("workersGrid");
-        grid.innerHTML = "";
-
-        workersToDisplay.forEach((worker) => {
-          const card = document.createElement("div");
-          card.className = "worker-card";
-          card.innerHTML = `
-                    <div class="worker-image">
-                        <img src="${worker.image}" alt="${worker.name}">
-                        <div class="worker-service-type">${
-                          worker.serviceType
-                        }</div>
-                        <div class="worker-rating">★ <span>${
-                          worker.rating
-                        }</span></div>
-                    </div>
-                    <div class="worker-details">
-                        <h3 class="worker-name">${worker.name}</h3>
-                        <p class="worker-location">📍 ${
-                          worker.location.charAt(0).toUpperCase() +
-                          worker.location.slice(1)
-                        } - ${
-            worker.area.charAt(0).toUpperCase() + worker.area.slice(1)
-          }</p>
-                        <p class="worker-price">₹${worker.price.toLocaleString()}/month</p>
-                        <p class="worker-experience">${worker.experience}</p>
-                        <button class="view-details-btn" onclick="showWorkerDetails(${
-                          worker.id
-                        })">View Details</button>
-                    </div>
-                `;
-          grid.appendChild(card);
-        });
+    }
+    
+    // Update area dropdown when location changes
+    function locationChanged() {
+      const locationSelect = document.getElementById("location");
+      const areaSelect = document.getElementById("area");
+      const location = locationSelect.value;
+    
+      // Reset area dropdown
+      areaSelect.innerHTML = '<option value="">Select Area</option>';
+    
+      if (!location) {
+        areaSelect.disabled = true;
+        return;
       }
-
-      // Location data
-      const areasByCity = {
-        delhi: ["karol bagh", "connaught place", "dwarka", "rohini"],
-        mumbai: ["andheri", "bandra", "juhu", "colaba"],
-        bangalore: ["koramangala", "indiranagar", "whitefield", "jp nagar"],
-        chennai: ["t nagar", "anna nagar", "adyar", "mylapore"],
-        hyderabad: [
-          "hitech city",
-          "banjara hills",
-          "jubilee hills",
-          "secunderabad",
-        ],
-        kolkata: ["salt lake", "park street", "howrah", "new town"],
-        pune: ["koregaon park", "hinjewadi", "wakad", "baner"],
-      };
-
-      // Update area dropdown when location changes
-      function locationChanged() {
-        const locationSelect = document.getElementById("location");
-        const areaSelect = document.getElementById("area");
-        const location = locationSelect.value;
-
-        // Reset area dropdown
-        areaSelect.innerHTML = '<option value="">Select Area</option>';
-
-        if (!location) {
-          areaSelect.disabled = true;
-          return;
-        }
-
-        // Enable and populate area dropdown
-        areaSelect.disabled = false;
-        const areas = areasByCity[location] || [];
-
-        areas.forEach((area) => {
-          const option = document.createElement("option");
-          option.value = area;
-          option.textContent = area.charAt(0).toUpperCase() + area.slice(1);
-          areaSelect.appendChild(option);
-        });
+    
+      // Enable and populate area dropdown
+      areaSelect.disabled = false;
+      const areas = areasByCity[location] || [];
+    
+      areas.forEach((area) => {
+        const option = document.createElement("option");
+        option.value = area;
+        option.textContent = area.charAt(0).toUpperCase() + area.slice(1);
+        areaSelect.appendChild(option);
+      });
+    }
+    
+    // Search by location and area
+    function searchLocation() {
+      const location = document.getElementById("location").value.toLowerCase();
+      const area = document.getElementById("area").value.toLowerCase();
+    
+      if (!location) {
+        alert("Please select a location");
+        return;
       }
-
-      // Search by location and area
-      function searchLocation() {
-        const location = document
-          .getElementById("location")
-          .value.toLowerCase();
-        const area = document.getElementById("area").value.toLowerCase();
-
-        if (!location) {
-          alert("Please select a location");
-          return;
-        }
-        if (!area) {
-          alert("Please select an area");
-          return;
-        }
-
-        // Apply all filters
-        applyFilters();
-
-        // Close the sidebar on mobile
-        const filtersSidebar = document.querySelector(".filters-sidebar");
-        filtersSidebar.classList.remove("active");
+      if (!area) {
+        alert("Please select an area");
+        return;
       }
-
-      // Filter workers based on selected criteria
-      function applyFilters() {
-        const location = document
-          .getElementById("location")
-          .value.toLowerCase();
-        const area = document.getElementById("area").value.toLowerCase();
-        const serviceType = document.getElementById("serviceType").value;
-        const price = document.getElementById("price").value;
-        const rating = document.getElementById("rating").value;
-
-        let filteredWorkers = workers;
-
-        // Apply service type filter first
-        if (serviceType) {
-          filteredWorkers = filteredWorkers.filter(
-            (w) => w.serviceType === serviceType
-          );
+    
+      // Apply all filters
+      applyFilters();
+    
+      // Close the sidebar on mobile
+      const filtersSidebar = document.querySelector(".filters-sidebar");
+      filtersSidebar.classList.remove("active");
+    }
+    
+    // Filter workers based on selected criteria
+    async function applyFilters() {
+      const location = document.getElementById("location").value.toLowerCase();
+      const area = document.getElementById("area").value.toLowerCase();
+      const serviceType = document.getElementById("serviceType").value;
+      const price = document.getElementById("price").value;
+      const rating = document.getElementById("rating").value;
+    
+      // Build query parameters
+      const queryParams = new URLSearchParams();
+      if (location) queryParams.append('location', location);
+      if (area) queryParams.append('area', area);
+      if (serviceType) queryParams.append('serviceType', serviceType);
+      if (price) queryParams.append('price', price);
+      if (rating) queryParams.append('rating', rating);
+    
+      try {
+        const response = await fetch(`/api/workers?${queryParams.toString()}`);
+        if (!response.ok) {
+          throw new Error(`Server responded with status: ${response.status}`);
         }
-
-        // Apply location and area filters
-        if (location && area) {
-          filteredWorkers = filteredWorkers.filter(
-            (w) =>
-              w.location.toLowerCase() === location &&
-              w.area.toLowerCase() === area
-          );
-        }
-
-        // Apply price filter if selected
-        if (price) {
-          const [min, max] = price.split("-").map(Number);
-          filteredWorkers = filteredWorkers.filter((w) => {
-            if (max) {
-              return w.price >= min && w.price <= max;
-            }
-            return w.price >= min;
-          });
-        }
-
-        // Apply rating filter if selected
-        if (rating) {
-          filteredWorkers = filteredWorkers.filter(
-            (w) => w.rating >= Number(rating)
-          );
-        }
-
+        
+        const filteredWorkers = await response.json();
+    
         // Display results
-        if (filteredWorkers.length === 0) {
-          document.getElementById("workersGrid").innerHTML =
-            '<p style="text-align: center; padding: 2rem;">No workers found matching your criteria</p>';
-        } else {
-          displayWorkers(filteredWorkers);
-        }
-
+        displayWorkers(filteredWorkers);
+    
         // Close the sidebar on mobile
         const filtersSidebar = document.querySelector(".filters-sidebar");
         filtersSidebar.classList.remove("active");
+      } catch (error) {
+        console.error('Error applying filters:', error);
+        document.getElementById("workersGrid").innerHTML = '<p style="text-align: center; padding: 2rem;">Error loading workers: ' + error.message + '</p>';
       }
-      // Clear all filters
-      function clearFilters() {
-        document.getElementById("location").value = "";
-        document.getElementById("area").value = "";
-        document.getElementById("area").disabled = true;
-        document.getElementById("price").value = "";
-        document.getElementById("rating").value = "";
-        document.getElementById("serviceType").value = "";
-        displayWorkers(workers); // Reset to show all workers
-      }
-
-      // Show worker details modal
-      function showWorkerDetails(workerId) {
-        const worker = workers.find((w) => w.id === workerId);
+    }
+    
+    // Clear all filters
+    function clearFilters() {
+      document.getElementById("location").value = "";
+      document.getElementById("area").value = "";
+      document.getElementById("area").disabled = true;
+      document.getElementById("price").value = "";
+      document.getElementById("rating").value = "";
+      document.getElementById("serviceType").value = "";
+      fetchWorkers(); // Reset to show all workers
+    }
+    
+    // Placeholder for serviceTypeChanged function
+    function serviceTypeChanged() {
+      // This can be expanded if you need specific behavior when service type changes
+    }
+    
+    // Show worker details modal
+    async function showWorkerDetails(workerId) {
+      try {
+        const response = await fetch(`/api/workers/${workerId}`);
+        if (!response.ok) {
+          throw new Error(`Server responded with status: ${response.status}`);
+        }
+        
+        const worker = await response.json();
         const modal = document.getElementById("workerModal");
         const modalContent = document.getElementById("modalContent");
-
-        modalContent.innerHTML = `
-                <div class="worker-modal-header">
-                    <div class="worker-modal-image">
-                        <img src="${worker.image}" alt="${worker.name}">
-                    </div>
-                    <div class="worker-modal-title">
-                        <h2 class="worker-modal-name">${worker.name}</h2>
-                        <div class="worker-modal-services">
-                            <span class="worker-modal-service">${
-                              worker.serviceType
-                            }</span>
-                        </div>
-                        <p class="worker-modal-location">📍 ${
-                          worker.location.charAt(0).toUpperCase() +
-                          worker.location.slice(1)
-                        }</p>
-                        <div class="worker-modal-stats">
-                            <div class="worker-modal-stat">
-                                <span class="worker-modal-stat-value">₹${worker.price.toLocaleString()}</span>
-                                <span class="worker-modal-stat-label">per month</span>
-                            </div>
-                            <div class="worker-modal-stat">
-                                <span class="worker-modal-stat-value">★ ${
-                                  worker.rating
-                                }</span>
-                                <span class="worker-modal-stat-label">rating</span>
-                            </div>
-                            <div class="worker-modal-stat">
-                                <span class="worker-modal-stat-value">${
-                                  worker.experience
-                                }</span>
-                                <span class="worker-modal-stat-label">experience</span>
-                            </div>
-                        </div>
-                        <button class="worker-modal-book-btn">Book Now</button>
-                    </div>
-                </div>
-                <div class="worker-modal-description">
-                    <h3 class="section-title">About</h3>
-                    <p>${worker.description}</p>
-                </div>
-                <div class="availability-container">
-                    <h3 class="section-title">Availability</h3>
-                    <div class="availability-grid">
-                        ${worker.availability
-                          .map(
-                            (day) => `
-                            <div class="time-slot available">${day}</div>
-                        `
-                          )
-                          .join("")}
-                    </div>
-                </div>
-                <div class="reviews-container">
-                    <h3 class="section-title">Reviews</h3>
-                    ${worker.reviews
-                      .map(
-                        (review) => `
-                        <div class="review-item">
-                            <div class="review-header">
-                                <span class="review-user">${review.user}</span>
-                                <span class="review-rating">★ ${review.rating}</span>
-                            </div>
-                            <div class="review-date">${review.date}</div>
-                            <p>${review.comment}</p>
-                        </div>
-                    `
-                      )
-                      .join("")}
-                </div>
-            `;
-
-        modal.style.display = "block";
-      }
-
-      // Close modal
-      function closeModal() {
-        document.getElementById("workerModal").style.display = "none";
-      }
-
-      // Close modal when clicking outside
-      window.onclick = function (event) {
-        const modal = document.getElementById("workerModal");
-        if (event.target == modal) {
-          modal.style.display = "none";
+        
+        // Handle potential undefined values
+        const firstName = worker.firstName || 'Unknown';
+        const lastName = worker.lastName || '';
+        const location = worker.location ? worker.location.charAt(0).toUpperCase() + worker.location.slice(1) : 'Location unknown';
+        const serviceType = worker.serviceType || 'General Services';
+        const experience = worker.experience || 0;
+        const price = worker.price ? `₹${worker.price.toLocaleString()}` : 'Contact for price';
+        const rating = worker.ratingId?.average || 'N/A';
+        const description = worker.description || 'No description available';
+        const image = worker.image || '/images/default-worker.jpg';
+        
+        // Generate reviews HTML
+        let reviewsHtml = '<p>No reviews available</p>';
+        if (worker.ratingId?.reviews && worker.ratingId.reviews.length > 0) {
+          reviewsHtml = worker.ratingId.reviews.map(review => `
+            <div class="review-item">
+              <div class="review-header">
+                <span class="review-user">${review.user || 'Anonymous'}</span>
+                <span class="review-rating">★ ${review.rating}</span>
+              </div>
+              <div class="review-date">${review.date || 'N/A'}</div>
+              <p>${review.comment || 'No comment'}</p>
+            </div>
+          `).join('');
         }
-      };
-
-      // Toggle filters sidebar on mobile
-      function toggleFilters() {
-        const filtersSidebar = document.querySelector(".filters-sidebar");
-        filtersSidebar.classList.toggle("active");
+    
+        modalContent.innerHTML = `
+          <div class="worker-modal-header">
+            <div class="worker-modal-image">
+              <img src="${image}" alt="${firstName} ${lastName}" onerror="this.src='/images/default-worker.jpg'">
+            </div>
+            <div class="worker-modal-title">
+              <h2 class="worker-modal-name">${firstName} ${lastName}</h2>
+              <div class="worker-modal-services">
+                <span class="worker-modal-service">${serviceType}</span>
+              </div>
+              <p class="worker-modal-location">📍 ${location}</p>
+              <div class="worker-modal-stats">
+                <div class="worker-modal-stat">
+                  <span class="worker-modal-stat-value">${price}</span>
+                  <span class="worker-modal-stat-label">per month</span>
+                </div>
+                <div class="worker-modal-stat">
+                  <span class="worker-modal-stat-value">★ ${rating}</span>
+                  <span class="worker-modal-stat-label">rating</span>
+                </div>
+                <div class="worker-modal-stat">
+                  <span class="worker-modal-stat-value">${experience} years</span>
+                  <span class="worker-modal-stat-label">experience</span>
+                </div>
+              </div>
+              <button class="worker-modal-book-btn">Book Now</button>
+            </div>
+          </div>
+          <div class="worker-modal-description">
+            <h3 class="section-title">About</h3>
+            <p>${description}</p>
+          </div>
+          <div class="availability-container">
+            <h3 class="section-title">Availability</h3>
+            <div class="availability-grid">
+              ${worker.availability ? 
+                '<div class="time-slot available">Available</div>' : 
+                '<div class="time-slot unavailable">Not Available</div>'}
+            </div>
+          </div>
+          <div class="reviews-container">
+            <h3 class="section-title">Reviews</h3>
+            ${reviewsHtml}
+          </div>
+        `;
+    
+        modal.style.display = "block";
+      } catch (error) {
+        console.error('Error fetching worker details:', error);
+        alert('Error loading worker details: ' + error.message);
       }
+    }
+    
+    // Close modal
+    function closeModal() {
+      document.getElementById("workerModal").style.display = "none";
+    }
+    
+    // Close modal when clicking outside
+    window.onclick = function (event) {
+      const modal = document.getElementById("workerModal");
+      if (event.target == modal) {
+        modal.style.display = "none";
+      }
+    };
+    
+    // Toggle filters sidebar on mobile
+    function toggleFilters() {
+      const filtersSidebar = document.querySelector(".filters-sidebar");
+      filtersSidebar.classList.toggle("active");
+    }
     </script>
   </body>
 </html>

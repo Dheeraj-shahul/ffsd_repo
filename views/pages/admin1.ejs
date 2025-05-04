@@ -1,0 +1,642 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Dashboard</title>
+  <!-- Add Poppins font from Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    /* Base styles with Poppins */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: 'Poppins', Arial, sans-serif;
+      background: #f4f4f4;
+      padding: 20px;
+    }
+    
+    h1, h2, h3, h4, h5, h6 {
+      font-family: 'Poppins', Arial, sans-serif;
+      color: #333;
+    }
+    
+    h1 {
+      text-align: center;
+      font-weight: 600;
+      margin-bottom: 20px;
+    }
+    
+    h2 {
+      color: #007bff;
+      font-weight: 500;
+      margin-bottom: 15px;
+    }
+    
+    h3 {
+      font-weight: 500;
+      font-size: 16px;
+    }
+    
+    /* Navigation */
+    .navbar {
+      position: sticky;
+      top: 0;
+      background: #007bff;
+      padding: 12px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+      z-index: 1000;
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+    
+    .navbar a {
+      color: white;
+      text-decoration: none;
+      margin: 0 15px;
+      font-weight: 500;
+      transition: all 0.3s ease;
+      font-family: 'Poppins', Arial, sans-serif;
+    }
+    
+    .navbar a:hover {
+      color: #ffc107;
+      transform: translateY(-2px);
+    }
+    
+    /* Section styles */
+    section {
+      margin: 25px 0;
+      padding: 25px;
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 3px 10px rgba(0,0,0,0.08);
+    }
+    
+    /* Stats grid */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 20px;
+    }
+    
+    .stat-card {
+      padding: 18px;
+      background: #f8f9fa;
+      border-radius: 10px;
+      text-align: center;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    
+    .stat-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    }
+    
+    .stat-card p {
+      font-size: 18px;
+      font-weight: 600;
+      margin-top: 8px;
+      color: #007bff;
+    }
+    
+    /* Table styles */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+      font-family: 'Poppins', Arial, sans-serif;
+    }
+    
+    th, td {
+      padding: 14px;
+      text-align: left;
+      border-bottom: 1px solid #e0e0e0;
+    }
+    
+    th {
+      background: #007bff;
+      color: white;
+      font-weight: 500;
+    }
+    
+    tr:hover {
+      background: #f5f5f5;
+    }
+    
+    /* Action buttons */
+    .action-buttons {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    
+    .action-buttons a, 
+    .action-buttons button {
+      padding: 8px 12px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      text-decoration: none;
+      font-size: 14px;
+      font-family: 'Poppins', Arial, sans-serif;
+      font-weight: 500;
+      transition: all 0.2s ease;
+    }
+    
+    .action-buttons a {
+      background: #007bff;
+      color: white;
+    }
+    
+    .action-buttons a:hover {
+      background: #0056b3;
+      transform: translateY(-2px);
+    }
+    
+    .action-buttons button {
+      background: #6c757d;
+      color: white;
+    }
+    
+    .action-buttons button:hover {
+      background: #5a6268;
+      transform: translateY(-2px);
+    }
+    
+    .action-buttons .danger {
+      background: #dc3545;
+    }
+    
+    .action-buttons .danger:hover {
+      background: #c82333;
+    }
+    
+    .action-buttons .success {
+      background: #28a745;
+    }
+    
+    .action-buttons .success:hover {
+      background: #218838;
+    }
+    
+    /* Charts section */
+    .charts {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 25px;
+    }
+    
+    .chart-container {
+      padding: 20px;
+      background: #f8f9fa;
+      border-radius: 10px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    }
+  </style>
+</head>
+<body>
+  <h1>Admin Dashboard</h1>
+
+  <!-- Navigation Header -->
+  <nav class="navbar">
+    <a href="#overview">Overview</a>
+    <a href="#property-management">Properties</a>
+    <a href="#user-management">Users</a>
+    <a href="#service-bookings">Bookings</a>
+    <a href="#payments">Payments</a>
+    <a href="#notifications">Notifications</a>
+    <a href="#reports">Reports</a>
+  </nav>
+
+  <!-- Dashboard Overview -->
+  <section id="overview" class="overview">
+    <h2>Dashboard Overview</h2>
+    <div class="stats-grid">
+      <% [
+        { title: 'Total Properties', value: stats.totalProperties },
+        { title: 'Total Renters', value: stats.totalRenters },
+        { title: 'Total Owners', value: stats.totalOwners },
+        { title: 'Total Workers', value: stats.totalWorkers },
+        { title: 'Active Rentals', value: stats.activeRentals },
+        { title: 'Pending Bookings', value: stats.pendingBookings },
+        { title: 'Cancelled Bookings', value: stats.cancelledBookings },
+        { title: 'Active Users', value: stats.activeUsers },
+        { title: 'Total Revenue', value: `₹${stats.totalRevenue?.toFixed(2)}` },
+        { title: 'Daily Revenue', value: `₹${stats.revenueDaily?.toFixed(2)}` },
+        { title: 'Weekly Revenue', value: `₹${stats.revenueWeekly?.toFixed(2)}` },
+        { title: 'Monthly Revenue', value: `₹${stats.revenueMonthly?.toFixed(2)}` },
+        { title: 'Active Properties', value: stats.propertiesActive },
+        { title: 'Pending Properties', value: stats.propertiesPending },
+        { title: 'Available Workers', value: stats.workersAvailable }
+      ].forEach(stat => { %>
+        <div class="stat-card">
+          <h3><%= stat.title %></h3>
+          <p><%= stat.value %></p>
+        </div>
+      <% }) %>
+    </div>
+  </section>
+
+  <!-- Property Management -->
+  <section id="property-management" class="property-management">
+    <h2>Property Management</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Name</th>
+          <th>Owner</th>
+          <th>Location</th>
+          <th>Type</th>
+          <th>Subtype</th>
+          <th>Status</th>
+          <th>Rented</th>
+          <th>Tenant</th>
+          <th>Workers</th>
+          <th>Price</th>
+          <th>Rating</th>
+          <th>Reviews</th>
+          <th>Created</th>
+          <th>Updated</th>
+          <th>Verified</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% properties.forEach(p => { %>
+          <tr>
+            <td><%= p.id %></td>
+            <td><%= p.name %></td>
+            <td><a href="/admin/user/<%= p.ownerId %>/owner"><%= p.owner || 'N/A' %></a></td>
+            <td><%= p.location %></td>
+            <td><%= p.type %></td>
+            <td><%= p.subtype %></td>
+            <td><%= p.status %></td>
+            <td><%= p.isRented ? 'Yes' : 'No' %></td>
+            <td>
+              <% if (p.tenantId) { %>
+                <a href="/admin/user/<%= p.tenantId %>/tenant"><%= p.tenant || 'N/A' %></a>
+              <% } else { %>
+                N/A
+              <% } %>
+            </td>
+            <td><%= p.activeWorkers?.length ? p.activeWorkers.map(w => w.name).join(', ') : 'None' %></td>
+            <td>₹<%= p.price?.toFixed(2) %></td>
+            <td><%= p.rating ? p.rating.toFixed(1) : 'N/A' %></td>
+            <td><%= p.reviews || 0 %></td>
+            <td><%= p.createdAt ? new Date(p.createdAt).toLocaleDateString() : 'N/A' %></td>
+            <td><%= p.updatedAt ? new Date(p.updatedAt).toLocaleDateString() : 'N/A' %></td>
+            <td><%= p.isVerified ? 'Yes' : 'No' %></td>
+            <td>
+              <div class="action-buttons">
+                <a href="/admin/property/<%= p.id %>">View</a>
+                <a href="/admin/property/edit/<%= p.id %>">Edit</a>
+                <a href="/property?id=<%= p.id %>" target="_blank">Site</a>
+                <a href="/admin/property/assign-worker/<%= p.id %>">Assign</a>
+                <button class="success" onclick="toggleVerify('<%= p.id %>', <%= p.isVerified ? 'false' : 'true' %>)">
+                  <%= p.isVerified ? 'Unverify' : 'Verify' %>
+                </button>
+                <button class="success" onclick="toggleStatus('<%= p.id %>', '<%= p.status === 'Active' ? 'Inactive' : 'Active' %>')">
+                  <%= p.status === 'Active' ? 'Deactivate' : 'Activate' %>
+                </button>
+                <button class="danger" onclick="deleteProperty('<%= p.id %>')">Delete</button>
+              </div>
+            </td>
+          </tr>
+        <% }) %>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- User Management -->
+  <section id="user-management" class="user-management">
+    <h2>User Management</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Name</th>
+          <th>Role</th>
+          <th>Email</th>
+          <th>Phone</th>
+          <th>Location</th>
+          <th>Registered</th>
+          <th>Last Login</th>
+          <th>Status</th>
+          <th>Bookings</th>
+          <th>Service</th>
+          <th>Experience</th>
+          <th>Properties</th>
+          <th>Account</th>
+          <th>UPI</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% users.forEach(u => { %>
+          <tr>
+            <td><%= u.id %></td>
+            <td><%= u.firstName %> <%= u.lastName %></td>
+            <td><%= u.userType %></td>
+            <td><%= u.email %></td>
+            <td><%= u.phone %></td>
+            <td><%= u.location %></td>
+            <td><%= u.createdAt ? new Date(u.createdAt).toLocaleDateString() : 'N/A' %></td>
+            <td><%= u.lastLogin ? new Date(u.lastLogin).toLocaleDateString() : 'Never' %></td>
+            <td><%= u.status %></td>
+            <td><%= u.tenantBookings || 'N/A' %></td>
+            <td><%= u.serviceType || 'N/A' %></td>
+            <td><%= u.experience ? u.experience + ' yrs' : 'N/A' %></td>
+            <td><%= u.numProperties || 'N/A' %></td>
+            <td><%= u.accountNo || 'N/A' %></td>
+            <td><%= u.upiid || 'N/A' %></td>
+            <td>
+              <div class="action-buttons">
+                <a href="/admin/user/<%= u.id %>/<%= u.userType %>">View</a>
+                <a href="/admin/user/edit/<%= u.id %>/<%= u.userType %>">Edit</a>
+                <button class="success" onclick="resetPassword('<%= u.id %>', '<%= u.userType %>')">Reset Password</button>
+                <button class="success" onclick="verifyEmail('<%= u.id %>', '<%= u.userType %>')">Verify Email</button>
+                <button class="success" onclick="suspendUser('<%= u.id %>', '<%= u.userType %>', '<%= u.status === 'Active' ? 'Suspended' : 'Active' %>')">
+                  <%= u.status === 'Active' ? 'Suspend' : 'Activate' %>
+                </button>
+                <button class="danger" onclick="deleteUser('<%= u.id %>', '<%= u.userType %>')">Delete</button>
+              </div>
+            </td>
+          </tr>
+        <% }) %>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- Service Bookings -->
+  <section id="service-bookings" class="service-bookings">
+    <h2>Service Bookings</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>User</th>
+          <th>Property</th>
+          <th>Status</th>
+          <th>Booked</th>
+          <th>Start</th>
+          <th>End</th>
+          <th>Amount</th>
+          <th>Worker</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% bookings.forEach(b => { %>
+          <tr>
+            <td><%= b.id %></td>
+            <td><a href="/admin/user/<%= b.user %>/tenant"><%= b.userName || 'N/A' %></a></td>
+            <td><a href="/admin/property/<%= b.property %>"><%= b.propertyName || 'N/A' %></a></td>
+            <td><%= b.status %></td>
+            <td><%= b.bookingDate ? new Date(b.bookingDate).toLocaleDateString() : 'N/A' %></td>
+            <td><%= b.startDate ? new Date(b.startDate).toLocaleDateString() : 'N/A' %></td>
+            <td><%= b.endDate ? new Date(b.endDate).toLocaleDateString() : 'N/A' %></td>
+            <td>₹<%= b.amount ? b.amount.toFixed(2) : 'N/A' %></td>
+            <td>
+              <% if (b.assignedWorker) { %>
+                <a href="/admin/user/<%= b.assignedWorker %>/worker"><%= b.workerName || 'N/A' %></a>
+              <% } else { %>
+                None
+              <% } %>
+            </td>
+            <td>
+              <div class="action-buttons">
+                <a href="/admin/booking/<%= b.id %>">View</a>
+                <a href="/admin/booking/assign-worker/<%= b.id %>">Assign</a>
+                <% if (b.status === 'Pending') { %>
+                  <button class="success" onclick="approveBooking('<%= b.id %>')">Approve</button>
+                  <button class="danger" onclick="rejectBooking('<%= b.id %>')">Reject</button>
+                <% } %>
+                <button class="danger" onclick="cancelBooking('<%= b.id %>')">Cancel</button>
+              </div>
+            </td>
+          </tr>
+        <% }) %>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- Payments and Transactions -->
+  <section id="payments" class="payments">
+    <h2>Payments and Transactions</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>User</th>
+          <th>Amount</th>
+          <th>Status</th>
+          <th>Date</th>
+          <th>Booking</th>
+          <th>Method</th>
+          <th>Transaction</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% payments.forEach(p => { %>
+          <tr>
+            <td><%= p.id %></td>
+            <td><a href="/admin/user/<%= p.user %>/tenant"><%= p.userName || 'N/A' %></a></td>
+            <td>₹<%= p.amount?.toFixed(2) %></td>
+            <td><%= p.status %></td>
+            <td><%= p.paymentDate ? new Date(p.paymentDate).toLocaleDateString() : 'N/A' %></td>
+            <td><a href="/admin/booking/<%= p.bookingId %>"><%= p.bookingId || 'N/A' %></a></td>
+            <td><%= p.paymentMethod || 'N/A' %></td>
+            <td><%= p.transactionId || 'N/A' %></td>
+            <td>
+              <div class="action-buttons">
+                <a href="/admin/payment/<%= p.id %>">View</a>
+                <% if (p.status === 'Completed') { %>
+                  <button class="danger" onclick="refundPayment('<%= p.id %>')">Refund</button>
+                <% } else if (p.status === 'Failed') { %>
+                  <button class="success" onclick="retryPayment('<%= p.id %>')">Retry</button>
+                <% } %>
+              </div>
+            </td>
+          </tr>
+        <% }) %>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- Requests and Notifications -->
+  <section id="notifications" class="notifications">
+    <h2>Requests and Notifications</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Type</th>
+          <th>Message</th>
+          <th>Recipient</th>
+          <th>Worker</th>
+          <th>Date</th>
+          <th>Status</th>
+          <th>Priority</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% notifications.forEach(n => { %>
+          <tr>
+            <td><%= n.id %></td>
+            <td><%= n.type %></td>
+            <td><%= n.message %></td>
+            <td><a href="/admin/user/<%= n.recipient %>/<%= n.recipientType %>"><%= n.recipientName || 'N/A' %></a></td>
+            <td>
+              <% if (n.worker) { %>
+                <a href="/admin/user/<%= n.worker %>/worker"><%= n.workerName || 'N/A' %></a>
+              <% } else { %>
+                None
+              <% } %>
+            </td>
+            <td><%= n.createdDate ? new Date(n.createdDate).toLocaleDateString() : 'N/A' %></td>
+            <td><%= n.status %></td>
+            <td><%= n.priority %></td>
+            <td>
+              <div class="action-buttons">
+                <a href="/admin/notification/<%= n.id %>">View</a>
+                <a href="/admin/notification/assign-worker/<%= n.id %>">Assign</a>
+                <button class="success" onclick="markNotification('<%= n.id %>', 'Read')">Mark Read</button>
+                <button class="success" onclick="respondNotification('<%= n.id %>')">Respond</button>
+                <button class="success" onclick="escalateNotification('<%= n.id %>')">Escalate</button>
+                <button class="success" onclick="completeTask('<%= n.id %>')">Complete</button>
+                <button class="success" onclick="requestUpdate('<%= n.id %>')">Update</button>
+              </div>
+            </td>
+          </tr>
+        <% }) %>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- Reports and Analytics -->
+  <section id="reports" class="reports">
+    <h2>Reports and Analytics</h2>
+    <div class="charts">
+      <% [
+        { id: 'revenueChart', title: 'Monthly Revenue', type: 'line', labels: ['Jan', 'Feb', 'Mar', 'Apr'], data: [stats.monthlyRevenue || 0, 0, 0, 0], color: '#007bff' },
+        { id: 'userGrowthChart', title: 'User Growth', type: 'bar', labels: ['Q1', 'Q2', 'Q3', 'Q4'], data: [stats.userGrowth || 0, 0, 0, 0], color: '#28a745' },
+        { id: 'bookingStatusChart', title: 'Booking Status', type: 'pie', labels: ['Active', 'Pending', 'Cancelled'], data: [stats.bookingStatusDistribution?.active || 0, stats.bookingStatusDistribution?.pending || 0, stats.bookingStatusDistribution?.cancelled || 0], color: ['#007bff', '#ffc107', '#dc3545'] },
+        { id: 'propertyPerformanceChart', title: 'Property Performance', type: 'bar', labels: ['Q1', 'Q2', 'Q3', 'Q4'], data: [0, 0, 0, 0], color: '#17a2b8' },
+        { id: 'revenueBySourceChart', title: 'Revenue by Source', type: 'pie', labels: ['Rentals', 'Services', 'Other'], data: [0, 0, 0], color: ['#007bff', '#28a745', '#ffc107'] },
+        { id: 'userRetentionChart', title: 'User Retention', type: 'line', labels: ['Jan', 'Feb', 'Mar', 'Apr'], data: [0, 0, 0, 0], color: '#dc3545' },
+        { id: 'occupancyChart', title: 'Property Occupancy', type: 'bar', labels: ['Q1', 'Q2', 'Q3', 'Q4'], data: [0, 0, 0, 0], color: '#6f42c1' },
+        { id: 'workerPerformanceChart', title: 'Worker Performance', type: 'bar', labels: ['Q1', 'Q2', 'Q3', 'Q4'], data: [0, 0, 0, 0], color: '#fd7e14' },
+        { id: 'geographicTrendsChart', title: 'Geographic Trends', type: 'line', labels: ['Jan', 'Feb', 'Mar', 'Apr'], data: [0, 0, 0, 0], color: '#20c997' },
+        { id: 'churnRateChart', title: 'Churn Rate', type: 'line', labels: ['Jan', 'Feb', 'Mar', 'Apr'], data: [0, 0, 0, 0], color: '#e83e8c' }
+      ].forEach(chart => { %>
+        <div class="chart-container">
+          <h3><%= chart.title %></h3>
+          <canvas id="<%= chart.id %>"></canvas>
+        </div>
+      <% }) %>
+    </div>
+  </section>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script>
+    // Chart.js Initialization
+    <% [
+      { id: 'revenueChart', type: 'line', data: [stats.monthlyRevenue || 0, 0, 0, 0], color: '#007bff', label: 'Monthly Revenue (₹)' },
+      { id: 'userGrowthChart', type: 'bar', data: [stats.userGrowth || 0, 0, 0, 0], color: '#28a745', label: 'User Growth' },
+      { id: 'bookingStatusChart', type: 'pie', data: [stats.bookingStatusDistribution?.active || 0, stats.bookingStatusDistribution?.pending || 0, stats.bookingStatusDistribution?.cancelled || 0], color: ['#007bff', '#ffc107', '#dc3545'], label: 'Booking Status' },
+      { id: 'propertyPerformanceChart', type: 'bar', data: [0, 0, 0, 0], color: '#17a2b8', label: 'Property Performance' },
+      { id: 'revenueBySourceChart', type: 'pie', data: [0, 0, 0], color: ['#007bff', '#28a745', '#ffc107'], label: 'Revenue by Source' },
+      { id: 'userRetentionChart', type: 'line', data: [0, 0, 0, 0], color: '#dc3545', label: 'User Retention' },
+      { id: 'occupancyChart', type: 'bar', data: [0, 0, 0, 0], color: '#6f42c1', label: 'Property Occupancy' },
+      { id: 'workerPerformanceChart', type: 'bar', data: [0, 0, 0, 0], color: '#fd7e14', label: 'Worker Performance' },
+      { id: 'geographicTrendsChart', type: 'line', data: [0, 0, 0, 0], color: '#20c997', label: 'Geographic Trends' },
+      { id: 'churnRateChart', type: 'line', data: [0, 0, 0, 0], color: '#e83e8c', label: 'Churn Rate' }
+    ].forEach(chart => { %>
+      new Chart(document.getElementById('<%= chart.id %>'), {
+        type: '<%= chart.type %>',
+        data: {
+          labels: <%= JSON.stringify(chart.type === 'pie' ? ['Active', 'Pending', 'Cancelled'].slice(0, chart.data.length) : (chart.id.includes('Chart') ? ['Jan', 'Feb', 'Mar', 'Apr'] : ['Q1', 'Q2', 'Q3', 'Q4'])) %>,
+          datasets: [{
+            label: '<%= chart.label %>',
+            data: <%= JSON.stringify(chart.data) %>,
+            <%= chart.type === 'pie' ? 'backgroundColor' : 'borderColor' %>: <%= JSON.stringify(chart.color) %>,
+            <%= chart.type !== 'pie' ? 'fill: false' : '' %>
+          }]
+        },
+        options: { 
+          scales: { 
+            y: { beginAtZero: true } 
+          },
+          plugins: {
+            legend: {
+              labels: {
+                font: {
+                  family: 'Poppins'
+                }
+              }
+            }
+          },
+          font: {
+            family: 'Poppins'
+          }
+        }
+      });
+    <% }) %>
+  </script>
+  <script>
+    // AJAX Functions
+    async function deleteProperty(id) {
+      if (confirm('Delete property?')) {
+        await fetch(`/admin/property/delete/${id}`, { method: 'DELETE' });
+        location.reload();
+      }
+    }
+
+    async function toggleVerify(id, isVerified) {
+      await fetch(`/admin/property/verify/${id}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ isVerified: isVerified === 'true' })
+      });
+      location.reload();
+    }
+
+    async function toggleStatus(id, status) {
+      await fetch(`/admin/property/status/${id}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status })
+      });
+      location.reload();
+    }
+
+    async function deleteUser(id, userType) {
+      if (confirm('Delete user?')) {
+        await fetch(`/admin/user/delete/${id}/${userType}`, { method: 'DELETE' });
+        location.reload();
+      }
+    }
+
+    async function suspendUser(id, userType, status) {
+      await fetch(`/admin/user/status/${id}/${userType}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status })
+      });
+      location.reload();
+    }
+
+    async function resetPassword(i

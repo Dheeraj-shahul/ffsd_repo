@@ -1,18 +1,42 @@
 const express = require("express");
-const fs = require("fs");
+const mongoose = require("mongoose");
 const path = require("path");
-const session = require("express-session"); // Add this import
+const session = require("express-session");
+const Property = require("./models/property");
+const Tenant = require("./models/tenant"); // New model
+const Worker = require("./models/worker"); // New model
+const Owner = require("./models/owner");   // New model
+const Booking = require("./models/booking");
+const Payment = require("./models/payment");
+const Notification = require("./models/notification");
+const Setting = require("./models/setting");
+const propertyRoutes = require("./routes/property");
+const workerRoutes = require("./routes/workers");
+
+
+const Complaint = require('./models/complaint');
+const Rating = require('./models/rating');
+const RentalHistory = require('./models/rentalhistory');
+const MaintananceRequest = require('./models/MaintenanceRequest');
+const TenantRoutes=require("./routes/tenant");
+
+
+require("dns").setDefaultResultOrder("ipv4first"); // Force IPv4
+
+
+
+
 const app = express();
 const PORT = 3000;
-const sqlite3 = require("sqlite3").verbose(); // Add this line to import sqlite3
 
-// import data
-const properties = require("./properties.js");
-const initialUsers = require("./users.js");
+// Connect to MongoDB
+mongoose.connect("mongodb://127.0.0.1:27017/rentease")
+  .then(() => console.log("Connected to MongoDB"))
+  .catch((err) => console.error("MongoDB connection error:", err));
 
 // Middleware
 app.use(express.urlencoded({ extended: true }));
-app.use(express.json());
+app.use(express.json({ limit: "15mb" }));
 app.set("view engine", "ejs");
 app.set("views", path.join(__dirname, "views"));
 app.use(express.static(path.join(__dirname, "public")));
@@ -28,30 +52,7 @@ app.use(
 );
 
 // Authentication middleware
-function isAuthenticated(req, res, next) {
-  if (req.session.user) {
-    return next();
-  }
-  res.redirect("/login");
-}
-
-// Load initial users
-const usersFilePath = path.join(__dirname, "users.js");
-
-// In-memory user storage (will reset on restart)
-let users = [...initialUsers];
-
-// Helper function to save users to users.js
-function saveUsers(updatedUsers) {
-  fs.writeFileSync(
-    usersFilePath,
-    `// users.js – Temporary in-memory storage\n\nconst users = ${JSON.stringify(
-      updatedUsers,
-      null,
-      2
-    )};\n\nmodule.exports = users;\n`
-  );
-}
+const isAuthenticated = require("./middleware/auth");
 
 // Pass user data to all views
 app.use((req, res, next) => {
@@ -59,8 +60,21 @@ app.use((req, res, next) => {
   next();
 });
 
-app.get("/workerDetails", (req, res) => {
-  res.render("pages/workerDetails");
+// Routes
+
+// Property Routes
+app.use("/api/property", propertyRoutes);
+app.use("/", workerRoutes);
+app.use('/',TenantRoutes);
+
+
+
+// Route for property listing page
+app.get("/list-property", isAuthenticated, (req, res) => {
+  if (req.session.user.userType !== "owner") {
+    return redirectToDashboard(req, res);
+  }
+  res.render("pages/propertylisting");
 });
 
 // GET: Render Registration Page
@@ -68,8 +82,8 @@ app.get("/register", (req, res) => {
   res.render("pages/registration", { userType: "", serviceType: "" });
 });
 
-// Signup route
-app.post("/register", (req, res) => {
+// POST: Handle Registration
+app.post("/register", async (req, res) => {
   const {
     userType,
     firstName,
@@ -81,39 +95,90 @@ app.post("/register", (req, res) => {
     experience,
     numProperties,
     password,
+    accountNo,
+    upiid,
   } = req.body;
 
-  const newUser = {
-    id: users.length + 1,
-    userType,
-    firstName,
-    lastName,
-    email,
-    phone,
-    location,
-    serviceType: userType === "worker" ? serviceType : null,
-    experience: userType === "worker" ? Number(experience) || null : null,
-    numProperties:
-      userType === "homeowner" ? Number(numProperties) || null : null,
-    password,
-  };
+  try {
+    // Check for existing user in all collections
+    const existingUser = await Promise.any([
+      Tenant.findOne({ email }),
+      Worker.findOne({ email }),
+      Owner.findOne({ email }),
+    ].map(p => p.catch(() => null)));
 
-  users.push(newUser);
-  console.log("New User Registered:", newUser);
+    if (existingUser) {
+      return res.render("pages/registration", {
+        userType,
+        serviceType,
+        error: "Email already exists",
+      });
+    }
 
-  // Save updated users list
-  saveUsers(users);
+    let newUser;
+    const id = (await Promise.all([
+      Tenant.countDocuments(),
+      Worker.countDocuments(),
+      Owner.countDocuments(),
+    ])).reduce((sum, count) => sum + count, 0) + 1;
 
-  res.redirect("/login");
+    if (userType === "tenant") {
+      newUser = new Tenant({
+        id,
+        firstName,
+        lastName,
+        email,
+        phone,
+        location,
+        password,
+      });
+    } else if (userType === "worker") {
+      newUser = new Worker({
+        id,
+        firstName,
+        lastName,
+        email,
+        phone,
+        location,
+        serviceType,
+        experience: Number(experience) || null,
+        password,
+      });
+    } else if (userType === "owner") {
+      newUser = new Owner({
+        id,
+        firstName,
+        lastName,
+        email,
+        phone,
+        location,
+        numProperties: Number(numProperties) || null,
+        password,
+        accountNo,
+        upiid,
+      });
+    } else {
+      return res.render("pages/registration", {
+        userType,
+        serviceType,
+        error: "Invalid user type",
+      });
+    }
+
+    await newUser.save();
+    console.log("New User Registered:", newUser);
+    res.redirect("/login");
+  } catch (err) {
+    console.error("Error registering user:", err);
+    res.status(500).send("Server Error");
+  }
 });
 
 // GET: Render Login Page
 app.get("/login", (req, res) => {
-  // If user is already logged in, redirect to appropriate dashboard
   if (req.session.user) {
     return redirectToDashboard(req, res);
   }
-
   res.render("pages/login", {
     userType: "",
     email: "",
@@ -133,17 +198,15 @@ function redirectToDashboard(req, res) {
   } else if (user.userType === "worker") {
     return res.redirect("/worker_dashboard");
   }
-  // Default fallback
   return res.redirect("/");
 }
 
 // POST: Handle Login Logic
-app.post("/login", (req, res) => {
+app.post("/login", async (req, res) => {
   console.log("POST /login received:", req.body);
   const { userType, email, password } = req.body;
   const errors = {};
 
-  // Basic validation
   if (!userType) errors.userType = "Role is required";
   if (!email) errors.email = "Email is required";
   if (!password) errors.password = "Password is required";
@@ -157,29 +220,40 @@ app.post("/login", (req, res) => {
     });
   }
 
-  // Check against users array (includes both initial and newly registered)
-  const user = users.find(
-    (u) =>
-      u.email === email && u.password === password && u.userType === userType
-  );
+  try {
+    let user;
+    if (userType === "tenant") {
+      user = await Tenant.findOne({ email, password });
+    } else if (userType === "worker") {
+      user = await Worker.findOne({ email, password });
+    } else if (userType === "owner") {
+      user = await Owner.findOne({ email, password });
+    } else {
+      errors.auth = "Invalid user type";
+      return res.render("pages/login", {
+        userType,
+        email,
+        password: "",
+        errors,
+      });
+    }
 
-  if (!user) {
-    console.log("No user found, setting auth error");
-    errors.auth = "Invalid email, password, or user type";
-    console.log("Errors object before render:", errors);
-    return res.render("pages/login", {
-      userType,
-      email,
-      password: "",
-      errors,
-    });
-  } else {
-    // Store user in session
+    if (!user) {
+      errors.auth = "Invalid email, password, or user type";
+      return res.render("pages/login", {
+        userType,
+        email,
+        password: "",
+        errors,
+      });
+    }
+
     req.session.user = user;
-
-    // Successful login - redirect based on user type
     console.log("Login successful, user ID:", user.id);
     redirectToDashboard(req, res);
+  } catch (err) {
+    console.error("Error during login:", err);
+    res.status(500).send("Server Error");
   }
 });
 
@@ -189,14 +263,14 @@ app.get("/logout", (req, res) => {
   res.redirect("/");
 });
 
-// Dashboard Routes (with session protection)
-app.get("/tenant_dashboard", isAuthenticated, (req, res) => {
-  const user = req.session.user;
-  if (user.userType !== "tenant") {
-    return redirectToDashboard(req, res);
-  }
-  res.render("pages/tenant_dashboard", { user });
-});
+// Dashboard Routes
+// app.get("/tenant_dashboard", isAuthenticated, (req, res) => {
+//   const user = req.session.user;
+//   if (user.userType !== "tenant") {
+//     return redirectToDashboard(req, res);
+//   }
+//   res.render("pages/tenant_dashboard", { user });
+// });
 
 app.get("/owner_dashboard", isAuthenticated, (req, res) => {
   const user = req.session.user;
@@ -219,32 +293,42 @@ app.get("/", (req, res) => {
   res.render("pages/index");
 });
 
-app.get("/header", (req, res) => {
-  res.render("partials/header");
-});
-
 // Route to render search.ejs
-app.get("/search", (req, res) => {
-  res.render("pages/search1", { properties, request: req });
+app.get("/search", async (req, res) => {
+  try {
+    const properties = await Property.find({});
+    res.render("pages/search1", { properties, request: req });
+  } catch (err) {
+    console.error("Error fetching properties:", err);
+    res.status(500).send("Server Error");
+  }
 });
 
 // Route to the property listing
-app.get("/property_listing_page", (req, res) => {
-  res.render("pages/property_listing_page", { properties, request: req });
+// Route to the property listing page (form for owners)
+app.get("/property_listing_page", isAuthenticated, (req, res) => {
+  if (req.session.user.userType !== "owner") {
+    return redirectToDashboard(req, res);
+  }
+  res.render("pages/property_listing_page");
 });
 
 // Route for property details
-app.get("/property", (req, res) => {
+app.get("/property", async (req, res) => {
   const propertyId = req.query.id;
-  const property = properties.find((p) => p.id == propertyId);
-
-  if (!property) {
-    return res.status(404).send("Property not found");
+  try {
+    const property = await Property.findById(propertyId).lean();
+    if (!property) {
+      return res.status(404).render("pages/propertydetails", { property: null });
+    }
+    res.render("pages/propertydetails", { property });
+  } catch (err) {
+    console.error("Error fetching property:", err);
+    res.status(500).render("pages/propertydetails", { property: null, error: "Server Error" });
   }
-
-  res.render("pages/propertydetails", { property });
 });
 
+// Other static routes
 app.get("/worker_register", (req, res) => {
   res.render("pages/worker_register");
 });
@@ -265,114 +349,45 @@ app.get("/about_us", (req, res) => {
   res.render("pages/about_us");
 });
 
-// In-memory SQLite database
-const db = new sqlite3.Database(":memory:");
+// Admin dashboard route
+app.get("/admin", async (req, res) => {
+  try {
+    const properties = await Property.find({});
+    const tenants = await Tenant.find({});
+    const workers = await Worker.find({});
+    const owners = await Owner.find({});
+    const bookings = await Booking.find({});
+    const payments = await Payment.find({});
+    const notifications = await Notification.find({});
+    const settings = await Setting.find({});
+    
+    const users = [...tenants, ...workers, ...owners]; // Combine users for display
+    
+    const stats = {
+      totalProperties: await Property.countDocuments({}),
+      activeRentals: await Booking.countDocuments({ status: "Active" }),
+      pendingBookings: await Booking.countDocuments({ status: "Pending" }),
+      cancelledBookings: await Booking.countDocuments({ status: "Cancelled" }),
+      renters: await Tenant.countDocuments({}),
+      totalRevenue: (await Payment.aggregate([
+        { $match: { status: "Completed" } },
+        { $group: { _id: null, total: { $sum: "$amount" } } }
+      ]))[0]?.total || 0,
+    };
 
-// Initialize database and seed data
-db.serialize(() => {
-  db.run(
-    `CREATE TABLE properties (id TEXT PRIMARY KEY, name TEXT, owner TEXT, status TEXT)`
-  );
-  db.run(`CREATE TABLE users (id TEXT PRIMARY KEY, name TEXT, role TEXT)`);
-  db.run(
-    `CREATE TABLE bookings (id TEXT PRIMARY KEY, user TEXT, property TEXT, status TEXT)`
-  );
-  db.run(
-    `CREATE TABLE payments (id TEXT PRIMARY KEY, user TEXT, amount REAL, status TEXT)`
-  );
-  db.run(
-    `CREATE TABLE notifications (id TEXT PRIMARY KEY, type TEXT, message TEXT)`
-  );
-  db.run(`CREATE TABLE settings (id TEXT PRIMARY KEY, name TEXT, value TEXT)`);
-
-  db.run(
-    "INSERT INTO properties VALUES ('P1', 'Beach Villa', 'John Doe', 'Active')"
-  );
-  db.run(
-    "INSERT INTO properties VALUES ('P2', 'City Loft', 'Jane Smith', 'Pending')"
-  );
-  db.run("INSERT INTO users VALUES ('U1', 'Alice', 'Renter')");
-  db.run("INSERT INTO users VALUES ('U2', 'Bob', 'Owner')");
-  db.run(
-    "INSERT INTO bookings VALUES ('B1', 'Alice', 'Beach Villa', 'Active')"
-  );
-  db.run("INSERT INTO bookings VALUES ('B2', 'Bob', 'City Loft', 'Pending')");
-  db.run(
-    "INSERT INTO bookings VALUES ('B3', 'Alice', 'Beach Villa', 'Cancelled')"
-  );
-  db.run("INSERT INTO payments VALUES ('T1', 'Alice', 500.00, 'Completed')");
-  db.run("INSERT INTO payments VALUES ('T2', 'Bob', 300.00, 'Pending')");
-  db.run(
-    "INSERT INTO notifications VALUES ('N1', 'Property', 'New property submitted')"
-  );
-  db.run(
-    "INSERT INTO notifications VALUES ('N2', 'Booking', 'New booking request')"
-  );
-  db.run("INSERT INTO settings VALUES ('S1', 'Website Title', 'RentEase')");
-  db.run("INSERT INTO settings VALUES ('S2', 'Payment Gateway', 'Stripe')");
-});
-
-app.get("/admin", (req, res) => {
-  db.all("SELECT * FROM properties", (err, properties) => {
-    db.all("SELECT * FROM users", (err, users) => {
-      db.all("SELECT * FROM bookings", (err, bookings) => {
-        db.all("SELECT * FROM payments", (err, payments) => {
-          db.all("SELECT * FROM notifications", (err, notifications) => {
-            db.all("SELECT * FROM settings", (err, settings) => {
-              db.get(
-                "SELECT COUNT(*) as count FROM properties",
-                (err, propCount) => {
-                  db.get(
-                    'SELECT COUNT(*) as count FROM bookings WHERE status = "Active"',
-                    (err, activeBookings) => {
-                      db.get(
-                        'SELECT COUNT(*) as count FROM bookings WHERE status = "Pending"',
-                        (err, pendingBookings) => {
-                          db.get(
-                            'SELECT COUNT(*) as count FROM bookings WHERE status = "Cancelled"',
-                            (err, cancelledBookings) => {
-                              db.get(
-                                'SELECT COUNT(*) as count FROM users WHERE role = "Renter"',
-                                (err, renters) => {
-                                  db.get(
-                                    'SELECT SUM(amount) as total FROM payments WHERE status = "Completed"',
-                                    (err, revenue) => {
-                                      const stats = {
-                                        totalProperties: propCount.count,
-                                        activeRentals: activeBookings.count,
-                                        pendingBookings: pendingBookings.count,
-                                        cancelledBookings:
-                                          cancelledBookings.count,
-                                        renters: renters.count,
-                                        totalRevenue: revenue.total || 0,
-                                      };
-                                      res.render("pages/admin", {
-                                        properties,
-                                        users,
-                                        bookings,
-                                        payments,
-                                        notifications,
-                                        settings,
-                                        stats,
-                                      });
-                                    }
-                                  );
-                                }
-                              );
-                            }
-                          );
-                        }
-                      );
-                    }
-                  );
-                }
-              );
-            });
-          });
-        });
-      });
+    res.render("pages/admin", {
+      properties,
+      users,
+      bookings,
+      payments,
+      notifications,
+      settings,
+      stats,
     });
-  });
+  } catch (err) {
+    console.error("Error fetching admin data:", err);
+    res.status(500).send("Server Error");
+  }
 });
 
 // Start server
