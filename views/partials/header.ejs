@@ -347,7 +347,7 @@
           </a>
           <div class="dropdown-content" id="dropdown-content">
             <% if (user.userType === 'tenant') { %>
-            <a href="/tenant_dashboard">Dashboard</a>
+            <a href="/tenant/tenant_dashboard">Dashboard</a>
             <% } else if (user.userType === 'owner') { %>
             <a href="/owner_dashboard">Dashboard</a>
             <% } else if (user.userType === 'worker') { %>

@@ -1,7 +1,7 @@
 const mongoose = require("mongoose");
 
 const ownerSchema = new mongoose.Schema({
-  id: Number,
+  
   userType: { type: String, default: "owner" },
   firstName: String,
   lastName: String,

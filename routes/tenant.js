@@ -1,28 +1,36 @@
 const express = require('express');
 const router = express.Router();
 const tenantController = require('../controllers/tenantController');
-const isAuthenticated = require("../middleware/auth");
+const isAuthenticated = require('../middleware/auth');
 
-// Debug: Log the imported controller
-console.log('tenantController:', Object.keys(tenantController));
+// Debug log for tenant routes
+router.use((req, res, next) => {
+  console.log(`Tenant route: ${req.method} ${req.url}`);
+  next();
+});
 
-// Dashboard route
+// Tenant dashboard route
 router.get('/tenant_dashboard', isAuthenticated, tenantController.getDashboard);
 
-// Maintenance routes
-router.post('/maintenance/submit', isAuthenticated, tenantController.submitMaintenanceRequest);
+// Maintenance request submission
+router.post('/maintenance', isAuthenticated, tenantController.submitMaintenanceRequest);
 
-// Complaint routes
-router.post('/complaint/submit', isAuthenticated, tenantController.submitComplaint);
+// Complaint submission
+router.post('/complaint', isAuthenticated, tenantController.submitComplaint);
 
-// Review routes
-router.post('/review/submit', isAuthenticated, tenantController.submitPropertyReview);
+// Property review submission
+router.post('/review', isAuthenticated, tenantController.submitPropertyReview);
 
-// Profile routes
-router.post('/profile/update', isAuthenticated, tenantController.updateProfile);
-router.post('/profile/change-password', isAuthenticated, tenantController.changePassword);
+// Profile update
+router.post('/profile', isAuthenticated, tenantController.updateProfile);
 
-// Saved properties routes
-router.post('/property/toggle-save', isAuthenticated, tenantController.toggleSavedProperty);
+// Password change
+router.post('/password', isAuthenticated, tenantController.changePassword);
+
+// Save or remove property
+router.post('/saved-property', isAuthenticated, tenantController.toggleSavedProperty);
+
+// Notification preferences update
+router.post('/notifications', isAuthenticated, tenantController.updateNotificationPreferences);
 
 module.exports = router;

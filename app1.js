@@ -2,6 +2,7 @@ const express = require("express");
 const mongoose = require("mongoose");
 const session = require("express-session");
 const path = require("path");
+const MaintenanceRequest = require('./models/MaintenanceRequest');
 
 const app = express();
 
@@ -334,6 +335,29 @@ async function seedData() {
         }
       ]);
 
+      await MaintenanceRequest.insertMany([
+        {
+          tenantId: (await Tenant.findOne({ id: 1 }))._id,
+          propertyId: (await Property.findOne({ id: 1 }))._id,
+          issueType: "Plumbing",
+          description: "Leaky faucet in bathroom",
+          location: "Bathroom",
+          dateReported: new Date("2025-04-20"),
+          status: "Pending",
+          assignedTo: (await Worker.findOne({ id: 1 }))._id
+        },
+        {
+          tenantId: (await Tenant.findOne({ id: 1 }))._id,
+          propertyId: (await Property.findOne({ id: 2 }))._id,
+          issueType: "Electrical",
+          description: "Faulty wiring in kitchen",
+          location: "Kitchen",
+          dateReported: new Date("2025-04-21"),
+          status: "In Progress",
+          assignedTo: (await Worker.findOne({ id: 1 }))._id
+        }
+      ]);
+
       await Setting.insertMany([
         {
           name: "Website Title",
@@ -396,6 +420,7 @@ app.get("/admin", isAuthenticated, async (req, res) => {
     const payments = await Payment.find({}).lean();
     const notifications = await Notification.find({}).lean();
     const settings = await Setting.find({}).lean();
+    const maintenanceRequests = await MaintenanceRequest.find({}).lean();
 
     const users = await Promise.all([...tenants, ...workers, ...owners].map(async u => ({
       ...u,
@@ -428,6 +453,14 @@ app.get("/admin", isAuthenticated, async (req, res) => {
         .find(u => u._id.equals(n.recipient))?.lastName,
       workerName: n.worker ? workers.find(w => w._id.equals(n.worker))?.firstName + ' ' + workers.find(w => w._id.equals(n.worker))?.lastName : null,
       recipientType: n.recipientType || "tenant"
+    }));
+
+    const enhancedMaintenanceRequests = maintenanceRequests.map(m => ({
+      ...m,
+      tenantName: tenants.find(t => t._id.equals(m.tenantId))?.firstName + ' ' + tenants.find(t => t._id.equals(m.tenantId))?.lastName,
+      ownerName: owners.find(o => o._id.equals(properties.find(p => p._id.equals(m.propertyId))?.ownerId))?.firstName + ' ' + owners.find(o => o._id.equals(properties.find(p => p._id.equals(m.propertyId))?.ownerId))?.lastName,
+      propertyName: properties.find(p => p._id.equals(m.propertyId))?.name,
+      assignedWorkerName: m.assignedTo ? workers.find(w => w._id.equals(m.assignedTo))?.firstName + ' ' + workers.find(w => w._id.equals(m.assignedTo))?.lastName : null
     }));
 
     const stats = {
@@ -484,6 +517,7 @@ app.get("/admin", isAuthenticated, async (req, res) => {
       bookings: enhancedBookings,
       payments: enhancedPayments,
       notifications: enhancedNotifications,
+      maintenanceRequests: enhancedMaintenanceRequests,
       settings,
       stats
     });
@@ -613,6 +647,95 @@ app.post("/admin/notification/complete/:id", isAuthenticated, async (req, res) =
     res.redirect("/admin");
   } catch (err) {
     console.error("Complete notification error:", err);
+    res.status(500).send("Server Error");
+  }
+});
+
+app.post("/admin/maintenance/mark/:id", isAuthenticated, async (req, res) => {
+  if (!req.session.user.isAdmin) return res.status(403).send("Access denied");
+  try {
+    await MaintenanceRequest.updateOne({ _id: req.params.id }, { status: req.body.status });
+    res.redirect("/admin");
+  } catch (err) {
+    console.error("Mark maintenance error:", err);
+    res.status(500).send("Server Error");
+  }
+});
+
+app.post("/admin/maintenance/respond/:id", isAuthenticated, async (req, res) => {
+  if (!req.session.user.isAdmin) return res.status(403).send("Access denied");
+  try {
+    await MaintenanceRequest.updateOne({ _id: req.params.id }, { description: req.body.response });
+    res.redirect("/admin");
+  } catch (err) {
+    console.error("Respond maintenance error:", err);
+    res.status(500).send("Server Error");
+  }
+});
+
+app.post("/admin/maintenance/escalate/:id", isAuthenticated, async (req, res) => {
+  if (!req.session.user.isAdmin) return res.status(403).send("Access denied");
+  try {
+    await MaintenanceRequest.updateOne({ _id: req.params.id }, { status: "In Progress" });
+    res.redirect("/admin");
+  } catch (err) {
+    console.error("Escalate maintenance error:", err);
+    res.status(500).send("Server Error");
+  }
+});
+
+app.post("/admin/maintenance/complete/:id", isAuthenticated, async (req, res) => {
+  if (!req.session.user.isAdmin) return res.status(403).send("Access denied");
+  try {
+    await MaintenanceRequest.updateOne({ _id: req.params.id }, { status: "Completed", completedDate: new Date() });
+    res.redirect("/admin");
+  } catch (err) {
+    console.error("Complete maintenance error:", err);
+    res.status(500).send("Server Error");
+  }
+});
+
+app.post("/admin/maintenance/update/:id", isAuthenticated, async (req, res) => {
+  if (!req.session.user.isAdmin) return res.status(403).send("Access denied");
+  try {
+    await MaintenanceRequest.updateOne({ _id: req.params.id }, { description: req.body.update });
+    res.redirect("/admin");
+  } catch (err) {
+    console.error("Update maintenance error:", err);
+    res.status(500).send("Server Error");
+  }
+});
+
+app.get("/admin/maintenance/:id", isAuthenticated, async (req, res) => {
+  if (!req.session.user.isAdmin) return res.status(403).send("Access denied");
+  try {
+    const maintenanceRequest = await MaintenanceRequest.findById(req.params.id).lean();
+    res.render("pages/maintenance", { maintenanceRequest });
+  } catch (err) {
+    console.error("View maintenance error:", err);
+    res.status(500).send("Server Error");
+  }
+});
+
+app.get("/admin/maintenance/assign-worker/:id", isAuthenticated, async (req, res) => {
+  if (!req.session.user.isAdmin) return res.status(403).send("Access denied");
+  try {
+    const maintenanceRequest = await MaintenanceRequest.findById(req.params.id).lean();
+    const workers = await Worker.find({ availability: true }).lean();
+    res.render("pages/assignWorker", { maintenanceRequest, workers });
+  } catch (err) {
+    console.error("Assign worker error:", err);
+    res.status(500).send("Server Error");
+  }
+});
+
+app.post("/admin/maintenance/assign-worker/:id", isAuthenticated, async (req, res) => {
+  if (!req.session.user.isAdmin) return res.status(403).send("Access denied");
+  try {
+    await MaintenanceRequest.updateOne({ _id: req.params.id }, { assignedTo: req.body.workerId });
+    res.redirect("/admin");
+  } catch (err) {
+    console.error("Assign worker error:", err);
     res.status(500).send("Server Error");
   }
 });

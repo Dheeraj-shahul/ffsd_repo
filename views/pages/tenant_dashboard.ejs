@@ -48,7 +48,7 @@
             <i class="fa-solid fa-bookmark"></i> Saved Listings
           </li>
           <li onclick="showSection('ratings')">
-            <i class="fa-solid fa-star-half-stroke"></i>Reviews & Ratings
+            <i class="fa-solid fa-star-half-stroke"></i> Reviews & Ratings
           </li>
           <li onclick="showSection('settings')">
             <i class="fa-solid fa-gears"></i> Settings
@@ -67,39 +67,29 @@
             <div class="property-card" id="home_proprty_card">
               <div class="img_container">
                 <img
-                  src="<%= currentProperty.images[0] || '/images/default-property.jpg' %>"
+                  src="<%= currentProperty.images && currentProperty.images[0] ? currentProperty.images[0] : '/images/default-property.jpg' %>"
                   alt="Property Image"
                 />
               </div>
               <div class="property-details">
                 <p>
-                  <strong>Property:</strong> <%= currentProperty.subtype %> <%=
-                  currentProperty.name %>
+                  <strong>Property:</strong> <%= currentProperty.subtype || '' %> <%= currentProperty.name || 'N/A' %>
                 </p>
-                <p><strong>Address:</strong> <%= currentProperty.address %></p>
+                <p><strong>Address:</strong> <%= currentProperty.address || 'N/A' %></p>
                 <p>
-                  <strong>Owner:</strong> <%= propertyOwner ?
-                  propertyOwner.firstName + ' ' + propertyOwner.lastName : 'N/A'
-                  %>
+                  <strong>Owner:</strong> <%= propertyOwner ? propertyOwner.firstName + ' ' + propertyOwner.lastName : 'N/A' %>
                 </p>
                 <p>
-                  <strong>Contact:</strong> <%= propertyOwner ?
-                  propertyOwner.email : 'N/A' %>
+                  <strong>Contact:</strong> <%= propertyOwner ? propertyOwner.email : 'N/A' %>
                 </p>
                 <p>
-                  <strong>Monthly Rent:</strong> ₹<%= currentProperty.price %>
+                  <strong>Monthly Rent:</strong> ₹<%= currentProperty.price || 'N/A' %>
                 </p>
                 <p>
-                  <strong>Due Date:</strong> <%= nextPayment ? new
-                  Date(nextPayment.dueDate).toLocaleDateString() : 'N/A' %>
+                  <strong>Due Date:</strong> <%= nextPayment ? new Date(nextPayment.dueDate).toLocaleDateString() : 'N/A' %>
                 </p>
                 <p>
-                  <strong>Lease Period:</strong> <%= rentalHistory &&
-                  rentalHistory[0] ? new
-                  Date(rentalHistory[0].startDate).toLocaleDateString() + ' - '
-                  + (rentalHistory[0].endDate ? new
-                  Date(rentalHistory[0].endDate).toLocaleDateString() :
-                  'Ongoing') : 'N/A' %>
+                  <strong>Lease Period:</strong> <%= rentalHistory && rentalHistory.length && rentalHistory[0] ? new Date(rentalHistory[0].startDate).toLocaleDateString() + ' - ' + (rentalHistory[0].endDate ? new Date(rentalHistory[0].endDate).toLocaleDateString() : 'Ongoing') : 'N/A' %>
                 </p>
               </div>
             </div>
@@ -109,18 +99,16 @@
               <h4>Next Rent Due</h4>
               <p>₹<%= nextPayment ? nextPayment.amount : 'N/A' %></p>
               <p>
-                <%= nextPayment ? 'Due in ' + Math.ceil((new
-                Date(nextPayment.dueDate) - new Date()) / (1000 * 60 * 60 * 24))
-                + ' days' : 'N/A' %>
+                <%= nextPayment ? 'Due in ' + Math.ceil((new Date(nextPayment.dueDate) - new Date()) / (1000 * 60 * 60 * 24)) + ' days' : 'N/A' %>
               </p>
             </div>
             <div class="stat-box">
               <h4>Active Maintenance</h4>
-              <p><%= activeMaintenanceRequests.length %> Pending Requests</p>
+              <p><%= activeMaintenanceRequests ? activeMaintenanceRequests.length : 0 %> Pending Requests</p>
             </div>
             <div class="stat-box">
               <h4>Saved Properties</h4>
-              <p><%= user.savedListings.length %> Properties</p>
+              <p><%= user.savedListings ? user.savedListings.length : 0 %> Properties</p>
             </div>
           </div>
           <% } else { %>
@@ -134,8 +122,7 @@
           <% if (nextPayment) { %>
           <div class="current-rent">
             <p>
-              Next Rent Due: <strong>₹<%= nextPayment.amount %></strong> on <%=
-              new Date(nextPayment.dueDate).toLocaleDateString() %>
+              Next Rent Due: <strong>₹<%= nextPayment.amount %></strong> on <%= new Date(nextPayment.dueDate).toLocaleDateString() %>
             </p>
             <button
               class="pay-buttons"
@@ -158,15 +145,15 @@
                 </tr>
               </thead>
               <tbody>
-                <% payments.forEach(payment => { %>
+                <% (payments || []).forEach(payment => { %>
                 <tr>
                   <td>
-                    <%= new Date(payment.paymentDate).toLocaleDateString() %>
+                    <%= payment.paymentDate ? new Date(payment.paymentDate).toLocaleDateString() : 'N/A' %>
                   </td>
-                  <td>₹<%= payment.amount %></td>
-                  <td><%= payment.paymentMethod %></td>
-                  <td class="<%= payment.status.toLowerCase() %>">
-                    <%= payment.status %>
+                  <td>₹<%= payment.amount || 'N/A' %></td>
+                  <td><%= payment.paymentMethod || 'N/A' %></td>
+                  <td class="<%= payment.status ? payment.status.toLowerCase() : '' %>">
+                    <%= payment.status || 'N/A' %>
                   </td>
                   <td><a href="<%= payment.receiptUrl || '#' %>">View</a></td>
                 </tr>
@@ -182,29 +169,26 @@
           <button class="book-button">Submit New Request</button>
           <h4>Active Requests</h4>
           <div class="maintenance-cards">
-            <% activeMaintenanceRequests.forEach(request => { %>
+            <% (activeMaintenanceRequests || []).forEach(request => { %>
             <div class="maintenance-card">
               <div class="maintenance-header">
-                <h5><%= request.issueType %> Issue</h5>
+                <h5><%= request.issueType || 'Unknown' %> Issue</h5>
                 <span
-                  class="status <%= request.status.toLowerCase().replace(' ', '-') %>"
-                  ><%= request.status %></span
+                  class="status <%= request.status ? request.status.toLowerCase().replace(' ', '-') : 'pending' %>"
+                  ><%= request.status || 'Pending' %></span
                 >
               </div>
               <p>
-                <strong>Date Reported:</strong> <%= new
-                Date(request.dateReported).toLocaleDateString() %>
+                <strong>Date Reported:</strong> <%= request.dateReported ? new Date(request.dateReported).toLocaleDateString() : 'N/A' %>
               </p>
-              <p><strong>Description:</strong> <%= request.description %></p>
-              <p><strong>Location:</strong> <%= request.location %></p>
+              <p><strong>Description:</strong> <%= request.description || 'N/A' %></p>
+              <p><strong>Location:</strong> <%= request.location || 'N/A' %></p>
               <p>
-                <strong>Assigned To:</strong> <%= request.assignedTo ||
-                'Awaiting assignment' %>
+                <strong>Assigned To:</strong> <%= request.assignedTo || 'Awaiting assignment' %>
               </p>
               <% if (request.scheduledDate) { %>
               <p>
-                <strong>Scheduled For:</strong> <%= new
-                Date(request.scheduledDate).toLocaleString() %>
+                <strong>Scheduled For:</strong> <%= new Date(request.scheduledDate).toLocaleString() %>
               </p>
               <% } %>
               <button class="small-button">Update</button>
@@ -213,21 +197,19 @@
           </div>
           <h4>Completed Requests</h4>
           <div class="maintenance-cards">
-            <% completedMaintenanceRequests.forEach(request => { %>
+            <% (completedMaintenanceRequests || []).forEach(request => { %>
             <div class="maintenance-card">
               <div class="maintenance-header">
-                <h5><%= request.issueType %> Issue</h5>
+                <h5><%= request.issueType || 'Unknown' %> Issue</h5>
                 <span class="status completed">Completed</span>
               </div>
               <p>
-                <strong>Date Reported:</strong> <%= new
-                Date(request.dateReported).toLocaleDateString() %>
+                <strong>Date Reported:</strong> <%= request.dateReported ? new Date(request.dateReported).toLocaleDateString() : 'N/A' %>
               </p>
               <p>
-                <strong>Date Completed:</strong> <%= new
-                Date(request.completedDate).toLocaleDateString() %>
+                <strong>Date Completed:</strong> <%= request.completedDate ? new Date(request.completedDate).toLocaleDateString() : 'N/A' %>
               </p>
-              <p><strong>Description:</strong> <%= request.description %></p>
+              <p><strong>Description:</strong> <%= request.description || 'N/A' %></p>
               <p>
                 <strong>Serviced By:</strong> <%= request.assignedTo || 'N/A' %>
               </p>
@@ -310,20 +292,19 @@
           </form>
           <h4>Previous Complaints</h4>
           <div class="complaints-history">
-            <% complaints.forEach(complaint => { %>
+            <% (complaints || []).forEach(complaint => { %>
             <div class="complaint-item">
               <div class="complaint-header">
-                <h5><%= complaint.subject %></h5>
+                <h5><%= complaint.subject || 'N/A' %></h5>
                 <span
-                  class="status <%= complaint.status.toLowerCase().replace(' ', '-') %>"
-                  ><%= complaint.status %></span
+                  class="status <%= complaint.status ? complaint.status.toLowerCase().replace(' ', '-') : 'open' %>"
+                  ><%= complaint.status || 'Open' %></span
                 >
               </div>
               <p>
-                <strong>Date:</strong> <%= new
-                Date(complaint.dateSubmitted).toLocaleDateString() %>
+                <strong>Date:</strong> <%= complaint.dateSubmitted ? new Date(complaint.dateSubmitted).toLocaleDateString() : 'N/A' %>
               </p>
-              <p><strong>Description:</strong> <%= complaint.description %></p>
+              <p><strong>Description:</strong> <%= complaint.description || 'N/A' %></p>
               <% if (complaint.response) { %>
               <p><strong>Response:</strong> <%= complaint.response %></p>
               <% } %>
@@ -372,7 +353,7 @@
           </div>
           <h4>Your Current Service Providers</h4>
           <div class="worker-cards">
-            <% workers.forEach(worker => { %>
+            <% (workers || []).forEach(worker => { %>
             <div class="worker-card">
               <img
                 src="<%= worker.image || '/resources/default-worker.jpg' %>"
@@ -380,14 +361,14 @@
               />
               <div class="worker-details">
                 <h5><%= worker.firstName %> <%= worker.lastName %></h5>
-                <p><strong>Service:</strong> <%= worker.serviceType %></p>
+                <p><strong>Service:</strong> <%= worker.serviceType || 'N/A' %></p>
                 <p>
                   <strong>Schedule:</strong> <%= worker.schedule || 'N/A' %>
                 </p>
                 <p><strong>Monthly Fee:</strong> ₹<%= worker.fee || 'N/A' %></p>
                 <div class="rating">
-                  <span><%= '⭐'.repeat(Math.round(worker.rating)) %></span> <%=
-                  worker.rating?.toFixed(1) || 'N/A' %>
+                  <span><%= worker.rating ? '⭐'.repeat(Math.round(worker.rating)) : '' %></span>
+                  <%= worker.rating ? worker.rating.toFixed(1) : 'N/A' %>
                 </div>
               </div>
             </div>
@@ -399,30 +380,26 @@
         <div id="history" class="section">
           <h3>Rental History</h3>
           <div class="history-timeline">
-            <% rentalHistory.forEach(history => { %>
+            <% (rentalHistory || []).forEach(history => { %>
             <div class="history-item">
               <div class="timeline-dot"></div>
               <div class="history-content">
-                <h4><%= history.property.name %></h4>
+                <h4><%= history.property && history.property.name ? history.property.name : 'Unknown Property' %></h4>
                 <p>
-                  <strong>Period:</strong> <%= new
-                  Date(history.startDate).toLocaleDateString() %> - <%=
-                  history.endDate ? new
-                  Date(history.endDate).toLocaleDateString() : 'Present' %>
+                  <strong>Period:</strong> <%= history.startDate ? new Date(history.startDate).toLocaleDateString() : 'N/A' %> - <%= history.endDate ? new Date(history.endDate).toLocaleDateString() : 'Present' %>
                 </p>
-                <p><strong>Monthly Rent:</strong> ₹<%= history.rent %></p>
-                <p><strong>Owner:</strong> <%= history.owner %></p>
-                <p><strong>Address:</strong> <%= history.address %></p>
+                <p><strong>Monthly Rent:</strong> ₹<%= history.rent || 'N/A' %></p>
+                <p><strong>Owner:</strong> <%= history.owner || 'N/A' %></p>
+                <p><strong>Address:</strong> <%= history.address || 'N/A' %></p>
                 <p>
                   <strong>Status:</strong>
-                  <span class="status <%= history.status.toLowerCase() %>"
-                    ><%= history.status %></span
-                  >
+                  <span class="status <%= history.status ? history.status.toLowerCase() : 'current' %>">
+                    <%= history.status || 'Current' %>
+                  </span>
                 </p>
                 <% if (history.reasonForMoving) { %>
                 <p>
-                  <strong>Reason for Moving:</strong> <%=
-                  history.reasonForMoving %>
+                  <strong>Reason for Moving:</strong> <%= history.reasonForMoving %>
                 </p>
                 <% } %>
               </div>
@@ -435,30 +412,28 @@
         <div id="savedListings" class="section">
           <h3>Saved Listings</h3>
           <p>
-            You have saved <%= user.savedListings.length %> properties for
-            future reference.
+            You have saved <%= user.savedListings ? user.savedListings.length : 0 %> properties for future reference.
           </p>
           <div class="saved-properties">
-            <% user.savedListings.forEach(property => { %>
-            <div class="property-card">
+            <% (user.savedListings || []).forEach(property => { %>
+            <div class="property-card" data-property-id="<%= property._id %>">
               <div class="img_container">
                 <img
-                  src="<%= property.images[0] || '/images/default-property.jpg' %>"
+                  src="<%= property.images && property.images[0] ? property.images[0] : '/images/default-property.jpg' %>"
                   alt="Property Image"
                 />
               </div>
               <div class="property-info">
-                <h4><%= property.name %></h4>
-                <p><strong>Location:</strong> <%= property.location %></p>
-                <p><strong>Rent:</strong> ₹<%= property.price %>/month</p>
+                <h4><%= property.name || 'N/A' %></h4>
+                <p><strong>Location:</strong> <%= property.location || 'N/A' %></p>
+                <p><strong>Rent:</strong> ₹<%= property.price || 'N/A' %>/month</p>
                 <p>
-                  <strong>Available From:</strong> <%= property.availableFrom ||
-                  'Immediate' %>
+                  <strong>Available From:</strong> <%= property.availableFrom ? new Date(property.availableFrom).toLocaleDateString() : 'Immediate' %>
                 </p>
                 <div class="property-features">
-                  <span><%= property.subtype %></span>
-                  <span><%= property.size %></span>
-                  <span><%= property.furnished %></span>
+                  <span><%= property.subtype || 'N/A' %></span>
+                  <span><%= property.size || 'N/A' %></span>
+                  <span><%= property.furnished || 'N/A' %></span>
                 </div>
                 <div class="card-actions">
                   <button
@@ -494,8 +469,7 @@
                 id="star-rating"
                 data-property-id="<%= currentProperty._id %>"
               >
-                <span>⭐</span><span>⭐</span><span>⭐</span><span>⭐</span
-                ><span>⭐</span>
+                <span>⭐</span><span>⭐</span><span>⭐</span><span>⭐</span><span>⭐</span>
               </div>
             </div>
             <textarea
@@ -508,19 +482,18 @@
           <% } %>
           <h4>Past Reviews</h4>
           <div class="past-reviews">
-            <% ratings.forEach(rating => { %>
+            <% (ratings || []).forEach(rating => { %>
             <div class="review-card">
               <div class="review-header">
-                <h5><%= rating.propertyId.name %></h5>
+                <h5><%= rating.propertyId && rating.propertyId.name ? rating.propertyId.name : 'Unknown Property' %></h5>
                 <div class="rating">
-                  <%= '⭐'.repeat(rating.rating) %> <%= rating.rating.toFixed(1)
-                  %>
+                  <%= rating.rating ? '⭐'.repeat(rating.rating) : '' %> <%= rating.rating ? rating.rating.toFixed(1) : 'N/A' %>
                 </div>
               </div>
               <p class="review-date">
-                Reviewed on: <%= new Date(rating.date).toLocaleDateString() %>
+                Reviewed on: <%= rating.date ? new Date(rating.date).toLocaleDateString() : 'N/A' %>
               </p>
-              <p class="review-text"><%= rating.review %></p>
+              <p class="review-text"><%= rating.review || 'No review provided' %></p>
             </div>
             <% }); %>
           </div>
@@ -547,11 +520,11 @@
                 </div>
                 <div class="form-group">
                   <label for="phone">Phone Number</label>
-                  <input type="tel" id="phone" value="<%= user.phone %>" />
+                  <input type="tel" id="phone" value="<%= user.phone || '' %>" />
                 </div>
                 <div class="form-group">
                   <label for="address">Current Address</label>
-                  <textarea id="address"><%= user.location %></textarea>
+                  <textarea id="address"><%= user.location || '' %></textarea>
                 </div>
                 <button type="submit" class="settings-submission-class">
                   Update Profile
@@ -583,32 +556,27 @@
               <form class="notification-form" id="notification-form">
                 <div class="checkbox-group">
                   <label for="email-notifications">Email Notifications</label>
-                  <input type="checkbox" id="email-notifications" <%=
-                  user.emailNotifications ? 'checked' : '' %> />
+                  <input type="checkbox" id="email-notifications" <%= user.emailNotifications ? 'checked' : '' %> />
                   <label for="email-notifications" class="button"></label>
                 </div>
                 <div class="checkbox-group">
                   <label for="sms-notifications">SMS Notifications</label>
-                  <input type="checkbox" id="sms-notifications" <%=
-                  user.smsNotifications ? 'checked' : '' %> />
+                  <input type="checkbox" id="sms-notifications" <%= user.smsNotifications ? 'checked' : '' %> />
                   <label for="sms-notifications" class="button"></label>
                 </div>
                 <div class="checkbox-group">
                   <label for="rent-reminders">Rent Due Reminders</label>
-                  <input type="checkbox" id="rent-reminders" <%=
-                  user.rentReminders ? 'checked' : '' %> />
+                  <input type="checkbox" id="rent-reminders" <%= user.rentReminders ? 'checked' : '' %> />
                   <label for="rent-reminders" class="button"></label>
                 </div>
                 <div class="checkbox-group">
                   <label for="maintenance-updates">Maintenance Updates</label>
-                  <input type="checkbox" id="maintenance-updates" <%=
-                  user.maintenanceUpdates ? 'checked' : '' %> />
+                  <input type="checkbox" id="maintenance-updates" <%= user.maintenanceUpdates ? 'checked' : '' %> />
                   <label for="maintenance-updates" class="button"></label>
                 </div>
                 <div class="checkbox-group">
                   <label for="new-listings">New Property Listings</label>
-                  <input type="checkbox" id="new-listings" <%= user.newListings
-                  ? 'checked' : '' %> />
+                  <input type="checkbox" id="new-listings" <%= user.newListings ? 'checked' : '' %> />
                   <label for="new-listings" class="button"></label>
                 </div>
                 <button type="submit" class="settings-submission-class">
@@ -622,356 +590,472 @@
     </div>
 
     <script>
-      function showSection(sectionId) {
-        const sections = document.querySelectorAll(".section");
-        sections.forEach((section) => section.classList.remove("active"));
-        document.getElementById(sectionId).classList.add("active");
-        const sidebar = document.querySelector(".sidebar");
-        const menuButton = document.querySelector(".menu-toggle");
-        if (window.innerWidth <= 768) {
-          sidebar.classList.remove("active");
-          menuButton.innerHTML = "<strong>></strong>";
-        }
-      }
+     function showSection(sectionId) {
+  console.log("Showing section:", sectionId);
+  const sections = document.querySelectorAll(".section");
+  sections.forEach((section) => section.classList.remove("active"));
+  const targetSection = document.getElementById(sectionId);
+  if (targetSection) {
+    targetSection.classList.add("active");
+  } else {
+    console.error("Section not found:", sectionId);
+  }
+  const sidebar = document.querySelector(".sidebar");
+  const menuButton = document.querySelector(".menu-toggle");
+  if (window.innerWidth <= 768 && sidebar && menuButton) {
+    sidebar.classList.remove("active");
+    menuButton.innerHTML = "<strong>></strong>";
+  }
+}
 
-      function toggleMenu() {
-        const sidebar = document.querySelector(".sidebar");
-        const menuButton = document.querySelector(".menu-toggle");
-        sidebar.classList.toggle("active");
-        menuButton.innerHTML = sidebar.classList.contains("active")
-          ? "<strong><</strong>"
-          : "<strong>></strong>";
-      }
+function toggleMenu() {
+  const sidebar = document.querySelector(".sidebar");
+  const menuButton = document.querySelector(".menu-toggle");
+  if (sidebar && menuButton) {
+    sidebar.classList.toggle("active");
+    menuButton.innerHTML = sidebar.classList.contains("active")
+      ? "<strong><</strong>"
+      : "<strong>></strong>";
+  }
+}
 
-      function toggleNav() {
-        const navMenu = document.getElementById("nav-menu");
-        const overlay = document.getElementById("overlay");
-        navMenu.classList.toggle("active");
-        overlay.classList.toggle("active");
-      }
+function toggleNav() {
+  const navMenu = document.getElementById("nav-menu");
+  const overlay = document.getElementById("overlay");
+  if (navMenu && overlay) {
+    navMenu.classList.toggle("active");
+    overlay.classList.toggle("active");
+  }
+}
 
-      document.getElementById("overlay").addEventListener("click", function () {
-        const navMenu = document.getElementById("nav-menu");
+document.addEventListener("DOMContentLoaded", function () {
+  const overlay = document.getElementById("overlay");
+  if (overlay) {
+    overlay.addEventListener("click", function () {
+      const navMenu = document.getElementById("nav-menu");
+      if (navMenu) {
         navMenu.classList.remove("active");
-        this.classList.remove("active");
+        overlay.classList.remove("active");
+      }
+    });
+  }
+
+  const popup = document.getElementById("maintenance-request-popup");
+  const bookButton = document.querySelector(".book-button");
+  const closeBtn = document.querySelector(".close-btn");
+  const maintenanceForm = document.getElementById("maintenance-request-form");
+  const complaintForm = document.getElementById("complaint-form");
+  const reviewForm = document.getElementById("review-submission");
+  const profileForm = document.getElementById("profile-form");
+  const passwordForm = document.getElementById("password-form");
+  const notificationForm = document.getElementById("notification-form");
+
+  if (bookButton) {
+    bookButton.addEventListener("click", function () {
+      if (popup) popup.style.display = "flex";
+    });
+  }
+
+  if (closeBtn) {
+    closeBtn.addEventListener("click", function () {
+      if (popup) popup.style.display = "none";
+    });
+  }
+
+  if (popup) {
+    window.addEventListener("click", function (event) {
+      if (event.target === popup) {
+        popup.style.display = "none";
+      }
+    });
+  }
+
+  if (maintenanceForm) {
+    maintenanceForm.addEventListener("submit", async function (event) {
+      event.preventDefault();
+      event.stopPropagation();
+      const issueType = document.getElementById("issue-type")?.value;
+      const description = document.getElementById("description")?.value;
+      const location = document.getElementById("location")?.value;
+      const preferredDate = document.getElementById("preferred-date")?.value;
+
+      console.log("Submitting maintenance request:", { issueType, description, location, preferredDate });
+      try {
+        const response = await fetch("/tenant/maintenance", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            issueType,
+            description,
+            location,
+            preferredDate,
+          }),
+        });
+        const result = await response.json();
+        console.log("Maintenance response:", result);
+        if (result.success) {
+          alert(result.message);
+          addNewRequest(result.request);
+          maintenanceForm.reset();
+          if (popup) popup.style.display = "none";
+        } else {
+          alert(result.message || "Error submitting request");
+        }
+      } catch (error) {
+        console.error("Maintenance form error:", error);
+        alert("Error submitting request");
+      }
+    });
+  }
+
+  if (complaintForm) {
+    complaintForm.addEventListener("submit", async function (event) {
+      event.preventDefault();
+      event.stopPropagation();
+      const category = complaintForm.querySelector("select")?.value;
+      const subject = complaintForm.querySelector("input")?.value;
+      const description = complaintForm.querySelector("textarea")?.value;
+
+      console.log("Submitting complaint:", { category, subject, description });
+      try {
+        const response = await fetch("/tenant_dashboard/complaint", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ category, subject, description }),
+        });
+        const result = await response.json();
+        console.log("Complaint response:", result);
+        if (result.success) {
+          alert(result.message);
+          addNewComplaint(result.complaint);
+          complaintForm.reset();
+        } else {
+          alert(result.message || "Error submitting complaint");
+        }
+      } catch (error) {
+        console.error("Complaint form error:", error);
+        alert("Error submitting complaint");
+      }
+    });
+  }
+
+  if (reviewForm) {
+    reviewForm.addEventListener("click", async function () {
+      const propertyId = document.getElementById("star-rating")?.dataset.propertyId;
+      const rating = document.querySelectorAll("#star-rating span.active").length;
+      const review = document.getElementById("review-text")?.value;
+
+      if (!rating) {
+        alert("Please select a rating");
+        return;
+      }
+
+      console.log("Submitting review:", { propertyId, rating, review });
+      try {
+        const response = await fetch("/tenant/review", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ propertyId, rating, review }),
+        });
+        const result = await response.json();
+        console.log("Review response:", result);
+        if (result.success) {
+          alert(result.message);
+          addNewReview(result.rating);
+          if (document.getElementById("review-text")) document.getElementById("review-text").value = "";
+          document.querySelectorAll("#star-rating span").forEach(s => s.classList.remove("active"));
+        } else {
+          alert(result.message || "Error submitting review");
+        }
+      } catch (error) {
+        console.error("Review form error:", error);
+        alert("Error submitting review");
+      }
+    });
+  }
+
+  if (profileForm) {
+    profileForm.addEventListener("submit", async function (event) {
+      event.preventDefault();
+      event.stopPropagation();
+      const fullname = document.getElementById("fullname")?.value.trim();
+      const email = document.getElementById("email")?.value.trim();
+      const phone = document.getElementById("phone")?.value.trim();
+      const location = document.getElementById("address")?.value.trim();
+
+      if (!fullname || !email) {
+        alert("Full name and email are required");
+        return;
+      }
+      const nameParts = fullname.split(" ").filter(part => part);
+      if (nameParts.length < 2) {
+        alert("Please provide both first and last names");
+        return;
+      }
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+        alert("Please provide a valid email address");
+        return;
+      }
+
+      const firstName = nameParts[0];
+      const lastName = nameParts.slice(1).join(" ");
+
+      console.log("Submitting profile update:", { firstName, lastName, email, phone, location });
+      try {
+        const response = await fetch("/tenant/profile", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            firstName,
+            lastName,
+            email,
+            phone,
+            location,
+          }),
+        });
+        const result = await response.json();
+        console.log("Profile update response:", result);
+        if (result.success) {
+          alert(result.message);
+          // Update form inputs
+          if (document.getElementById("fullname")) {
+            document.getElementById("fullname").value = `${result.user.firstName} ${result.user.lastName}`;
+          }
+          if (document.getElementById("email")) {
+            document.getElementById("email").value = result.user.email;
+          }
+          if (document.getElementById("phone")) {
+            document.getElementById("phone").value = result.user.phone || '';
+          }
+          if (document.getElementById("address")) {
+            document.getElementById("address").value = result.user.location || '';
+          }
+          // Stay in settings
+          showSection('settings');
+          // Update URL hash
+          window.location.hash = 'settings';
+        } else {
+          alert(result.message || "Error updating profile");
+        }
+      } catch (error) {
+        console.error("Profile form error:", error);
+        alert("Error updating profile");
+      }
+    });
+  }
+
+  if (passwordForm) {
+    passwordForm.addEventListener("submit", async function (event) {
+      event.preventDefault();
+      event.stopPropagation();
+      const currentPassword = document.getElementById("current-password")?.value;
+      const newPassword = document.getElementById("new-password")?.value;
+      const confirmPassword = document.getElementById("confirm-password")?.value;
+
+      if (!currentPassword || !newPassword || !confirmPassword) {
+        alert("All password fields are required");
+        return;
+      }
+      if (newPassword !== confirmPassword) {
+        alert("New passwords do not match");
+        return;
+      }
+      if (newPassword.length < 6) {
+        alert("New password must be at least 6 characters");
+        return;
+      }
+
+      console.log("Submitting password change:", { currentPassword, newPassword });
+      try {
+        const response = await fetch("/tenant/password", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ currentPassword, newPassword }),
+        });
+        const result = await response.json();
+        console.log("Password change response:", result);
+        if (result.success) {
+          alert(result.message);
+          passwordForm.reset();
+          // Stay in settings
+          showSection('settings');
+          // Update URL hash
+          window.location.hash = 'settings';
+        } else {
+          alert(result.message || "Error changing password");
+        }
+      } catch (error) {
+        console.error("Password form error:", error);
+        alert("Error changing password");
+      }
+    });
+  }
+
+  if (notificationForm) {
+    notificationForm.addEventListener("submit", async function (event) {
+      event.preventDefault();
+      event.stopPropagation();
+      const emailNotifications = document.getElementById("email-notifications")?.checked;
+      const smsNotifications = document.getElementById("sms-notifications")?.checked;
+      const rentReminders = document.getElementById("rent-reminders")?.checked;
+      const maintenanceUpdates = document.getElementById("maintenance-updates")?.checked;
+      const newListings = document.getElementById("new-listings")?.checked;
+
+      console.log("Submitting notification preferences:", {
+        emailNotifications,
+        smsNotifications,
+        rentReminders,
+        maintenanceUpdates,
+        newListings,
       });
-
-      document.addEventListener("DOMContentLoaded", function () {
-        const popup = document.getElementById("maintenance-request-popup");
-        const bookButton = document.querySelector(".book-button");
-        const closeBtn = document.querySelector(".close-btn");
-        const maintenanceForm = document.getElementById(
-          "maintenance-request-form"
-        );
-        const complaintForm = document.getElementById("complaint-form");
-        const reviewForm = document.getElementById("review-submission");
-        const profileForm = document.getElementById("profile-form");
-        const passwordForm = document.getElementById("password-form");
-        const notificationForm = document.getElementById("notification-form");
-
-        bookButton.addEventListener("click", function () {
-          popup.style.display = "flex";
+      try {
+        const response = await fetch("/tenant/notifications", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            emailNotifications,
+            smsNotifications,
+            rentReminders,
+            maintenanceUpdates,
+            newListings,
+          }),
         });
-
-        closeBtn.addEventListener("click", function () {
-          popup.style.display = "none";
-        });
-
-        window.addEventListener("click", function (event) {
-          if (event.target === popup) {
-            popup.style.display = "none";
+        const result = await response.json();
+        console.log("Notification preferences response:", result);
+        if (result.success) {
+          alert(result.message);
+          // Update checkboxes
+          if (document.getElementById("email-notifications")) {
+            document.getElementById("email-notifications").checked = result.user.emailNotifications;
           }
-        });
-
-        maintenanceForm.addEventListener("submit", async function (event) {
-          event.preventDefault();
-          const issueType = document.getElementById("issue-type").value;
-          const description = document.getElementById("description").value;
-          const location = document.getElementById("location").value;
-          const preferredDate = document.getElementById("preferred-date").value;
-
-          try {
-            const response = await fetch("/tenant/maintenance/submit", {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({
-                issueType,
-                description,
-                location,
-                preferredDate,
-              }),
-            });
-            const result = await response.json();
-            if (result.success) {
-              alert(result.message);
-              addNewRequest(result.request);
-              maintenanceForm.reset();
-              popup.style.display = "none";
-            } else {
-              alert(result.error);
-            }
-          } catch (error) {
-            alert("Error submitting request");
+          if (document.getElementById("sms-notifications")) {
+            document.getElementById("sms-notifications").checked = result.user.smsNotifications;
           }
-        });
-
-        complaintForm.addEventListener("submit", async function (event) {
-          event.preventDefault();
-          const category = complaintForm.querySelector("select").value;
-          const subject = complaintForm.querySelector("input").value;
-          const description = complaintForm.querySelector("textarea").value;
-
-          try {
-            const response = await fetch("/tenant/complaint/submit", {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ category, subject, description }),
-            });
-            const result = await response.json();
-            if (result.success) {
-              alert(result.message);
-              addNewComplaint(result.complaint);
-              complaintForm.reset();
-            } else {
-              alert(result.error);
-            }
-          } catch (error) {
-            alert("Error submitting complaint");
+          if (document.getElementById("rent-reminders")) {
+            document.getElementById("rent-reminders").checked = result.user.rentReminders;
           }
-        });
-
-        reviewForm.addEventListener("click", async function () {
-          const propertyId =
-            document.getElementById("star-rating").dataset.propertyId;
-          const rating = document.querySelectorAll(
-            "#star-rating span.active"
-          ).length;
-          const review = document.getElementById("review-text").value;
-
-          try {
-            const response = await fetch("/tenant/review/submit", {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ propertyId, rating, review }),
-            });
-            const result = await response.json();
-            if (result.success) {
-              alert(result.message);
-              addNewReview(result.rating);
-              document.getElementById("review-text").value = "";
-            } else {
-              alert(result.error);
-            }
-          } catch (error) {
-            alert("Error submitting review");
+          if (document.getElementById("maintenance-updates")) {
+            document.getElementById("maintenance-updates").checked = result.user.maintenanceUpdates;
           }
-        });
-
-        profileForm.addEventListener("submit", async function (event) {
-          event.preventDefault();
-          const [firstName, lastName] = document
-            .getElementById("fullname")
-            .value.split(" ");
-          const email = document.getElementById("email").value;
-          const phone = document.getElementById("phone").value;
-          const location = document.getElementById("address").value;
-
-          try {
-            const response = await fetch("/tenant/profile/update", {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({
-                firstName,
-                lastName,
-                email,
-                phone,
-                location,
-              }),
-            });
-            const result = await response.json();
-            if (result.success) {
-              alert(result.message);
-            } else {
-              alert(result.error);
-            }
-          } catch (error) {
-            alert("Error updating profile");
+          if (document.getElementById("new-listings")) {
+            document.getElementById("new-listings").checked = result.user.newListings;
           }
-        });
-
-        passwordForm.addEventListener("submit", async function (event) {
-          event.preventDefault();
-          const currentPassword =
-            document.getElementById("current-password").value;
-          const newPassword = document.getElementById("new-password").value;
-          const confirmPassword =
-            document.getElementById("confirm-password").value;
-
-          if (newPassword !== confirmPassword) {
-            alert("New passwords do not match");
-            return;
-          }
-
-          try {
-            const response = await fetch("/tenant/profile/change-password", {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ currentPassword, newPassword }),
-            });
-            const result = await response.json();
-            if (result.success) {
-              alert(result.message);
-              passwordForm.reset();
-            } else {
-              alert(result.error);
-            }
-          } catch (error) {
-            alert("Error changing password");
-          }
-        });
-
-        notificationForm.addEventListener("submit", async function (event) {
-          event.preventDefault();
-          const emailNotifications = document.getElementById(
-            "email-notifications"
-          ).checked;
-          const smsNotifications =
-            document.getElementById("sms-notifications").checked;
-          const rentReminders =
-            document.getElementById("rent-reminders").checked;
-          const maintenanceUpdates = document.getElementById(
-            "maintenance-updates"
-          ).checked;
-          const newListings = document.getElementById("new-listings").checked;
-
-          try {
-            const response = await fetch("/tenant/profile/update", {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({
-                emailNotifications,
-                smsNotifications,
-                rentReminders,
-                maintenanceUpdates,
-                newListings,
-              }),
-            });
-            const result = await response.json();
-            if (result.success) {
-              alert("Notification preferences updated successfully");
-            } else {
-              alert(result.error);
-            }
-          } catch (error) {
-            alert("Error updating preferences");
-          }
-        });
-
-        async function removeSavedProperty(propertyId) {
-          try {
-            const response = await fetch("/tenant/property/toggle-save", {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ propertyId, action: "remove" }),
-            });
-            const result = await response.json();
-            if (result.success) {
-              alert(result.message);
-              document
-                .querySelector(
-                  .property-card[data-property-id="${propertyId}"]
-                )
-                ?.remove();
-            } else {
-              alert(result.error);
-            }
-          } catch (error) {
-            alert("Error removing property");
-          }
+          // Stay in settings
+          showSection('settings');
+          // Update URL hash
+          window.location.hash = 'settings';
+        } else {
+          alert(result.message || "Error updating preferences");
         }
+      } catch (error) {
+        console.error("Notification form error:", error);
+        alert("Error updating preferences");
+      }
+    });
+  }
 
-        function addNewRequest(request) {
-          const activeRequestsContainer =
-            document.querySelector(".maintenance-cards");
-          const newCard = document.createElement("div");
-          newCard.className = "maintenance-card";
-          newCard.innerHTML = `
-            <div class="maintenance-header">
-              <h5>${request.issueType} Issue</h5>
-              <span class="status pending">Pending</span>
-            </div>
-            <p><strong>Date Reported:</strong> ${new Date(
-              request.dateReported
-            ).toLocaleDateString()}</p>
-            <p><strong>Description:</strong> ${request.description}</p>
-            <p><strong>Location:</strong> ${request.location}</p>
-            ${
-              request.scheduledDate
-                ? `<p><strong>Preferred Date:</strong> ${new Date(
-                    request.scheduledDate
-                  ).toLocaleDateString()}</p>`
-                : ""
-            }
-            <p><strong>Assigned To:</strong> Awaiting assignment</p>
-            <button class="small-button">Update</button>
-          `;
-          activeRequestsContainer.insertBefore(
-            newCard,
-            activeRequestsContainer.firstChild
-          );
-        }
-
-        function addNewComplaint(complaint) {
-          const complaintsContainer = document.querySelector(
-            ".complaints-history"
-          );
-          const newItem = document.createElement("div");
-          newItem.className = "complaint-item";
-          newItem.innerHTML = `
-            <div class="complaint-header">
-              <h5>${complaint.subject}</h5>
-              <span class="status open">Open</span>
-            </div>
-            <p><strong>Date:</strong> ${new Date(
-              complaint.dateSubmitted
-            ).toLocaleDateString()}</p>
-            <p><strong>Description:</strong> ${complaint.description}</p>
-          `;
-          complaintsContainer.insertBefore(
-            newItem,
-            complaintsContainer.firstChild
-          );
-        }
-
-        function addNewReview(rating) {
-          const reviewsContainer = document.querySelector(".past-reviews");
-          const newCard = document.createElement("div");
-          newCard.className = "review-card";
-          newCard.innerHTML = `
-            <div class="review-header">
-              <h5>${rating.propertyId.name}</h5>
-              <div class="rating">${"⭐".repeat(
-                rating.rating
-              )} ${rating.rating.toFixed(1)}</div>
-            </div>
-            <p class="review-date">Reviewed on: ${new Date(
-              rating.date
-            ).toLocaleDateString()}</p>
-            <p class="review-text">${rating.review}</p>
-          `;
-          reviewsContainer.insertBefore(newCard, reviewsContainer.firstChild);
-        }
-
-        // Star rating interactivity
-        const stars = document.querySelectorAll("#star-rating span");
-        stars.forEach((star, index) => {
-          star.addEventListener("click", () => {
-            stars.forEach((s, i) => {
-              s.classList.toggle("active", i <= index);
-            });
-          });
-        });
+  async function removeSavedProperty(propertyId) {
+    console.log("Removing saved property:", { propertyId });
+    try {
+      const response = await fetch("/tenant/saved-property", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ propertyId, action: "remove" }),
       });
+      const result = await response.json();
+      console.log("Remove property response:", result);
+      if (result.success) {
+        alert(result.message);
+        document.querySelector(`.property-card[data-property-id="${propertyId}"]`)?.remove();
+      } else {
+        alert(result.message || "Error removing property");
+      }
+    } catch (error) {
+      console.error("Remove property error:", error);
+      alert("Error removing property");
+    }
+  }
+
+  function addNewRequest(request) {
+    const activeRequestsContainer = document.querySelector(".maintenance-cards");
+    if (activeRequestsContainer) {
+      const newCard = document.createElement("div");
+      newCard.className = "maintenance-card";
+      newCard.innerHTML = `
+        <div class="maintenance-header">
+          <h5>${request.issueType || 'Unknown'} Issue</h5>
+          <span class="status pending">Pending</span>
+        </div>
+        <p><strong>Date Reported:</strong> ${request.dateReported ? new Date(request.dateReported).toLocaleDateString() : 'N/A'}</p>
+        <p><strong>Description:</strong> ${request.description || 'N/A'}</p>
+        <p><strong>Location:</strong> ${request.location || 'N/A'}</p>
+        ${request.scheduledDate ? `<p><strong>Preferred Date:</strong> ${new Date(request.scheduledDate).toLocaleDateString()}</p>` : ""}
+        <p><strong>Assigned To:</strong> Awaiting assignment</p>
+        <button class="small-button">Update</button>
+      `;
+      activeRequestsContainer.insertBefore(newCard, activeRequestsContainer.firstChild);
+    }
+  }
+
+  function addNewComplaint(complaint) {
+    const complaintsContainer = document.querySelector(".complaints-history");
+    if (complaintsContainer) {
+      const newItem = document.createElement("div");
+      newItem.className = "complaint-item";
+      newItem.innerHTML = `
+        <div class="complaint-header">
+          <h5>${complaint.subject || 'N/A'}</h5>
+          <span class="status open">Open</span>
+        </div>
+        <p><strong>Date:</strong> ${complaint.dateSubmitted ? new Date(complaint.dateSubmitted).toLocaleDateString() : 'N/A'}</p>
+        <p><strong>Description:</strong> ${complaint.description || 'N/A'}</p>
+      `;
+      complaintsContainer.insertBefore(newItem, complaintsContainer.firstChild);
+    }
+  }
+
+  function addNewReview(rating) {
+    const reviewsContainer = document.querySelector(".past-reviews");
+    if (reviewsContainer) {
+      const newCard = document.createElement("div");
+      newCard.className = "review-card";
+      newCard.innerHTML = `
+        <div class="review-header">
+          <h5>${rating.propertyId && rating.propertyId.name ? rating.propertyId.name : 'Unknown Property'}</h5>
+          <div class="rating">${rating.rating ? "⭐".repeat(rating.rating) : ''} ${rating.rating ? rating.rating.toFixed(1) : 'N/A'}</div>
+        </div>
+        <p class="review-date">Reviewed on: ${rating.date ? new Date(rating.date).toLocaleDateString() : 'N/A'}</p>
+        <p class="review-text">${rating.review || 'No review provided'}</p>
+      `;
+      reviewsContainer.insertBefore(newCard, reviewsContainer.firstChild);
+    }
+  }
+
+  // Star rating interactivity
+  const stars = document.querySelectorAll("#star-rating span");
+  stars.forEach((star, index) => {
+    star.addEventListener("click", () => {
+      stars.forEach((s, i) => {
+        s.classList.toggle("active", i <= index);
+      });
+    });
+  });
+
+  // Ensure settings section is active if navigated with #settings
+  if (window.location.hash === '#settings') {
+    showSection('settings');
+  } else {
+    showSection('home'); // Default to home on initial load
+  }
+
+  // Prevent form submissions from reloading the page
+  document.querySelectorAll('form').forEach(form => {
+    form.addEventListener('submit', (event) => {
+      event.preventDefault();
+      event.stopPropagation();
+    });
+  });
+});
     </script>
   </body>
 </html>

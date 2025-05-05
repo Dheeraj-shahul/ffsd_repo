@@ -32,7 +32,7 @@
     }
     
     h2 {
-      color: #007bff;
+      color: #ffc107;
       font-weight: 500;
       margin-bottom: 15px;
     }
@@ -46,8 +46,8 @@
     .navbar {
       position: sticky;
       top: 0;
-      background: #007bff;
-      padding: 12px;
+      background:#333;
+      padding: 28px;
       border-radius: 8px;
       margin-bottom: 20px;
       box-shadow: 0 2px 10px rgba(0,0,0,0.1);
@@ -59,7 +59,7 @@
     }
     
     .navbar a {
-      color: white;
+      color: #ffc107;
       text-decoration: none;
       margin: 0 15px;
       font-weight: 500;
@@ -106,7 +106,7 @@
       font-size: 18px;
       font-weight: 600;
       margin-top: 8px;
-      color: #007bff;
+      color: #ff6f00;
     }
     
     /* Table styles */
@@ -115,16 +115,21 @@
       border-collapse: collapse;
       margin-top: 20px;
       font-family: 'Poppins', Arial, sans-serif;
+      table-layout: fixed;
     }
     
     th, td {
-      padding: 14px;
+      padding: 10px;
       text-align: left;
       border-bottom: 1px solid #e0e0e0;
+      font-size: 14px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
     
     th {
-      background: #007bff;
+      background: #333;
       color: white;
       font-weight: 500;
     }
@@ -137,24 +142,24 @@
     .action-buttons {
       display: flex;
       flex-wrap: wrap;
-      gap: 8px;
+      gap: 6px;
     }
     
     .action-buttons a, 
     .action-buttons button {
-      padding: 8px 12px;
+      padding: 6px 10px;
       border: none;
       border-radius: 6px;
       cursor: pointer;
       text-decoration: none;
-      font-size: 14px;
+      font-size: 12px;
       font-family: 'Poppins', Arial, sans-serif;
       font-weight: 500;
       transition: all 0.2s ease;
     }
     
     .action-buttons a {
-      background: #007bff;
+      background: #ff6f00;
       color: white;
     }
     
@@ -202,6 +207,14 @@
       border-radius: 10px;
       box-shadow: 0 2px 8px rgba(0,0,0,0.05);
     }
+
+    /* No data message */
+    .no-data {
+      text-align: center;
+      padding: 20px;
+      color: #6c757d;
+      font-size: 14px;
+    }
   </style>
 </head>
 <body>
@@ -215,6 +228,7 @@
     <a href="#service-bookings">Bookings</a>
     <a href="#payments">Payments</a>
     <a href="#notifications">Notifications</a>
+    <a href="#maintenance-requests">Maintenance Requests</a>
     <a href="#reports">Reports</a>
   </nav>
 
@@ -253,23 +267,21 @@
     <table>
       <thead>
         <tr>
-          <th>ID</th>
-          <th>Name</th>
-          <th>Owner</th>
-          <th>Location</th>
-          <th>Type</th>
-          <th>Subtype</th>
-          <th>Status</th>
-          <th>Rented</th>
-          <th>Tenant</th>
-          <th>Workers</th>
-          <th>Price</th>
-          <th>Rating</th>
-          <th>Reviews</th>
-          <th>Created</th>
-          <th>Updated</th>
-          <th>Verified</th>
-          <th>Actions</th>
+          <th style="width: 8%;">ID</th>
+          <th style="width: 10%;">Name</th>
+          <th style="width: 10%;">Owner</th>
+          <th style="width: 10%;">Location</th>
+          <th style="width: 8%;">Type</th>
+          <th style="width: 8%;">Subtype</th>
+          <th style="width: 8%;">Status</th>
+          <th style="width: 8%;">Rented</th>
+          <th style="width: 10%;">Tenant</th>
+          <th style="width: 10%;">Workers</th>
+          <th style="width: 8%;">Price</th>
+          <th style="width: 8%;">Created</th>
+          <th style="width: 8%;">Updated</th>
+          <th style="width: 8%;">Verified</th>
+          <th style="width: 20%;">Actions</th>
         </tr>
       </thead>
       <tbody>
@@ -291,9 +303,7 @@
               <% } %>
             </td>
             <td><%= p.activeWorkers?.length ? p.activeWorkers.map(w => w.name).join(', ') : 'None' %></td>
-            <td>₹<%= p.price?.toFixed(2) %></td>
-            <td><%= p.rating ? p.rating.toFixed(1) : 'N/A' %></td>
-            <td><%= p.reviews || 0 %></td>
+            <td>₹<%= p.price ? Number(p.price).toFixed(2) : 'N/A' %></td>
             <td><%= p.createdAt ? new Date(p.createdAt).toLocaleDateString() : 'N/A' %></td>
             <td><%= p.updatedAt ? new Date(p.updatedAt).toLocaleDateString() : 'N/A' %></td>
             <td><%= p.isVerified ? 'Yes' : 'No' %></td>
@@ -324,22 +334,21 @@
     <table>
       <thead>
         <tr>
-          <th>ID</th>
-          <th>Name</th>
-          <th>Role</th>
-          <th>Email</th>
-          <th>Phone</th>
-          <th>Location</th>
-          <th>Registered</th>
-          <th>Last Login</th>
-          <th>Status</th>
-          <th>Bookings</th>
-          <th>Service</th>
-          <th>Experience</th>
-          <th>Properties</th>
-          <th>Account</th>
-          <th>UPI</th>
-          <th>Actions</th>
+          <th style="width: 8%;">ID</th>
+          <th style="width: 10%;">Name</th>
+          <th style="width: 8%;">Role</th>
+          <th style="width: 10%;">Email</th>
+          <th style="width: 10%;">Phone</th>
+          <th style="width: 10%;">Address</th>
+          <th style="width: 8%;">Registered</th>
+          <th style="width: 8%;">Status</th>
+          <th style="width: 8%;">Service Bookings</th>
+          <th style="width: 8%;">Domestic Service</th>
+          <th style="width: 8%;">Experience</th>
+          <th style="width: 8%;">Properties</th>
+          <th style="width: 8%;">Account</th>
+          <th style="width: 8%;">UPI</th>
+          <th style="width: 20%;">Actions</th>
         </tr>
       </thead>
       <tbody>
@@ -350,9 +359,8 @@
             <td><%= u.userType %></td>
             <td><%= u.email %></td>
             <td><%= u.phone %></td>
-            <td><%= u.location %></td>
+            <td><%= u.address || 'N/A' %></td>
             <td><%= u.createdAt ? new Date(u.createdAt).toLocaleDateString() : 'N/A' %></td>
-            <td><%= u.lastLogin ? new Date(u.lastLogin).toLocaleDateString() : 'Never' %></td>
             <td><%= u.status %></td>
             <td><%= u.tenantBookings || 'N/A' %></td>
             <td><%= u.serviceType || 'N/A' %></td>
@@ -384,16 +392,16 @@
     <table>
       <thead>
         <tr>
-          <th>ID</th>
-          <th>User</th>
-          <th>Property</th>
-          <th>Status</th>
-          <th>Booked</th>
-          <th>Start</th>
-          <th>End</th>
-          <th>Amount</th>
-          <th>Worker</th>
-          <th>Actions</th>
+          <th style="width: 8%;">ID</th>
+          <th style="width: 10%;">User</th>
+          <th style="width: 10%;">Property</th>
+          <th style="width: 10%;">Worker</th>
+          <th style="width: 8%;">Status</th>
+          <th style="width: 8%;">Booked</th>
+          <th style="width: 8%;">Start</th>
+          <th style="width: 8%;">End</th>
+          <th style="width: 8%;">Amount</th>
+          <th style="width: 20%;">Actions</th>
         </tr>
       </thead>
       <tbody>
@@ -402,11 +410,6 @@
             <td><%= b.id %></td>
             <td><a href="/admin/user/<%= b.user %>/tenant"><%= b.userName || 'N/A' %></a></td>
             <td><a href="/admin/property/<%= b.property %>"><%= b.propertyName || 'N/A' %></a></td>
-            <td><%= b.status %></td>
-            <td><%= b.bookingDate ? new Date(b.bookingDate).toLocaleDateString() : 'N/A' %></td>
-            <td><%= b.startDate ? new Date(b.startDate).toLocaleDateString() : 'N/A' %></td>
-            <td><%= b.endDate ? new Date(b.endDate).toLocaleDateString() : 'N/A' %></td>
-            <td>₹<%= b.amount ? b.amount.toFixed(2) : 'N/A' %></td>
             <td>
               <% if (b.assignedWorker) { %>
                 <a href="/admin/user/<%= b.assignedWorker %>/worker"><%= b.workerName || 'N/A' %></a>
@@ -414,6 +417,11 @@
                 None
               <% } %>
             </td>
+            <td><%= b.status %></td>
+            <td><%= b.bookingDate ? new Date(b.bookingDate).toLocaleDateString() : 'N/A' %></td>
+            <td><%= b.startDate ? new Date(b.startDate).toLocaleDateString() : 'N/A' %></td>
+            <td><%= b.endDate ? new Date(b.endDate).toLocaleDateString() : 'N/A' %></td>
+            <td>₹<%= b.amount ? b.amount.toFixed(2) : 'N/A' %></td>
             <td>
               <div class="action-buttons">
                 <a href="/admin/booking/<%= b.id %>">View</a>
@@ -437,15 +445,15 @@
     <table>
       <thead>
         <tr>
-          <th>ID</th>
-          <th>User</th>
-          <th>Amount</th>
-          <th>Status</th>
-          <th>Date</th>
-          <th>Booking</th>
-          <th>Method</th>
-          <th>Transaction</th>
-          <th>Actions</th>
+          <th style="width: 8%;">ID</th>
+          <th style="width: 10%;">User</th>
+          <th style="width: 10%;">Amount</th>
+          <th style="width: 10%;">Status</th>
+          <th style="width: 10%;">Date</th>
+          <th style="width: 10%;">Booking</th>
+          <th style="width: 10%;">Method</th>
+          <th style="width: 10%;">Transaction</th>
+          <th style="width: 20%;">Actions</th>
         </tr>
       </thead>
       <tbody>
@@ -475,21 +483,20 @@
     </table>
   </section>
 
-  <!-- Requests and Notifications -->
+  <!-- Notifications -->
   <section id="notifications" class="notifications">
-    <h2>Requests and Notifications</h2>
+    <h2>Notifications</h2>
     <table>
       <thead>
         <tr>
-          <th>ID</th>
-          <th>Type</th>
-          <th>Message</th>
-          <th>Recipient</th>
-          <th>Worker</th>
-          <th>Date</th>
-          <th>Status</th>
-          <th>Priority</th>
-          <th>Actions</th>
+          <th style="width: 8%;">ID</th>
+          <th style="width: 10%;">Type</th>
+          <th style="width: 10%;">Worker</th>
+          <th style="width: 10%;">Owner</th>
+          <th style="width: 10%;">Tenant</th>
+          <th style="width: 10%;">Date</th>
+          <th style="width: 10%;">Status</th>
+          <th style="width: 30%;">Actions</th>
         </tr>
       </thead>
       <tbody>
@@ -497,8 +504,6 @@
           <tr>
             <td><%= n.id %></td>
             <td><%= n.type %></td>
-            <td><%= n.message %></td>
-            <td><a href="/admin/user/<%= n.recipient %>/<%= n.recipientType %>"><%= n.recipientName || 'N/A' %></a></td>
             <td>
               <% if (n.worker) { %>
                 <a href="/admin/user/<%= n.worker %>/worker"><%= n.workerName || 'N/A' %></a>
@@ -506,9 +511,22 @@
                 None
               <% } %>
             </td>
+            <td>
+              <% if (n.recipientType === 'owner' && n.recipient) { %>
+                <a href="/admin/user/<%= n.recipient %>/owner"><%= n.recipientName || 'N/A' %></a>
+              <% } else { %>
+                None
+              <% } %>
+            </td>
+            <td>
+              <% if (n.recipientType === 'tenant' && n.recipient) { %>
+                <a href="/admin/user/<%= n.recipient %>/tenant"><%= n.recipientName || 'N/A' %></a>
+              <% } else { %>
+                None
+              <% } %>
+            </td>
             <td><%= n.createdDate ? new Date(n.createdDate).toLocaleDateString() : 'N/A' %></td>
             <td><%= n.status %></td>
-            <td><%= n.priority %></td>
             <td>
               <div class="action-buttons">
                 <a href="/admin/notification/<%= n.id %>">View</a>
@@ -522,6 +540,70 @@
             </td>
           </tr>
         <% }) %>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- Maintenance Requests -->
+  <section id="maintenance-requests" class="maintenance-requests">
+    <h2>Maintenance Requests</h2>
+    <table>
+      <thead>
+        <tr>
+          <th style="width: 8%;">ID</th>
+          <th style="width: 10%;">Issue Type</th>
+          <th style="width: 10%;">Property</th>
+          <th style="width: 10%;">Tenant</th>
+          <th style="width: 10%;">Owner</th>
+          <th style="width: 10%;">Location</th>
+          <th style="width: 10%;">Date Reported</th>
+          <th style="width: 10%;">Status</th>
+          <th style="width: 20%;">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% if (maintenanceRequests && Array.isArray(maintenanceRequests)) { %>
+          <% maintenanceRequests.forEach(m => { %>
+            <tr>
+              <td><%= m._id %></td>
+              <td><%= m.issueType %></td>
+              <td><a href="/admin/property/<%= m.propertyId %>"><%= m.propertyName || 'N/A' %></a></td>
+              <td>
+                <% if (m.tenantId) { %>
+                  <a href="/admin/user/<%= m.tenantId %>/tenant"><%= m.tenantName || 'N/A' %></a>
+                <% } else { %>
+                  None
+                <% } %>
+              </td>
+              <td>
+                <% if (m.ownerName) { %>
+                  <a href="/admin/user/<%= properties.find(p => p._id.equals(m.propertyId))?.ownerId %>/owner"><%= m.ownerName || 'N/A' %></a>
+                <% } else { %>
+                  None
+                <% } %>
+              </td>
+            
+              <td><%= m.location %></td>
+              <td><%= m.dateReported ? new Date(m.dateReported).toLocaleDateString() : 'N/A' %></td>
+              <td><%= m.status %></td>
+              <td>
+                <div class="action-buttons">
+                  <a href="/admin/maintenance/<%= m._id %>">View</a>
+                  <a href="/admin/maintenance/assign-worker/<%= m._id %>">Assign</a>
+                  <button class="success" onclick="markMaintenance('<%= m._id %>', 'Read')">Mark Read</button>
+                  <button class="success" onclick="respondMaintenance('<%= m._id %>')">Respond</button>
+                  <button class="success" onclick="escalateMaintenance('<%= m._id %>')">Escalate</button>
+                  <button class="success" onclick="completeMaintenance('<%= m._id %>')">Complete</button>
+                  <button class="success" onclick="requestUpdateMaintenance('<%= m._id %>')">Update</button>
+                </div>
+              </td>
+            </tr>
+          <% }) %>
+        <% } else { %>
+          <tr>
+            <td colspan="10" class="no-data">No maintenance requests available</td>
+          </tr>
+        <% } %>
       </tbody>
     </table>
   </section>
@@ -576,10 +658,8 @@
             <%= chart.type !== 'pie' ? 'fill: false' : '' %>
           }]
         },
-        options: { 
-          scales: { 
-            y: { beginAtZero: true } 
-          },
+        options: {
+          scales: { y: { beginAtZero: true } },
           plugins: {
             legend: {
               labels: {
@@ -639,4 +719,167 @@
       location.reload();
     }
 
-    async function resetPassword(i
+    async function resetPassword(id, userType) {
+      if (confirm('Reset password for this user?')) {
+        await fetch(`/admin/user/reset-password/${id}/${userType}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' }
+        });
+        alert('Password reset email sent.');
+      }
+    }
+
+    async function verifyEmail(id, userType) {
+      await fetch(`/admin/user�n/verify-email/${id}/${userType}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' }
+      });
+      location.reload();
+    }
+
+    async function approveBooking(id) {
+      await fetch(`/admin/booking/approve/${id}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' }
+      });
+      location.reload();
+    }
+
+    async function rejectBooking(id) {
+      if (confirm('Reject this booking?')) {
+        await fetch(`/admin/booking/reject/${id}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' }
+        });
+        location.reload();
+      }
+    }
+
+    async function cancelBooking(id) {
+      if (confirm('Cancel this booking?')) {
+        await fetch(`/admin/booking/cancel/${id}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' }
+        });
+        location.reload();
+      }
+    }
+
+    async function refundPayment(id) {
+      if (confirm('Issue refund for this payment?')) {
+        await fetch(`/admin/payment/refund/${id}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' }
+        });
+        location.reload();
+      }
+    }
+
+    async function retryPayment(id) {
+      await fetch(`/admin/payment/retry/${id}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' }
+      });
+      location.reload();
+    }
+
+    async function markNotification(id, status) {
+      await fetch(`/admin/notification/mark/${id}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status })
+      });
+      location.reload();
+    }
+
+    async function respondNotification(id) {
+      const response = prompt('Enter response:');
+      if (response) {
+        await fetch(`/admin/notification/respond/${id}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ response })
+        });
+        location.reload();
+      }
+    }
+
+    async function escalateNotification(id) {
+      await fetch(`/admin/notification/escalate/${id}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' }
+      });
+      location.reload();
+    }
+
+    async function completeTask(id) {
+      await fetch(`/admin/notification/complete/${id}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' }
+      });
+      location.reload();
+    }
+
+    async function requestUpdate(id) {
+      const update = prompt('Enter update request:');
+      if (update) {
+        await fetch(`/admin/notification/update/${id}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ update })
+        });
+        location.reload();
+      }
+    }
+
+    async function markMaintenance(id, status) {
+      await fetch(`/admin/maintenance/mark/${id}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status })
+      });
+      location.reload();
+    }
+
+    async function respondMaintenance(id) {
+      const response = prompt('Enter response:');
+      if (response) {
+        await fetch(`/admin/maintenance/respond/${id}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ response })
+        });
+        location.reload();
+      }
+    }
+
+    async function escalateMaintenance(id) {
+      await fetch(`/admin/maintenance/escalate/${id}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' }
+      });
+      location.reload();
+    }
+
+    async function completeMaintenance(id) {
+      await fetch(`/admin/maintenance/complete/${id}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' }
+      });
+      location.reload();
+    }
+
+    async function requestUpdateMaintenance(id) {
+      const update = prompt('Enter update request:');
+      if (update) {
+        await fetch(`/admin/maintenance/update/${id}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ update })
+        });
+        location.reload();
+      }
+    }
+  </script>
+</body>
+</html>

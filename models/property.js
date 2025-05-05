@@ -2,18 +2,18 @@
 const mongoose = require('mongoose');
 
 const propertySchema = new mongoose.Schema({
-  id: Number,
   name: String,
   ownerId: { type: mongoose.Schema.Types.ObjectId, ref: "Owner" },
+  tenantId: { type: mongoose.Schema.Types.ObjectId, ref: "Tenant" },
   owner: String,
   location: String,
   type: String,
   subtype: String,
   status: { type: String, default: "Pending" },
   isRented: { type: Boolean, default: false },
-  tenantId: { type: mongoose.Schema.Types.ObjectId, ref: "Tenant" },
+
   tenant: String,
-  activeWorkerIds: [{ type: mongoose.Schema.Types.ObjectId, ref: "Worker" }],
+  activeWorkers: [{ type: mongoose.Schema.Types.ObjectId, ref: "Worker" }],
   price: Number, // Converted to Number (from String) for consistency
   rating: Number,
   reviews: Number,
@@ -40,5 +40,29 @@ const propertySchema = new mongoose.Schema({
   contactEmail: String,
 
 }, { timestamps: true });
+
+
+// Validate activeWorkers before saving
+propertySchema.pre('save', async function (next) {
+  if (this.activeWorkers && this.activeWorkers.length > 0) {
+    const Worker = mongoose.model('Worker');
+    const validWorkers = [];
+    for (const workerId of this.activeWorkers) {
+      try {
+        const id = mongoose.Types.ObjectId(workerId);
+        const worker = await Worker.findById(id);
+        if (worker) {
+          validWorkers.push(id);
+        } else {
+          console.warn(`Worker not found for ID: ${workerId}`);
+        }
+      } catch (e) {
+        console.warn(`Invalid ObjectId for activeWorkers: ${workerId}`);
+      }
+    }
+    this.activeWorkers = validWorkers;
+  }
+  next();
+});
 
 module.exports = mongoose.model('Property', propertySchema);

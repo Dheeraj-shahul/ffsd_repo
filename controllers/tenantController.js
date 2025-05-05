@@ -11,48 +11,40 @@ const RentalHistory = require('../models/rentalhistory');
 // Dashboard Controller
 exports.getDashboard = async (req, res) => {
   try {
-    const userId = req.session.user._id; // Standardized session handling
+    if (!req.session.user || !req.session.user._id) {
+      console.log("Unauthorized access to dashboard, redirecting to login");
+      return res.redirect('/login?error=Please log in');
+    }
+    const userId = req.session.user._id;
+    console.log("Fetching dashboard for tenant ID:", userId);
 
-    // Fetch tenant data with populated references
     const tenant = await Tenant.findById(userId)
       .populate('savedListings')
-      .populate({
-        path: 'maintenanceRequestIds',
-        model: 'MaintenanceRequest',
-        options: { sort: { 'dateReported': -1 } }
-      })
-      .populate({
-        path: 'complaintIds',
-        model: 'Complaint',
-        options: { sort: { 'dateSubmitted': -1 } }
-      })
+      .populate({ path: 'maintenanceRequestIds', model: 'MaintenanceRequest', options: { sort: { 'dateReported': -1 } } })
+      .populate({ path: 'complaintIds', model: 'Complaint', options: { sort: { 'dateSubmitted': -1 } } })
       .populate('domesticWorkerId');
 
     if (!tenant) {
+      console.log("Tenant not found for ID:", userId);
       return res.status(404).send('Tenant not found');
     }
 
-    // Get current property (assuming tenant is renting a property)
     const currentProperty = await Property.findOne({ tenantId: userId });
 
-    // Get owner details for the current property
     let propertyOwner = null;
     if (currentProperty && currentProperty.ownerId) {
       propertyOwner = await Owner.findById(currentProperty.ownerId);
     }
 
-    // Get payment history
     const payments = await Payment.find({ tenantId: userId })
       .sort({ paymentDate: -1 })
       .limit(10);
 
-    // Calculate next rent due
     const nextPayment = await Payment.findOne({ 
       tenantId: userId, 
       status: 'Pending' 
     }).sort({ dueDate: 1 });
 
-    // Get maintenance requests
     const activeMaintenanceRequests = await MaintenanceRequest.find({
       tenantId: userId,
       status: { $in: ['Pending', 'In Progress'] }
@@ -63,17 +55,13 @@ exports.getDashboard = async (req, res) => {
       status: 'Completed'
     }).sort({ dateReported: -1 }).limit(5);
 
-    // Get complaints
     const complaints = await Complaint.find({ tenantId: userId })
       .sort({ dateSubmitted: -1 });
 
-    // Get domestic workers serving tenant
     const workers = await Worker.find({ clientIds: userId });
 
-    // Get rental history
     const rentalHistory = await RentalHistory.findOne({ tenantId: userId });
 
-    // Get property ratings
     const ratings = await Rating.find({ 
       tenantId: userId,
       propertyId: { $exists: true }
@@ -101,16 +89,20 @@ exports.getDashboard = async (req, res) => {
 // Maintenance Request Controller
 exports.submitMaintenanceRequest = async (req, res) => {
   try {
+    if (!req.session.user || !req.session.user._id) {
+      console.log("Unauthorized access to maintenance request");
+      return res.status(401).json({ success: false, message: 'Unauthorized: Please log in' });
+    }
     const { issueType, description, location, preferredDate } = req.body;
-    const tenantId = req.session.userId;
+    const tenantId = req.session.user._id;
+    console.log("Submitting maintenance request for tenant ID:", tenantId, { issueType, description, location, preferredDate });
 
-    // Get property ID for the tenant
     const property = await Property.findOne({ tenantId });
     if (!property) {
-      return res.status(404).json({ error: 'No property found for this tenant' });
+      console.log("No property found for tenant ID:", tenantId);
+      return res.status(404).json({ success: false, message: 'No property found for this tenant' });
     }
 
-    // Create maintenance request
     const newRequest = new MaintenanceRequest({
       tenantId,
       propertyId: property._id,
@@ -123,12 +115,10 @@ exports.submitMaintenanceRequest = async (req, res) => {
 
     await newRequest.save();
 
-    // Update tenant's maintenance requests
     await Tenant.findByIdAndUpdate(tenantId, {
       $push: { maintenanceRequestIds: newRequest._id }
     });
 
-    // Update property owner's maintenance requests
     await Owner.findByIdAndUpdate(property.ownerId, {
       $push: { maintenanceRequestIds: newRequest._id }
     });
@@ -140,23 +130,27 @@ exports.submitMaintenanceRequest = async (req, res) => {
     });
   } catch (error) {
     console.error('Maintenance request error:', error);
-    res.status(500).json({ error: 'Server error' });
+    res.status(500).json({ success: false, message: 'Server error: ' + error.message });
   }
 };
 
 // Complaint Controller
 exports.submitComplaint = async (req, res) => {
   try {
+    if (!req.session.user || !req.session.user._id) {
+      console.log("Unauthorized access to complaint submission");
+      return res.status(401).json({ success: false, message: 'Unauthorized: Please log in' });
+    }
     const { category, subject, description } = req.body;
-    const tenantId = req.session.userId;
+    const tenantId = req.session.user._id;
+    console.log("Submitting complaint for tenant ID:", tenantId, { category, subject, description });
 
-    // Get property ID for the tenant
     const property = await Property.findOne({ tenantId });
     if (!property) {
-      return res.status(404).json({ error: 'No property found for this tenant' });
+      console.log("No property found for tenant ID:", tenantId);
+      return res.status(404).json({ success: false, message: 'No property found for this tenant' });
     }
 
-    // Create complaint
     const newComplaint = new Complaint({
       tenantId,
       propertyId: property._id,
@@ -168,12 +162,10 @@ exports.submitComplaint = async (req, res) => {
 
     await newComplaint.save();
 
-    // Update tenant's complaints
     await Tenant.findByIdAndUpdate(tenantId, {
-      $push: { complaintIds: newComplaint._id }
+      $push: { complaintIds: newRequest._id }
     });
 
-    // Update property owner's complaints
     await Owner.findByIdAndUpdate(property.ownerId, {
       $push: { complaintIds: newComplaint._id }
     });
@@ -185,30 +177,33 @@ exports.submitComplaint = async (req, res) => {
     });
   } catch (error) {
     console.error('Complaint submission error:', error);
-    res.status(500).json({ error: 'Server error' });
+    res.status(500).json({ success: false, message: 'Server error: ' + error.message });
   }
 };
 
 // Property Reviews Controller
 exports.submitPropertyReview = async (req, res) => {
   try {
+    if (!req.session.user || !req.session.user._id) {
+      console.log("Unauthorized access to review submission");
+      return res.status(401).json({ success: false, message: 'Unauthorized: Please log in' });
+    }
     const { propertyId, rating, review } = req.body;
-    const tenantId = req.session.userId;
+    const tenantId = req.session.user._id;
+    console.log("Submitting review for tenant ID:", tenantId, { propertyId, rating, review });
 
-    // Validate property exists and tenant is renting it
     const property = await Property.findById(propertyId);
     if (!property) {
-      return res.status(404).json({ error: 'Property not found' });
+      console.log("Property not found:", propertyId);
+      return res.status(404).json({ success: false, message: 'Property not found' });
     }
 
-    // Create or update rating
     const existingRating = await Rating.findOne({ 
       tenantId, 
       propertyId 
     });
 
     if (existingRating) {
-      // Update existing rating
       existingRating.rating = rating;
       existingRating.review = review;
       existingRating.date = new Date();
@@ -221,7 +216,6 @@ exports.submitPropertyReview = async (req, res) => {
       });
     }
 
-    // Create new rating
     const newRating = new Rating({
       tenantId,
       propertyId,
@@ -232,12 +226,10 @@ exports.submitPropertyReview = async (req, res) => {
 
     await newRating.save();
 
-    // Update tenant's ratings
     await Tenant.findByIdAndUpdate(tenantId, {
-      $push: { ratingId: newRating._id }
+      $push: { ratingIds: newRating._id }
     });
 
-    // Update property ratings
     const propertyRatings = await Rating.find({ propertyId });
     const averageRating = propertyRatings.reduce((acc, curr) => acc + curr.rating, 0) / propertyRatings.length;
 
@@ -253,108 +245,246 @@ exports.submitPropertyReview = async (req, res) => {
     });
   } catch (error) {
     console.error('Rating submission error:', error);
-    res.status(500).json({ error: 'Server error' });
+    res.status(500).json({ success: false, message: 'Server error: ' + error.message });
   }
 };
 
 // Update Profile Controller
 exports.updateProfile = async (req, res) => {
   try {
+    if (!req.session.user || !req.session.user._id) {
+      console.log("Unauthorized access to profile update");
+      return res.status(401).json({ success: false, message: 'Unauthorized: Please log in' });
+    }
     const { firstName, lastName, email, phone, location } = req.body;
-    const tenantId = req.session.userId;
+    const tenantId = req.session.user._id;
+    console.log("Received profile update request for tenant ID:", tenantId, { firstName, lastName, email, phone, location });
 
+    // Validate inputs
+    if (!firstName || !lastName || !email) {
+      console.log("Validation failed: Missing required fields");
+      return res.status(400).json({ success: false, message: 'First name, last name, and email are required' });
+    }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      console.log("Validation failed: Invalid email format");
+      return res.status(400).json({ success: false, message: 'Invalid email format' });
+    }
+
+    // Check email uniqueness
+    const existingTenant = await Tenant.findOne({ email, _id: { $ne: tenantId } });
+    if (existingTenant) {
+      console.log("Email already in use:", email);
+      return res.status(400).json({ success: false, message: 'Email already in use' });
+    }
+
+    // Prepare update object
+    const updateFields = {};
+    if (firstName) updateFields.firstName = firstName;
+    if (lastName) updateFields.lastName = lastName;
+    if (email) updateFields.email = email;
+    if (phone) updateFields.phone = phone;
+    if (location) updateFields.location = location;
+
+    console.log("Updating tenant with fields:", updateFields);
     const updatedTenant = await Tenant.findByIdAndUpdate(
       tenantId,
-      { firstName, lastName, email, phone, location },
+      { $set: updateFields },
       { new: true }
     );
 
     if (!updatedTenant) {
-      return res.status(404).json({ error: 'Tenant not found' });
+      console.log("Tenant not found for ID:", tenantId);
+      return res.status(404).json({ success: false, message: 'Tenant not found' });
     }
 
-    res.status(200).json({ 
-      success: true, 
+    // Update session
+    req.session.user = {
+      ...req.session.user,
+      firstName: updatedTenant.firstName,
+      lastName: updatedTenant.lastName,
+      email: updatedTenant.email,
+      phone: updatedTenant.phone,
+      location: updatedTenant.location
+    };
+
+    console.log("Profile updated successfully for tenant ID:", tenantId, updatedTenant);
+    res.status(200).json({
+      success: true,
       message: 'Profile updated successfully',
-      user: updatedTenant
+      user: {
+        firstName: updatedTenant.firstName,
+        lastName: updatedTenant.lastName,
+        email: updatedTenant.email,
+        phone: updatedTenant.phone || '',
+        location: updatedTenant.location || ''
+      }
     });
   } catch (error) {
     console.error('Profile update error:', error);
-    res.status(500).json({ error: 'Server error' });
+    res.status(500).json({ success: false, message: 'Server error: ' + error.message });
   }
 };
 
 // Change Password Controller
 exports.changePassword = async (req, res) => {
   try {
+    if (!req.session.user || !req.session.user._id) {
+      console.log("Unauthorized access to password change");
+      return res.status(401).json({ success: false, message: 'Unauthorized: Please log in' });
+    }
     const { currentPassword, newPassword } = req.body;
-    const tenantId = req.session.userId;
+    const tenantId = req.session.user._id;
+    console.log("Received password change request for tenant ID:", tenantId, { currentPassword, newPassword });
+
+    // Validate inputs
+    if (!currentPassword || !newPassword) {
+      console.log("Validation failed: Missing required fields");
+      return res.status(400).json({ success: false, message: 'Current and new passwords are required' });
+    }
+    if (newPassword.length < 6) {
+      console.log("Validation failed: Password too short");
+      return res.status(400).json({ success: false, message: 'New password must be at least 6 characters' });
+    }
 
     const tenant = await Tenant.findById(tenantId);
     if (!tenant) {
-      return res.status(404).json({ error: 'Tenant not found' });
+      console.log("Tenant not found for ID:", tenantId);
+      return res.status(404).json({ success: false, message: 'Tenant not found' });
     }
 
-    // Verify current password (use bcrypt in a real app)
+    // Verify current password (plain text)
     if (tenant.password !== currentPassword) {
-      return res.status(401).json({ error: 'Current password is incorrect' });
+      console.log("Incorrect current password for tenant ID:", tenantId);
+      return res.status(401).json({ success: false, message: 'Current password is incorrect' });
     }
 
-    // Update password (use bcrypt in production)
     tenant.password = newPassword;
     await tenant.save();
 
-    res.status(200).json({ 
-      success: true, 
+    console.log("Password changed successfully for tenant ID:", tenantId);
+    res.status(200).json({
+      success: true,
       message: 'Password changed successfully'
     });
   } catch (error) {
     console.error('Password change error:', error);
-    res.status(500).json({ error: 'Server error' });
+    res.status(500).json({ success: false, message: 'Server error: ' + error.message });
+  }
+};
+
+// Update Notification Preferences Controller
+exports.updateNotificationPreferences = async (req, res) => {
+  try {
+    if (!req.session.user || !req.session.user._id) {
+      console.log("Unauthorized access to notification preferences");
+      return res.status(401).json({ success: false, message: 'Unauthorized: Please log in' });
+    }
+    const { emailNotifications, smsNotifications, rentReminders, maintenanceUpdates, newListings } = req.body;
+    const tenantId = req.session.user._id;
+    console.log("Received notification preferences update for tenant ID:", tenantId, {
+      emailNotifications,
+      smsNotifications,
+      rentReminders,
+      maintenanceUpdates,
+      newListings
+    });
+
+    // Prepare update object
+    const updateFields = {};
+    if (emailNotifications !== undefined) updateFields.emailNotifications = emailNotifications === true || emailNotifications === 'true';
+    if (smsNotifications !== undefined) updateFields.smsNotifications = smsNotifications === true || smsNotifications === 'true';
+    if (rentReminders !== undefined) updateFields.rentReminders = rentReminders === true || rentReminders === 'true';
+    if (maintenanceUpdates !== undefined) updateFields.maintenanceUpdates = maintenanceUpdates === true || maintenanceUpdates === 'true';
+    if (newListings !== undefined) updateFields.newListings = newListings === true || newListings === 'true';
+
+    console.log("Updating tenant notification preferences with fields:", updateFields);
+    const updatedTenant = await Tenant.findByIdAndUpdate(
+      tenantId,
+      { $set: updateFields },
+      { new: true }
+    );
+
+    if (!updatedTenant) {
+      console.log("Tenant not found for ID:", tenantId);
+      return res.status(404).json({ success: false, message: 'Tenant not found' });
+    }
+
+    // Update session
+    req.session.user = {
+      ...req.session.user,
+      emailNotifications: updatedTenant.emailNotifications,
+      smsNotifications: updatedTenant.smsNotifications,
+      rentReminders: updatedTenant.rentReminders,
+      maintenanceUpdates: updatedTenant.maintenanceUpdates,
+      newListings: updatedTenant.newListings
+    };
+
+    console.log("Notification preferences updated successfully for tenant ID:", tenantId, updatedTenant);
+    res.status(200).json({
+      success: true,
+      message: 'Notification preferences updated successfully',
+      user: {
+        emailNotifications: updatedTenant.emailNotifications,
+        smsNotifications: updatedTenant.smsNotifications,
+        rentReminders: updatedTenant.rentReminders,
+        maintenanceUpdates: updatedTenant.maintenanceUpdates,
+        newListings: updatedTenant.newListings
+      }
+    });
+  } catch (error) {
+    console.error('Notification preferences update error:', error);
+    res.status(500).json({ success: false, message: 'Server error: ' + error.message });
   }
 };
 
 // Save/Remove Property Controller
 exports.toggleSavedProperty = async (req, res) => {
   try {
-    const { propertyId, action } = req.body; // action: 'save' or 'remove'
-    const tenantId = req.session.userId;
+    if (!req.session.user || !req.session.user._id) {
+      console.log("Unauthorized access to saved property");
+      return res.status(401).json({ success: false, message: 'Unauthorized: Please log in' });
+    }
+    const { propertyId, action } = req.body;
+    const tenantId = req.session.user._id;
+    console.log("Received toggle saved property request for tenant ID:", tenantId, { propertyId, action });
 
     const tenant = await Tenant.findById(tenantId);
     if (!tenant) {
-      return res.status(404).json({ error: 'Tenant not found' });
+      console.log("Tenant not found for ID:", tenantId);
+      return res.status(404).json({ success: false, message: 'Tenant not found' });
     }
 
     if (action === 'save') {
-      // Check if already saved
       if (tenant.savedListings.includes(propertyId)) {
-        return res.status(400).json({ error: 'Property already saved' });
+        console.log("Property already saved:", propertyId);
+        return res.status(400).json({ success: false, message: 'Property already saved' });
       }
 
-      // Add property to saved listings
       await Tenant.findByIdAndUpdate(tenantId, {
         $push: { savedListings: propertyId }
       });
 
+      console.log("Property saved successfully for tenant ID:", tenantId);
       return res.status(200).json({ 
         success: true, 
         message: 'Property saved successfully'
       });
     } else if (action === 'remove') {
-      // Remove property from saved listings
       await Tenant.findByIdAndUpdate(tenantId, {
         $pull: { savedListings: propertyId }
       });
 
+      console.log("Property removed successfully for tenant ID:", tenantId);
       return res.status(200).json({ 
         success: true, 
         message: 'Property removed from saved listings'
       });
     }
 
-    res.status(400).json({ error: 'Invalid action' });
+    console.log("Invalid action for saved property");
+    res.status(400).json({ success: false, message: 'Invalid action' });
   } catch (error) {
     console.error('Saved property error:', error);
-    res.status(500).json({ error: 'Server error' });
+    res.status(500).json({ success: false, message: 'Server error: ' + error.message });
   }
 };
