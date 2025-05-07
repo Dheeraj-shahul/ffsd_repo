@@ -436,22 +436,19 @@
                   <span><%= property.furnished || 'N/A' %></span>
                 </div>
                 <div class="card-actions">
-                  <button
-                    class="book-button"
-                    onclick="location.href='/property?id=<%= property._id %>'"
-                  >
-                    View Details
-                  </button>
-                  <button
-                    class="remove-button"
-                    onclick="removeSavedProperty('<%= property._id %>')"
-                  >
+                  <button class="book-button" onclick="location.href='/book-property?id=<%= property._id %>'">Book Now</button>
+                  <a href="/property?id=<%= property._id %>" class="view-details">View Details</a>
+                
+                  <button class="remove-button" data-property-id="<%= property._id %>">
                     Remove
                   </button>
                 </div>
               </div>
             </div>
             <% }); %>
+      <% if (!user.savedListings || user.savedListings.length === 0) { %>
+        <p>No saved properties yet. Browse properties to save your favorites!</p>
+      <% } %>
           </div>
         </div>
 
@@ -718,7 +715,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
       console.log("Submitting complaint:", { category, subject, description });
       try {
-        const response = await fetch("/tenant_dashboard/complaint", {
+        const response = await fetch("/tenant/complaint", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ category, subject, description }),
@@ -955,26 +952,65 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 
   async function removeSavedProperty(propertyId) {
-    console.log("Removing saved property:", { propertyId });
-    try {
-      const response = await fetch("/tenant/saved-property", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ propertyId, action: "remove" }),
-      });
-      const result = await response.json();
-      console.log("Remove property response:", result);
-      if (result.success) {
-        alert(result.message);
-        document.querySelector(`.property-card[data-property-id="${propertyId}"]`)?.remove();
+  console.log("Removing saved property:", { propertyId });
+
+  try {
+    const response = await fetch("/tenant/saved-property", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ propertyId, action: "remove" }),
+    });
+
+    // Check if response is OK
+    if (!response.ok) {
+      throw new Error(`Server error: ${response.status}`);
+    }
+
+    const result = await response.json();
+
+    // Validate response structure
+    if (typeof result !== "object" || result === null) {
+      throw new Error("Invalid server response");
+    }
+
+    console.log("Remove property response:", result);
+
+    if (result.success) {
+      // Show success notification (replace alert with a better UI component)
+      showNotification(result.message || "Property removed successfully", "success");
+
+      // Remove the property card from the DOM
+      const propertyCard = document.querySelector(`.property-card[data-property-id="${propertyId}"]`);
+      if (propertyCard) {
+        propertyCard.remove();
       } else {
-        alert(result.message || "Error removing property");
+        console.warn(`Property card with ID ${propertyId} not found in DOM`);
       }
-    } catch (error) {
-      console.error("Remove property error:", error);
-      alert("Error removing property");
+    } else {
+      // Show error notification
+      showNotification(result.message || "Error removing property", "error");
+    }
+  } catch (error) {
+    console.error("Remove property error:", error);
+    showNotification("Failed to remove property. Please try again.", "error");
+  }
+}
+
+// Example notification function (replace with your preferred library)
+function showNotification(message, type) {
+  // Replace with a library like SweetAlert, Toastify, or custom component
+  alert(message); // Fallback for now
+}
+
+// Event delegation for remove buttons
+document.addEventListener("click", (event) => {
+  if (event.target.classList.contains("remove-button")) {
+    const propertyId = event.target.dataset.propertyId;
+    if (propertyId) {
+      removeSavedProperty(propertyId);
     }
   }
+});
 
   function addNewRequest(request) {
     const activeRequestsContainer = document.querySelector(".maintenance-cards");

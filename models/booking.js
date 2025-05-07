@@ -1,7 +1,7 @@
 const mongoose = require("mongoose");
 
 const bookingSchema = new mongoose.Schema({
-  id: Number, // From first schema
+
   tenantId: { type: mongoose.Schema.Types.ObjectId, ref: "Tenant", required: true }, // From second, replaces 'user'
   userName: String, // From first
   propertyId: { type: mongoose.Schema.Types.ObjectId, ref: "Property", required: true }, // From second, replaces 'property'

@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Book Property - RentEase</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" integrity="sha512-Evv84Mr4kqVGRNSgIGL/F/aIDqQb7xQ2vcrdIwxfjThSH8CSF7PBEakCr51Ck+w+/U6swU2Im1vVX0SVk9ABhg==" crossorigin="anonymous" referrerpolicy="no-referrer">
+  <style>
+    .popup-overlay { display: flex; justify-content: center; align-items: center; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); }
+    .popup-container { background: white; padding: 20px; border-radius: 8px; max-width: 500px; width: 90%; }
+    .popup-title { margin-bottom: 20px; text-align: center; }
+    .form-group { margin-bottom: 15px; }
+    .form-group label { display: block; margin-bottom: 5px; font-weight: bold; }
+    .form-group input, .form-group select, .form-group textarea { width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; }
+    .form-group input[readonly] { background: #f0f0f0; }
+    .error { color: red; font-size: 0.9em; margin-top: 5px; }
+    .popup-buttons { display: flex; justify-content: space-between; }
+    .cancel-button, .confirm-button { padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer; }
+    .cancel-button { background: #ccc; }
+    .confirm-button { background: #ffc107; color: black; }
+    .success-message { color: green; text-align: center; margin-top: 10px; }
+  </style>
+</head>
+<body>
+  <div id="bookingPopup" class="popup-overlay">
+    <div class="popup-container">
+      <h4 class="popup-title">Book Property</h4>
+      <form id="bookingForm">
+        <input type="hidden" name="propertyId" value="<%= propertyId || '' %>">
+        <div class="form-group">
+          <label for="fullName">Full Name</label>
+          <input type="text" id="fullName" name="fullName" value="<%= user?.firstName && user?.lastName ? user.firstName + ' ' + user.lastName : '' %>" readonly>
+        </div>
+        <div class="form-group">
+          <label for="email">Email</label>
+          <input type="email" id="email" name="email" value="<%= user?.email || '' %>" readonly>
+        </div>
+        <div class="form-group">
+          <label for="phone">Phone Number</label>
+          <input type="tel" id="phone" name="phone" value="<%= user?.phone || '' %>" readonly>
+        </div>
+        <div class="form-group">
+          <label for="startDate">Start Date</label>
+          <input type="date" id="startDate" name="startDate" required>
+          <div id="startDateError" class="error"></div>
+        </div>
+        <div class="form-group">
+          <label for="leaseDuration">Lease Duration</label>
+          <select id="leaseDuration" name="leaseDuration" required>
+            <option value="" disabled selected>Select duration</option>
+            <option value="6">6 Months</option>
+            <option value="12">12 Months</option>
+            <option value="24">24 Months</option>
+          </select>
+          <div id="leaseDurationError" class="error"></div>
+        </div>
+        <div class="form-group">
+          <label for="comments">Comments (Optional)</label>
+          <textarea id="comments" name="comments" rows="4" placeholder="Any additional information"></textarea>
+        </div>
+        <div class="popup-buttons">
+          <button type="button" id="cancelBooking" class="cancel-button">Cancel</button>
+          <button type="submit" id="submitBooking" class="confirm-button">Submit Booking</button>
+        </div>
+      </form>
+      <div id="bookingSuccessMessage" class="success-message" style="display: none;">
+        Booking request submitted, awaiting owner approval
+      </div>
+      <div id="bookingErrorMessage" class="error" style="display: none;"></div>
+    </div>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      const bookingPopup = document.getElementById('bookingPopup');
+      const bookingForm = document.getElementById('bookingForm');
+      const cancelBookingBtn = document.getElementById('cancelBooking');
+      const successMessage = document.getElementById('bookingSuccessMessage');
+      const errorMessage = document.getElementById('bookingErrorMessage');
+
+      // Check if user is logged-in tenant
+      <% if (!user || user.userType !== 'tenant') { %>
+        window.location.href = '/login?redirect=' + encodeURIComponent(window.location.pathname + window.location.search);
+      <% } %>
+
+      // Set minimum start date to today
+      const startDateInput = document.getElementById('startDate');
+      const today = new Date().toISOString().split('T')[0];
+      startDateInput.setAttribute('min', today);
+
+      // Form submission
+      bookingForm.addEventListener('submit', async function (e) {
+        e.preventDefault();
+        const submitButton = document.getElementById('submitBooking');
+        submitButton.disabled = true;
+
+        const formData = {
+          propertyId: bookingForm.querySelector('[name="propertyId"]').value,
+          startDate: bookingForm.querySelector('[name="startDate"]').value,
+          leaseDuration: bookingForm.querySelector('[name="leaseDuration"]').value,
+          comments: bookingForm.querySelector('[name="comments"]').value
+        };
+
+        console.log('Submitting booking form:', formData);
+
+        try {
+          const response = await fetch('/book-property', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(formData)
+          });
+          const result = await response.json();
+
+          console.log('Booking response:', result);
+
+          if (result.success) {
+            successMessage.style.display = 'block';
+            errorMessage.style.display = 'none';
+            setTimeout(() => {
+              window.location.href = '/tenant/tenant_dashboard';
+            }, 2000);
+          } else {
+            errorMessage.textContent = result.message || 'Failed to submit booking';
+            errorMessage.style.display = 'block';
+            successMessage.style.display = 'none';
+          }
+        } catch (err) {
+          console.error('Error submitting booking:', err);
+          errorMessage.textContent = `An error occurred: ${err.message}`;
+          errorMessage.style.display = 'block';
+          successMessage.style.display = 'none';
+        } finally {
+          submitButton.disabled = false;
+        }
+      });
+
+      // Cancel button
+      cancelBookingBtn.addEventListener('click', function () {
+        window.location.href = '/property?id=<%= propertyId %>';
+      });
+
+      // Close popup when clicking outside
+      bookingPopup.addEventListener('click', function (e) {
+        if (e.target === bookingPopup) {
+          window.location.href = '/property?id=<%= propertyId %>';
+        }
+      });
+    });
+  </script>
+</body>
+</html>

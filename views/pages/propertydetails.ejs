@@ -510,7 +510,7 @@
         </div>
         <div class="property-price-section">
           <p class="price" id="property-price"><%= property.price %></p>
-          <a href="tel:+919876543210" class="contact-now">Book Now</a>
+          <button class="contact-now" onclick="location.href='/book-property?id=<%= property._id %>'">Book Now</button>
         </div>
       </div>
 

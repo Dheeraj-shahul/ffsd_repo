@@ -1,7 +1,6 @@
 const mongoose = require("mongoose");
 
 const settingSchema = new mongoose.Schema({
-  id: String, // From second
   name: String, // From both
   value: String, // From both
   platformFee: Number, // From first

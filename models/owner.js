@@ -12,8 +12,7 @@ const ownerSchema = new mongoose.Schema({
   password: String,
   accountNo: String,
   upiid: String,
-  isAdmin: { type: Boolean, default: false },
-  status: { type: String, default: "Active" },
+  status: { type: String, enum: ['Active', 'Suspended'], default: "Active" },
   lastLogin: Date,
 
   // New fields
@@ -24,6 +23,14 @@ const ownerSchema = new mongoose.Schema({
   maintenanceRequestIds: [{ type: mongoose.Schema.Types.ObjectId, ref: "MaintenanceRequest" }],
   notificationIds: [{ type: mongoose.Schema.Types.ObjectId, ref: "Notification" }],
   rentalAgreementIds: [{ type: mongoose.Schema.Types.ObjectId, ref: "RentalAgreement" }],
+
+  notifications: {
+    email: { type: Boolean, default: true },
+    sms: { type: Boolean, default: true },
+    payment: { type: Boolean, default: true },
+    complaint: { type: Boolean, default: true },
+    maintenance: { type: Boolean, default: true }
+  }
 
 }, { timestamps: true });
 

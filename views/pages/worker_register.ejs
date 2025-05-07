@@ -1,457 +1,392 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>RentEase - Worker Registration</title>
-
-    <style>
-      @import url("https://fonts.googleapis.com/css2?family=Poppins:wght@100;200;300;400;500;600;700;800;900&display=swap");
-
-      :root {
-        --primary-color: #febb02;
-        --secondary-color: #282828;
-        --text-color: #333;
-        --light-gray: #f5f5f5;
-        --medium-gray: #ddd;
-        --dark-gray: #888;
-        --white: #fff;
-      }
-
-      * {
-        margin: 0;
-        padding: 0;
-        box-sizing: border-box;
-        font-family: "Poppins", sans-serif;
-      }
-
-      body {
-        background-color: var(--light-gray);
-        color: var(--text-color);
-      }
-
-      .page-container {
-        max-width: 1200px;
-        margin: 2rem auto;
-        padding: 0 1rem;
-        position: relative;
-        top: 10vh;
-      }
-
-      .page-header {
-        text-align: center;
-        margin-bottom: 2rem;
-      }
-
-      .page-header h1 {
-        font-size: 2rem;
-        color: var(--secondary-color);
-        margin-bottom: 0.5rem;
-      }
-
-      .registration-form-container {
-        background-color: var(--white);
-        border-radius: 8px;
-        padding: 2rem;
-        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
-      }
-
-      .form-section {
-        margin-bottom: 2rem;
-        padding-bottom: 1rem;
-        border-bottom: 1px solid var(--medium-gray);
-      }
-
-      .form-section h2 {
-        color: var(--secondary-color);
-        margin-bottom: 1rem;
-        font-size: 1.2rem;
-      }
-
-      .form-row {
-        display: flex;
-        gap: 1rem;
-        margin-bottom: 1rem;
-      }
-
-      .form-group {
-        flex: 1;
-      }
-
-      .form-group.full-width {
-        flex: 0 0 100%;
-      }
-
-      label {
-        display: block;
-        margin-bottom: 0.5rem;
-        font-weight: bold;
-        color: var(--secondary-color);
-      }
-
-      input[type="text"],
-      input[type="tel"],
-      input[type="email"],
-      input[type="number"],
-      select,
-      textarea {
-        width: 100%;
-        padding: 0.75rem;
-        border: 1px solid var(--medium-gray);
-        border-radius: 4px;
-        font-size: 0.9rem;
-      }
-
-      textarea {
-        resize: vertical;
-      }
-
-      .agreement-checkbox {
-        display: flex;
-        align-items: flex-start;
-        gap: 0.5rem;
-      }
-
-      .agreement-checkbox input[type="checkbox"] {
-        margin-top: 0.25rem;
-      }
-
-      .form-actions {
-        display: flex;
-        justify-content: flex-end;
-        gap: 1rem;
-        margin-top: 2rem;
-      }
-
-      .primary-button,
-      .secondary-button {
-        padding: 0.75rem 1.5rem;
-        border: none;
-        border-radius: 4px;
-        font-weight: bold;
-        cursor: pointer;
-      }
-
-      .primary-button {
-        background-color: var(--primary-color);
-        color: var(--secondary-color);
-      }
-
-      .secondary-button {
-        background-color: var(--light-gray);
-        color: var(--secondary-color);
-      }
-
-      @media (max-width: 768px) {
-        .form-row {
-          flex-direction: column;
-        }
-
-        .form-group {
-          margin-bottom: 1rem;
-        }
-      }
-    </style>
-  </head>
-
-  <body>
-    <%- include('../partials/header') %>
-    <div class="page-container">
-      <div class="page-header">
-        <h1>Worker Registration</h1>
-        <p>
-          Complete the form below to register as a service provider on RentEase
-        </p>
-      </div>
-    
-      <div class="registration-form-container">
-        <form id="worker-registration-form" enctype="multipart/form-data">
-          <div class="form-section">
-            <h2>Personal Information</h2>
-            <div class="form-row">
-              <div class="form-group">
-                <label for="full-name">Full Name*</label>
-                <input
-                  type="text"
-                  id="full-name"
-                  name="full-name"
-                  required
-                  placeholder="Enter your full name"
-                />
-              </div>
-              <div class="form-group">
-                <label for="phone">Phone Number*</label>
-                <input
-                  type="tel"
-                  id="phone"
-                  name="phone"
-                  required
-                  placeholder="10-digit mobile number"
-                  pattern="[0-9]{10}"
-                />
-              </div>
-            </div>
-    
-            <div class="form-row">
-              <div class="form-group">
-                <label for="email">Email Address</label>
-                <input
-                  type="email"
-                  id="email"
-                  name="email"
-                  placeholder="Enter your email address"
-                />
-              </div>
-              <div class="form-group">
-                <label for="age">Age*</label>
-                <input
-                  type="number"
-                  id="age"
-                  name="age"
-                  required
-                  min="18"
-                  max="65"
-                />
-              </div>
-              <div class="form-group">
-                <label for="gender">Gender*</label>
-                <select id="gender" name="gender" required>
-                  <option value="">Select Gender</option>
-                  <option value="male">Male</option>
-                  <option value="female">Female</option>
-                  <option value="other">Other</option>
-                </select>
-              </div>
-            </div>
-          </div>
-    
-          <div class="form-section">
-            <h2>Service Details</h2>
-            <div class="form-row">
-              <div class="form-group">
-                <label for="service-type">Service Type*</label>
-                <select id="service-type" name="service-type" required>
-                  <option value="">Select Service Type</option>
-                  <option value="Housekeeper">Housekeeper</option>
-                  <option value="Cook">Cook</option>
-                  <option value="Nanny">Nanny</option>
-                  <option value="Driver">Driver</option>
-                  <option value="Gardener">Gardener</option>
-                </select>
-              </div>
-              <div class="form-group">
-                <label for="experience">Years of Experience*</label>
-                <input
-                  type="number"
-                  id="experience"
-                  name="experience"
-                  required
-                  min="0"
-                  max="50"
-                />
-              </div>
-            </div>
-    
-            <div class="form-row">
-              <div class="form-group full-width">
-                <label for="skills">Skills & Expertise*</label>
-                <textarea
-                  id="skills"
-                  name="skills"
-                  rows="3"
-                  required
-                  placeholder="Describe your skills and expertise"
-                ></textarea>
-              </div>
-            </div>
-    
-            <div class="form-row">
-              <div class="form-group">
-                <label for="expected-salary">Expected Monthly Salary (₹)*</label>
-                <input
-                  type="number"
-                  id="expected-salary"
-                  name="expected-salary"
-                  required
-                  min="1000"
-                />
-              </div>
-              <div class="form-group">
-                <label for="availability">Availability*</label>
-                <select id="availability" name="availability" required>
-                  <option value="">Select Availability</option>
-                  <option value="full-time">Full Time</option>
-                  <option value="part-time">Part Time</option>
-                  <option value="weekends">Weekends Only</option>
-                </select>
-              </div>
-            </div>
-          </div>
-    
-          <div class="form-section">
-            <h2>Location Details</h2>
-            <div class="form-row">
-              <div class="form-group">
-                <label for="city">City*</label>
-                <select id="city" name="city" required onchange="updateAreas()">
-                  <option value="">Select City</option>
-                  <option value="delhi">Delhi</option>
-                  <option value="mumbai">Mumbai</option>
-                  <option value="bangalore">Bangalore</option>
-                  <option value="chennai">Chennai</option>
-                </select>
-              </div>
-              <div class="form-group">
-                <label for="area">Preferred Area*</label>
-                <select id="area" name="area" required>
-                  <option value="">Select Area</option>
-                </select>
-              </div>
-            </div>
-          </div>
-    
-          <div class="form-section">
-            <h2>Documents</h2>
-            <div class="form-row">
-              <div class="form-group">
-                <label for="photo">Recent Photo*</label>
-                <input
-                  type="file"
-                  id="photo"
-                  name="photo"
-                  required
-                  accept="image/*"
-                />
-              </div>
-            </div>
-          </div>
-    
-          <div class="form-section">
-            <div class="form-row">
-              <div class="form-group full-width">
-                <div class="agreement-checkbox">
-                  <input
-                    type="checkbox"
-                    id="terms-agreement"
-                    name="terms-agreement"
-                    required
-                  />
-                  <label for="terms-agreement"
-                    >I agree to RentEase's
-                    <a href="#">Terms & Conditions</a> and
-                    <a href="#">Privacy Policy</a>*</label
-                  >
-                </div>
-              </div>
-            </div>
-          </div>
-    
-          <div class="form-actions">
-            <button
-              type="button"
-              class="secondary-button"
-              onclick="resetForm()"
-            >
-              Clear All
-            </button>
-            <button type="submit" class="primary-button">
-              Submit Registration
-            </button>
-          </div>
-        </form>
-      </div>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Worker Registration - RentEase</title>
+  <link rel="stylesheet" href="/css/worker_register.css" />
+  <style>
+    .page-container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+    .page-header {
+      text-align: center;
+      margin-bottom: 40px;
+    }
+    .registration-form-container {
+      background: #fff;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+    .form-section {
+      margin-bottom: 20px;
+    }
+    .form-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 20px;
+    }
+    .form-group {
+      flex: 1;
+      min-width: 200px;
+    }
+    .form-group.full-width {
+      flex: 100%;
+    }
+    .form-group label {
+      display: block;
+      margin-bottom: 5px;
+      font-weight: bold;
+    }
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+      width: 100%;
+      padding: 8px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      box-sizing: border-box;
+    }
+    .form-group input.error,
+    .form-group select.error,
+    .form-group textarea.error {
+      border-color: red;
+    }
+    .form-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+      margin-top: 20px;
+    }
+    .primary-button {
+      background-color: #28a745;
+      color: white;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    .primary-button:hover {
+      background-color: #218838;
+    }
+    .secondary-button {
+      background-color: #6c757d;
+      color: white;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    .secondary-button:hover {
+      background-color: #5a6268;
+    }
+    .agreement-checkbox {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+  </style>
+</head>
+<body>
+  <%- include('../partials/header') %>
+  <div class="page-container">
+    <div class="page-header">
+      <h1>Worker Profile Update</h1>
+      <p>Update your profile details below to manage your service on RentEase</p>
     </div>
-    
-    <script>
-      // Area data
-      const areasByCity = {
-        delhi: ["karol bagh", "connaught place", "dwarka", "rohini"],
-        mumbai: ["andheri", "bandra", "juhu", "colaba"],
-        bangalore: ["koramangala", "indiranagar", "whitefield", "jp nagar"],
-        chennai: ["t nagar", "anna nagar", "adyar", "mylapore"],
-      };
-    
-      // Update areas based on selected city
-      function updateAreas() {
-        const citySelect = document.getElementById("city");
-        const areaSelect = document.getElementById("area");
-        const selectedCity = citySelect.value;
-    
-        // Reset area dropdown
-        areaSelect.innerHTML = '<option value="">Select Area</option>';
-    
-        if (!selectedCity) {
-          areaSelect.disabled = true;
-          return;
+
+    <div class="registration-form-container">
+      <form id="worker-registration-form" enctype="multipart/form-data">
+        <div class="form-section">
+          <h2>Personal Information</h2>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="full-name">Full Name*</label>
+              <input
+                type="text"
+                id="full-name"
+                name="full-name"
+                required
+                placeholder="Enter your full name"
+                value="<%= user ? user.firstName + ' ' + user.lastName : '' %>"
+              />
+            </div>
+            <div class="form-group">
+              <label for="phone">Phone Number*</label>
+              <input
+                type="tel"
+                id="phone"
+                name="phone"
+                required
+                placeholder="10-digit mobile number"
+                pattern="[0-9]{10}"
+                value="<%= user ? user.phone : '' %>"
+              />
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="email">Email Address*</label>
+              <input
+                type="email"
+                id="email"
+                name="email"
+                required
+                placeholder="Enter your email address"
+                value="<%= user ? user.email : '' %>"
+              />
+            </div>
+          </div>
+        </div>
+
+        <div class="form-section">
+          <h2>Service Details</h2>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="service-type">Service Type*</label>
+              <select id="service-type" name="service-type" required>
+                <option value="" <%= !user || !user.serviceType ? 'selected' : '' %>>Select Service Type</option>
+                <option value="Housekeeper" <%= user && user.serviceType === 'Housekeeper' ? 'selected' : '' %>>Housekeeper</option>
+                <option value="Cook" <%= user && user.serviceType === 'Cook' ? 'selected' : '' %>>Cook</option>
+                <option value="Nanny" <%= user && user.serviceType === 'Nanny' ? 'selected' : '' %>>Nanny</option>
+                <option value="Driver" <%= user && user.serviceType === 'Driver' ? 'selected' : '' %>>Driver</option>
+                <option value="Gardener" <%= user && user.serviceType === 'Gardener' ? 'selected' : '' %>>Gardener</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="experience">Years of Experience*</label>
+              <input
+                type="number"
+                id="experience"
+                name="experience"
+                required
+                min="0"
+                max="50"
+                value="<%= user ? user.experience : '' %>"
+              />
+            </div>
+
+          <div class="form-row">
+            <div class="form-group full-width">
+              <label for="description">Skills & Expertise*</label>
+              <textarea
+                id="description"
+                name="description"
+                rows="3"
+                required
+                placeholder="Describe your skills and expertise"
+              ><%= user ? user.description : '' %></textarea>
+            </div>
+          </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="price">Expected Monthly Salary (₹)*</label>
+              <input
+                type="number"
+                id="price"
+                name="price"
+                required
+                min="1000"
+                value="<%= user ? user.price : '' %>"
+              />
+            </div>
+            <div class="form-group">
+              <label for="availability">Availability*</label>
+              <select id="availability" name="availability" required>
+                <option value="" <%= !user || !user.availability ? 'selected' : '' %>>Select Availability</option>
+                <option value="full-time" <%= user && user.availability === 'full-time' ? 'selected' : '' %>>Full Time</option>
+                <option value="part-time" <%= user && user.availability === 'part-time' ? 'selected' : '' %>>Part Time</option>
+                <option value="weekends" <%= user && user.availability === 'weekends' ? 'selected' : '' %>>Weekends Only</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-section">
+          <h2>Location Details</h2>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="city">City*</label>
+              <select id="city" name="city" required onchange="updateAreas()">
+                <option value="" <%= !user || !user.city ? 'selected' : '' %>>Select City</option>
+                <option value="delhi" <%= user && user.city === 'delhi' ? 'selected' : '' %>>Delhi</option>
+                <option value="mumbai" <%= user && user.city === 'mumbai' ? 'selected' : '' %>>Mumbai</option>
+                <option value="bangalore" <%= user && user.city === 'bangalore' ? 'selected' : '' %>>Bangalore</option>
+                <option value="chennai" <%= user && user.city === 'chennai' ? 'selected' : '' %>>Chennai</option>
+                <option value="sricity" <%= user && user.city === 'sricity' ? 'selected' : '' %>>Sricity</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="area">Preferred Area*</label>
+              <select id="area" name="area" required>
+                <option value="" <%= !user || !user.area ? 'selected' : '' %>>Select Area</option>
+                <% if (user && user.area) { %>
+                  <option value="<%= user.area %>" selected><%= user.area.charAt(0).toUpperCase() + user.area.slice(1) %></option>
+                <% } %>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-section">
+          <h2>Documents</h2>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="image">Recent Photo*</label>
+              <input
+                type="file"
+                id="image"
+                name="image"
+                accept="image/*"
+              />
+              <% if (user && user.image) { %>
+                <p>Current Photo: <a href="<%= user.image %>" target="_blank">View</a></p>
+              <% } %>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-section">
+          <div class="form-row">
+            <div class="form-group full-width">
+              <div class="agreement-checkbox">
+                <input
+                  type="checkbox"
+                  id="terms-agreement"
+                  name="terms-agreement"
+                  required
+                />
+                <label for="terms-agreement">
+                  I agree to RentEase's
+                  <a href="#">Terms & Conditions</a> and
+                  <a href="#">Privacy Policy</a>*
+                </label>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <input type="hidden" name="service-type" value="<%= user && user.serviceType ? user.serviceType : '' %>">
+
+        <div class="form-actions">
+          <button type="button" class="secondary-button" onclick="resetForm()">
+            Clear All
+          </button>
+          <button type="submit" class="primary-button">
+            Update Profile
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    // Area data
+    const areasByCity = {
+      delhi: ["karol bagh", "connaught place", "dwarka", "rohini"],
+      mumbai: ["andheri", "bandra", "juhu", "colaba"],
+      bangalore: ["koramangala", "indiranagar", "whitefield", "jp nagar"],
+      chennai: ["t nagar", "anna nagar", "adyar", "mylapore"],
+      sricity: ["central", "north", "south"]
+    };
+
+    // Update areas based on selected city
+    function updateAreas() {
+      const citySelect = document.getElementById("city");
+      const areaSelect = document.getElementById("area");
+      const selectedCity = citySelect.value;
+
+      // Reset area dropdown
+      areaSelect.innerHTML = '<option value="">Select Area</option>';
+
+      if (!selectedCity) {
+        areaSelect.disabled = true;
+        return;
+      }
+
+      // Enable and populate area dropdown
+      areaSelect.disabled = false;
+      const areas = areasByCity[selectedCity] || [];
+
+      areas.forEach((area) => {
+        const option = document.createElement("option");
+        option.value = area;
+        option.textContent = area.charAt(0).toUpperCase() + area.slice(1);
+        areaSelect.appendChild(option);
+      });
+
+      // Pre-select area if available
+      <% if (user && user.area) { %>
+        const areaOption = Array.from(areaSelect.options).find(option => option.value === "<%= user.area %>");
+        if (areaOption) {
+          areaSelect.value = "<%= user.area %>";
         }
-    
-        // Enable and populate area dropdown
-        areaSelect.disabled = false;
-        const areas = areasByCity[selectedCity] || [];
-    
-        areas.forEach((area) => {
-          const option = document.createElement("option");
-          option.value = area;
-          option.textContent = area.charAt(0).toUpperCase() + area.slice(1);
-          areaSelect.appendChild(option);
-        });
+      <% } %>
+    }
+
+    // Reset form
+    function resetForm() {
+      document.getElementById("worker-registration-form").reset();
+      document.getElementById("area").innerHTML = '<option value="">Select Area</option>';
+      document.getElementById("area").disabled = true;
+    }
+
+    // Initialize area dropdown on page load
+    window.onload = function() {
+      <% if (user && user.city) { %>
+        updateAreas();
+      <% } %>
+    };
+
+    // Form submission
+    document.getElementById("worker-registration-form").addEventListener("submit", function (event) {
+      event.preventDefault();
+
+      // Validate form
+      const requiredFields = document.querySelectorAll("[required]");
+      let isValid = true;
+
+      requiredFields.forEach((field) => {
+        if (!field.value || (field.type === "checkbox" && !field.checked)) {
+          isValid = false;
+          field.classList.add("error");
+        } else {
+          field.classList.remove("error");
+        }
+      });
+
+      if (!isValid) {
+        alert("Please fill in all required fields marked with *");
+        return;
       }
-    
-      // Reset form
-      function resetForm() {
-        document.getElementById("worker-registration-form").reset();
-        document.getElementById("area").innerHTML =
-          '<option value="">Select Area</option>';
-        document.getElementById("area").disabled = true;
-      }
-    
-      // Form submission
-      document
-        .getElementById("worker-registration-form")
-        .addEventListener("submit", function (event) {
-          event.preventDefault();
-    
-          // Validate form
-          const requiredFields = document.querySelectorAll("[required]");
-          let isValid = true;
-    
-          requiredFields.forEach((field) => {
-            if (!field.value) {
-              isValid = false;
-              field.classList.add("error");
-            } else {
-              field.classList.remove("error");
-            }
-          });
-    
-          if (!isValid) {
-            alert("Please fill in all required fields marked with *");
-            return;
+
+      // Submit form via AJAX
+      const form = document.getElementById("worker-registration-form");
+      const formData = new FormData(form);
+
+      fetch("/api/workers/register", {
+        method: "POST",
+        body: formData,
+      })
+        .then((response) => response.json())
+        .then((data) => {
+          if (data.success) {
+            alert("Profile updated successfully! Redirecting to dashboard.");
+            window.location.href = "/worker_dashboard";
+          } else {
+            alert("Error updating profile: " + data.error);
           }
-    
-          // Submit form via AJAX
-          const form = document.getElementById("worker-registration-form");
-          const formData = new FormData(form);
-    
-          fetch("/api/workers/register", {
-            method: "POST",
-            body: formData,
-          })
-            .then((response) => response.json())
-            .then((data) => {
-              if (data.success) {
-                alert(
-                  "Registration submitted successfully! Our team will review your application and contact you soon."
-                );
-                resetForm();
-              } else {
-                alert("Error submitting registration: " + data.error);
-              }
-            })
-            .catch((error) => {
-              alert("Error submitting registration: " + error.message);
-            });
+        })
+        .catch((error) => {
+          alert("Error updating profile: " + error.message);
         });
-    </script>
-  </body>
+    });
+  </script>
+</body>
 </html>

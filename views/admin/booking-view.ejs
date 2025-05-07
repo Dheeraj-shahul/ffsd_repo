@@ -1,0 +1,60 @@
+<div class="booking-view">
+    <h2>Booking Details - <%= booking._id %></h2>
+  
+    <div class="booking-details">
+      <div class="detail-group">
+        <h3>Booking Information</h3>
+        <p><strong>Status:</strong> <%= booking.status %></p>
+        <p><strong>Booking Date:</strong> <%= new Date(booking.bookingDate).toLocaleString() %></p>
+        <p><strong>Start Date:</strong> <%= new Date(booking.startDate).toLocaleDateString() %></p>
+        <p><strong>End Date:</strong> <%= new Date(booking.endDate).toLocaleDateString() %></p>
+        <p><strong>Amount:</strong> ₹<%= booking.amount?.toFixed(2) || 'N/A' %></p>
+      </div>
+  
+      <div class="detail-group">
+        <h3>User Information</h3>
+        <p><strong>Name:</strong> 
+          <a href="/admin/user/<%= booking.user._id %>/tenant">
+            <%= booking.user.firstName %> <%= booking.user.lastName %>
+          </a>
+        </p>
+        <p><strong>Email:</strong> <%= booking.user.email %></p>
+        <p><strong>Phone:</strong> <%= booking.user.phone %></p>
+      </div>
+  
+      <div class="detail-group">
+        <h3>Property Information</h3>
+        <p><strong>Name:</strong> 
+          <a href="/admin/property/<%= booking.property._id %>">
+            <%= booking.property.name %>
+          </a>
+        </p>
+        <p><strong>Location:</strong> <%= booking.property.location %></p>
+        <p><strong>Address:</strong> <%= booking.property.address %></p>
+        <p><strong>Price:</strong> ₹<%= booking.property.price?.toFixed(2) || 'N/A' %></p>
+      </div>
+  
+      <% if (booking.assignedWorker) { %>
+        <div class="detail-group">
+          <h3>Worker Information</h3>
+          <p><strong>Name:</strong> 
+            <a href="/admin/user/<%= booking.assignedWorker._id %>/worker">
+              <%= booking.assignedWorker.firstName %> <%= booking.assignedWorker.lastName %>
+            </a>
+          </p>
+          <p><strong>Service Type:</strong> <%= booking.assignedWorker.serviceType %></p>
+        </div>
+      <% } %>
+  
+      <div class="detail-group">
+        <h3>Actions</h3>
+        <div class="action-buttons">
+          <% if (booking.status === 'Pending') { %>
+            <button class="success" onclick="approveBooking('<%= booking._id %>')">Approve</button>
+            <button class="danger" onclick="rejectBooking('<%= booking._id %>')">Reject</button>
+          <% } %>
+          <a href="/admin/service-bookings" class="btn">Back to List</a>
+        </div>
+      </div>
+    </div>
+  </div>

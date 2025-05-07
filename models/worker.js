@@ -8,16 +8,17 @@ const workerSchema = new mongoose.Schema({
   phone: String,
   location: String,
   area: String,
-  serviceType: String,
+  serviceType: String, 
   experience: Number,
-  price: Number,
+  price: Number, 
+  rateUnit: String, // From Service schema
+  availability: String,
   description: String,
-  image: String,
+  image: String, // Already exists, will store the service/worker image
   password: String,
-  availability: { type: Boolean, default: true },
-  status: { type: String, default: "Active" },
+  status: { type: String, enum: ['Active', 'Suspended'], default: "Active" }, // Worker status (e.g., Active, Inactive)
+  serviceStatus: { type: String, default: "Available" }, // From Service schema (Available/Unavailable)
   lastLogin: Date,
-  serviceId: { type: mongoose.Schema.Types.ObjectId, ref: "Service" },
   bookingIds: [{ type: mongoose.Schema.Types.ObjectId, ref: "Booking" }],
   clientIds: [{ type: mongoose.Schema.Types.ObjectId, ref: "Tenant" }],
   paymentId: { type: mongoose.Schema.Types.ObjectId, ref: "Payment" },
@@ -28,7 +29,8 @@ const workerSchema = new mongoose.Schema({
         user: String,
         rating: Number,
         date: String,
-        comment: String
+        comment: String,
+        serviceName: String // Optional: Keep for review context
       }]
     },
     default: null

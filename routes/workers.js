@@ -2,11 +2,20 @@ const express = require("express");
 const router = express.Router();
 const workerController = require("../controllers/workerController");
 
+// Route to render the worker dashboard
+router.get("/worker_dashboard", workerController.isAuthenticated, workerController.renderWorkerDashboard);
+
 // Route to render the worker registration page
 router.get("/worker_register", workerController.isAuthenticated, workerController.renderWorkerRegisterPage);
 
-// Route to render the worker details page
+// Route to render the worker details page (no authentication)
 router.get("/workerDetails", workerController.renderWorkerDetailsPage);
+
+// Route to render the service details page
+router.get("/service/:id", workerController.renderServiceDetailsPage);
+
+// Route to render the edit service page
+router.get("/edit_service/:id", workerController.isAuthenticated, workerController.renderEditServicePage);
 
 // API endpoint to get all workers data
 router.get("/api/workers", workerController.getAllWorkers);
@@ -17,7 +26,13 @@ router.get("/api/workers/:id", workerController.getWorkerById);
 // Add filter functionality for workers
 router.get("/api/workers/filter", workerController.filterWorkers);
 
-// API endpoint to register a new worker
+// API endpoint to register/update a worker
 router.post("/api/workers/register", workerController.registerWorker);
+
+// API endpoint to toggle worker availability
+router.post("/api/workers/:id/toggle", workerController.toggleWorkerAvailability);
+
+// API endpoint to delete worker service details
+router.post("/api/workers/delete-service", workerController.deleteWorkerService);
 
 module.exports = router;

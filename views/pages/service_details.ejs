@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Service Details - RentEase</title>
+    <link rel="stylesheet" href="/css/domestic_worker_dashboard.css" />
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        background-color: #f4f4f4;
+        margin: 0;
+        padding: 20px;
+      }
+      .service-details-container {
+        max-width: 600px;
+        margin: 0 auto;
+        background: white;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      }
+      .service-details-container img {
+        max-width: 100%;
+        height: auto;
+        border-radius: 8px;
+        margin-bottom: 20px;
+      }
+      .service-details-container h2 {
+        margin-bottom: 20px;
+      }
+      .service-details-container ul {
+        list-style: none;
+        padding: 0;
+      }
+      .service-details-container ul li {
+        margin-bottom: 10px;
+      }
+      .service-details-container ul li strong {
+        display: inline-block;
+        width: 150px;
+      }
+      .back-button {
+        display: inline-block;
+        padding: 10px 20px;
+        background-color: #007bff;
+        color: white;
+        text-decoration: none;
+        border-radius: 5px;
+        margin-top: 20px;
+      }
+      .back-button:hover {
+        background-color: #0056b3;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="service-details-container">
+      <h2>Service Details</h2>
+      <% if (user) { %>
+        <img src="<%= user.image || '/images/default_service.jpg' %>" alt="<%= user.serviceType %>" />
+        <ul>
+          <li><strong>Name:</strong> <%= user.serviceType %></li>
+          <li><strong>Service Type:</strong> <%= user.serviceType %></li>
+          <li><strong>Rate:</strong> ₹<%= user.price %> <%= user.rateUnit %></li>
+          <li><strong>Experience:</strong> <%= user.experience %> years</li>
+          <li><strong>Description:</strong> <%= user.description %></li>
+          <li><strong>Availability:</strong> <%= user.serviceStatus === 'Available' ? 'Available' : 'Not Available' %></li>
+          <li><strong>Status:</strong> <%= user.status %></li>
+          <li><strong>Created At:</strong> <%= new Date(user.createdAt).toLocaleDateString() %></li>
+        </ul>
+        <a href="/worker_dashboard" class="back-button">Back to Dashboard</a>
+      <% } else { %>
+        <p>Service not found.</p>
+        <a href="/worker_dashboard" class="back-button">Back to Dashboard</a>
+      <% } %>
+    </div>
+  </body>
+</html>

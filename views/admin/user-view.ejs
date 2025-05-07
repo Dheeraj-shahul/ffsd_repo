@@ -1,0 +1,55 @@
+<div class="user-view">
+    <h2><%= userType.charAt(0).toUpperCase() + userType.slice(1) %> Details - <%= user.firstName %> <%= user.lastName %></h2>
+  
+    <div class="user-details">
+      <div class="detail-group">
+        <h3>Basic Information</h3>
+        <p><strong>ID:</strong> <%= user._id %></p>
+        <p><strong>Name:</strong> <%= user.firstName %> <%= user.lastName %></p>
+        <p><strong>Email:</strong> <%= user.email %></p>
+        <p><strong>Phone:</strong> <%= user.phone %></p>
+        <p><strong>Location:</strong> <%= user.location %></p>
+        <p><strong>Status:</strong> <%= user.status %></p>
+        <p><strong>Last Login:</strong> <%= user.lastLogin ? new Date(user.lastLogin).toLocaleString() : 'Never' %></p>
+      </div>
+  
+      <% if (userType === 'owner') { %>
+        <div class="detail-group">
+          <h3>Owner Information</h3>
+          <p><strong>Properties:</strong> <%= user.propertyIds?.length || 0 %></p>
+          <p><strong>Tenants:</strong> <%= user.tenantIds?.length || 0 %></p>
+        </div>
+      <% } else if (userType === 'tenant') { %>
+        <div class="detail-group">
+          <h3>Tenant Information</h3>
+          <% if (user.ownerId) { %>
+            <p><strong>Owner:</strong> 
+              <a href="/admin/user/<%= user.ownerId._id %>/owner">
+                <%= user.ownerId.firstName %> <%= user.ownerId.lastName %>
+              </a>
+            </p>
+          <% } %>
+          <p><strong>Saved Properties:</strong> <%= user.savedListings?.length || 0 %></p>
+        </div>
+      <% } else if (userType === 'worker') { %>
+        <div class="detail-group">
+          <h3>Worker Information</h3>
+          <p><strong>Service Type:</strong> <%= user.serviceType %></p>
+          <p><strong>Experience:</strong> <%= user.experience %> years</p>
+          <p><strong>Service Status:</strong> <%= user.serviceStatus %></p>
+          <p><strong>Bookings:</strong> <%= user.bookingIds?.length || 0 %></p>
+        </div>
+      <% } %>
+  
+      <div class="detail-group">
+        <h3>Account Actions</h3>
+        <div class="action-buttons">
+          <button onclick="suspendUser('<%= user._id %>', '<%= userType %>', '<%= user.status === 'Active' ? 'Suspended' : 'Active' %>')">
+            <%= user.status === 'Active' ? 'Suspend' : 'Activate' %>
+          </button>
+          <button class="danger" onclick="deleteUser('<%= user._id %>', '<%= userType %>')">Delete Account</button>
+          <a href="/admin/user-management" class="btn">Back to List</a>
+        </div>
+      </div>
+    </div>
+  </div>

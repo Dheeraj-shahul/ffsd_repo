@@ -1,17 +1,25 @@
 const mongoose = require("mongoose");
 
 const notificationSchema = new mongoose.Schema({
-  id: String, // From first, preferring String over Number
-  type: String, // From both
-  message: String, // From both
-  recipient: { type: mongoose.Schema.Types.ObjectId }, // From second
-  recipientType: String, // From second
-  recipientName: String, // From second
-  worker: { type: mongoose.Schema.Types.ObjectId, ref: "Worker" }, // From second
-  workerName: String, // From second
-  status: String, // From second
-  priority: String, // From second
-  createdDate: Date, // From second
+  type: String,
+  message: String,
+  recipient: {
+    type: mongoose.Schema.Types.ObjectId,
+    refPath: 'recipientType' // Dynamic reference based on recipientType
+  },
+  recipientType: {
+    type: String,
+    enum: ['Owner', 'Tenant', 'Worker'],
+    required: true
+  },
+  recipientName: String,
+  worker: { type: mongoose.Schema.Types.ObjectId, ref: "Worker" },
+  workerName: String,
+  propertyName: { type: String },
+  status: { type: String, enum: ['Pending', 'Completed'], default: 'Pending' },
+  priority: String,
+  createdDate: Date,
+  bookingId: { type: mongoose.Schema.Types.ObjectId, ref: "Booking" }
 }, { timestamps: true });
 
 module.exports = mongoose.model("Notification", notificationSchema);

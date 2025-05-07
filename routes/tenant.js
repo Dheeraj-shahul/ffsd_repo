@@ -27,8 +27,12 @@ router.post('/profile', isAuthenticated, tenantController.updateProfile);
 // Password change
 router.post('/password', isAuthenticated, tenantController.changePassword);
 
-// Save or remove property
-router.post('/saved-property', isAuthenticated, tenantController.toggleSavedProperty);
+// Save/Remove Property
+router.post('/saved-property', isAuthenticated, (req, res, next) => {
+  console.log('Reached /saved-property route:', { method: req.method, body: req.body, session: req.session.user });
+  tenantController.toggleSavedProperty(req, res, next);
+});
+
 
 // Notification preferences update
 router.post('/notifications', isAuthenticated, tenantController.updateNotificationPreferences);

@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 
 const paymentSchema = new mongoose.Schema({
-  id: Number, // From second
+  
   tenantId: { type: mongoose.Schema.Types.ObjectId, ref: "Tenant" }, // From first, replaces 'user'
   userName: String, // From second
   propertyId: { type: mongoose.Schema.Types.ObjectId, ref: "Property" }, // From first

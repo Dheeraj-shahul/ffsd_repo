@@ -7,6 +7,7 @@ const Complaint = require('../models/complaint');
 const Payment = require('../models/payment');
 const Rating = require('../models/rating');
 const RentalHistory = require('../models/rentalhistory');
+const mongoose = require('mongoose');
 
 // Dashboard Controller
 exports.getDashboard = async (req, res) => {
@@ -26,7 +27,7 @@ exports.getDashboard = async (req, res) => {
 
     if (!tenant) {
       console.log("Tenant not found for ID:", userId);
-      return res.status(404).send('Tenant not found');
+      return res.status(404).json({ success: false, message: 'Tenant not found' });
     }
 
     const currentProperty = await Property.findOne({ tenantId: userId });
@@ -82,7 +83,7 @@ exports.getDashboard = async (req, res) => {
     });
   } catch (error) {
     console.error('Dashboard error:', error);
-    res.status(500).send('Server error: ' + error.message);
+    res.status(500).json({ success: false, message: 'Server error: ' + error.message });
   }
 };
 
@@ -163,7 +164,7 @@ exports.submitComplaint = async (req, res) => {
     await newComplaint.save();
 
     await Tenant.findByIdAndUpdate(tenantId, {
-      $push: { complaintIds: newRequest._id }
+      $push: { complaintIds: newComplaint._id }
     });
 
     await Owner.findByIdAndUpdate(property.ownerId, {
@@ -440,14 +441,42 @@ exports.updateNotificationPreferences = async (req, res) => {
 // Save/Remove Property Controller
 exports.toggleSavedProperty = async (req, res) => {
   try {
+    console.log('Received /saved-property request:', { body: req.body, sessionUser: req.session.user });
     if (!req.session.user || !req.session.user._id) {
-      console.log("Unauthorized access to saved property");
+      console.log("Unauthorized access to saved property, no session user");
       return res.status(401).json({ success: false, message: 'Unauthorized: Please log in' });
     }
+    if (req.session.user.userType !== 'tenant') {
+      console.log("Non-tenant user attempted to save property, user ID:", req.session.user._id, "userType:", req.session.user.userType);
+      return res.status(403).json({ success: false, message: 'Only tenants can save properties' });
+    }
+
     const { propertyId, action } = req.body;
     const tenantId = req.session.user._id;
-    console.log("Received toggle saved property request for tenant ID:", tenantId, { propertyId, action });
+    console.log("Processing toggle saved property for tenant ID:", tenantId, { propertyId, action });
 
+    // Validate inputs
+    if (!propertyId) {
+      console.log("Missing property ID");
+      return res.status(400).json({ success: false, message: 'Property ID is required' });
+    }
+    if (!mongoose.Types.ObjectId.isValid(propertyId)) {
+      console.log("Invalid property ID format:", propertyId);
+      return res.status(400).json({ success: false, message: 'Invalid property ID' });
+    }
+    if (!['save', 'remove'].includes(action)) {
+      console.log("Invalid action:", action);
+      return res.status(400).json({ success: false, message: 'Invalid action' });
+    }
+
+    // Check if property exists
+    const property = await Property.findById(propertyId);
+    if (!property) {
+      console.log("Property not found for ID:", propertyId);
+      return res.status(404).json({ success: false, message: 'Property not found' });
+    }
+
+    // Check if tenant exists
     const tenant = await Tenant.findById(tenantId);
     if (!tenant) {
       console.log("Tenant not found for ID:", tenantId);
@@ -464,27 +493,28 @@ exports.toggleSavedProperty = async (req, res) => {
         $push: { savedListings: propertyId }
       });
 
-      console.log("Property saved successfully for tenant ID:", tenantId);
+      const updatedTenant = await Tenant.findById(tenantId);
+      console.log("Property saved successfully for tenant ID:", tenantId, "Property ID:", propertyId);
       return res.status(200).json({ 
         success: true, 
-        message: 'Property saved successfully'
+        message: 'Property saved successfully',
+        savedCount: updatedTenant.savedListings.length
       });
     } else if (action === 'remove') {
       await Tenant.findByIdAndUpdate(tenantId, {
         $pull: { savedListings: propertyId }
       });
 
-      console.log("Property removed successfully for tenant ID:", tenantId);
+      const updatedTenant = await Tenant.findById(tenantId);
+      console.log("Property removed successfully for tenant ID:", tenantId, "Property ID:", propertyId);
       return res.status(200).json({ 
         success: true, 
-        message: 'Property removed from saved listings'
+        message: 'Property removed from saved listings',
+        savedCount: updatedTenant.savedListings.length
       });
     }
-
-    console.log("Invalid action for saved property");
-    res.status(400).json({ success: false, message: 'Invalid action' });
   } catch (error) {
-    console.error('Saved property error:', error);
-    res.status(500).json({ success: false, message: 'Server error: ' + error.message });
+    console.error('Saved property error for tenant ID:', req.session.user?._id, 'Property ID:', req.body.propertyId, error.message, error.stack);
+    res.status(500).json({ success: false, message: 'Server error: Unable to save property' });
   }
 };

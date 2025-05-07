@@ -8,7 +8,7 @@ const tenantSchema = new mongoose.Schema({
   phone: { type: String, required: true },
   location: { type: String, required: true },
   password: { type: String, required: true },
-  status: { type: String, default: "Active" },
+  status: { type: String, enum: ['Active', 'Suspended'], default: "Active" },
   lastLogin: { type: Date },
   ownerId: { type: mongoose.Schema.Types.ObjectId, ref: "Owner", default: null },
   savedListings: [{ type: mongoose.Schema.Types.ObjectId, ref: "Property" }],

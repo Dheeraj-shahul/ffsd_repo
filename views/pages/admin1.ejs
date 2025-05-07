@@ -310,16 +310,12 @@
             <td>
               <div class="action-buttons">
                 <a href="/admin/property/<%= p.id %>">View</a>
-                <a href="/admin/property/edit/<%= p.id %>">Edit</a>
-                <a href="/property?id=<%= p.id %>" target="_blank">Site</a>
-                <a href="/admin/property/assign-worker/<%= p.id %>">Assign</a>
-                <button class="success" onclick="toggleVerify('<%= p.id %>', <%= p.isVerified ? 'false' : 'true' %>)">
+                <a href="/property?id=<%= p.id %>" >Site</a>
+                <button class="success" onclick="toggleVerify('<%= p._id %>', <%= p.isVerified ? 'false' : 'true' %>)">
                   <%= p.isVerified ? 'Unverify' : 'Verify' %>
                 </button>
-                <button class="success" onclick="toggleStatus('<%= p.id %>', '<%= p.status === 'Active' ? 'Inactive' : 'Active' %>')">
-                  <%= p.status === 'Active' ? 'Deactivate' : 'Activate' %>
-                </button>
-                <button class="danger" onclick="deleteProperty('<%= p.id %>')">Delete</button>
+                <button class="danger" onclick="deleteProperty('<%= p._id %>')">Delete</button>
+               
               </div>
             </td>
           </tr>
@@ -371,9 +367,6 @@
             <td>
               <div class="action-buttons">
                 <a href="/admin/user/<%= u.id %>/<%= u.userType %>">View</a>
-                <a href="/admin/user/edit/<%= u.id %>/<%= u.userType %>">Edit</a>
-                <button class="success" onclick="resetPassword('<%= u.id %>', '<%= u.userType %>')">Reset Password</button>
-                <button class="success" onclick="verifyEmail('<%= u.id %>', '<%= u.userType %>')">Verify Email</button>
                 <button class="success" onclick="suspendUser('<%= u.id %>', '<%= u.userType %>', '<%= u.status === 'Active' ? 'Suspended' : 'Active' %>')">
                   <%= u.status === 'Active' ? 'Suspend' : 'Activate' %>
                 </button>
@@ -425,12 +418,7 @@
             <td>
               <div class="action-buttons">
                 <a href="/admin/booking/<%= b.id %>">View</a>
-                <a href="/admin/booking/assign-worker/<%= b.id %>">Assign</a>
-                <% if (b.status === 'Pending') { %>
-                  <button class="success" onclick="approveBooking('<%= b.id %>')">Approve</button>
-                  <button class="danger" onclick="rejectBooking('<%= b.id %>')">Reject</button>
-                <% } %>
-                <button class="danger" onclick="cancelBooking('<%= b.id %>')">Cancel</button>
+                
               </div>
             </td>
           </tr>
@@ -500,7 +488,7 @@
         </tr>
       </thead>
       <tbody>
-        <% notifications.forEach(n => { %>
+        <% notifications.filter(n => n.status !== 'Completed').forEach(n => { %>
           <tr>
             <td><%= n.id %></td>
             <td><%= n.type %></td>
@@ -530,12 +518,7 @@
             <td>
               <div class="action-buttons">
                 <a href="/admin/notification/<%= n.id %>">View</a>
-                <a href="/admin/notification/assign-worker/<%= n.id %>">Assign</a>
-                <button class="success" onclick="markNotification('<%= n.id %>', 'Read')">Mark Read</button>
-                <button class="success" onclick="respondNotification('<%= n.id %>')">Respond</button>
-                <button class="success" onclick="escalateNotification('<%= n.id %>')">Escalate</button>
                 <button class="success" onclick="completeTask('<%= n.id %>')">Complete</button>
-                <button class="success" onclick="requestUpdate('<%= n.id %>')">Update</button>
               </div>
             </td>
           </tr>
@@ -589,12 +572,7 @@
               <td>
                 <div class="action-buttons">
                   <a href="/admin/maintenance/<%= m._id %>">View</a>
-                  <a href="/admin/maintenance/assign-worker/<%= m._id %>">Assign</a>
-                  <button class="success" onclick="markMaintenance('<%= m._id %>', 'Read')">Mark Read</button>
-                  <button class="success" onclick="respondMaintenance('<%= m._id %>')">Respond</button>
-                  <button class="success" onclick="escalateMaintenance('<%= m._id %>')">Escalate</button>
                   <button class="success" onclick="completeMaintenance('<%= m._id %>')">Complete</button>
-                  <button class="success" onclick="requestUpdateMaintenance('<%= m._id %>')">Update</button>
                 </div>
               </td>
             </tr>
@@ -632,254 +610,7 @@
     </div>
   </section>
 
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <script>
-    // Chart.js Initialization
-    <% [
-      { id: 'revenueChart', type: 'line', data: [stats.monthlyRevenue || 0, 0, 0, 0], color: '#007bff', label: 'Monthly Revenue (₹)' },
-      { id: 'userGrowthChart', type: 'bar', data: [stats.userGrowth || 0, 0, 0, 0], color: '#28a745', label: 'User Growth' },
-      { id: 'bookingStatusChart', type: 'pie', data: [stats.bookingStatusDistribution?.active || 0, stats.bookingStatusDistribution?.pending || 0, stats.bookingStatusDistribution?.cancelled || 0], color: ['#007bff', '#ffc107', '#dc3545'], label: 'Booking Status' },
-      { id: 'propertyPerformanceChart', type: 'bar', data: [0, 0, 0, 0], color: '#17a2b8', label: 'Property Performance' },
-      { id: 'revenueBySourceChart', type: 'pie', data: [0, 0, 0], color: ['#007bff', '#28a745', '#ffc107'], label: 'Revenue by Source' },
-      { id: 'userRetentionChart', type: 'line', data: [0, 0, 0, 0], color: '#dc3545', label: 'User Retention' },
-      { id: 'occupancyChart', type: 'bar', data: [0, 0, 0, 0], color: '#6f42c1', label: 'Property Occupancy' },
-      { id: 'workerPerformanceChart', type: 'bar', data: [0, 0, 0, 0], color: '#fd7e14', label: 'Worker Performance' },
-      { id: 'geographicTrendsChart', type: 'line', data: [0, 0, 0, 0], color: '#20c997', label: 'Geographic Trends' },
-      { id: 'churnRateChart', type: 'line', data: [0, 0, 0, 0], color: '#e83e8c', label: 'Churn Rate' }
-    ].forEach(chart => { %>
-      new Chart(document.getElementById('<%= chart.id %>'), {
-        type: '<%= chart.type %>',
-        data: {
-          labels: <%= JSON.stringify(chart.type === 'pie' ? ['Active', 'Pending', 'Cancelled'].slice(0, chart.data.length) : (chart.id.includes('Chart') ? ['Jan', 'Feb', 'Mar', 'Apr'] : ['Q1', 'Q2', 'Q3', 'Q4'])) %>,
-          datasets: [{
-            label: '<%= chart.label %>',
-            data: <%= JSON.stringify(chart.data) %>,
-            <%= chart.type === 'pie' ? 'backgroundColor' : 'borderColor' %>: <%= JSON.stringify(chart.color) %>,
-            <%= chart.type !== 'pie' ? 'fill: false' : '' %>
-          }]
-        },
-        options: {
-          scales: { y: { beginAtZero: true } },
-          plugins: {
-            legend: {
-              labels: {
-                font: {
-                  family: 'Poppins'
-                }
-              }
-            }
-          },
-          font: {
-            family: 'Poppins'
-          }
-        }
-      });
-    <% }) %>
-  </script>
-  <script>
-    // AJAX Functions
-    async function deleteProperty(id) {
-      if (confirm('Delete property?')) {
-        await fetch(`/admin/property/delete/${id}`, { method: 'DELETE' });
-        location.reload();
-      }
-    }
-
-    async function toggleVerify(id, isVerified) {
-      await fetch(`/admin/property/verify/${id}`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ isVerified: isVerified === 'true' })
-      });
-      location.reload();
-    }
-
-    async function toggleStatus(id, status) {
-      await fetch(`/admin/property/status/${id}`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ status })
-      });
-      location.reload();
-    }
-
-    async function deleteUser(id, userType) {
-      if (confirm('Delete user?')) {
-        await fetch(`/admin/user/delete/${id}/${userType}`, { method: 'DELETE' });
-        location.reload();
-      }
-    }
-
-    async function suspendUser(id, userType, status) {
-      await fetch(`/admin/user/status/${id}/${userType}`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ status })
-      });
-      location.reload();
-    }
-
-    async function resetPassword(id, userType) {
-      if (confirm('Reset password for this user?')) {
-        await fetch(`/admin/user/reset-password/${id}/${userType}`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' }
-        });
-        alert('Password reset email sent.');
-      }
-    }
-
-    async function verifyEmail(id, userType) {
-      await fetch(`/admin/user�n/verify-email/${id}/${userType}`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' }
-      });
-      location.reload();
-    }
-
-    async function approveBooking(id) {
-      await fetch(`/admin/booking/approve/${id}`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' }
-      });
-      location.reload();
-    }
-
-    async function rejectBooking(id) {
-      if (confirm('Reject this booking?')) {
-        await fetch(`/admin/booking/reject/${id}`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' }
-        });
-        location.reload();
-      }
-    }
-
-    async function cancelBooking(id) {
-      if (confirm('Cancel this booking?')) {
-        await fetch(`/admin/booking/cancel/${id}`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' }
-        });
-        location.reload();
-      }
-    }
-
-    async function refundPayment(id) {
-      if (confirm('Issue refund for this payment?')) {
-        await fetch(`/admin/payment/refund/${id}`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' }
-        });
-        location.reload();
-      }
-    }
-
-    async function retryPayment(id) {
-      await fetch(`/admin/payment/retry/${id}`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' }
-      });
-      location.reload();
-    }
-
-    async function markNotification(id, status) {
-      await fetch(`/admin/notification/mark/${id}`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ status })
-      });
-      location.reload();
-    }
-
-    async function respondNotification(id) {
-      const response = prompt('Enter response:');
-      if (response) {
-        await fetch(`/admin/notification/respond/${id}`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ response })
-        });
-        location.reload();
-      }
-    }
-
-    async function escalateNotification(id) {
-      await fetch(`/admin/notification/escalate/${id}`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' }
-      });
-      location.reload();
-    }
-
-    async function completeTask(id) {
-      await fetch(`/admin/notification/complete/${id}`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' }
-      });
-      location.reload();
-    }
-
-    async function requestUpdate(id) {
-      const update = prompt('Enter update request:');
-      if (update) {
-        await fetch(`/admin/notification/update/${id}`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ update })
-        });
-        location.reload();
-      }
-    }
-
-    async function markMaintenance(id, status) {
-      await fetch(`/admin/maintenance/mark/${id}`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ status })
-      });
-      location.reload();
-    }
-
-    async function respondMaintenance(id) {
-      const response = prompt('Enter response:');
-      if (response) {
-        await fetch(`/admin/maintenance/respond/${id}`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ response })
-        });
-        location.reload();
-      }
-    }
-
-    async function escalateMaintenance(id) {
-      await fetch(`/admin/maintenance/escalate/${id}`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' }
-      });
-      location.reload();
-    }
-
-    async function completeMaintenance(id) {
-      await fetch(`/admin/maintenance/complete/${id}`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' }
-      });
-      location.reload();
-    }
-
-    async function requestUpdateMaintenance(id) {
-      const update = prompt('Enter update request:');
-      if (update) {
-        await fetch(`/admin/maintenance/update/${id}`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ update })
-        });
-        location.reload();
-      }
-    }
-  </script>
+  
 </body>
+<script src="js/admin.js"></script>
 </html>

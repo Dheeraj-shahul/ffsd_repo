@@ -14,7 +14,7 @@ const propertySchema = new mongoose.Schema({
 
   tenant: String,
   activeWorkers: [{ type: mongoose.Schema.Types.ObjectId, ref: "Worker" }],
-  price: Number, // Converted to Number (from String) for consistency
+  price: Number, 
   rating: Number,
   reviews: Number,
   isVerified: { type: Boolean, default: false },

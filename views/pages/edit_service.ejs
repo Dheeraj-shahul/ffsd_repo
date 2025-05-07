@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Edit Service - RentEase</title>
+    <link rel="stylesheet" href="/css/domestic_worker_dashboard.css" />
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        background-color: #f4f4f4;
+        margin: 0;
+        padding: 20px;
+      }
+      .edit-service-container {
+        max-width: 600px;
+        margin: 0 auto;
+        background: white;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      }
+      .edit-service-container h2 {
+        margin-bottom: 20px;
+      }
+      .form-group {
+        margin-bottom: 15px;
+      }
+      .form-group label {
+        display: block;
+        margin-bottom: 5px;
+      }
+      .form-group input,
+      .form-group select,
+      .form-group textarea {
+        width: 100%;
+        padding: 8px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+      }
+      .form-group .error {
+        color: red;
+        font-size: 12px;
+      }
+      .button-container {
+        display: flex;
+        gap: 10px;
+        margin-top: 20px;
+      }
+      .save-button,
+      .cancel-button {
+        padding: 10px 20px;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+      }
+      .save-button {
+        background-color: #28a745;
+        color: white;
+      }
+      .save-button:hover {
+        background-color: #218838;
+      }
+      .cancel-button {
+        background-color: #6c757d;
+        color: white;
+      }
+      .cancel-button:hover {
+        background-color: #5a6268;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="edit-service-container">
+      <h2>Edit Service</h2>
+      <% if (user) { %>
+        <form id="editServiceForm" action="/workers/api/workers/register" method="POST" enctype="multipart/form-data">
+          <div class="form-group">
+            <label for="full-name">Full Name</label>
+            <input type="text" id="full-name" name="full-name" value="<%= user.firstName %> <%= user.lastName %>" required />
+            <div id="nameError" class="error"></div>
+          </div>
+          <div class="form-group">
+            <label for="service-type">Service Type</label>
+            <select id="service-type" name="service-type" required>
+              <option value="cleaning" <%= user.serviceType === 'cleaning' ? 'selected' : '' %>>Home Cleaning</option>
+              <option value="cooking" <%= user.serviceType === 'cooking' ? 'selected' : '' %>>Cooking</option>
+              <option value="laundry" <%= user.serviceType === 'laundry' ? 'selected' : '' %>>Laundry</option>
+              <option value="gardening" <%= user.serviceType === 'gardening' ? 'selected' : '' %>>Gardening</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="price">Rate (₹)</label>
+            <input type="number" id="price" name="price" min="0" value="<%= user.price %>" required />
+            <div id="priceError" class="error"></div>
+          </div>
+          <div class="form-group">
+            <label for="rateUnit">Rate Unit</label>
+            <select id="rateUnit" name="rateUnit" required>
+              <option value="hourly" <%= user.rateUnit === 'hourly' ? 'selected' : '' %>>Hourly</option>
+              <option value="daily" <%= user.rateUnit === 'daily' ? 'selected' : '' %>>Daily</option>
+              <option value="monthly" <%= user.rateUnit === 'monthly' ? 'selected' : '' %>>Monthly</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="experience">Experience (Years)</label>
+            <input type="number" id="experience" name="experience" min="0" value="<%= user.experience %>" required />
+            <div id="experienceError" class="error"></div>
+          </div>
+          <div class="form-group">
+            <label for="description">Description</label>
+            <textarea id="description" name="description" rows="5" required><%= user.description %></textarea>
+            <div id="descriptionError" class="error"></div>
+          </div>
+          <div class="form-group">
+            <label for="image">Service Image</label>
+            <input type="file" id="image" name="image" accept="image/*" />
+            <div id="imageError" class="error"></div>
+          </div>
+          <div class="form-group">
+            <label for="city">City</label>
+            <input type="text" id="city" name="city" value="<%= user.city || '' %>" required />
+            <div id="cityError" class="error"></div>
+          </div>
+          <div class="form-group">
+            <label for="area">Area</label>
+            <input type="text" id="area" name="area" value="<%= user.area || '' %>" required />
+            <div id="areaError" class="error"></div>
+          </div>
+          <div class="form-group">
+            <label for="phone">Phone</label>
+            <input type="tel" id="phone" name="phone" value="<%= user.phone %>" required />
+            <div id="phoneError" class="error"></div>
+          </div>
+          <div class="form-group">
+            <label for="email">Email</label>
+            <input type="email" id="email" name="email" value="<%= user.email %>" required />
+            <div id="emailError" class="error"></div>
+          </div>
+          <div class="form-group">
+            <label for="availability">Availability</label>
+            <select id="availability" name="availability" required>
+              <option value="full-time" <%= user.availability === 'full-time' ? 'selected' : '' %>>Full Time</option>
+              <option value="part-time" <%= user.availability === 'part-time' ? 'selected' : '' %>>Part Time</option>
+              <option value="weekends" <%= user.availability === 'weekends' ? 'selected' : '' %>>Weekends Only</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="terms-agreement">Agree to Terms</label>
+            <input type="checkbox" id="terms-agreement" name="terms-agreement" required checked />
+            <div id="termsError" class="error"></div>
+          </div>
+          <div class="button-container">
+            <button type="submit" class="save-button">Save Changes</button>
+            <button type="button" class="cancel-button" onclick="window.location.href='/workers/worker_dashboard'">Cancel</button>
+          </div>
+        </form>
+      <% } else { %>
+        <p>Service not found.</p>
+        <a href="/workers/worker_dashboard" class="cancel-button">Back to Dashboard</a>
+      <% } %>
+    </div>
+
+    <script>
+      document.getElementById('editServiceForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        const formData = new FormData(this);
+
+        fetch(this.action, {
+          method: 'POST',
+          body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+          if (data.success) {
+            window.location.href = '/workers/worker_dashboard';
+          } else {
+            if (data.error) {
+              alert(data.error);
+            } else {
+              alert('Failed to update service. Please try again.');
+            }
+          }
+        })
+        .catch(error => {
+          console.error('Error:', error);
+          alert('An error occurred. Please try again.');
+        });
+      });
+    </script>
+  </body>
+</html>

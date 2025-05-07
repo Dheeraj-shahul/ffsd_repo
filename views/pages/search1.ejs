@@ -569,7 +569,7 @@
                       </div>
                       <div class="property-footer">
                         <a href="/property?id=<%= property._id %>" class="btn">View Details</a>
-                        <button class="btn wishlist-btn">❤ Save</button>
+                        <button class="btn wishlist-btn" onclick="saveProperty('<%= property._id %>')">❤ Save</button>
                       </div>
                     </div>
                   </li>
@@ -698,6 +698,63 @@
             });
           }
         });
+
+
+     // saved listings
+
+     async function saveProperty(propertyId) {
+    try {
+      console.log('Attempting to save property with ID:', propertyId);
+      const user = <%- JSON.stringify(request.session.user || null) %>;
+      console.log('Session user:', JSON.stringify(user, null, 2));
+      if (!user || !user._id) {
+        console.log('No user session, redirecting to login');
+        alert('Please log in to save properties.');
+        window.location.href = '/login?redirect=' + encodeURIComponent(window.location.href);
+        return;
+      }
+      if (user.userType !== 'tenant') {
+        console.log('User is not a tenant:', user.userType);
+        alert('Only tenants can save properties.');
+        return;
+      }
+
+      const payload = { propertyId, action: 'save' };
+      console.log('Sending POST to /tenant/saved-property with:', payload);
+      const response = await fetch('/tenant/saved-property', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+
+      console.log('Response status:', response.status, 'OK:', response.ok);
+      if (response.status === 404) {
+        console.error('Route /tenant/saved-property not found');
+        throw new Error('Server error: /tenant/saved-property route not found. Please check server configuration.');
+      }
+
+      const contentType = response.headers.get('content-type');
+      if (!contentType || !contentType.includes('application/json')) {
+        const text = await response.text();
+        console.error('Non-JSON response received:', text.slice(0, 100));
+        throw new Error('Server returned non-JSON response, possibly a login page or error page');
+      }
+
+      const result = await response.json();
+      console.log('Response from /tenant/saved-property:', result);
+      if (result.success) {
+        alert('Property saved successfully!');
+        document.querySelector(`[data-property-id="${propertyId}"] .wishlist-btn`)
+          .classList.add('saved');
+      } else {
+        console.error('Failed to save property:', result.message);
+        alert(result.message || 'Failed to save property.');
+      }
+    } catch (error) {
+      console.error('Error saving property:', error.message, error.stack);
+      
+    }
+  }
       </script>
 </body>
 </html>

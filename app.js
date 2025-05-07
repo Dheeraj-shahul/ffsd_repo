@@ -23,6 +23,11 @@ const Admin = require('./models/admin');
 const propertyRoutes = require("./routes/property");
 const workerRoutes = require("./routes/workers");
 const TenantRoutes=require("./routes/tenant");
+const ownerRoutes = require('./routes/owner');
+const bookingRoutes = require('./routes/bookingRoutes');
+
+// Admin Routes
+const adminRoutes=require('./routes/admin')
 
 
 
@@ -35,7 +40,7 @@ const app = express();
 const PORT = 3000;
 
 // Connect to MongoDB
-mongoose.connect("mongodb+srv://revanthkumardompaka:qqo8F9xCiY5DPQLT@ffsd.pjcw0o6.mongodb.net/rentease?retryWrites=true&w=majority")
+mongoose.connect("mongodb+srv://revanthkumardompaka:qqo8F9xCiY5DPQLT@ffsd.pjcw0o6.mongodb.net/rentease")
   .then(() => console.log("Connected to MongoDB Atlas"))
   .catch((err) => console.error("MongoDB Atlas connection error:", err));
 
@@ -73,7 +78,11 @@ app.use((req, res, next) => {
 app.use("/api/property", propertyRoutes);
 app.use("/", workerRoutes);
 app.use("/tenant", TenantRoutes);
+app.use("/",ownerRoutes);
+app.use('/', bookingRoutes);
 
+//admin routes
+app.use('/admin',adminRoutes);
 
 
 // Error handling middleware
@@ -347,21 +356,23 @@ app.get("/logout", (req, res) => {
 //   res.render("pages/tenant_dashboard", { user });
 // });
 
-app.get("/owner_dashboard", isAuthenticated, (req, res) => {
-  const user = req.session.user;
-  if (user.userType !== "owner") {
-    return redirectToDashboard(req, res);
-  }
-  res.render("pages/owner_dashboard", { user });
-});
+// app.get("/owner_dashboard", isAuthenticated, (req, res) => {
+//   const user = req.session.user;
+//   if (user.userType !== "owner") {
+//     return redirectToDashboard(req, res);
+//   }
+//   res.render("pages/owner_dashboard", { user });
+// });
 
-app.get("/worker_dashboard", isAuthenticated, (req, res) => {
-  const user = req.session.user;
-  if (user.userType !== "worker") {
-    return redirectToDashboard(req, res);
-  }
-  res.render("pages/worker_dashboard", { user });
-});
+// app.get("/worker_dashboard", isAuthenticated, (req, res) => {
+//   const user = req.session.user;
+//   if (user.userType !== "worker") {
+//     return redirectToDashboard(req, res);
+//   }
+//   res.render("pages/worker_dashboard", { user });
+// });
+
+
 
 // Route for the main page
 app.get("/", (req, res) => {
@@ -371,10 +382,21 @@ app.get("/", (req, res) => {
 // Route to render search.ejs
 app.get("/search", async (req, res) => {
   try {
-    const properties = await Property.find({});
+    const properties = await Property.find({
+      $and: [
+        {
+          $or: [
+            { isRented: false },
+            { isRented: { $exists: false } }
+          ]
+        },
+        { isVerified: true }
+      ]
+    });
+    
     res.render("pages/search1", { properties, request: req });
   } catch (err) {
-    console.error("Error fetching properties:", err);
+    console.error("Error fetching properties for search:", err);
     res.status(500).send("Server Error");
   }
 });

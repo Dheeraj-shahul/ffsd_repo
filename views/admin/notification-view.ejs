@@ -1,0 +1,51 @@
+<div class="notification-view">
+    <h2>Notification Details - <%= notification._id %></h2>
+  
+    <div class="notification-details">
+        <div class="detail-group">
+          <h3>Notification Information</h3>
+          <p><strong>Type:</strong> <%= notification.type %></p>
+          <p><strong>Status:</strong> <%= notification.status %></p>
+          <p><strong>Created:</strong> <%= new Date(notification.createdDate).toLocaleString() %></p>
+          <p><strong>Message:</strong> <%= notification.message %></p>
+        </div>
+      
+        <div class="detail-group">
+          <h3>Recipient Information</h3>
+          <% if (notification.recipient) { %>
+            <p><strong>Name:</strong> 
+              <a href="/admin/user/<%= notification.recipient._id %>/<%= notification.recipient.userType %>">
+                <%= notification.recipient.firstName %> <%= notification.recipient.lastName %>
+              </a>
+            </p>
+            <p><strong>Email:</strong> <%= notification.recipient.email %></p>
+            <p><strong>User Type:</strong> <%= notification.recipient.userType %></p>
+          <% } else { %>
+            <p><strong>Name:</strong> N/A</p>
+            <p><strong>Email:</strong> N/A</p>
+            <p><strong>User Type:</strong> N/A</p>
+          <% } %>
+        </div>
+      
+        <% if (notification.worker) { %>
+          <div class="detail-group">
+            <h3>Worker Information</h3>
+            <p><strong>Name:</strong> 
+              <a href="/admin/user/<%= notification.worker._id %>/worker">
+                <%= notification.worker.firstName %> <%= notification.worker.lastName %>
+              </a>
+            </p>
+            <p><strong>Service Type:</strong> <%= notification.worker.serviceType %></p>
+          </div>
+        <% } %>
+      
+        <div class="detail-group">
+          <h3>Actions</h3>
+          <div class="action-buttons">
+            <% if (notification.status !== 'Completed') { %>
+              <button class="success" onclick="completeTask('<%= notification._id %>')">Mark as Completed</button>
+            <% } %>
+            <a href="/admin/notifications" class="btn">Back to List</a>
+          </div>
+        </div>
+      </div>
