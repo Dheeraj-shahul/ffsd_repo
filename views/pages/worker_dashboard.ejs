@@ -88,56 +88,52 @@
           <button class="add-button" onclick="location.href='/worker_register'">Update Profile</button>
         </div>
 
-        <div id="bookings" class="section">
-          <h3>My Bookings</h3>
-          <div class="complaint_container">
-            <% if (bookings && bookings.length > 0) { %>
-              <% bookings.forEach(booking => { %>
-                <div class="res_complaint">
-                  <ul>
-                    <strong><li><%= booking.serviceName %></li></strong>
-                    <ul>
-                      <li><strong>Client:</strong> <%= booking.clientName %></li>
-                      <li><strong>Address:</strong> <%= booking.address %></li>
-                      <li><strong>Date:</strong> <%= booking.date %></li>
-                      <li><strong>Time:</strong> <%= booking.time %></li>
-                      <li><strong>Status:</strong> <%= booking.status %></li>
-                    </ul>
-                  </ul>
-                  <% if (booking.status === 'Pending') { %>
-                    <button class="update_sts" onclick="acceptBooking('<%= booking._id %>')">Accept Booking</button>
-                    <button class="update_sts" onclick="declineBooking('<%= booking._id %>')">Decline Booking</button>
-                  <% } else if (booking.status === 'In Progress') { %>
-                    <button class="update_sts" onclick="markComplete('<%= booking._id %>')">Mark as Complete</button>
-                    <button class="update_sts" onclick="requestReschedule('<%= booking._id %>')">Request Rescheduling</button>
-                  <% } %>
-                </div>
-              <% }) %>
-            <% } else { %>
-              <p>No bookings available.</p>
-            <% } %>
-          </div>
+       <!-- Bookings Section -->
+       <div id="bookings" class="section">
+        <h3>My Bookings</h3>
+        <div class="complaint_container">
+          <% bookings.forEach(booking => { %>
+            <div class="res_complaint">
+              <ul>
+                <strong><li><%= booking.serviceName || 'Service' %></li></strong>
+                <ul>
+                  <li><strong>Client: </strong><%= booking.tenantId.firstName %> <%= booking.tenantId.lastName %></li>
+                  <li><strong>Address: </strong><%= booking.propertyId.address %></li>
+                  <li><strong>Date: </strong><%= new Date(booking.date).toLocaleDateString() %></li>
+                  <li><strong>Time: </strong><%= booking.time %></li>
+                  <li><strong>Status: </strong><%= booking.status %></li>
+                </ul>
+              </ul>
+              <% if (booking.status === 'Pending') { %>
+                <button class="update_sts" onclick="updateBookingStatus('<%= booking._id %>', 'Confirmed')">Accept Booking</button>
+                <button class="update_sts" onclick="updateBookingStatus('<%= booking._id %>', 'Declined')">Decline Booking</button>
+              <% } else if (booking.status === 'Confirmed') { %>
+                <button class="update_sts" onclick="updateBookingStatus('<%= booking._id %>', 'Completed')">Mark as Complete</button>
+                
+              <% } %>
+            </div>
+          <% }) %>
         </div>
+      </div>
 
-        <div id="clients" class="section">
-          <h3>My Clients</h3>
-          <div class="messages">
-            <% if (clients && clients.length > 0) { %>
-              <% clients.forEach(client => { %>
-                <div class="tentant_details">
-                  <ul>
-                    <li><strong><%= client.name.toUpperCase() %></strong></li>
-                    <li><strong>SERVICE :</strong> <a href="#"><%= client.serviceName %></a></li>
-                    <li><strong>CONTACT :</strong> <%= client.contact %></li>
-                  </ul>
-                  <button class="msg_button" onclick="viewMessages('<%= client._id %>')">view messages</button>
-                </div>
-              <% }) %>
-            <% } else { %>
-              <p>No clients available.</p>
-            <% } %>
-          </div>
+
+      <!-- Clients Section -->
+      <div id="clients" class="section">
+        <h3>My Clients</h3>
+        <div class="messages">
+          <% clients.forEach(client => { %>
+            <div class="tentant_details">
+              <ul>
+                <li><strong><%= client.firstName %> <%= client.lastName %></strong></li>
+                <li><strong>Service: </strong><a href="#"> <%= client.services.join(', ') %></a></li>
+                <li><strong>Contact: </strong><%= client.phone %></li>
+              </ul>
+              <button class="msg_button" onclick="viewMessages('<%= client._id %>')">View Messages</button>
+            </div>
+          <% }) %>
         </div>
+      </div>
+
 
         <div id="earnings" class="section">
           <h3>My Earnings</h3>
@@ -160,11 +156,12 @@
                 </div>
               <% }) %>
             <% } else { %>
-              <p>No transactions available.</p>
+              <p>No transactions available.</p> 
             <% } %>
           </div>
           <button class="pay-button">View All Transactions</button>
         </div>
+
 
         <div id="reviews" class="section">
           <h3>Reviews & Ratings</h3>
@@ -491,53 +488,31 @@
         }
       }
 
-      function acceptBooking(bookingId) {
-        fetch(`/api/bookings/${bookingId}/accept`, { method: 'POST' })
-          .then(response => response.json())
-          .then(data => {
-            if (data.success) {
-              location.reload();
-            } else {
-              alert('Error accepting booking');
-            }
+
+
+
+     
+      async function updateBookingStatus(bookingId, status) {
+        try {
+          const response = await fetch(`/worker/bookings/${bookingId}/status`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ status })
           });
+          if (response.ok) window.location.reload();
+          else alert('Failed to update booking status');
+        } catch (error) {
+          console.error('Error updating booking status:', error);
+          alert('Server error');
+        }
       }
-      function declineBooking(bookingId) {
-        fetch(`/api/bookings/${bookingId}/decline`, { method: 'POST' })
-          .then(response => response.json())
-          .then(data => {
-            if (data.success) {
-              location.reload();
-            } else {
-              alert('Error declining booking');
-            }
-          });
-      }
-      function markComplete(bookingId) {
-        fetch(`/api/bookings/${bookingId}/complete`, { method: 'POST' })
-          .then(response => response.json())
-          .then(data => {
-            if (data.success) {
-              location.reload();
-            } else {
-              alert('Error marking booking as complete');
-            }
-          });
-      }
-      function requestReschedule(bookingId) {
-        fetch(`/api/bookings/${bookingId}/reschedule`, { method: 'POST' })
-          .then(response => response.json())
-          .then(data => {
-            if (data.success) {
-              alert('Reschedule request sent');
-            } else {
-              alert('Error requesting reschedule');
-            }
-          });
-      }
+      
+
       function viewMessages(clientId) {
-        window.location.href = `/messages/${clientId}`;
+        window.location.href = `/worker/messages/${clientId}`;
       }
+
+      
     </script>
   </body>
 </html>

@@ -420,3 +420,48 @@ exports.deleteWorkerService = async (req, res) => {
     res.status(500).json({ error: "Error deleting worker service" });
   }
 };
+
+
+// Get bookings
+exports.getBookings = async (req, res) => {
+  try {
+    const workerId = req.session.user._id;
+    const bookings = await Booking.find({
+      assignedWorker: workerId,
+    })
+      .populate("tenantId", "firstName lastName")
+      .populate("propertyId", "name address");
+
+    res.json(bookings);
+  } catch (error) {
+    console.error("Error fetching bookings:", error);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
+// Update booking status
+exports.updateBookingStatus = async (req, res) => {
+  try {
+    const bookingId = req.params.id;
+    const { status } = req.body;
+    const workerId = req.session.user._id;
+
+    const booking = await Booking.findOne({
+      _id: bookingId,
+      assignedWorker: workerId,
+    });
+
+    if (!booking) {
+      return res.status(404).json({ message: "Booking not found" });
+    }
+
+    booking.status = status;
+    await booking.save();
+
+    req.session.successMessage = `Booking status updated to ${status}!`;
+    res.redirect("/worker/worker_dashboard");
+  } catch (error) {
+    console.error("Error updating booking status:", error);
+    res.status(500).send("Server error");
+  }
+};

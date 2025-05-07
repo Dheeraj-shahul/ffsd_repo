@@ -298,6 +298,16 @@ app.post("/login", async (req, res) => {
       });
     }
 
+    if (user.status === "Suspended") {
+      errors.auth = "Your account is suspended temporarily";
+      return res.render("pages/login", {
+        userType,
+        email,
+        password: "",
+        errors,
+      });
+    }
+
     req.session.user = {
       _id: user._id.toString(),
       userType,

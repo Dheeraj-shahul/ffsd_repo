@@ -35,4 +35,12 @@ router.post("/api/workers/:id/toggle", workerController.toggleWorkerAvailability
 // API endpoint to delete worker service details
 router.post("/api/workers/delete-service", workerController.deleteWorkerService);
 
+// Booking routes
+router.get("/bookings", workerController.isAuthenticated, workerController.getBookings);
+router.put(
+  "/bookings/:id/status",
+  workerController.isAuthenticated,
+  workerController.updateBookingStatus
+);
+
 module.exports = router;
