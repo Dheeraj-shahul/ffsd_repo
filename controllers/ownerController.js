@@ -188,3 +188,31 @@ exports.deleteProperty = async (req, res) => {
     });
   }
 };
+
+
+
+// Fetch owner's notifications
+exports.getNotifications = async (req, res) => {
+  try {
+    // Check if user is owner
+    if (!req.session.user || req.session.user.userType !== "owner") {
+      return res.status(401).json({ success: false, message: "Unauthorized" });
+    }
+
+    const ownerId = req.session.user._id;
+    if (!mongoose.Types.ObjectId.isValid(ownerId)) {
+      return res.status(400).json({ success: false, message: "Invalid owner ID" });
+    }
+
+    // Fetch notifications for the owner
+    const notifications = await Notification.find({
+      recipient: ownerId,
+      recipientType: "Owner",
+    }).sort({ createdDate: -1 });
+
+    res.status(200).json({ success: true, notifications });
+  } catch (err) {
+    console.error("Error fetching notifications:", err);
+    res.status(500).json({ success: false, message: "Server error" });
+  }
+};

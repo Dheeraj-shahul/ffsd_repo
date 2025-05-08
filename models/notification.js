@@ -16,7 +16,7 @@ const notificationSchema = new mongoose.Schema({
   worker: { type: mongoose.Schema.Types.ObjectId, ref: "Worker" },
   workerName: String,
   propertyName: { type: String },
-  status: { type: String, enum: ['Pending', 'Completed'], default: 'Pending' },
+  status: { type: String, enum: ['Pending', 'Completed', 'Approved', 'Rejected'], default: 'Pending' },
   priority: String,
   createdDate: Date,
   bookingId: { type: mongoose.Schema.Types.ObjectId, ref: "Booking" },

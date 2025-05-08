@@ -787,6 +787,73 @@
     </div>
 
     <script>
+
+      // Function to refresh notifications section
+function refreshNotifications() {
+  fetch("/api/notifications", {
+    method: "GET",
+    headers: { "Content-Type": "application/json" },
+    credentials: "include",
+  })
+    .then((response) => {
+      if (!response.ok) {
+        throw new Error("Failed to fetch notifications");
+      }
+      return response.json();
+    })
+    .then((data) => {
+      const notificationContainer = document.querySelector(".notification-container");
+      notificationContainer.innerHTML = ""; // Clear existing notifications
+      if (data.notifications && data.notifications.length > 0) {
+        data.notifications.forEach((notification) => {
+          const notificationCard = document.createElement("div");
+          notificationCard.className = "notification-card";
+          notificationCard.setAttribute("data-notification-id", notification._id);
+          notificationCard.innerHTML = `
+            <div class="notification-header">
+              <h4>${notification.type || "Booking Request"}</h4>
+              <span class="notification-status ${notification.status.toLowerCase()}">
+                ${notification.status || "Pending"}
+              </span>
+            </div>
+            <div class="notification-details">
+              <p><strong>Message:</strong> ${notification.message || "N/A"}</p>
+              <p><strong>Recipient:</strong> ${notification.recipientName || "N/A"}</p>
+              <p><strong>Property:</strong> ${notification.propertyName || "N/A"}</p>
+              <p><strong>Date:</strong> ${
+                notification.createdDate
+                  ? new Date(notification.createdDate).toLocaleDateString()
+                  : "N/A"
+              }</p>
+            </div>
+            ${
+              notification.status === "Pending"
+                ? `
+                  <div class="notification-actions">
+                    <button class="action-button approve-button" onclick="handleNotificationAction('${
+                      notification._id
+                    }', 'approve')">
+                      Approve
+                    </button>
+                    <button class="action-button reject-button" onclick="handleNotificationAction('${
+                      notification._id
+                    }', 'reject')">
+                      Reject
+                    </button>
+                  </div>`
+                : ""
+            }
+          `;
+          notificationContainer.appendChild(notificationCard);
+        });
+      } else {
+        notificationContainer.innerHTML = "<p>No notifications available.</p>";
+      }
+    })
+    .catch((error) => {
+      console.error("Error refreshing notifications:", error);
+    });
+}
       let propertyToDelete = null;
       function showDeleteConfirmation(propertyId, isRented) {
         // Check if the property is currently rented
@@ -1075,45 +1142,54 @@
           document.getElementById("settingsForm").reset();
         });
 
-      // Handle notification actions (approve/reject)
-      function handleNotificationAction(notificationId, action) {
-        fetch("/notifications/action", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          credentials: "include", // Ensure cookies/session are sent
-          body: JSON.stringify({ notificationId, action }),
-        })
-          .then((response) => {
-            if (!response.ok) {
-              throw new Error(`HTTP error! Status: ${response.status}`);
-            }
-            return response.json();
-          })
-          .then((data) => {
-            if (data.success) {
-              const notificationCard = document.querySelector(
-                `.notification-card[data-notification-id="${notificationId}"]`
-              );
-              const statusElement = notificationCard.querySelector(
-                ".notification-status"
-              );
-              statusElement.textContent =
-                action === "approve" ? "Approved" : "Rejected";
-              statusElement.classList.remove("pending");
-              statusElement.classList.add(
-                action === "approve" ? "approved" : "rejected"
-              );
-              notificationCard.querySelector(".notification-actions").remove();
-              alert(`Notification ${action}d successfully!`);
-            } else {
-              alert(`Failed to ${action} notification: ${data.message}`);
-            }
-          })
-          .catch((error) => {
-            console.error("Error handling notification action:", error);
-            alert("An error occurred while processing the request.");
-          });
+    // Handle notification actions (approve/reject)
+function handleNotificationAction(notificationId, action) {
+  fetch("/notifications/action", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    credentials: "include", // Ensure cookies/session are sent
+    body: JSON.stringify({ notificationId, action }),
+  })
+    .then((response) => {
+      // Check if response is ok (status in the range 200-299)
+      if (!response.ok) {
+        return response.json().then((errorData) => {
+          throw new Error(errorData.message || `HTTP error! Status: ${response.status}`);
+        });
       }
+      return response.json();
+    })
+    .then((data) => {
+      if (data.success) {
+        const notificationCard = document.querySelector(
+          `.notification-card[data-notification-id="${notificationId}"]`
+        );
+        const statusElement = notificationCard.querySelector(
+          ".notification-status"
+        );
+        // Update status text and class
+        statusElement.textContent = action === "approve" ? "Approved" : "Rejected";
+        statusElement.classList.remove("pending");
+        statusElement.classList.add(
+          action === "approve" ? "approved" : "rejected"
+        );
+        // Remove action buttons
+        const actions = notificationCard.querySelector(".notification-actions");
+        if (actions) {
+          actions.remove();
+        }
+        // Show success message
+        alert(`Notification ${action === "approve" ? "approved" : "rejected"} successfully!`);
+        refreshNotifications();
+      } else {
+        alert(`Failed to ${action} notification: ${data.message || "Unknown error"}`);
+      }
+    })
+    .catch((error) => {
+      console.error("Error handling notification action:", error);
+      alert(`Failed to process the request: ${error.message}`);
+    });
+}
     </script>
   </body>
 </html>
