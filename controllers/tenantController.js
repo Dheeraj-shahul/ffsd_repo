@@ -756,3 +756,145 @@ exports.submitPayment = async (req, res) => {
     res.status(500).json({ success: false, message: 'Server error: ' + error.message });
   }
 };
+
+exports.checkAccountStatus = async (req, res) => {
+  try {
+    if (!req.session.user || !req.session.user._id) {
+      console.log("Unauthorized access to check account status");
+      return res.status(401).json({ success: false, message: 'Unauthorized: Please log in' });
+    }
+    const tenantId = req.session.user._id;
+    console.log("Checking account status for tenant ID:", tenantId);
+
+    // Check for active property rental (ownerId is not null)
+    const property = await Property.findOne({ tenantId });
+    const hasActiveRentals = !!property;
+
+    // Check for active worker bookings
+    const activeBookings = await WorkerBooking.find({
+      tenantId,
+      status: { $in: ['Pending', 'Approved'] }
+    });
+    const hasActiveBookings = activeBookings.length > 0;
+
+    if (hasActiveRentals) {
+      console.log("Tenant has active property rental:", tenantId);
+      return res.status(400).json({
+        success: false,
+        message: 'Cannot delete account while renting a property',
+        hasActiveRentals,
+        hasActiveBookings
+      });
+    }
+
+    if (hasActiveBookings) {
+      console.log("Tenant has active worker bookings:", tenantId);
+      return res.status(400).json({
+        success: false,
+        message: 'Cannot delete account with active worker bookings',
+        hasActiveRentals,
+        hasActiveBookings
+      });
+    }
+
+    console.log("No active rentals or bookings for tenant ID:", tenantId);
+    return res.status(200).json({
+      success: true,
+      message: 'Account eligible for deletion',
+      hasActiveRentals,
+      hasActiveBookings
+    });
+  } catch (error) {
+    console.error('Check account status error:', error);
+    return res.status(500).json({ success: false, message: 'Server error: ' + error.message });
+  }
+};
+
+exports.deleteAccount = async (req, res) => {
+  try {
+    if (!req.session.user || !req.session.user._id) {
+      console.log("Unauthorized access to delete account");
+      return res.status(401).json({ success: false, message: 'Unauthorized: Please log in' });
+    }
+    const { password } = req.body;
+    const tenantId = req.session.user._id;
+    console.log("Processing account deletion for tenant ID:", tenantId);
+
+    // Validate input
+    if (!password) {
+      console.log("Password not provided");
+      return res.status(400).json({ success: false, message: 'Password is required' });
+    }
+
+    // Find tenant
+    const tenant = await Tenant.findById(tenantId);
+    if (!tenant) {
+      console.log("Tenant not found for ID:", tenantId);
+      return res.status(404).json({ success: false, message: 'Tenant not found' });
+    }
+
+    // Verify password
+    if (tenant.password !== password) {
+      console.log("Incorrect password for tenant ID:", tenantId);
+      return res.status(401).json({ success: false, message: 'Incorrect password' });
+    }
+
+    // Double-check for active rentals
+    const property = await Property.findOne({ tenantId });
+    if (property) {
+      console.log("Tenant has active property rental:", tenantId);
+      return res.status(400).json({
+        success: false,
+        message: 'Cannot delete account while renting a property'
+      });
+    }
+
+    // Double-check for active worker bookings
+    const activeBookings = await WorkerBooking.find({
+      tenantId,
+      status: { $in: ['Pending', 'Approved'] }
+    });
+    if (activeBookings.length > 0) {
+      console.log("Tenant has active worker bookings:", tenantId);
+      return res.status(400).json({
+        success: false,
+        message: 'Cannot delete account with active worker bookings'
+      });
+    }
+
+    // Delete related data
+    await Payment.deleteMany({ tenantId });
+    await MaintenanceRequest.deleteMany({ tenantId });
+    await Complaint.deleteMany({ tenantId });
+    await Rating.deleteMany({ tenantId });
+    await RentalHistory.deleteMany({ tenantId });
+    await Notification.deleteMany({ recipient: tenantId, recipientType: 'Tenant' });
+    await WorkerBooking.deleteMany({ tenantId });
+
+    // Remove tenant references from other collections
+    if (tenant.ownerId) {
+      await Owner.findByIdAndUpdate(tenant.ownerId, {
+        $pull: { tenantIds: tenantId }
+      });
+    }
+
+    // Delete tenant
+    await Tenant.findByIdAndDelete(tenantId);
+
+    // Clear session
+    req.session.destroy((err) => {
+      if (err) {
+        console.error("Error destroying session:", err);
+      }
+    });
+
+    console.log("Account deleted successfully for tenant ID:", tenantId);
+    return res.status(200).json({
+      success: true,
+      message: 'Account deleted successfully'
+    });
+  } catch (error) {
+    console.error('Delete account error:', error);
+    return res.status(500).json({ success: false, message: 'Server error: ' + error.message });
+  }
+};

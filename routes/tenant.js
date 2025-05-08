@@ -56,4 +56,7 @@ router.post(
 router.post('/check-recent-payment', isAuthenticated, tenantController.checkRecentPayment);
 router.post("/payment", isAuthenticated, tenantController.submitPayment);
 
+router.post("/check-account-status", isAuthenticated, tenantController.checkAccountStatus);
+router.post("/delete-account", isAuthenticated, tenantController.deleteAccount);
+
 module.exports = router;
