@@ -67,9 +67,58 @@ exports.getOwnerDashboard = async (req, res) => {
 
     // Fetch other data
     const payments = await Payment.find({ tenantId: { $in: tenantIds } });
+
     const maintenanceRequests = await MaintenanceRequest.find({
       tenantId: { $in: tenantIds },
+    }).lean();
+
+    // Fetch tenant and property details for maintenance requests
+    const tenantMap = new Map();
+    const propertyMap = new Map();
+
+    // Collect unique tenant and property IDs
+    const tenantIdsForRequests = maintenanceRequests
+      .filter(
+        (req) => req.tenantId && mongoose.Types.ObjectId.isValid(req.tenantId)
+      )
+      .map((req) => req.tenantId);
+    const propertyIdsForRequests = maintenanceRequests
+      .filter(
+        (req) =>
+          req.propertyId && mongoose.Types.ObjectId.isValid(req.propertyId)
+      )
+      .map((req) => req.propertyId);
+
+    // Fetch tenants
+    const tenantsForRequests = await Tenant.find({
+      _id: { $in: tenantIdsForRequests },
+    })
+      .select("firstName lastName")
+      .lean();
+    tenantsForRequests.forEach((tenant) => {
+      tenantMap.set(
+        tenant._id.toString(),
+        `${tenant.firstName} ${tenant.lastName}`
+      );
     });
+
+    // Fetch properties
+    const propertiesForRequests = await Property.find({
+      _id: { $in: propertyIdsForRequests },
+    })
+      .select("name")
+      .lean();
+    propertiesForRequests.forEach((property) => {
+      propertyMap.set(property._id.toString(), property.name);
+    });
+
+    // Attach tenantName and propertyName to each maintenance request
+    maintenanceRequests.forEach((request) => {
+      request.tenantName = tenantMap.get(request.tenantId?.toString()) || "N/A";
+      request.propertyName =
+        propertyMap.get(request.propertyId?.toString()) || "N/A";
+    });
+
     const complaints = await Complaint.find({ tenantId: { $in: tenantIds } });
     const agreements = await Agreement.find({ ownerId: objectId });
     const notifications = await Notification.find({

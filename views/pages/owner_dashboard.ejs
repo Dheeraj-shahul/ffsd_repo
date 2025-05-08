@@ -276,7 +276,7 @@
           <div class="maintenance-requests">
             <% if (maintenanceRequests && Array.isArray(maintenanceRequests)) {
             %> <% maintenanceRequests.forEach(request => { %>
-            <div class="request-card">
+            <div class="request-card" data-request-id="<%= request._id %>">
               <div class="request-header">
                 <h4><%= request.issueType || 'N/A' %></h4>
                 <span
@@ -286,12 +286,16 @@
               </div>
               <div class="request-details">
                 <p>
-                  <strong>Property:</strong> <%= request.propertyId || 'N/A' %>
+                  <strong>Property:</strong> <%= request.propertyName || 'N/A'
+                  %>
                 </p>
-                <p><strong>Tenant:</strong> <%= request.tenantId || 'N/A' %></p>
                 <p>
-                  <strong>Date Submitted:</strong> <%= request.dateReported ?
-                  new Date(request.dateReported).toLocaleDateString() : 'N/A' %>
+                  <strong>Tenant:</strong> <%= request.tenantName || 'N/A' %>
+                </p>
+                <p>
+                  <strong>Date Submitted:</strong> <%= request.scheduledDate ?
+                  new Date(request.scheduledDate).toLocaleDateString() : 'N/A'
+                  %>
                 </p>
                 <p>
                   <strong>Description:</strong> <%= request.description || 'N/A'
@@ -1098,21 +1102,91 @@
         });
 
         function updateRequestStatus(statusElement, newStatus) {
-          statusElement.classList.remove("pending", "in-progress", "resolved");
+          // Get the request ID from the closest request-card parent
+          const requestCard = statusElement.closest(".request-card");
+          if (!requestCard) {
+            console.error("Could not find parent request card");
+            alert("Error: Could not locate request information");
+            return;
+          }
+
+          // Extract the request ID from the request card
+          // You'll need to add a data attribute to your request cards in the EJS template
+          const requestId = requestCard.getAttribute("data-request-id");
+          if (!requestId) {
+            console.error("Request ID not found");
+            alert("Error: Request ID not found");
+            return;
+          }
+
+          // Format the status value for the API
+          let formattedStatus;
           switch (newStatus) {
             case "pending":
-              statusElement.textContent = "Pending";
-              statusElement.classList.add("pending");
+              formattedStatus = "Pending";
               break;
             case "in-progress":
-              statusElement.textContent = "In Progress";
-              statusElement.classList.add("in-progress");
+              formattedStatus = "In Progress";
               break;
             case "resolved":
-              statusElement.textContent = "Resolved";
-              statusElement.classList.add("resolved");
+              formattedStatus = "Resolved";
               break;
+            default:
+              formattedStatus = newStatus;
           }
+
+          // Send API request to update status
+          fetch("/maintenance-request/status", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              requestId: requestId,
+              status: formattedStatus,
+            }),
+          })
+            .then((response) => response.json())
+            .then((data) => {
+              if (data.success) {
+                // Update UI only after successful API response
+                statusElement.classList.remove(
+                  "pending",
+                  "in-progress",
+                  "resolved"
+                );
+                switch (newStatus) {
+                  case "pending":
+                    statusElement.textContent = "Pending";
+                    statusElement.classList.add("pending");
+                    break;
+                  case "in-progress":
+                    statusElement.textContent = "In Progress";
+                    statusElement.classList.add("in-progress");
+                    break;
+                  case "resolved":
+                    statusElement.textContent = "Resolved";
+                    statusElement.classList.add("resolved");
+                    break;
+                }
+                // Optional: Show success message
+                console.log("Status updated successfully");
+              } else {
+                alert(
+                  "Failed to update status: " +
+                    (data.message || "Unknown error")
+                );
+              }
+            })
+            .catch((error) => {
+              console.error(
+                "Error updating maintenance request status:",
+                error
+              );
+              alert(
+                "An error occurred while updating the status. Please try again."
+              );
+            });
         }
 
         window.addEventListener("click", function (event) {
