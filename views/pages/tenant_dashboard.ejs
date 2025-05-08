@@ -357,17 +357,20 @@
           </div>
         </div>
 
-        <!-- Notifications Section -->
         <div id="notifications" class="section">
           <h3>Notifications</h3>
-          <div class="notification-container">
+          <div classrast="notification-container">
             <% if (notifications && Array.isArray(notifications) && notifications.length > 0) { %>
               <% notifications.forEach(notification => { %>
-                <div class="notification-card">
+                <div class="notification-card <%= notification.read ? 'read' : 'unread' %>" data-notification-id="<%= notification._id %>">
                   <p><strong>From:</strong> <%= notification.workerName || notification.propertyName || 'System' %></p>
                   <p><strong>Message:</strong> <%= notification.message %></p>
                   <p><strong>Date:</strong> <%= notification.createdDate.toLocaleString() %></p>
-                  <p><strong>Status:</strong> <span class="notification-status"><%= notification.status %></span></p>
+                  <p><strong>Status:</strong> <span class="notification-status <%= notification.status.toLowerCase() %>"><%= notification.status %></span></p>
+                  <p><strong>Read:</strong> <%= notification.read ? 'Read' : 'Unread' %></p>
+                  <% if (!notification.read) { %>
+                    <button class="mark-read-button" data-notification-id="<%= notification._id %>">Mark as Read</button>
+                  <% } %>
                 </div>
               <% }) %>
             <% } else { %>
@@ -586,6 +589,51 @@
     </div>
 
     <script>
+
+
+async function markNotificationAsRead(notificationId) {
+  console.log("Marking notification as read:", { notificationId });
+  try {
+    const response = await fetch("/tenant/notification/read", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ notificationId }),
+    });
+    const result = await response.json();
+    console.log("Mark notification response:", result);
+    if (result.success) {
+      showNotification(result.message || "Notification marked as read", "success");
+      const notificationCard = document.querySelector(`.notification-card[data-notification-id="${notificationId}"]`);
+      if (notificationCard) {
+        notificationCard.classList.remove("unread");
+        notificationCard.classList.add("read");
+        const readStatus = notificationCard.querySelector("p:nth-child(5)");
+        if (readStatus) readStatus.innerHTML = "<strong>Read:</strong> Read";
+        const markButton = notificationCard.querySelector(".mark-read-button");
+        if (markButton) markButton.remove();
+      } else {
+        console.warn(`Notification card with ID ${notificationId} not found in DOM`);
+      }
+    } else {
+      showNotification(result.message || "Error marking notification as read", "error");
+    }
+  } catch (error) {
+    console.error("Mark notification error:", error);
+    showNotification("Failed to mark notification as read. Please try again.", "error");
+  }
+}
+
+document.addEventListener("click", (event) => {
+  if (event.target.classList.contains("mark-read-button")) {
+    const notificationId = event.target.dataset.notificationId;
+    if (notificationId) {
+      markNotificationAsRead(notificationId);
+    }
+  }
+});
+
+
+
       function showSection(sectionId) {
         console.log("Showing section:", sectionId);
         const sections = document.querySelectorAll(".section");

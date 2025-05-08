@@ -998,3 +998,30 @@ body {
     flex-direction: column;
   }
 }
+
+
+
+.notification-card.read {
+  background-color: #f0f0f0;
+  opacity: 0.7;
+}
+
+.notification-card.unread {
+  background-color: #e3f2fd;
+  border-left: 4px solid #2196f3;
+}
+
+.mark-read-button {
+  background-color: #4caf50;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  margin-top: 10px;
+}
+
+.mark-read-button:hover {
+  background-color: #45a049;
+}

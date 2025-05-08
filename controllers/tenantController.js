@@ -533,3 +533,53 @@ exports.toggleSavedProperty = async (req, res) => {
     res.status(500).json({ success: false, message: 'Server error: Unable to save property' });
   }
 };
+
+
+
+
+exports.markNotificationAsRead = async (req, res) => {
+  try {
+    if (!req.session.user || !req.session.user._id) {
+      console.log("Unauthorized access to mark notification as read");
+      return res.status(401).json({ success: false, message: 'Unauthorized: Please log in' });
+    }
+    const { notificationId } = req.body;
+    const tenantId = req.session.user._id;
+    console.log("Marking notification as read for tenant ID:", tenantId, { notificationId });
+
+    // Validate inputs
+    if (!notificationId) {
+      console.log("Missing notification ID");
+      return res.status(400).json({ success: false, message: 'Notification ID is required' });
+    }
+    if (!mongoose.Types.ObjectId.isValid(notificationId)) {
+      console.log("Invalid notification ID format:", notificationId);
+      return res.status(400).json({ success: false, message: 'Invalid notification ID' });
+    }
+
+    // Find and update the notification
+    const notification = await Notification.findOneAndUpdate(
+      { _id: notificationId, recipient: tenantId, recipientType: 'Tenant' },
+      { $set: { read: true } },
+      { new: true }
+    );
+
+    if (!notification) {
+      console.log("Notification not found or not authorized for ID:", notificationId);
+      return res.status(404).json({ success: false, message: 'Notification not found or you are not authorized' });
+    }
+
+    console.log("Notification marked as read successfully for tenant ID:", tenantId, notificationId);
+    res.status(200).json({
+      success: true,
+      message: 'Notification marked as read successfully',
+      notification: {
+        _id: notification._id,
+        read: notification.read
+      }
+    });
+  } catch (error) {
+    console.error('Mark notification as read error:', error);
+    res.status(500).json({ success: false, message: 'Server error: ' + error.message });
+  }
+};
