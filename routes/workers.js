@@ -37,7 +37,11 @@ router.post("/api/workers/delete-service", workerController.deleteWorkerService)
 
 router.post("/api/workers/:id/book", workerController.bookWorkerCorrected);
 router.post("/api/workers/bookings/:id/status", workerController.updateWorkerBookingStatus);
+// API endpoint to check if worker is booked
+router.get("/api/workers/check-booked/:id", workerController.isAuthenticated, workerController.checkWorkerBookedStatus);
 
+// API endpoint to delete worker account
+router.delete("/api/workers/delete-account/:id", workerController.isAuthenticated, workerController.deleteWorkerAccount);
 router.get("/worker_dashboard", workerController.renderWorkerDashboardSafer);
 
 

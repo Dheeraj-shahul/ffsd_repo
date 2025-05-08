@@ -481,6 +481,68 @@ exports.deleteWorkerService = async (req, res) => {
   }
 };
 
+// Check if worker is booked
+exports.checkWorkerBookedStatus = async (req, res) => {
+  try {
+    const workerId = req.params.id;
+    const worker = await Worker.findById(workerId);
+
+    if (!worker) {
+      return res.status(404).json({ error: 'Worker not found' });
+    }
+
+    if (worker._id.toString() !== req.session.user._id) {
+      return res.status(403).json({ error: 'Unauthorized' });
+    }
+
+    res.json({ isBooked: worker.isBooked });
+  } catch (error) {
+    console.error('Error checking worker booked status:', error);
+    res.status(500).json({ error: 'Error checking booked status' });
+  }
+};
+
+// Delete worker account
+exports.deleteWorkerAccount = async (req, res) => {
+  try {
+    const workerId = req.params.id;
+    const { password } = req.body;
+
+    const worker = await Worker.findById(workerId);
+    if (!worker) {
+      return res.status(404).json({ error: 'Worker not found' });
+    }
+
+    if (worker._id.toString() !== req.session.user._id) {
+      return res.status(403).json({ error: 'Unauthorized' });
+    }
+
+    if (worker.isBooked) {
+      return res.status(400).json({ error: 'Cannot delete account: You are currently working' });
+    }
+
+    // Verify password (plain text comparison)
+    if (password !== worker.password) {
+      return res.status(401).json({ error: 'Invalid password' });
+    }
+
+    // Delete the worker
+    await Worker.deleteOne({ _id: workerId });
+
+    // Clear session
+    req.session.destroy((err) => {
+      if (err) {
+        console.error('Error destroying session:', err);
+      }
+    });
+
+    res.json({ success: true, message: 'Account deleted successfully' });
+  } catch (error) {
+    console.error('Error deleting worker account:', error);
+    res.status(500).json({ error: 'Error deleting account' });
+  }
+};
+
 exports.bookWorkerCorrected = async (req, res) => {
   try {
     if (!req.session.user || req.session.user.userType !== "tenant") {
