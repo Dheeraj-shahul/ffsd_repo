@@ -2,7 +2,6 @@
 <script>
   document.addEventListener('DOMContentLoaded', function() {
     console.log('User data received:', <%= JSON.stringify(user) %>);
-    console.log('Services data received:', <%= JSON.stringify(services) %>);
   });
 </script>
 
@@ -108,7 +107,7 @@
           <button class="update_sts" onclick="updateBookingStatus('<%= booking._id %>', 'Approved')">Accept Booking</button>
           <button class="update_sts" onclick="updateBookingStatus('<%= booking._id %>', 'Declined')">Decline Booking</button>
         <% } else if (booking.status === 'Approved') { %>
-          <button class="update_sts" onclick="updateBookingStatus('<%= booking._id %>', 'Completed')">Mark as Complete</button>
+          <!-- <button class="update_sts" onclick="updateBookingStatus('<%= booking._id %>', 'Completed')">Mark as Complete</button> -->
         <% } %>
       </div>
     <% }) %>
@@ -489,6 +488,13 @@
 
       
       function updateBookingStatus(bookingId, status) {
+  // Show loading state or disable button
+  const buttons = document.querySelectorAll(`button[onclick*="${bookingId}"]`);
+  buttons.forEach(btn => {
+    btn.disabled = true;
+    btn.innerHTML = `Updating...`;
+  });
+
   fetch(`/api/workers/bookings/${bookingId}/status`, {
     method: 'POST',
     headers: {
@@ -496,17 +502,29 @@
     },
     body: JSON.stringify({ status }),
   })
-    .then(response => response.json())
+    .then(response => {
+      if (!response.ok) {
+        throw new Error(`Server responded with status ${response.status}`);
+      }
+      return response.json();
+    })
     .then(data => {
-      if (data.message === `Booking status updated to ${status}!`) {
+      if (data.success) {
+        // Success notification
+        alert(`Booking ${status.toLowerCase()} successfully!`);
         window.location.reload(); // Reload to reflect updated clients and bookings
       } else {
-        alert(data.message || 'Error updating status');
+        // Error message from server
+        alert(data.error || 'Unknown error updating booking status');
+        // Re-enable buttons
+        buttons.forEach(btn => btn.disabled = false);
       }
     })
     .catch(error => {
       console.error('Error updating booking status:', error);
-      alert('Failed to update booking status');
+      alert(`Failed to update booking status: ${error.message}`);
+      // Re-enable buttons
+      buttons.forEach(btn => btn.disabled = false);
     });
 }
 

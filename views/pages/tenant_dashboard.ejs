@@ -347,6 +347,8 @@
                 <p><strong>Service:</strong> <%= worker.serviceType || 'N/A' %></p>
                 <p><strong>Schedule:</strong> <%= worker.availability || 'N/A' %></p>
                 <p><strong>Monthly Fee:</strong> ₹<%= worker.price || 'N/A' %></p>
+                <p><strong>Phone:</strong> ₹<%= worker.phone || 'N/A' %></p>
+
                 <div class="rating">
                   <span><%= worker.ratingId?.average ? '⭐'.repeat(Math.round(worker.ratingId.average)) : '' %></span>
                   <%= worker.ratingId?.average ? worker.ratingId.average.toFixed(1) : 'N/A' %>

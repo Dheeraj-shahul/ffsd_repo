@@ -8,6 +8,7 @@ const Payment = require('../models/payment');
 const Rating = require('../models/rating');
 const RentalHistory = require('../models/rentalhistory');
 const Notification = require('../models/notification');
+const WorkerBooking = require("../models/workerBooking");
 const mongoose = require('mongoose');
 
 // Dashboard Controller
@@ -30,6 +31,22 @@ exports.getDashboard = async (req, res) => {
       console.log("Tenant not found for ID:", userId);
       return res.status(404).json({ success: false, message: 'Tenant not found' });
     }
+
+    console.log("Tenant fetched", { 
+      tenantId: tenant._id, 
+      domesticWorkerId: tenant.domesticWorkerId ? tenant.domesticWorkerId.map(id => id.toString()) : [] 
+    });
+
+    // Fetch approved bookings to get worker IDs
+    const approvedBookings = await WorkerBooking.find({ 
+      tenantId: tenant._id, 
+      status: "Approved" 
+    }).select("workerId");
+    const workerIdsFromBookings = approvedBookings.map(b => b.workerId).filter(id => id);
+    console.log("Approved bookings for tenant", { tenantId: tenant._id, workerIds: workerIdsFromBookings.map(id => id.toString()) });
+
+    // Merge domesticWorkerId with worker IDs from bookings
+    tenant.domesticWorkerId = [...new Set([...(tenant.domesticWorkerId || []), ...workerIdsFromBookings])];
 
     const currentProperty = await Property.findOne({ tenantId: userId });
 
