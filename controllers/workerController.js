@@ -549,60 +549,72 @@ exports.bookWorkerCorrected = async (req, res) => {
   }
 };
 
-async function sendNotificationToTenant(
-  tenantId,
-  { message, bookingId, workerId, serviceType }
-) {
+
+// This function should be added to the same file where updateWorkerBookingStatus exists
+// or imported from a notification service file
+
+/**
+ * Sends a notification to a tenant by creating a notification record
+ * @param {ObjectId} tenantId - The ID of the tenant receiving the notification
+ * @param {Object} data - Data for the notification
+ * @param {string} data.message - The notification message
+ * @param {ObjectId} data.bookingId - The related booking ID
+ * @param {ObjectId} data.workerId - The worker ID who triggered the notification
+ * @param {string} data.serviceType - The service type related to the booking
+ */
+const sendNotificationToTenant = async (tenantId, data) => {
   try {
-    const tenant = await Tenant.findById(tenantId);
-    const worker = await Worker.findById(workerId);
-    if (!tenant || !worker) {
-      console.warn("Tenant or worker not found for notification", {
-        tenantId,
-        workerId,
-      });
+    // Get worker details for the notification
+    const worker = await Worker.findById(data.workerId);
+    
+    if (!worker) {
+      console.error("Worker not found when sending notification:", data.workerId);
       return;
     }
-
+    
+    // Create new notification object
     const notification = new Notification({
-      type: "BookingUpdate",
-      message,
+      type: "Booking Update",
+      message: data.message,
       recipient: tenantId,
       recipientType: "Tenant",
-      recipientName: `${tenant.firstName} ${tenant.lastName}`,
-      worker: workerId,
+      worker: data.workerId,
       workerName: `${worker.firstName} ${worker.lastName}`,
-      propertyName: tenant.location || "Not provided",
-      status: "Pending",
-      priority: "High",
+      status: data.status === "Approved" ? "Approved" : "Rejected",
+      priority: "Medium",
       createdDate: new Date(),
-      bookingId,
-      read: false,
+      bookingId: data.bookingId,
+      read: false
     });
-
-    await notification.save();
-
-    console.log("Notification created", {
-      notificationId: notification._id,
-      recipient: notification.recipient.toString(),
-      bookingId: notification.bookingId.toString(),
-      status: notification.status,
+    
+    // Save the notification to the database
+    const savedNotification = await notification.save();
+    
+    console.log("Notification created successfully:", {
+      notificationId: savedNotification._id.toString(),
+      tenantId: tenantId.toString(),
+      message: data.message
     });
-
-    console.log("Notification sent to tenant", {
+    
+    // Update the tenant's notificationIds array (optional but recommended for quick access)
+    await Tenant.findByIdAndUpdate(
       tenantId,
-      message,
-      notificationId: notification._id,
-    });
+      { $push: { notificationIds: savedNotification._id } },
+      { new: true }
+    );
+    
+    return savedNotification;
   } catch (error) {
-    console.error("Error sending notification:", {
-      message: error.message,
-      tenantId,
-      workerId,
-      bookingId,
+    console.error("Error sending notification to tenant:", {
+      tenantId: tenantId.toString(),
+      error: error.message,
+      stack: error.stack
     });
+    // Don't throw - just log the error since this is a secondary operation
   }
-}
+};
+
+
 
 exports.getWorkerBookings = async (req, res) => {
   try {
@@ -677,69 +689,79 @@ exports.updateWorkerBookingStatus = async (req, res) => {
     });
 
     // Handle approval-specific logic
-    if (status === "Approved") {
-      try {
-        // Find tenant and worker
-        const tenant = await Tenant.findById(updatedBooking.tenantId);
-        const worker = await Worker.findById(workerId);
+     // Handle notification for Approved or Declined status
+if (status === "Approved" || status === "Declined") {
+  try {
+    // Find tenant and worker
+    const tenant = await Tenant.findById(updatedBooking.tenantId);
+    const worker = await Worker.findById(workerId);
 
-        if (!tenant || !worker) {
-          console.error("Tenant or worker not found for association:", {
-            tenantId: updatedBooking.tenantId.toString(),
-            workerId: workerId.toString(),
-          });
-          return res.status(404).json({ error: "Tenant or worker not found" });
-        }
-
-        // Ensure arrays exist before attempting to update them
-        if (!Array.isArray(tenant.domesticWorkerId))
-          tenant.domesticWorkerId = [];
-        if (!Array.isArray(worker.clientIds)) worker.clientIds = [];
-
-        // Add worker to tenant's domesticWorkerId array if not already present
-        const workerIdStr = workerId.toString();
-        if (
-          !tenant.domesticWorkerId.some((id) => id.toString() === workerIdStr)
-        ) {
-          tenant.domesticWorkerId.push(workerId);
-          await tenant.save();
-          console.log("Updated tenant with worker association:", {
-            tenantId: tenant._id.toString(),
-            addedWorkerId: workerIdStr,
-          });
-        }
-
-        // Add tenant to worker's clientIds array if not already present
-        const tenantIdStr = tenant._id.toString();
-        if (!worker.clientIds.some((id) => id.toString() === tenantIdStr)) {
-          worker.clientIds.push(tenant._id);
-          worker.isBooked = true;
-          await worker.save();
-          console.log("Updated worker with tenant association:", {
-            workerId: worker._id.toString(),
-            
-            addedTenantId: tenantIdStr,
-          });
-        }
-
-        // Update session with fresh worker data
-        req.session.user = worker.toObject();
-
-        // Send notification to tenant
-        await sendNotificationToTenant(updatedBooking.tenantId, {
-          message: `Your booking for ${updatedBooking.serviceType} has been approved by ${worker.firstName} ${worker.lastName}.`,
-          bookingId: updatedBooking._id,
-          workerId,
-          serviceType: updatedBooking.serviceType,
-        });
-      } catch (innerError) {
-        console.error(
-          "Error updating associations after approval:",
-          innerError
-        );
-        // Continue processing - don't fail the status update due to association issues
-      }
+    if (!tenant || !worker) {
+      console.error("Tenant or worker not found for notification:", {
+        tenantId: updatedBooking.tenantId.toString(),
+        workerId: workerId.toString(),
+      });
+      return res.status(404).json({ error: "Tenant or worker not found" });
     }
+
+    // Only update associations for Approved status
+    if (status === "Approved") {
+      // Ensure arrays are initialized
+      tenant.domesticWorkerId = Array.isArray(tenant.domesticWorkerId)
+        ? tenant.domesticWorkerId
+        : [];
+      worker.clientIds = Array.isArray(worker.clientIds) ? worker.clientIds : [];
+
+      // Add worker to tenant's domesticWorkerId array if not already present
+      const workerIdStr = workerId.toString();
+      if (
+        !tenant.domesticWorkerId.some((id) => id.toString() === workerIdStr)
+      ) {
+        tenant.domesticWorkerId.push(workerId);
+        await tenant.save();
+        console.log("Updated tenant with worker association:", {
+          tenantId: tenant._id.toString(),
+          addedWorkerId: workerIdStr,
+        });
+      }
+
+      // Add tenant to worker's clientIds array if not already present
+      const tenantIdStr = tenant._id.toString();
+      if (!worker.clientIds.some((id) => id.toString() === tenantIdStr)) {
+        worker.clientIds.push(tenant._id);
+        worker.isBooked = true;
+        await worker.save();
+        console.log("Updated worker with tenant association:", {
+          workerId: worker._id.toString(),
+          addedTenantId: tenantIdStr,
+        });
+      }
+
+      // Update session with fresh worker data
+      req.session.user = worker.toObject();
+    }
+
+    // Send notification to tenant
+    const message =
+      status === "Approved"
+        ? `Your booking for ${updatedBooking.serviceType} has been approved by ${worker.firstName} ${worker.lastName}.`
+        : `Your booking for ${updatedBooking.serviceType} has been declined by ${worker.firstName} ${worker.lastName}.`;
+    await sendNotificationToTenant(updatedBooking.tenantId, {
+      message,
+      bookingId: updatedBooking._id,
+      workerId,
+      serviceType: updatedBooking.serviceType,
+    });
+  } catch (innerError) {
+    console.error(
+      status === "Approved"
+        ? "Error updating associations or sending notification after approval:"
+        : "Error sending notification for declined status:",
+      innerError
+    );
+    // Continue processing - don't fail the status update due to association/notification issues
+  }
+}
 
     res.status(200).json({
       success: true,

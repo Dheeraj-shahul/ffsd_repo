@@ -189,8 +189,6 @@ exports.deleteProperty = async (req, res) => {
   }
 };
 
-
-
 // Fetch owner's notifications
 exports.getNotifications = async (req, res) => {
   try {
@@ -201,7 +199,9 @@ exports.getNotifications = async (req, res) => {
 
     const ownerId = req.session.user._id;
     if (!mongoose.Types.ObjectId.isValid(ownerId)) {
-      return res.status(400).json({ success: false, message: "Invalid owner ID" });
+      return res
+        .status(400)
+        .json({ success: false, message: "Invalid owner ID" });
     }
 
     // Fetch notifications for the owner
@@ -214,5 +214,52 @@ exports.getNotifications = async (req, res) => {
   } catch (err) {
     console.error("Error fetching notifications:", err);
     res.status(500).json({ success: false, message: "Server error" });
+  }
+};
+
+// Update maintenance request status
+exports.updateMaintenanceRequestStatus = async (req, res) => {
+  try {
+    const { requestId, status } = req.body;
+
+    // Validate requestId
+    if (!mongoose.Types.ObjectId.isValid(requestId)) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Invalid request ID" });
+    }
+
+    // Validate status
+    const validStatuses = ["Pending", "In Progress", "Resolved"];
+    if (!validStatuses.includes(status)) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Invalid status value" });
+    }
+
+    // Find and update the maintenance request
+    const maintenanceRequest = await MaintenanceRequest.findById(requestId);
+    if (!maintenanceRequest) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Maintenance request not found" });
+    }
+
+    // Update status
+    maintenanceRequest.status = status;
+    await maintenanceRequest.save();
+
+    return res.status(200).json({
+      success: true,
+      message: "Maintenance request status updated successfully",
+      status: maintenanceRequest.status,
+    });
+  } catch (error) {
+    console.error("Error updating maintenance request status:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Server error while updating maintenance request status",
+      error: error.message,
+    });
   }
 };
