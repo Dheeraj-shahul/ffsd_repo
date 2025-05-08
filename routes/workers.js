@@ -3,7 +3,7 @@ const router = express.Router();
 const workerController = require("../controllers/workerController");
 
 // Route to render the worker dashboard
-router.get("/worker_dashboard", workerController.isAuthenticated, workerController.renderWorkerDashboard);
+//router.get("/worker_dashboard", workerController.isAuthenticated, workerController.renderWorkerDashboard);
 
 // Route to render the worker registration page
 router.get("/worker_register", workerController.isAuthenticated, workerController.renderWorkerRegisterPage);
@@ -35,12 +35,11 @@ router.post("/api/workers/:id/toggle", workerController.toggleWorkerAvailability
 // API endpoint to delete worker service details
 router.post("/api/workers/delete-service", workerController.deleteWorkerService);
 
-// Booking routes
-router.get("/bookings", workerController.isAuthenticated, workerController.getBookings);
-router.put(
-  "/bookings/:id/status",
-  workerController.isAuthenticated,
-  workerController.updateBookingStatus
-);
+router.post("/api/workers/:id/book", workerController.bookWorkerCorrected);
+router.post("/api/workers/bookings/:id/status", workerController.updateWorkerBookingStatus);
+
+router.get("/worker_dashboard", workerController.renderWorkerDashboardSafer);
+
+
 
 module.exports = router;

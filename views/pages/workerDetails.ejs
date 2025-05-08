@@ -514,8 +514,6 @@
           color: #ffc107;
           border: 1px solid #ffc107;
         }
-
-        /* Rest of your media queries remain the same */
       }
     </style>
   </head>
@@ -571,6 +569,7 @@
                   <option value="Child Care">Child Care</option>
                   <option value="Gardening">Gardening</option>
                   <option value="Laundry">Laundry</option>
+                  <option value="Housekeeper">Housekeeper</option>
                 </select>
               </div>
               <div class="filter-item">
@@ -618,6 +617,9 @@
     </main>
     
     <script>
+    // Log to verify script execution
+    console.log('workerDetails.ejs script loaded');
+
     // Location data
     const areasByCity = {
       delhi: ["karol bagh", "connaught place", "dwarka", "rohini"],
@@ -631,18 +633,20 @@
     
     // Initialize the page
     document.addEventListener("DOMContentLoaded", () => {
-      // Fetch workers from the server
+      console.log('DOMContentLoaded event fired');
       fetchWorkers();
     });
     
     // Fetch workers from the server
     async function fetchWorkers() {
       try {
+        console.log('Fetching workers from /api/workers');
         const response = await fetch('/api/workers');
         if (!response.ok) {
           throw new Error(`Server responded with status: ${response.status}`);
         }
         const workers = await response.json();
+        console.log('Workers fetched:', workers.length);
         displayWorkers(workers);
       } catch (error) {
         console.error('Error fetching workers:', error);
@@ -653,22 +657,14 @@
     // Display workers in the grid
     function displayWorkers(workers) {
       const grid = document.getElementById("workersGrid");
-      
-      // Clear the grid
       grid.innerHTML = "";
-      
-      // Check if there are any workers
       if (!workers || workers.length === 0) {
         grid.innerHTML = '<p style="text-align: center; padding: 2rem;">No workers found</p>';
         return;
       }
-      
-      // Create and append worker cards
       workers.forEach((worker) => {
         const card = document.createElement("div");
         card.className = "worker-card";
-        
-        // Handle potential undefined values
         const firstName = worker.firstName || 'Unknown';
         const lastName = worker.lastName || '';
         const location = worker.location ? worker.location.charAt(0).toUpperCase() + worker.location.slice(1) : 'Location unknown';
@@ -677,7 +673,6 @@
         const price = worker.price ? `₹${worker.price.toLocaleString()}` : 'Contact for price';
         const rating = worker.ratingId?.average ? worker.ratingId.average : 'N/A';
         const image = worker.image || '/images/default-worker.jpg';
-        
         card.innerHTML = `
           <div class="worker-image">
             <img src="${image}" alt="${firstName} ${lastName}" onerror="this.src='/images/default-worker.jpg'">
@@ -692,7 +687,6 @@
             <button class="view-details-btn" onclick="showWorkerDetails('${worker._id}')">View Details</button>
           </div>
         `;
-        
         grid.appendChild(card);
       });
     }
@@ -702,19 +696,13 @@
       const locationSelect = document.getElementById("location");
       const areaSelect = document.getElementById("area");
       const location = locationSelect.value;
-    
-      // Reset area dropdown
       areaSelect.innerHTML = '<option value="">Select Area</option>';
-    
       if (!location) {
         areaSelect.disabled = true;
         return;
       }
-    
-      // Enable and populate area dropdown
       areaSelect.disabled = false;
       const areas = areasByCity[location] || [];
-    
       areas.forEach((area) => {
         const option = document.createElement("option");
         option.value = area;
@@ -727,7 +715,6 @@
     function searchLocation() {
       const location = document.getElementById("location").value.toLowerCase();
       const area = document.getElementById("area").value.toLowerCase();
-    
       if (!location) {
         alert("Please select a location");
         return;
@@ -736,11 +723,7 @@
         alert("Please select an area");
         return;
       }
-    
-      // Apply all filters
       applyFilters();
-    
-      // Close the sidebar on mobile
       const filtersSidebar = document.querySelector(".filters-sidebar");
       filtersSidebar.classList.remove("active");
     }
@@ -752,27 +735,21 @@
       const serviceType = document.getElementById("serviceType").value;
       const price = document.getElementById("price").value;
       const rating = document.getElementById("rating").value;
-    
-      // Build query parameters
       const queryParams = new URLSearchParams();
       if (location) queryParams.append('location', location);
       if (area) queryParams.append('area', area);
       if (serviceType) queryParams.append('serviceType', serviceType);
       if (price) queryParams.append('price', price);
       if (rating) queryParams.append('rating', rating);
-    
       try {
+        console.log('Applying filters:', queryParams.toString());
         const response = await fetch(`/api/workers?${queryParams.toString()}`);
         if (!response.ok) {
           throw new Error(`Server responded with status: ${response.status}`);
         }
-        
         const filteredWorkers = await response.json();
-    
-        // Display results
+        console.log('Filtered workers:', filteredWorkers.length);
         displayWorkers(filteredWorkers);
-    
-        // Close the sidebar on mobile
         const filtersSidebar = document.querySelector(".filters-sidebar");
         filtersSidebar.classList.remove("active");
       } catch (error) {
@@ -789,27 +766,33 @@
       document.getElementById("price").value = "";
       document.getElementById("rating").value = "";
       document.getElementById("serviceType").value = "";
-      fetchWorkers(); // Reset to show all workers
+      fetchWorkers();
     }
     
     // Placeholder for serviceTypeChanged function
     function serviceTypeChanged() {
-      // This can be expanded if you need specific behavior when service type changes
+      // This can be expanded if needed
+    }
+    
+    // Redirect to login page
+    function redirectToLogin() {
+      console.log('Redirecting to login: User not authenticated or not a tenant');
+      alert('Please log in as a tenant to book a worker.');
+      window.location.href = '/login';
     }
     
     // Show worker details modal
     async function showWorkerDetails(workerId) {
       try {
+        console.log('Fetching worker details for ID:', workerId);
         const response = await fetch(`/api/workers/${workerId}`);
         if (!response.ok) {
           throw new Error(`Server responded with status: ${response.status}`);
         }
-        
         const worker = await response.json();
+        console.log('Worker details fetched:', worker);
         const modal = document.getElementById("workerModal");
         const modalContent = document.getElementById("modalContent");
-        
-        // Handle potential undefined values
         const firstName = worker.firstName || 'Unknown';
         const lastName = worker.lastName || '';
         const location = worker.location ? worker.location.charAt(0).toUpperCase() + worker.location.slice(1) : 'Location unknown';
@@ -819,8 +802,10 @@
         const rating = worker.ratingId?.average || 'N/A';
         const description = worker.description || 'No description available';
         const image = worker.image || '/images/default-worker.jpg';
+        const isAuthenticated = <%= user ? 'true' : 'false' %>;
+        const isTenant = isAuthenticated && '<%= user?.userType %>' === 'tenant';
+        console.log('User auth status:', { isAuthenticated, isTenant, userType: '<%= user?.userType %>' });
         
-        // Generate reviews HTML
         let reviewsHtml = '<p>No reviews available</p>';
         if (worker.ratingId?.reviews && worker.ratingId.reviews.length > 0) {
           reviewsHtml = worker.ratingId.reviews.map(review => `
@@ -860,7 +845,11 @@
                   <span class="worker-modal-stat-label">experience</span>
                 </div>
               </div>
-              <button class="worker-modal-book-btn">Book Now</button>
+              <button class="worker-modal-book-btn" 
+                      onclick="${isTenant ? `confirmBooking('${worker._id}', '${serviceType}')` : `redirectToLogin()`}"
+                      ${isTenant ? '' : 'title="Please log in as a tenant to book"'}>
+                Book Now
+              </button>
             </div>
           </div>
           <div class="worker-modal-description">
@@ -885,6 +874,63 @@
       } catch (error) {
         console.error('Error fetching worker details:', error);
         alert('Error loading worker details: ' + error.message);
+      }
+    }
+    
+    // Confirm and submit booking
+    async function confirmBooking(workerId, serviceType) {
+      console.log('confirmBooking called:', { workerId, serviceType });
+      
+      const isAuthenticated = <%= user ? 'true' : 'false' %>;
+      const isTenant = isAuthenticated && '<%= user?.userType %>' === 'tenant';
+      console.log('Checking auth:', { isAuthenticated, isTenant, userType: '<%= user?.userType %>' });
+      
+      if (!isAuthenticated || !isTenant) {
+        console.log('Booking failed: User not authenticated or not a tenant');
+        alert('Please log in as a tenant to book a worker.');
+        window.location.href = '/login';
+        return;
+      }
+      
+      if (confirm(`Are you sure you want to book this worker for ${serviceType}?`)) {
+        try {
+          console.log('Sending booking request to:', `/api/workers/${workerId}/book`);
+          const response = await fetch(`/api/workers/${workerId}/book`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Accept': 'application/json',
+              'Credentials': 'include'
+            },
+            body: JSON.stringify({ serviceType })
+          });
+          
+          console.log('Booking response:', { status: response.status, redirected: response.redirected });
+          
+          if (response.status === 401 || response.redirected) {
+            console.log('Booking failed: Unauthorized, redirecting to login');
+            alert('Session expired. Please log in as a tenant to book a worker.');
+            window.location.href = '/login';
+            return;
+          }
+          
+          const data = await response.json();
+          
+          if (response.ok && data.success) {
+            console.log('Booking successful:', data);
+            alert('Booking request sent successfully!');
+            closeModal();
+            fetchWorkers();
+          } else {
+            console.error('Booking failed:', data.error || 'Unknown error');
+            alert(data.error || 'Error submitting booking. Please try again.');
+          }
+        } catch (err) {
+          console.error('Error submitting booking:', err);
+          alert('An error occurred while submitting the booking: ' + err.message);
+        }
+      } else {
+        console.log('Booking cancelled by user');
       }
     }
     

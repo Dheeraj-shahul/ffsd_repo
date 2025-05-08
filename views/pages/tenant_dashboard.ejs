@@ -41,6 +41,9 @@
           <li onclick="showSection('movers')">
             <i class="fa-solid fa-users"></i> Domestic Workers
           </li>
+          <li onclick="showSection('notifications')">
+            <i class="fa-solid fa-bell"></i> Notifications
+          </li>
           <li onclick="showSection('history')">
             <i class="fa-solid fa-clock-rotate-left"></i> Rental History
           </li>
@@ -316,63 +319,60 @@
         <!-- Domestic Workers Booking -->
         <div id="movers" class="section">
           <h3>Domestic Worker Services</h3>
-          <p>
-            Book verified domestic workers nearby to complete your daily chores.
-          </p>
+          <p>Book verified domestic workers nearby to complete your daily chores.</p>
           <div class="service-categories">
             <div class="service-category">
               <h4>Cleaning Services</h4>
               <p>Professional house cleaning</p>
-              <button
-                class="book-button"
-                onclick="location.href='/workerDetails'"
-              >
-                Find Cleaners
-              </button>
+              <button class="book-button" onclick="location.href='/workerDetails?service=cleaning'">Find Cleaners</button>
             </div>
             <div class="service-category">
               <h4>Cooking Services</h4>
               <p>Skilled cooks for daily meals</p>
-              <button
-                class="book-button"
-                onclick="location.href='/workerDetails'"
-              >
-                Find Cooks
-              </button>
+              <button class="book-button" onclick="location.href='/workerDetails?service=cooking'">Find Cooks</button>
             </div>
             <div class="service-category">
               <h4>Laundry Services</h4>
               <p>Washing and ironing services</p>
-              <button
-                class="book-button"
-                onclick="location.href='/workerDetails'"
-              >
-                Find Help
-              </button>
+              <button class="book-button" onclick="location.href='/workerDetails?service=laundry'">Find Help</button>
             </div>
           </div>
           <h4>Your Current Service Providers</h4>
           <div class="worker-cards">
             <% (workers || []).forEach(worker => { %>
             <div class="worker-card">
-              <img
-                src="<%= worker.image || '/resources/default-worker.jpg' %>"
-                alt="Worker Photo"
-              />
+              <img src="<%= worker.image || '/resources/default-worker.jpg' %>" alt="Worker Photo" />
               <div class="worker-details">
                 <h5><%= worker.firstName %> <%= worker.lastName %></h5>
                 <p><strong>Service:</strong> <%= worker.serviceType || 'N/A' %></p>
-                <p>
-                  <strong>Schedule:</strong> <%= worker.schedule || 'N/A' %>
-                </p>
-                <p><strong>Monthly Fee:</strong> ₹<%= worker.fee || 'N/A' %></p>
+                <p><strong>Schedule:</strong> <%= worker.availability || 'N/A' %></p>
+                <p><strong>Monthly Fee:</strong> ₹<%= worker.price || 'N/A' %></p>
                 <div class="rating">
-                  <span><%= worker.rating ? '⭐'.repeat(Math.round(worker.rating)) : '' %></span>
-                  <%= worker.rating ? worker.rating.toFixed(1) : 'N/A' %>
+                  <span><%= worker.ratingId?.average ? '⭐'.repeat(Math.round(worker.ratingId.average)) : '' %></span>
+                  <%= worker.ratingId?.average ? worker.ratingId.average.toFixed(1) : 'N/A' %>
                 </div>
               </div>
             </div>
             <% }); %>
+          </div>
+        </div>
+
+        <!-- Notifications Section -->
+        <div id="notifications" class="section">
+          <h3>Notifications</h3>
+          <div class="notification-container">
+            <% if (notifications && Array.isArray(notifications) && notifications.length > 0) { %>
+              <% notifications.forEach(notification => { %>
+                <div class="notification-card">
+                  <p><strong>From:</strong> <%= notification.workerName || notification.propertyName || 'System' %></p>
+                  <p><strong>Message:</strong> <%= notification.message %></p>
+                  <p><strong>Date:</strong> <%= notification.createdDate.toLocaleString() %></p>
+                  <p><strong>Status:</strong> <span class="notification-status"><%= notification.status %></span></p>
+                </div>
+              <% }) %>
+            <% } else { %>
+              <p>No notifications available.</p>
+            <% } %>
           </div>
         </div>
 
@@ -438,7 +438,6 @@
                 <div class="card-actions">
                   <button class="book-button" onclick="location.href='/book-property?id=<%= property._id %>'">Book Now</button>
                   <a href="/property?id=<%= property._id %>" class="view-details">View Details</a>
-                
                   <button class="remove-button" data-property-id="<%= property._id %>">
                     Remove
                   </button>
@@ -446,9 +445,9 @@
               </div>
             </div>
             <% }); %>
-      <% if (!user.savedListings || user.savedListings.length === 0) { %>
-        <p>No saved properties yet. Browse properties to save your favorites!</p>
-      <% } %>
+            <% if (!user.savedListings || user.savedListings.length === 0) { %>
+              <p>No saved properties yet. Browse properties to save your favorites!</p>
+            <% } %>
           </div>
         </div>
 
@@ -587,511 +586,482 @@
     </div>
 
     <script>
-     function showSection(sectionId) {
-  console.log("Showing section:", sectionId);
-  const sections = document.querySelectorAll(".section");
-  sections.forEach((section) => section.classList.remove("active"));
-  const targetSection = document.getElementById(sectionId);
-  if (targetSection) {
-    targetSection.classList.add("active");
-  } else {
-    console.error("Section not found:", sectionId);
-  }
-  const sidebar = document.querySelector(".sidebar");
-  const menuButton = document.querySelector(".menu-toggle");
-  if (window.innerWidth <= 768 && sidebar && menuButton) {
-    sidebar.classList.remove("active");
-    menuButton.innerHTML = "<strong>></strong>";
-  }
-}
-
-function toggleMenu() {
-  const sidebar = document.querySelector(".sidebar");
-  const menuButton = document.querySelector(".menu-toggle");
-  if (sidebar && menuButton) {
-    sidebar.classList.toggle("active");
-    menuButton.innerHTML = sidebar.classList.contains("active")
-      ? "<strong><</strong>"
-      : "<strong>></strong>";
-  }
-}
-
-function toggleNav() {
-  const navMenu = document.getElementById("nav-menu");
-  const overlay = document.getElementById("overlay");
-  if (navMenu && overlay) {
-    navMenu.classList.toggle("active");
-    overlay.classList.toggle("active");
-  }
-}
-
-document.addEventListener("DOMContentLoaded", function () {
-  const overlay = document.getElementById("overlay");
-  if (overlay) {
-    overlay.addEventListener("click", function () {
-      const navMenu = document.getElementById("nav-menu");
-      if (navMenu) {
-        navMenu.classList.remove("active");
-        overlay.classList.remove("active");
-      }
-    });
-  }
-
-  const popup = document.getElementById("maintenance-request-popup");
-  const bookButton = document.querySelector(".book-button");
-  const closeBtn = document.querySelector(".close-btn");
-  const maintenanceForm = document.getElementById("maintenance-request-form");
-  const complaintForm = document.getElementById("complaint-form");
-  const reviewForm = document.getElementById("review-submission");
-  const profileForm = document.getElementById("profile-form");
-  const passwordForm = document.getElementById("password-form");
-  const notificationForm = document.getElementById("notification-form");
-
-  if (bookButton) {
-    bookButton.addEventListener("click", function () {
-      if (popup) popup.style.display = "flex";
-    });
-  }
-
-  if (closeBtn) {
-    closeBtn.addEventListener("click", function () {
-      if (popup) popup.style.display = "none";
-    });
-  }
-
-  if (popup) {
-    window.addEventListener("click", function (event) {
-      if (event.target === popup) {
-        popup.style.display = "none";
-      }
-    });
-  }
-
-  if (maintenanceForm) {
-    maintenanceForm.addEventListener("submit", async function (event) {
-      event.preventDefault();
-      event.stopPropagation();
-      const issueType = document.getElementById("issue-type")?.value;
-      const description = document.getElementById("description")?.value;
-      const location = document.getElementById("location")?.value;
-      const preferredDate = document.getElementById("preferred-date")?.value;
-
-      console.log("Submitting maintenance request:", { issueType, description, location, preferredDate });
-      try {
-        const response = await fetch("/tenant/maintenance", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            issueType,
-            description,
-            location,
-            preferredDate,
-          }),
-        });
-        const result = await response.json();
-        console.log("Maintenance response:", result);
-        if (result.success) {
-          alert(result.message);
-          addNewRequest(result.request);
-          maintenanceForm.reset();
-          if (popup) popup.style.display = "none";
+      function showSection(sectionId) {
+        console.log("Showing section:", sectionId);
+        const sections = document.querySelectorAll(".section");
+        sections.forEach((section) => section.classList.remove("active"));
+        const targetSection = document.getElementById(sectionId);
+        if (targetSection) {
+          targetSection.classList.add("active");
         } else {
-          alert(result.message || "Error submitting request");
+          console.error("Section not found:", sectionId);
         }
-      } catch (error) {
-        console.error("Maintenance form error:", error);
-        alert("Error submitting request");
-      }
-    });
-  }
-
-  if (complaintForm) {
-    complaintForm.addEventListener("submit", async function (event) {
-      event.preventDefault();
-      event.stopPropagation();
-      const category = complaintForm.querySelector("select")?.value;
-      const subject = complaintForm.querySelector("input")?.value;
-      const description = complaintForm.querySelector("textarea")?.value;
-
-      console.log("Submitting complaint:", { category, subject, description });
-      try {
-        const response = await fetch("/tenant/complaint", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ category, subject, description }),
-        });
-        const result = await response.json();
-        console.log("Complaint response:", result);
-        if (result.success) {
-          alert(result.message);
-          addNewComplaint(result.complaint);
-          complaintForm.reset();
-        } else {
-          alert(result.message || "Error submitting complaint");
+        const sidebar = document.querySelector(".sidebar");
+        const menuButton = document.querySelector(".menu-toggle");
+        if (window.innerWidth <= 768 && sidebar && menuButton) {
+          sidebar.classList.remove("active");
+          menuButton.innerHTML = "<strong>></strong>";
         }
-      } catch (error) {
-        console.error("Complaint form error:", error);
-        alert("Error submitting complaint");
-      }
-    });
-  }
-
-  if (reviewForm) {
-    reviewForm.addEventListener("click", async function () {
-      const propertyId = document.getElementById("star-rating")?.dataset.propertyId;
-      const rating = document.querySelectorAll("#star-rating span.active").length;
-      const review = document.getElementById("review-text")?.value;
-
-      if (!rating) {
-        alert("Please select a rating");
-        return;
       }
 
-      console.log("Submitting review:", { propertyId, rating, review });
-      try {
-        const response = await fetch("/tenant/review", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ propertyId, rating, review }),
-        });
-        const result = await response.json();
-        console.log("Review response:", result);
-        if (result.success) {
-          alert(result.message);
-          addNewReview(result.rating);
-          if (document.getElementById("review-text")) document.getElementById("review-text").value = "";
-          document.querySelectorAll("#star-rating span").forEach(s => s.classList.remove("active"));
-        } else {
-          alert(result.message || "Error submitting review");
+      function toggleMenu() {
+        const sidebar = document.querySelector(".sidebar");
+        const menuButton = document.querySelector(".menu-toggle");
+        if (sidebar && menuButton) {
+          sidebar.classList.toggle("active");
+          menuButton.innerHTML = sidebar.classList.contains("active")
+            ? "<strong><</strong>"
+            : "<strong>></strong>";
         }
-      } catch (error) {
-        console.error("Review form error:", error);
-        alert("Error submitting review");
-      }
-    });
-  }
-
-  if (profileForm) {
-    profileForm.addEventListener("submit", async function (event) {
-      event.preventDefault();
-      event.stopPropagation();
-      const fullname = document.getElementById("fullname")?.value.trim();
-      const email = document.getElementById("email")?.value.trim();
-      const phone = document.getElementById("phone")?.value.trim();
-      const location = document.getElementById("address")?.value.trim();
-
-      if (!fullname || !email) {
-        alert("Full name and email are required");
-        return;
-      }
-      const nameParts = fullname.split(" ").filter(part => part);
-      if (nameParts.length < 2) {
-        alert("Please provide both first and last names");
-        return;
-      }
-      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-        alert("Please provide a valid email address");
-        return;
       }
 
-      const firstName = nameParts[0];
-      const lastName = nameParts.slice(1).join(" ");
+      function toggleNav() {
+        const navMenu = document.getElementById("nav-menu");
+        const overlay = document.getElementById("overlay");
+        if (navMenu && overlay) {
+          navMenu.classList.toggle("active");
+          overlay.classList.toggle("active");
+        }
+      }
 
-      console.log("Submitting profile update:", { firstName, lastName, email, phone, location });
-      try {
-        const response = await fetch("/tenant/profile", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            firstName,
-            lastName,
-            email,
-            phone,
-            location,
-          }),
+      document.addEventListener("DOMContentLoaded", function () {
+        const overlay = document.getElementById("overlay");
+        if (overlay) {
+          overlay.addEventListener("click", function () {
+            const navMenu = document.getElementById("nav-menu");
+            if (navMenu) {
+              navMenu.classList.remove("active");
+              overlay.classList.remove("active");
+            }
+          });
+        }
+
+        const popup = document.getElementById("maintenance-request-popup");
+        const bookButton = document.querySelector(".book-button");
+        const closeBtn = document.querySelector(".close-btn");
+        const maintenanceForm = document.getElementById("maintenance-request-form");
+        const complaintForm = document.getElementById("complaint-form");
+        const reviewForm = document.getElementById("review-submission");
+        const profileForm = document.getElementById("profile-form");
+        const passwordForm = document.getElementById("password-form");
+        const notificationForm = document.getElementById("notification-form");
+
+        if (bookButton) {
+          bookButton.addEventListener("click", function () {
+            if (popup) popup.style.display = "flex";
+          });
+        }
+
+        if (closeBtn) {
+          closeBtn.addEventListener("click", function () {
+            if (popup) popup.style.display = "none";
+          });
+        }
+
+        if (popup) {
+          window.addEventListener("click", function (event) {
+            if (event.target === popup) {
+              popup.style.display = "none";
+            }
+          });
+        }
+
+        if (maintenanceForm) {
+          maintenanceForm.addEventListener("submit", async function (event) {
+            event.preventDefault();
+            event.stopPropagation();
+            const issueType = document.getElementById("issue-type")?.value;
+            const description = document.getElementById("description")?.value;
+            const location = document.getElementById("location")?.value;
+            const preferredDate = document.getElementById("preferred-date")?.value;
+
+            console.log("Submitting maintenance request:", { issueType, description, location, preferredDate });
+            try {
+              const response = await fetch("/tenant/maintenance", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                  issueType,
+                  description,
+                  location,
+                  preferredDate,
+                }),
+              });
+              const result = await response.json();
+              console.log("Maintenance response:", result);
+              if (result.success) {
+                alert(result.message);
+                addNewRequest(result.request);
+                maintenanceForm.reset();
+                if (popup) popup.style.display = "none";
+              } else {
+                alert(result.message || "Error submitting request");
+              }
+            } catch (error) {
+              console.error("Maintenance form error:", error);
+              alert("Error submitting request");
+            }
+          });
+        }
+
+        if (complaintForm) {
+          complaintForm.addEventListener("submit", async function (event) {
+            event.preventDefault();
+            event.stopPropagation();
+            const category = complaintForm.querySelector("select")?.value;
+            const subject = complaintForm.querySelector("input")?.value;
+            const description = complaintForm.querySelector("textarea")?.value;
+
+            console.log("Submitting complaint:", { category, subject, description });
+            try {
+              const response = await fetch("/tenant/complaint", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ category, subject, description }),
+              });
+              const result = await response.json();
+              console.log("Complaint response:", result);
+              if (result.success) {
+                alert(result.message);
+                addNewComplaint(result.complaint);
+                complaintForm.reset();
+              } else {
+                alert(result.message || "Error submitting complaint");
+              }
+            } catch (error) {
+              console.error("Complaint form error:", error);
+              alert("Error submitting complaint");
+            }
+          });
+        }
+
+        if (reviewForm) {
+          reviewForm.addEventListener("click", async function () {
+            const propertyId = document.getElementById("star-rating")?.dataset.propertyId;
+            const rating = document.querySelectorAll("#star-rating span.active").length;
+            const review = document.getElementById("review-text")?.value;
+
+            if (!rating) {
+              alert("Please select a rating");
+              return;
+            }
+
+            console.log("Submitting review:", { propertyId, rating, review });
+            try {
+              const response = await fetch("/tenant/review", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ propertyId, rating, review }),
+              });
+              const result = await response.json();
+              console.log("Review response:", result);
+              if (result.success) {
+                alert(result.message);
+                addNewReview(result.rating);
+                if (document.getElementById("review-text")) document.getElementById("review-text").value = "";
+                document.querySelectorAll("#star-rating span").forEach(s => s.classList.remove("active"));
+              } else {
+                alert(result.message || "Error submitting review");
+              }
+            } catch (error) {
+              console.error("Review form error:", error);
+              alert("Error submitting review");
+            }
+          });
+        }
+
+        if (profileForm) {
+          profileForm.addEventListener("submit", async function (event) {
+            event.preventDefault();
+            event.stopPropagation();
+            const fullname = document.getElementById("fullname")?.value.trim();
+            const email = document.getElementById("email")?.value.trim();
+            const phone = document.getElementById("phone")?.value.trim();
+            const location = document.getElementById("address")?.value.trim();
+
+            if (!fullname || !email) {
+              alert("Full name and email are required");
+              return;
+            }
+            const nameParts = fullname.split(" ").filter(part => part);
+            if (nameParts.length < 2) {
+              alert("Please provide both first and last names");
+              return;
+            }
+            if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+              alert("Please provide a valid email address");
+              return;
+            }
+
+            const firstName = nameParts[0];
+            const lastName = nameParts.slice(1).join(" ");
+
+            console.log("Submitting profile update:", { firstName, lastName, email, phone, location });
+            try {
+              const response = await fetch("/tenant/profile", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                  firstName,
+                  lastName,
+                  email,
+                  phone,
+                  location,
+                }),
+              });
+              const result = await response.json();
+              console.log("Profile update response:", result);
+              if (result.success) {
+                alert(result.message);
+                if (document.getElementById("fullname")) {
+                  document.getElementById("fullname").value = `${result.user.firstName} ${result.user.lastName}`;
+                }
+                if (document.getElementById("email")) {
+                  document.getElementById("email").value = result.user.email;
+                }
+                if (document.getElementById("phone")) {
+                  document.getElementById("phone").value = result.user.phone || '';
+                }
+                if (document.getElementById("address")) {
+                  document.getElementById("address").value = result.user.location || '';
+                }
+                showSection('settings');
+                window.location.hash = 'settings';
+              } else {
+                alert(result.message || "Error updating profile");
+              }
+            } catch (error) {
+              console.error("Profile form error:", error);
+              alert("Error updating profile");
+            }
+          });
+        }
+
+        if (passwordForm) {
+          passwordForm.addEventListener("submit", async function (event) {
+            event.preventDefault();
+            event.stopPropagation();
+            const currentPassword = document.getElementById("current-password")?.value;
+            const newPassword = document.getElementById("new-password")?.value;
+            const confirmPassword = document.getElementById("confirm-password")?.value;
+
+            if (!currentPassword || !newPassword || !confirmPassword) {
+              alert("All password fields are required");
+              return;
+            }
+            if (newPassword !== confirmPassword) {
+              alert("New passwords do not match");
+              return;
+            }
+            if (newPassword.length < 6) {
+              alert("New password must be at least 6 characters");
+              return;
+            }
+
+            console.log("Submitting password change:", { currentPassword, newPassword });
+            try {
+              const response = await fetch("/tenant/password", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ currentPassword, newPassword }),
+              });
+              const result = await response.json();
+              console.log("Password change response:", result);
+              if (result.success) {
+                alert(result.message);
+                passwordForm.reset();
+                showSection('settings');
+                window.location.hash = 'settings';
+              } else {
+                alert(result.message || "Error changing password");
+              }
+            } catch (error) {
+              console.error("Password form error:", error);
+              alert("Error changing password");
+            }
+          });
+        }
+
+        if (notificationForm) {
+          notificationForm.addEventListener("submit", async function (event) {
+            event.preventDefault();
+            event.stopPropagation();
+            const emailNotifications = document.getElementById("email-notifications")?.checked;
+            const smsNotifications = document.getElementById("sms-notifications")?.checked;
+            const rentReminders = document.getElementById("rent-reminders")?.checked;
+            const maintenanceUpdates = document.getElementById("maintenance-updates")?.checked;
+            const newListings = document.getElementById("new-listings")?.checked;
+
+            console.log("Submitting notification preferences:", {
+              emailNotifications,
+              smsNotifications,
+              rentReminders,
+              maintenanceUpdates,
+              newListings,
+            });
+            try {
+              const response = await fetch("/tenant/notifications", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                  emailNotifications,
+                  smsNotifications,
+                  rentReminders,
+                  maintenanceUpdates,
+                  newListings,
+                }),
+              });
+              const result = await response.json();
+              console.log("Notification preferences response:", result);
+              if (result.success) {
+                alert(result.message);
+                if (document.getElementById("email-notifications")) {
+                  document.getElementById("email-notifications").checked = result.user.emailNotifications;
+                }
+                if (document.getElementById("sms-notifications")) {
+                  document.getElementById("sms-notifications").checked = result.user.smsNotifications;
+                }
+                if (document.getElementById("rent-reminders")) {
+                  document.getElementById("rent-reminders").checked = result.user.rentReminders;
+                }
+                if (document.getElementById("maintenance-updates")) {
+                  document.getElementById("maintenance-updates").checked = result.user.maintenanceUpdates;
+                }
+                if (document.getElementById("new-listings")) {
+                  document.getElementById("new-listings").checked = result.user.newListings;
+                }
+                showSection('settings');
+                window.location.hash = 'settings';
+              } else {
+                alert(result.message || "Error updating preferences");
+              }
+            } catch (error) {
+              console.error("Notification form error:", error);
+              alert("Error updating preferences");
+            }
+          });
+        }
+
+        async function removeSavedProperty(propertyId) {
+          console.log("Removing saved property:", { propertyId });
+          try {
+            const response = await fetch("/tenant/saved-property", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ propertyId, action: "remove" }),
+            });
+            if (!response.ok) {
+              throw new Error(`Server error: ${response.status}`);
+            }
+            const result = await response.json();
+            console.log("Remove property response:", result);
+            if (result.success) {
+              showNotification(result.message || "Property removed successfully", "success");
+              const propertyCard = document.querySelector(`.property-card[data-property-id="${propertyId}"]`);
+              if (propertyCard) {
+                propertyCard.remove();
+              } else {
+                console.warn(`Property card with ID ${propertyId} not found in DOM`);
+              }
+            } else {
+              showNotification(result.message || "Error removing property", "error");
+            }
+          } catch (error) {
+            console.error("Remove property error:", error);
+            showNotification("Failed to remove property. Please try again.", "error");
+          }
+        }
+
+        function showNotification(message, type) {
+          alert(message);
+        }
+
+        document.addEventListener("click", (event) => {
+          if (event.target.classList.contains("remove-button")) {
+            const propertyId = event.target.dataset.propertyId;
+            if (propertyId) {
+              removeSavedProperty(propertyId);
+            }
+          }
         });
-        const result = await response.json();
-        console.log("Profile update response:", result);
-        if (result.success) {
-          alert(result.message);
-          // Update form inputs
-          if (document.getElementById("fullname")) {
-            document.getElementById("fullname").value = `${result.user.firstName} ${result.user.lastName}`;
+
+        function addNewRequest(request) {
+          const activeRequestsContainer = document.querySelector(".maintenance-cards");
+          if (activeRequestsContainer) {
+            const newCard = document.createElement("div");
+            newCard.className = "maintenance-card";
+            newCard.innerHTML = `
+              <div class="maintenance-header">
+                <h5>${request.issueType || 'Unknown'} Issue</h5>
+                <span class="status pending">Pending</span>
+              </div>
+              <p><strong>Date Reported:</strong> ${request.dateReported ? new Date(request.dateReported).toLocaleDateString() : 'N/A'}</p>
+              <p><strong>Description:</strong> ${request.description || 'N/A'}</p>
+              <p><strong>Location:</strong> ${request.location || 'N/A'}</p>
+              ${request.scheduledDate ? `<p><strong>Preferred Date:</strong> ${new Date(request.scheduledDate).toLocaleDateString()}</p>` : ""}
+              <p><strong>Assigned To:</strong> Awaiting assignment</p>
+              <button class="small-button">Update</button>
+            `;
+            activeRequestsContainer.insertBefore(newCard, activeRequestsContainer.firstChild);
           }
-          if (document.getElementById("email")) {
-            document.getElementById("email").value = result.user.email;
+        }
+
+        function addNewComplaint(complaint) {
+          const complaintsContainer = document.querySelector(".complaints-history");
+          if (complaintsContainer) {
+            const newItem = document.createElement("div");
+            newItem.className = "complaint-item";
+            newItem.innerHTML = `
+              <div class="complaint-header">
+                <h5>${complaint.subject || 'N/A'}</h5>
+                <span class="status open">Open</span>
+              </div>
+              <p><strong>Date:</strong> ${complaint.dateSubmitted ? new Date(complaint.dateSubmitted).toLocaleDateString() : 'N/A'}</p>
+              <p><strong>Description:</strong> ${complaint.description || 'N/A'}</p>
+            `;
+            complaintsContainer.insertBefore(newItem, complaintsContainer.firstChild);
           }
-          if (document.getElementById("phone")) {
-            document.getElementById("phone").value = result.user.phone || '';
+        }
+
+        function addNewReview(rating) {
+          const reviewsContainer = document.querySelector(".past-reviews");
+          if (reviewsContainer) {
+            const newCard = document.createElement("div");
+            newCard.className = "review-card";
+            newCard.innerHTML = `
+              <div class="review-header">
+                <h5>${rating.propertyId && rating.propertyId.name ? rating.propertyId.name : 'Unknown Property'}</h5>
+                <div class="rating">${rating.rating ? "⭐".repeat(rating.rating) : ''} ${rating.rating ? rating.rating.toFixed(1) : 'N/A'}</div>
+              </div>
+              <p class="review-date">Reviewed on: ${rating.date ? new Date(rating.date).toLocaleDateString() : 'N/A'}</p>
+              <p class="review-text">${rating.review || 'No review provided'}</p>
+            `;
+            reviewsContainer.insertBefore(newCard, reviewsContainer.firstChild);
           }
-          if (document.getElementById("address")) {
-            document.getElementById("address").value = result.user.location || '';
-          }
-          // Stay in settings
+        }
+
+        const stars = document.querySelectorAll("#star-rating span");
+        stars.forEach((star, index) => {
+          star.addEventListener("click", () => {
+            stars.forEach((s, i) => {
+              s.classList.toggle("active", i <= index);
+            });
+          });
+        });
+
+        if (window.location.hash === '#settings') {
           showSection('settings');
-          // Update URL hash
-          window.location.hash = 'settings';
         } else {
-          alert(result.message || "Error updating profile");
+          showSection('home');
         }
-      } catch (error) {
-        console.error("Profile form error:", error);
-        alert("Error updating profile");
-      }
-    });
-  }
 
-  if (passwordForm) {
-    passwordForm.addEventListener("submit", async function (event) {
-      event.preventDefault();
-      event.stopPropagation();
-      const currentPassword = document.getElementById("current-password")?.value;
-      const newPassword = document.getElementById("new-password")?.value;
-      const confirmPassword = document.getElementById("confirm-password")?.value;
-
-      if (!currentPassword || !newPassword || !confirmPassword) {
-        alert("All password fields are required");
-        return;
-      }
-      if (newPassword !== confirmPassword) {
-        alert("New passwords do not match");
-        return;
-      }
-      if (newPassword.length < 6) {
-        alert("New password must be at least 6 characters");
-        return;
-      }
-
-      console.log("Submitting password change:", { currentPassword, newPassword });
-      try {
-        const response = await fetch("/tenant/password", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ currentPassword, newPassword }),
+        document.querySelectorAll('form').forEach(form => {
+          form.addEventListener('submit', (event) => {
+            event.preventDefault();
+            event.stopPropagation();
+          });
         });
-        const result = await response.json();
-        console.log("Password change response:", result);
-        if (result.success) {
-          alert(result.message);
-          passwordForm.reset();
-          // Stay in settings
-          showSection('settings');
-          // Update URL hash
-          window.location.hash = 'settings';
-        } else {
-          alert(result.message || "Error changing password");
-        }
-      } catch (error) {
-        console.error("Password form error:", error);
-        alert("Error changing password");
-      }
-    });
-  }
-
-  if (notificationForm) {
-    notificationForm.addEventListener("submit", async function (event) {
-      event.preventDefault();
-      event.stopPropagation();
-      const emailNotifications = document.getElementById("email-notifications")?.checked;
-      const smsNotifications = document.getElementById("sms-notifications")?.checked;
-      const rentReminders = document.getElementById("rent-reminders")?.checked;
-      const maintenanceUpdates = document.getElementById("maintenance-updates")?.checked;
-      const newListings = document.getElementById("new-listings")?.checked;
-
-      console.log("Submitting notification preferences:", {
-        emailNotifications,
-        smsNotifications,
-        rentReminders,
-        maintenanceUpdates,
-        newListings,
       });
-      try {
-        const response = await fetch("/tenant/notifications", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            emailNotifications,
-            smsNotifications,
-            rentReminders,
-            maintenanceUpdates,
-            newListings,
-          }),
-        });
-        const result = await response.json();
-        console.log("Notification preferences response:", result);
-        if (result.success) {
-          alert(result.message);
-          // Update checkboxes
-          if (document.getElementById("email-notifications")) {
-            document.getElementById("email-notifications").checked = result.user.emailNotifications;
-          }
-          if (document.getElementById("sms-notifications")) {
-            document.getElementById("sms-notifications").checked = result.user.smsNotifications;
-          }
-          if (document.getElementById("rent-reminders")) {
-            document.getElementById("rent-reminders").checked = result.user.rentReminders;
-          }
-          if (document.getElementById("maintenance-updates")) {
-            document.getElementById("maintenance-updates").checked = result.user.maintenanceUpdates;
-          }
-          if (document.getElementById("new-listings")) {
-            document.getElementById("new-listings").checked = result.user.newListings;
-          }
-          // Stay in settings
-          showSection('settings');
-          // Update URL hash
-          window.location.hash = 'settings';
-        } else {
-          alert(result.message || "Error updating preferences");
-        }
-      } catch (error) {
-        console.error("Notification form error:", error);
-        alert("Error updating preferences");
-      }
-    });
-  }
-
-  async function removeSavedProperty(propertyId) {
-  console.log("Removing saved property:", { propertyId });
-
-  try {
-    const response = await fetch("/tenant/saved-property", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ propertyId, action: "remove" }),
-    });
-
-    // Check if response is OK
-    if (!response.ok) {
-      throw new Error(`Server error: ${response.status}`);
-    }
-
-    const result = await response.json();
-
-    // Validate response structure
-    if (typeof result !== "object" || result === null) {
-      throw new Error("Invalid server response");
-    }
-
-    console.log("Remove property response:", result);
-
-    if (result.success) {
-      // Show success notification (replace alert with a better UI component)
-      showNotification(result.message || "Property removed successfully", "success");
-
-      // Remove the property card from the DOM
-      const propertyCard = document.querySelector(`.property-card[data-property-id="${propertyId}"]`);
-      if (propertyCard) {
-        propertyCard.remove();
-      } else {
-        console.warn(`Property card with ID ${propertyId} not found in DOM`);
-      }
-    } else {
-      // Show error notification
-      showNotification(result.message || "Error removing property", "error");
-    }
-  } catch (error) {
-    console.error("Remove property error:", error);
-    showNotification("Failed to remove property. Please try again.", "error");
-  }
-}
-
-// Example notification function (replace with your preferred library)
-function showNotification(message, type) {
-  // Replace with a library like SweetAlert, Toastify, or custom component
-  alert(message); // Fallback for now
-}
-
-// Event delegation for remove buttons
-document.addEventListener("click", (event) => {
-  if (event.target.classList.contains("remove-button")) {
-    const propertyId = event.target.dataset.propertyId;
-    if (propertyId) {
-      removeSavedProperty(propertyId);
-    }
-  }
-});
-
-  function addNewRequest(request) {
-    const activeRequestsContainer = document.querySelector(".maintenance-cards");
-    if (activeRequestsContainer) {
-      const newCard = document.createElement("div");
-      newCard.className = "maintenance-card";
-      newCard.innerHTML = `
-        <div class="maintenance-header">
-          <h5>${request.issueType || 'Unknown'} Issue</h5>
-          <span class="status pending">Pending</span>
-        </div>
-        <p><strong>Date Reported:</strong> ${request.dateReported ? new Date(request.dateReported).toLocaleDateString() : 'N/A'}</p>
-        <p><strong>Description:</strong> ${request.description || 'N/A'}</p>
-        <p><strong>Location:</strong> ${request.location || 'N/A'}</p>
-        ${request.scheduledDate ? `<p><strong>Preferred Date:</strong> ${new Date(request.scheduledDate).toLocaleDateString()}</p>` : ""}
-        <p><strong>Assigned To:</strong> Awaiting assignment</p>
-        <button class="small-button">Update</button>
-      `;
-      activeRequestsContainer.insertBefore(newCard, activeRequestsContainer.firstChild);
-    }
-  }
-
-  function addNewComplaint(complaint) {
-    const complaintsContainer = document.querySelector(".complaints-history");
-    if (complaintsContainer) {
-      const newItem = document.createElement("div");
-      newItem.className = "complaint-item";
-      newItem.innerHTML = `
-        <div class="complaint-header">
-          <h5>${complaint.subject || 'N/A'}</h5>
-          <span class="status open">Open</span>
-        </div>
-        <p><strong>Date:</strong> ${complaint.dateSubmitted ? new Date(complaint.dateSubmitted).toLocaleDateString() : 'N/A'}</p>
-        <p><strong>Description:</strong> ${complaint.description || 'N/A'}</p>
-      `;
-      complaintsContainer.insertBefore(newItem, complaintsContainer.firstChild);
-    }
-  }
-
-  function addNewReview(rating) {
-    const reviewsContainer = document.querySelector(".past-reviews");
-    if (reviewsContainer) {
-      const newCard = document.createElement("div");
-      newCard.className = "review-card";
-      newCard.innerHTML = `
-        <div class="review-header">
-          <h5>${rating.propertyId && rating.propertyId.name ? rating.propertyId.name : 'Unknown Property'}</h5>
-          <div class="rating">${rating.rating ? "⭐".repeat(rating.rating) : ''} ${rating.rating ? rating.rating.toFixed(1) : 'N/A'}</div>
-        </div>
-        <p class="review-date">Reviewed on: ${rating.date ? new Date(rating.date).toLocaleDateString() : 'N/A'}</p>
-        <p class="review-text">${rating.review || 'No review provided'}</p>
-      `;
-      reviewsContainer.insertBefore(newCard, reviewsContainer.firstChild);
-    }
-  }
-
-  // Star rating interactivity
-  const stars = document.querySelectorAll("#star-rating span");
-  stars.forEach((star, index) => {
-    star.addEventListener("click", () => {
-      stars.forEach((s, i) => {
-        s.classList.toggle("active", i <= index);
-      });
-    });
-  });
-
-  // Ensure settings section is active if navigated with #settings
-  if (window.location.hash === '#settings') {
-    showSection('settings');
-  } else {
-    showSection('home'); // Default to home on initial load
-  }
-
-  // Prevent form submissions from reloading the page
-  document.querySelectorAll('form').forEach(form => {
-    form.addEventListener('submit', (event) => {
-      event.preventDefault();
-      event.stopPropagation();
-    });
-  });
-});
     </script>
   </body>
 </html>

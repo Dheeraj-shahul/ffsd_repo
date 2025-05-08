@@ -9,4 +9,6 @@ const isAuthenticated = require("../middleware/auth");
 // Route for property listing form submission
 router.post("/list-property", isAuthenticated, propertyController.listProperty);
 
+router.delete('/:id', propertyController.deleteProperty);
+
 module.exports = router;

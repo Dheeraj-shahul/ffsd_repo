@@ -1,6 +1,7 @@
 const Property = require("../models/property");
 const formidable = require("formidable");
 const fs = require("fs");
+const mongoose = require("mongoose");
 
 exports.listProperty = async (req, res) => {
   try {
@@ -86,7 +87,10 @@ exports.listProperty = async (req, res) => {
     // Validate Base64 images
     base64Images.forEach((base64, index) => {
       if (!base64.startsWith("data:image/")) {
-        console.log(`Invalid Base64 at index ${index}:`, base64.substring(0, 50));
+        console.log(
+          `Invalid Base64 at index ${index}:`,
+          base64.substring(0, 50)
+        );
         throw new Error(`Image ${index + 1} is not a valid image`);
       }
       const sizeInBytes = Buffer.from(base64.split(",")[1], "base64").length;
@@ -124,7 +128,11 @@ exports.listProperty = async (req, res) => {
       furnished: furnishing || "unfurnished",
       description,
       images: base64Images,
-      amenities: Array.isArray(amenities) ? amenities : amenities ? [amenities] : [],
+      amenities: Array.isArray(amenities)
+        ? amenities
+        : amenities
+        ? [amenities]
+        : [],
       price: parseFloat(price),
       status: "Pending",
       isRented: false,
@@ -146,6 +154,53 @@ exports.listProperty = async (req, res) => {
     res.status(201).json({ message: "Property listed successfully", property });
   } catch (error) {
     console.error("Error listing property:", error);
-    res.status(400).json({ error: error.message || "Server error while listing property" });
+    res
+      .status(400)
+      .json({ error: error.message || "Server error while listing property" });
+  }
+};
+
+exports.deleteProperty = async (req, res) => {
+  try {
+    const propertyId = req.params.id;
+
+    // Validate ObjectId
+    if (!mongoose.Types.ObjectId.isValid(propertyId)) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Invalid property ID" });
+    }
+
+    // Find property to check if it's rented
+    const property = await Property.findById(propertyId);
+
+    if (!property) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Property not found" });
+    }
+
+    // Check if property is currently rented
+    if (property.isRented) {
+      return res.status(400).json({
+        success: false,
+        message: "Cannot delete property because it is currently rented",
+      });
+    }
+
+    // Delete the property
+    await Property.findByIdAndDelete(propertyId);
+
+    return res.status(200).json({
+      success: true,
+      message: "Property deleted successfully",
+    });
+  } catch (error) {
+    console.error("Error deleting property:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Server error while deleting property",
+      error: error.message,
+    });
   }
 };

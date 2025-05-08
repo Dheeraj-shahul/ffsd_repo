@@ -22,7 +22,9 @@
     <div class="dashboard-container">
       <div class="sidebar">
         <h2>Owner Dashboard</h2>
-        <h2 id="house_owner_name">Hey, <%= user?.firstName || '' %> <%= user?.lastName || '' %></h2>
+        <h2 id="house_owner_name">
+          Hey, <%= user?.firstName || '' %> <%= user?.lastName || '' %>
+        </h2>
         <ul>
           <li onclick="showSection('properties')">
             <i class="fa-solid fa-house"></i> My Properties
@@ -42,9 +44,9 @@
           <li onclick="showSection('reports')">
             <i class="fa-solid fa-chart-column"></i> Reports & Analytics
           </li>
-          <li onclick="showSection('agreements')">
+          <!-- <li onclick="showSection('agreements')">
             <i class="fa-solid fa-file-contract"></i> Rental Agreements
-          </li>
+          </li> -->
           <li onclick="showSection('settings')">
             <i class="fa-solid fa-gears"></i> Settings
           </li>
@@ -55,41 +57,75 @@
       </div>
 
       <div class="main-content">
+        <!-- Updated Property Section for owner_dashboard.ejs -->
         <div id="properties" class="section active">
           <h3>My Properties</h3>
           <div id="prop_container">
-            <% if (properties && Array.isArray(properties)) { %>
-              <% properties.forEach(property => { %>
-                <div id="gs_container" class="after_scroll_container">
-                  <div class="sc_image_cotainer">
-                    <img src="<%= property.images && property.images[0] || '/images/default.jpg' %>" class="sc_image" />
-                  </div>
-                  <div class="main_sen"><%= property.name || 'Untitled Property' %></div>
-                  <div class="sc_text">
-                    <div class="prop_details">
-                      <ul>
-                        <li><strong>Location:</strong> <%= property.address || 'N/A' %></li>
-                        <li><strong>City:</strong> <%= property.location || 'N/A' %></li>
-                        <li><strong>Monthly Rent:</strong> ₹<%= (property.price || 0).toLocaleString() %></li>
-                        <li><strong>Current Status:</strong> <%= property.isRented || 'N/A' %></li>
-                      </ul>
-                    </div>
-                    <div id="prop_view">
-                      <button class="prop_button">Property Details</button>
-                      <% if (property.isRented === true) { %>
-                        <button class="prop_button" onclick="showSection('payments')">
-                          Rent Details
-                        </button>
-                        <button class="prop_button" onclick="showSection('complaints')">
-                          View Complaints
-                        </button>
-                      <% } %>
-                    </div>
-                  </div>
+            <% if (properties && Array.isArray(properties)) { %> <%
+            properties.forEach(property => { %>
+            <div
+              id="gs_container"
+              class="after_scroll_container"
+              data-property-id="<%= property._id %>"
+            >
+              <div class="sc_image_cotainer">
+                <img
+                  src="<%= property.images && property.images[0] || '/images/default.jpg' %>"
+                  class="sc_image"
+                />
+              </div>
+              <div class="main_sen">
+                <%= property.name || 'Untitled Property' %>
+              </div>
+              <div class="sc_text">
+                <div class="prop_details">
+                  <ul>
+                    <li>
+                      <strong>Location:</strong> <%= property.address || 'N/A'
+                      %>
+                    </li>
+                    <li>
+                      <strong>City:</strong> <%= property.location || 'N/A' %>
+                    </li>
+                    <li>
+                      <strong>Monthly Rent:</strong> ₹<%= (property.price ||
+                      0).toLocaleString() %>
+                    </li>
+                    <li>
+                      <strong>Current Status:</strong> <%= property.isRented ?
+                      'Rented' : 'Vacant' %>
+                    </li>
+                  </ul>
                 </div>
-              <% }) %>
-            <% } else { %>
-              <p>No properties available.</p>
+                <div id="prop_view">
+                  <button
+                    class="prop_button"
+                    onclick="location.href='/property?id=<%=property._id%>'"
+                  >
+                    Property Details
+                  </button>
+                  <% if (property.isRented === true) { %>
+                  <button class="prop_button" onclick="showSection('payments')">
+                    Rent Details
+                  </button>
+                  <button
+                    class="prop_button"
+                    onclick="showSection('complaints')"
+                  >
+                    View Complaints
+                  </button>
+                  <% } %>
+                  <button
+                    class="delete_button"
+                    onclick="showDeleteConfirmation('<%= property._id %>', <%= property.isRented %>)"
+                  >
+                    Delete Property
+                  </button>
+                </div>
+              </div>
+            </div>
+            <% }) %> <% } else { %>
+            <p>No properties available.</p>
             <% } %>
           </div>
           <button
@@ -100,38 +136,74 @@
           </button>
         </div>
 
+        <!-- Add the delete confirmation overlay -->
+        <div id="deletePropertyOverlay" class="popup-overlay">
+          <div class="delete-popup-container">
+            <h4 class="delete-popup-title">Delete Property?</h4>
+            <p class="delete-popup-message">
+              Are you sure you want to delete this property? This action cannot
+              be undone.
+            </p>
+            <div class="delete-popup-buttons">
+              <button id="cancelDeleteProperty" class="delete-cancel-button">
+                Cancel
+              </button>
+              <button id="confirmDeleteProperty" class="delete-confirm-button">
+                Yes, Delete
+              </button>
+            </div>
+          </div>
+        </div>
+
         <div id="tenants" class="section">
           <h3>My Tenants</h3>
           <div class="messages">
-            <% if (tenants && Array.isArray(tenants)) { %>
-              <% tenants.forEach(tenant => { %>
-                <div class="tentant_details">
-                  <ul>
-                    <li><strong><%= tenant.firstName || '' %> <%= tenant.lastName || '' %></strong></li>
-                    <li>
-                      <strong>PROPERTY:</strong> <a href="#"><%= tenant.property || 'N/A' %></a>
-                    </li>
-                    <li><strong>Contact:</strong> <%= tenant.phone || 'N/A' %></li>
-                    <li><strong>Email:</strong> <%= tenant.email || 'N/A' %></li>
-                    <li><strong>Occupation:</strong> <%= tenant.occupation || 'N/A' %></li>
-                    <li><strong>Lease Period:</strong> <%= tenant.leaseDuration || 'N/A' %></li>
-                  </ul>
-                  <button class="msg_button">View Messages</button>
-                  <button class="msg_button contact_tenant_button">
-                    Contact Tenant
-                  </button>
-                </div>
-              <% }) %>
-            <% } else { %>
-              <p>No tenants available.</p>
+            <% if (tenants && Array.isArray(tenants)) { %> <%
+            tenants.forEach(tenant => { %>
+            <div class="tentant_details">
+              <ul>
+                <li>
+                  <strong
+                    ><%= tenant.firstName || '' %> <%= tenant.lastName || ''
+                    %></strong
+                  >
+                </li>
+                <li>
+                  <strong>PROPERTY:</strong>
+                  <a href="/property?id=<%=tenant.propid%>"
+                    ><%= tenant.property || 'N/A' %></a
+                  >
+                </li>
+                <li><strong>Contact:</strong> <%= tenant.phone || 'N/A' %></li>
+                <li><strong>Email:</strong> <%= tenant.email || 'N/A' %></li>
+              </ul>
+              <!-- <button class="msg_button">View Messages</button> -->
+              <button class="msg_button contact_tenant_button">
+                Contact Tenant
+              </button>
+            </div>
+            <% }) %> <% } else { %>
+            <p>No tenants available.</p>
             <% } %>
           </div>
         </div>
 
         <div id="payments" class="section">
           <h3>Rent Payments</h3>
-          <p>Monthly Revenue: <strong>₹<%= (paymentSummary?.monthlyRevenue || 0).toLocaleString() %></strong></p>
-          <p>Upcoming Payments: <strong>₹<%= (paymentSummary?.upcomingPayments || 0).toLocaleString() %></strong></p>
+          <p>
+            Monthly Revenue:
+            <strong
+              >₹<%= (paymentSummary?.monthlyRevenue || 0).toLocaleString()
+              %></strong
+            >
+          </p>
+          <p>
+            Upcoming Payments:
+            <strong
+              >₹<%= (paymentSummary?.upcomingPayments || 0).toLocaleString()
+              %></strong
+            >
+          </p>
 
           <div class="payment-table-container">
             <h4>Recent Transactions</h4>
@@ -146,18 +218,26 @@
                 </tr>
               </thead>
               <tbody>
-                <% if (payments && Array.isArray(payments)) { %>
-                  <% payments.forEach(payment => { %>
-                    <tr>
-                      <td><%= payment.paymentDate ? new Date(payment.paymentDate).toLocaleDateString() : 'N/A' %></td>
-                      <td><%= payment.userName || 'N/A' %></td>
-                      <td><%= payment.property || 'N/A' %></td>
-                      <td>₹<%= (payment.amount || 0).toLocaleString() %></td>
-                      <td><span class="status-paid"><%= payment.status || 'N/A' %></span></td>
-                    </tr>
-                  <% }) %>
-                <% } else { %>
-                  <tr><td colspan="5">No transactions available.</td></tr>
+                <% if (payments && Array.isArray(payments)) { %> <%
+                payments.forEach(payment => { %>
+                <tr>
+                  <td>
+                    <%= payment.paymentDate ? new
+                    Date(payment.paymentDate).toLocaleDateString() : 'N/A' %>
+                  </td>
+                  <td><%= payment.userName || 'N/A' %></td>
+                  <td><%= payment.property || 'N/A' %></td>
+                  <td>₹<%= (payment.amount || 0).toLocaleString() %></td>
+                  <td>
+                    <span class="status-paid"
+                      ><%= payment.status || 'N/A' %></span
+                    >
+                  </td>
+                </tr>
+                <% }) %> <% } else { %>
+                <tr>
+                  <td colspan="5">No transactions available.</td>
+                </tr>
                 <% } %>
               </tbody>
             </table>
@@ -166,49 +246,65 @@
           <div class="payment-summary">
             <div class="summary-card">
               <h4>Total Revenue</h4>
-              <p class="amount">₹<%= (paymentSummary?.totalRevenue || 0).toLocaleString() %></p>
+              <p class="amount">
+                ₹<%= (paymentSummary?.totalRevenue || 0).toLocaleString() %>
+              </p>
               <p class="period">Last 2 Months</p>
             </div>
             <div class="summary-card">
               <h4>Website Commission</h4>
-              <p class="amount">₹<%= (paymentSummary?.commission || 0).toLocaleString() %></p>
+              <p class="amount">
+                ₹<%= (paymentSummary?.commission || 0).toLocaleString() %>
+              </p>
               <p class="period">5% of Revenue</p>
             </div>
             <div class="summary-card">
               <h4>Net Income</h4>
-              <p class="amount">₹<%= (paymentSummary?.netIncome || 0).toLocaleString() %></p>
+              <p class="amount">
+                ₹<%= (paymentSummary?.netIncome || 0).toLocaleString() %>
+              </p>
               <p class="period">After Commission</p>
             </div>
           </div>
 
-          <button class="pay-button">View All Transactions</button>
-          <button class="pay-button">Download Statement</button>
+          <!-- <button class="pay-button">View All Transactions</button>
+          <button class="pay-button">Download Statement</button> -->
         </div>
 
         <div id="maintenance" class="section">
           <h3>Maintenance Requests</h3>
           <div class="maintenance-requests">
-            <% if (maintenanceRequests && Array.isArray(maintenanceRequests)) { %>
-              <% maintenanceRequests.forEach(request => { %>
-                <div class="request-card">
-                  <div class="request-header">
-                    <h4><%= request.issueType || 'N/A' %></h4>
-                    <span class="request-status <%= (request.status || '').toLowerCase().replace(' ', '-') %>"><%= request.status || 'N/A' %></span>
-                  </div>
-                  <div class="request-details">
-                    <p><strong>Property:</strong> <%= request.propertyId || 'N/A' %></p>
-                    <p><strong>Tenant:</strong> <%= request.tenantId || 'N/A' %></p>
-                    <p><strong>Date Submitted:</strong> <%= request.dateReported ? new Date(request.dateReported).toLocaleDateString() : 'N/A' %></p>
-                    <p><strong>Description:</strong> <%= request.description || 'N/A' %></p>
-                  </div>
-                  <div class="request-actions">
-                    <button class="update_sts">Update Status</button>
-                    <button class="update_sts">Mark Resolved</button>
-                  </div>
-                </div>
-              <% }) %>
-            <% } else { %>
-              <p>No maintenance requests available.</p>
+            <% if (maintenanceRequests && Array.isArray(maintenanceRequests)) {
+            %> <% maintenanceRequests.forEach(request => { %>
+            <div class="request-card">
+              <div class="request-header">
+                <h4><%= request.issueType || 'N/A' %></h4>
+                <span
+                  class="request-status <%= (request.status || '').toLowerCase().replace(' ', '-') %>"
+                  ><%= request.status || 'N/A' %></span
+                >
+              </div>
+              <div class="request-details">
+                <p>
+                  <strong>Property:</strong> <%= request.propertyId || 'N/A' %>
+                </p>
+                <p><strong>Tenant:</strong> <%= request.tenantId || 'N/A' %></p>
+                <p>
+                  <strong>Date Submitted:</strong> <%= request.dateReported ?
+                  new Date(request.dateReported).toLocaleDateString() : 'N/A' %>
+                </p>
+                <p>
+                  <strong>Description:</strong> <%= request.description || 'N/A'
+                  %>
+                </p>
+              </div>
+              <div class="request-actions">
+                <button class="update_sts">Update Status</button>
+                <button class="update_sts">Mark Resolved</button>
+              </div>
+            </div>
+            <% }) %> <% } else { %>
+            <p>No maintenance requests available.</p>
             <% } %>
           </div>
         </div>
@@ -216,24 +312,35 @@
         <div id="complaints" class="section">
           <h3>Tenant Complaints</h3>
           <div class="complaint_container">
-            <% if (complaints && Array.isArray(complaints)) { %>
-              <% complaints.forEach(complaint => { %>
-                <div class="res_complaint">
-                  <ul>
-                    <strong><li><%= complaint.property || 'N/A' %></li></strong>
-                    <ul>
-                      <li><strong>Issue:</strong> <%= complaint.subject || 'N/A' %></li>
-                      <li><strong>Reported by:</strong> <%= complaint.reportedBy || 'N/A' %></li>
-                      <li><strong>Date Reported:</strong> <%= complaint.dateSubmitted ? new Date(complaint.dateSubmitted).toLocaleDateString() : 'N/A' %></li>
-                      <li><strong>Current Status:</strong> <%= complaint.status || 'N/A' %></li>
-                    </ul>
-                  </ul>
-                  <button class="update_sts">Update Current Status</button>
-                  <button class="update_sts">Contact Tenant</button>
-                </div>
-              <% }) %>
-            <% } else { %>
-              <p>No complaints available.</p>
+            <% if (complaints && Array.isArray(complaints)) { %> <%
+            complaints.forEach(complaint => { %>
+            <div class="res_complaint">
+              <ul>
+                <strong><li><%= complaint.property || 'N/A' %></li></strong>
+                <ul>
+                  <li>
+                    <strong>Issue:</strong> <%= complaint.subject || 'N/A' %>
+                  </li>
+                  <li>
+                    <strong>Reported by:</strong> <%= complaint.reportedBy ||
+                    'N/A' %>
+                  </li>
+                  <li>
+                    <strong>Date Reported:</strong> <%= complaint.dateSubmitted
+                    ? new Date(complaint.dateSubmitted).toLocaleDateString() :
+                    'N/A' %>
+                  </li>
+                  <li>
+                    <strong>Current Status:</strong> <%= complaint.status ||
+                    'N/A' %>
+                  </li>
+                </ul>
+              </ul>
+              <button class="update_sts">Update Current Status</button>
+              <button class="update_sts">Contact Tenant</button>
+            </div>
+            <% }) %> <% } else { %>
+            <p>No complaints available.</p>
             <% } %>
           </div>
         </div>
@@ -244,21 +351,40 @@
             <div class="status-options">
               <p>Select new status:</p>
               <div class="status-option">
-                <input type="radio" name="status" id="status-pending" value="pending" />
+                <input
+                  type="radio"
+                  name="status"
+                  id="status-pending"
+                  value="pending"
+                />
                 <label for="status-pending">Pending</label>
               </div>
               <div class="status-option">
-                <input type="radio" name="status" id="status-inprogress" value="in-progress" />
+                <input
+                  type="radio"
+                  name="status"
+                  id="status-inprogress"
+                  value="in-progress"
+                />
                 <label for="status-inprogress">In Progress</label>
               </div>
               <div class="status-option">
-                <input type="radio" name="status" id="status-resolved" value="resolved" />
+                <input
+                  type="radio"
+                  name="status"
+                  id="status-resolved"
+                  value="resolved"
+                />
                 <label for="status-resolved">Resolved</label>
               </div>
             </div>
             <div class="popup-buttons">
-              <button id="cancelUpdateStatus" class="cancel-button">Cancel</button>
-              <button id="confirmUpdateStatus" class="confirm-button">Yes, Update</button>
+              <button id="cancelUpdateStatus" class="cancel-button">
+                Cancel
+              </button>
+              <button id="confirmUpdateStatus" class="confirm-button">
+                Yes, Update
+              </button>
             </div>
           </div>
         </div>
@@ -266,10 +392,16 @@
         <div id="markResolvedOverlay" class="popup-overlay">
           <div class="popup-container">
             <h4 class="popup-title">Mark as Resolved?</h4>
-            <p class="popup-message">Are you sure you want to mark this request as resolved?</p>
+            <p class="popup-message">
+              Are you sure you want to mark this request as resolved?
+            </p>
             <div class="popup-buttons">
-              <button id="cancelMarkResolved" class="cancel-button">Cancel</button>
-              <button id="confirmMarkResolved" class="confirm-button">Yes, Mark Resolved</button>
+              <button id="cancelMarkResolved" class="cancel-button">
+                Cancel
+              </button>
+              <button id="confirmMarkResolved" class="confirm-button">
+                Yes, Mark Resolved
+              </button>
             </div>
           </div>
         </div>
@@ -279,83 +411,118 @@
           <div class="reports-summary">
             <div class="report-card">
               <h4>Monthly Revenue</h4>
-              <p class="amount">₹<%= (reports?.monthlyRevenue || 0).toLocaleString() %></p>
-              <div class="trend <%= reports?.revenueTrend?.class || '' %>"><%= reports?.revenueTrend?.text || 'N/A' %></div>
+              <p class="amount">
+                ₹<%= (reports?.monthlyRevenue || 0).toLocaleString() %>
+              </p>
+              <!-- <div class="trend <%= reports?.revenueTrend?.class || '' %>">
+                <%= reports?.revenueTrend?.text || 'N/A' %>
+              </div> -->
             </div>
             <div class="report-card">
               <h4>Occupancy Rate</h4>
               <p class="amount"><%= reports?.occupancyRate || 0 %>%</p>
-              <div class="trend <%= reports?.occupancyTrend?.class || '' %>"><%= reports?.occupancyTrend?.text || 'N/A' %></div>
+              <!-- <div class="trend <%= reports?.occupancyTrend?.class || '' %>">
+                <%= reports?.occupancyTrend?.text || 'N/A' %>
+              </div> -->
             </div>
             <div class="report-card">
               <h4>Maintenance Costs</h4>
-              <p class="amount">₹<%= (reports?.maintenanceCosts || 0).toLocaleString() %></p>
-              <div class="trend <%= reports?.maintenanceTrend?.class || '' %>"><%= reports?.maintenanceTrend?.text || 'N/A' %></div>
+              <p class="amount">
+                ₹<%= (reports?.maintenanceCosts || 0).toLocaleString() %>
+              </p>
+              <!-- <div class="trend <%= reports?.maintenanceTrend?.class || '' %>">
+                <%= reports?.maintenanceTrend?.text || 'N/A' %>
+              </div> -->
             </div>
           </div>
 
-          <div class="chart-container">
+          <!-- <div class="chart-container">
             <h4>Monthly Revenue (Last 6 Months)</h4>
             <div class="chart-placeholder">
               <div class="bar-chart">
-                <% if (reports && reports.revenueChart && Array.isArray(reports.revenueChart)) { %>
-                  <% reports.revenueChart.forEach(chart => { %>
-                    <div class="bar" style="height: <%= chart.height || 0 %>%">
-                      <span class="value">₹<%= Number(chart.value || 0).toLocaleString('en-IN') %></span>
-                      <span class="month"><%= chart.month || 'N/A' %></span>
-                    </div>
-                  <% }) %>
-                <% } else { %>
-                  <p>No revenue data available.</p>
+                <% if (reports && reports.revenueChart &&
+                Array.isArray(reports.revenueChart)) { %> <%
+                reports.revenueChart.forEach(chart => { %>
+                <div class="bar" style="height: <%= chart.height || 0 %>%">
+                  <span class="value"
+                    >₹<%= Number(chart.value || 0).toLocaleString('en-IN')
+                    %></span
+                  >
+                  <span class="month"><%= chart.month || 'N/A' %></span>
+                </div>
+                <% }) %> <% } else { %>
+                <p>No revenue data available.</p>
                 <% } %>
               </div>
             </div>
-          </div>
-
+          </div> -->
+          <!-- 
           <button class="report-button">Generate Detailed Report</button>
-          <button class="report-button">Download as PDF</button>
+          <button class="report-button">Download as PDF</button> -->
         </div>
 
         <div id="agreements" class="section">
           <h3>Rental Agreements</h3>
           <div class="agreements-container">
-            <% if (agreements && Array.isArray(agreements)) { %>
-              <% agreements.forEach(agreement => { %>
-                <div class="agreement-card">
-                  <h4><%= agreement.title || 'N/A' %></h4>
-                  <ul class="agreement-details">
-                    <% if (agreement.status === 'Active') { %>
-                      <li><strong>Start Date:</strong> <%= agreement.startDate || 'N/A' %></li>
-                      <li><strong>End Date:</strong> <%= agreement.endDate || 'N/A' %></li>
-                      <li><strong>Monthly Rent:</strong> ₹<%= (agreement.monthlyRent || 0).toLocaleString() %></li>
-                      <li><strong>Security Deposit:</strong> <%= (agreement.securityDeposit || 0).toLocaleString() %></li>
-                      <li>
-                        <strong>Status:</strong>
-                        <span class="active-status"><%= agreement.status || 'N/A' %></span>
-                      </li>
-                    <% } else { %>
-                      <li><strong>Last Tenant:</strong> <%= agreement.lastTenant || 'N/A' %></li>
-                      <li><strong>Agreement Ended:</strong> <%= agreement.endDate || 'N/A' %></li>
-                      <li>
-                        <strong>Property Status:</strong>
-                        <span class="vacant-status"><%= agreement.status || 'N/A' %></span>
-                      </li>
-                    <% } %>
-                  </ul>
-                  <div class="agreement-actions">
-                    <% if (agreement.status === 'Active') { %>
-                      <button class="prop_button">View Agreement</button>
-                      <button class="prop_button">Print Copy</button>
-                      <button class="prop_button"><%= agreement.action || 'N/A' %></button>
-                    <% } else { %>
-                      <button class="prop_button">Create New Agreement</button>
-                      <button class="prop_button">List Property</button>
-                    <% } %>
-                  </div>
-                </div>
-              <% }) %>
-            <% } else { %>
-              <p>No agreements available.</p>
+            <% if (agreements && Array.isArray(agreements)) { %> <%
+            agreements.forEach(agreement => { %>
+            <div class="agreement-card">
+              <h4><%= agreement.title || 'N/A' %></h4>
+              <ul class="agreement-details">
+                <% if (agreement.status === 'Active') { %>
+                <li>
+                  <strong>Start Date:</strong> <%= agreement.startDate || 'N/A'
+                  %>
+                </li>
+                <li>
+                  <strong>End Date:</strong> <%= agreement.endDate || 'N/A' %>
+                </li>
+                <li>
+                  <strong>Monthly Rent:</strong> ₹<%= (agreement.monthlyRent ||
+                  0).toLocaleString() %>
+                </li>
+                <li>
+                  <strong>Security Deposit:</strong> <%=
+                  (agreement.securityDeposit || 0).toLocaleString() %>
+                </li>
+                <li>
+                  <strong>Status:</strong>
+                  <span class="active-status"
+                    ><%= agreement.status || 'N/A' %></span
+                  >
+                </li>
+                <% } else { %>
+                <li>
+                  <strong>Last Tenant:</strong> <%= agreement.lastTenant ||
+                  'N/A' %>
+                </li>
+                <li>
+                  <strong>Agreement Ended:</strong> <%= agreement.endDate ||
+                  'N/A' %>
+                </li>
+                <li>
+                  <strong>Property Status:</strong>
+                  <span class="vacant-status"
+                    ><%= agreement.status || 'N/A' %></span
+                  >
+                </li>
+                <% } %>
+              </ul>
+              <div class="agreement-actions">
+                <% if (agreement.status === 'Active') { %>
+                <button class="prop_button">View Agreement</button>
+                <button class="prop_button">Print Copy</button>
+                <button class="prop_button">
+                  <%= agreement.action || 'N/A' %>
+                </button>
+                <% } else { %>
+                <button class="prop_button">Create New Agreement</button>
+                <button class="prop_button">List Property</button>
+                <% } %>
+              </div>
+            </div>
+            <% }) %> <% } else { %>
+            <p>No agreements available.</p>
             <% } %>
           </div>
         </div>
@@ -428,9 +595,11 @@
                   <div id="settingsLocationError" class="error"></div>
                 </div>
                 <div class="form-group">
-                  <label for="settingsNumProperties">Number of Properties</label>
+                  <label for="settingsNumProperties"
+                    >Number of Properties</label
+                  >
                   <input
-                    type="number"
+                    type="text"
                     id="settingsNumProperties"
                     name="numProperties"
                     min="1"
@@ -483,7 +652,9 @@
                   <div id="settingsNewPasswordError" class="error"></div>
                 </div>
                 <div class="form-group">
-                  <label for="settingsConfirmPassword">Confirm New Password</label>
+                  <label for="settingsConfirmPassword"
+                    >Confirm New Password</label
+                  >
                   <input
                     type="password"
                     id="settingsConfirmPassword"
@@ -498,52 +669,37 @@
                 <h4>Notification Preferences</h4>
                 <div class="checkbox-group">
                   <label for="emailNotifications">Email notifications</label>
-                  <input
-                    type="checkbox"
-                    id="emailNotifications"
-                    name="emailNotifications"
-                    <%= user?.notifications?.email ? 'checked' : '' %>
-                  />
+                  <input type="checkbox" id="emailNotifications"
+                  name="emailNotifications" <%= user?.notifications?.email ?
+                  'checked' : '' %> />
                   <label for="emailNotifications" class="button"></label>
                 </div>
                 <div class="checkbox-group">
                   <label for="smsNotifications">SMS notifications</label>
-                  <input
-                    type="checkbox"
-                    id="smsNotifications"
-                    name="smsNotifications"
-                    <%= user?.notifications?.sms ? 'checked' : '' %>
-                  />
+                  <input type="checkbox" id="smsNotifications"
+                  name="smsNotifications" <%= user?.notifications?.sms ?
+                  'checked' : '' %> />
                   <label for="smsNotifications" class="button"></label>
                 </div>
                 <div class="checkbox-group">
                   <label for="paymentReminders">Payment reminders</label>
-                  <input
-                    type="checkbox"
-                    id="paymentReminders"
-                    name="paymentReminders"
-                    <%= user?.notifications?.payment ? 'checked' : '' %>
-                  />
+                  <input type="checkbox" id="paymentReminders"
+                  name="paymentReminders" <%= user?.notifications?.payment ?
+                  'checked' : '' %> />
                   <label for="paymentReminders" class="button"></label>
                 </div>
                 <div class="checkbox-group">
                   <label for="complaintAlerts">Complaint alerts</label>
-                  <input
-                    type="checkbox"
-                    id="complaintAlerts"
-                    name="complaintAlerts"
-                    <%= user?.notifications?.complaint ? 'checked' : '' %>
-                  />
+                  <input type="checkbox" id="complaintAlerts"
+                  name="complaintAlerts" <%= user?.notifications?.complaint ?
+                  'checked' : '' %> />
                   <label for="complaintAlerts" class="button"></label>
                 </div>
                 <div class="checkbox-group">
                   <label for="maintenanceAlerts">Maintenance alerts</label>
-                  <input
-                    type="checkbox"
-                    id="maintenanceAlerts"
-                    name="maintenanceAlerts"
-                    <%= user?.notifications?.maintenance ? 'checked' : '' %>
-                  />
+                  <input type="checkbox" id="maintenanceAlerts"
+                  name="maintenanceAlerts" <%= user?.notifications?.maintenance
+                  ? 'checked' : '' %> />
                   <label for="maintenanceAlerts" class="button"></label>
                 </div>
               </div>
@@ -574,39 +730,144 @@
         <div id="notifications" class="section">
           <h3>Notifications</h3>
           <div class="notification-container">
-            <% if (notifications && Array.isArray(notifications)) { %>
-              <% notifications.forEach(notification => { %>
-                <div class="notification-card" data-notification-id="<%= notification._id %>">
-                  <div class="notification-header">
-                    <h4><%= notification.type || 'Booking Request' %></h4>
-                    <span class="notification-status <%= (notification.status || 'pending').toLowerCase() %>">
-                      <%= notification.status || 'Pending' %>
-                    </span>
-                  </div>
-                  <div class="notification-details">
-                    <p><strong>Message:</strong> <%= notification.message || 'N/A' %></p>
-                    <p><strong>Recipient:</strong> <%= notification.recipientName || 'N/A' %></p>
-                    <p><strong>Property:</strong> <%= notification.propertyName || 'N/A' %></p>
-                    <p><strong>Date:</strong> <%= notification.createdDate ? new Date(notification.createdDate).toLocaleDateString() : 'N/A' %></p>
-                  </div>
-                  <% if (notification.status === 'Pending') { %>
-                    <div class="notification-actions">
-                      <button class="action-button approve-button" onclick="handleNotificationAction('<%= notification._id %>', 'approve')">Approve</button>
-                      <button class="action-button reject-button" onclick="handleNotificationAction('<%= notification._id %>', 'reject')">Reject</button>
-                    </div>
-                  <% } %>
-                </div>
-              <% }) %>
-            <% } else { %>
-              <p>No notifications available.</p>
+            <% if (notifications && Array.isArray(notifications)) { %> <%
+            notifications.forEach(notification => { %>
+            <div
+              class="notification-card"
+              data-notification-id="<%= notification._id %>"
+            >
+              <div class="notification-header">
+                <h4><%= notification.type || 'Booking Request' %></h4>
+                <span
+                  class="notification-status <%= (notification.status || 'pending').toLowerCase() %>"
+                >
+                  <%= notification.status || 'Pending' %>
+                </span>
+              </div>
+              <div class="notification-details">
+                <p>
+                  <strong>Message:</strong> <%= notification.message || 'N/A' %>
+                </p>
+                <p>
+                  <strong>Recipient:</strong> <%= notification.recipientName ||
+                  'N/A' %>
+                </p>
+                <p>
+                  <strong>Property:</strong> <%= notification.propertyName ||
+                  'N/A' %>
+                </p>
+                <p>
+                  <strong>Date:</strong> <%= notification.createdDate ? new
+                  Date(notification.createdDate).toLocaleDateString() : 'N/A' %>
+                </p>
+              </div>
+              <% if (notification.status === 'Pending') { %>
+              <div class="notification-actions">
+                <button
+                  class="action-button approve-button"
+                  onclick="handleNotificationAction('<%= notification._id %>', 'approve')"
+                >
+                  Approve
+                </button>
+                <button
+                  class="action-button reject-button"
+                  onclick="handleNotificationAction('<%= notification._id %>', 'reject')"
+                >
+                  Reject
+                </button>
+              </div>
+              <% } %>
+            </div>
+            <% }) %> <% } else { %>
+            <p>No notifications available.</p>
             <% } %>
           </div>
         </div>
-
       </div>
     </div>
 
     <script>
+      let propertyToDelete = null;
+      function showDeleteConfirmation(propertyId, isRented) {
+        // Check if the property is currently rented
+        if (isRented) {
+          alert("Cannot delete this property because it is currently rented.");
+          return;
+        }
+
+        // Set the property ID for deletion
+        propertyToDelete = propertyId;
+
+        // Show the confirmation dialog
+        const deleteOverlay = document.getElementById("deletePropertyOverlay");
+        deleteOverlay.style.display = "flex";
+      }
+
+      // Set up delete property event listeners
+      document.addEventListener("DOMContentLoaded", function () {
+        const deleteOverlay = document.getElementById("deletePropertyOverlay");
+        const cancelDeleteBtn = document.getElementById("cancelDeleteProperty");
+        const confirmDeleteBtn = document.getElementById(
+          "confirmDeleteProperty"
+        );
+
+        // Cancel delete action
+        cancelDeleteBtn.addEventListener("click", function () {
+          deleteOverlay.style.display = "none";
+          propertyToDelete = null;
+        });
+
+        // Confirm delete action
+        confirmDeleteBtn.addEventListener("click", function () {
+          if (propertyToDelete) {
+            // Send delete request to the server
+            deleteProperty(propertyToDelete);
+          }
+        });
+
+        // Close the overlay when clicking outside
+        window.addEventListener("click", function (event) {
+          if (event.target === deleteOverlay) {
+            deleteOverlay.style.display = "none";
+            propertyToDelete = null;
+          }
+        });
+      });
+
+      // Function to send delete request to the server
+      function deleteProperty(propertyId) {
+        fetch(`/api/property/${propertyId}`, {
+          method: "DELETE",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        })
+          .then((response) => response.json())
+          .then((data) => {
+            if (data.success) {
+              // Hide the overlay
+              document.getElementById("deletePropertyOverlay").style.display =
+                "none";
+
+              // Remove the property card from the DOM
+              const propertyCard = document.querySelector(
+                `[data-property-id="${propertyId}"]`
+              );
+              if (propertyCard) {
+                propertyCard.remove();
+              }
+
+              // Show success message
+              alert("Property successfully deleted!");
+            } else {
+              alert("Failed to delete property: " + data.message);
+            }
+          })
+          .catch((error) => {
+            console.error("Error deleting property:", error);
+            alert("An error occurred while deleting the property.");
+          });
+      }
       function showSection(sectionId) {
         const sections = document.querySelectorAll(".section");
         sections.forEach((section) => {
@@ -618,7 +879,8 @@
         }
         if (window.innerWidth <= 768) {
           document.querySelector(".sidebar").classList.remove("active");
-          document.querySelector(".menu-toggle").innerHTML = "<strong>></strong>";
+          document.querySelector(".menu-toggle").innerHTML =
+            "<strong>></strong>";
         }
       }
 
@@ -645,18 +907,23 @@
         }
       }
 
-      document.getElementById("overlay")?.addEventListener("click", function () {
-        const navMenu = document.getElementById("nav-menu");
-        navMenu.classList.remove("active");
-        this.classList.remove("active");
-      });
+      document
+        .getElementById("overlay")
+        ?.addEventListener("click", function () {
+          const navMenu = document.getElementById("nav-menu");
+          navMenu.classList.remove("active");
+          this.classList.remove("active");
+        });
 
-      const contactButtons = document.querySelectorAll(".contact_tenant_button");
+      const contactButtons = document.querySelectorAll(
+        ".contact_tenant_button"
+      );
       contactButtons.forEach((button) => {
         button.addEventListener("click", function () {
           const tenantDetails = this.closest(".tentant_details");
           if (tenantDetails) {
-            const phoneElement = tenantDetails.querySelector("ul li:nth-child(3)");
+            const phoneElement =
+              tenantDetails.querySelector("ul li:nth-child(3)");
             if (phoneElement) {
               const phoneText = phoneElement.textContent;
               const phoneNumber = phoneText.replace(/[^0-9]/g, "");
@@ -676,13 +943,33 @@
 
       document.addEventListener("DOMContentLoaded", function () {
         const requestCards = document.querySelectorAll(".request-card");
-        const statusUpdateOverlay = document.getElementById("statusUpdateOverlay");
-        const markResolvedOverlay = document.getElementById("markResolvedOverlay");
-        const confirmUpdateStatusBtn = document.getElementById("confirmUpdateStatus");
-        const confirmMarkResolvedBtn = document.getElementById("confirmMarkResolved");
-        const cancelUpdateStatusBtn = document.getElementById("cancelUpdateStatus");
-        const cancelMarkResolvedBtn = document.getElementById("cancelMarkResolved");
+        const statusUpdateOverlay = document.getElementById(
+          "statusUpdateOverlay"
+        );
+        const markResolvedOverlay = document.getElementById(
+          "markResolvedOverlay"
+        );
+        const deletePropertyOverlay = document.getElementById(
+          "deletePropertyOverlay"
+        );
+        const confirmUpdateStatusBtn = document.getElementById(
+          "confirmUpdateStatus"
+        );
+        const confirmMarkResolvedBtn = document.getElementById(
+          "confirmMarkResolved"
+        );
+        const cancelUpdateStatusBtn =
+          document.getElementById("cancelUpdateStatus");
+        const cancelMarkResolvedBtn =
+          document.getElementById("cancelMarkResolved");
+        const confirmDeletePropertyBtn = document.getElementById(
+          "confirmDeleteProperty"
+        );
+        const cancelDeletePropertyBtn = document.getElementById(
+          "cancelDeleteProperty"
+        );
         let currentStatusElement = null;
+        let currentPropertyId = null;
 
         requestCards.forEach((card) => {
           const statusElement = card.querySelector(".request-status");
@@ -691,9 +978,11 @@
           buttons[0].addEventListener("click", function () {
             currentStatusElement = statusElement;
             const currentStatus = statusElement.textContent.toLowerCase();
-            document.querySelectorAll('input[name="status"]').forEach((radio) => {
-              radio.checked = false;
-            });
+            document
+              .querySelectorAll('input[name="status"]')
+              .forEach((radio) => {
+                radio.checked = false;
+              });
             if (currentStatus === "pending") {
               document.getElementById("status-pending").checked = true;
             } else if (currentStatus === "in progress") {
@@ -711,7 +1000,9 @@
         });
 
         confirmUpdateStatusBtn.addEventListener("click", function () {
-          const selectedRadio = document.querySelector('input[name="status"]:checked');
+          const selectedRadio = document.querySelector(
+            'input[name="status"]:checked'
+          );
           if (selectedRadio && currentStatusElement) {
             const newStatus = selectedRadio.value;
             updateRequestStatus(currentStatusElement, newStatus);
@@ -759,46 +1050,69 @@
           if (event.target === markResolvedOverlay) {
             markResolvedOverlay.style.display = "none";
           }
+          if (event.target === deletePropertyOverlay) {
+            deletePropertyOverlay.style.display = "none";
+            currentPropertyId = null;
+          }
         });
       });
 
-      document.getElementById("settingsForm")?.addEventListener("submit", function (e) {
-        e.preventDefault();
-        document.getElementById("settingsSuccessMessage").style.display = "block";
-        setTimeout(function () {
-          document.getElementById("settingsSuccessMessage").style.display = "none";
-        }, 3000);
-      });
+      document
+        .getElementById("settingsForm")
+        ?.addEventListener("submit", function (e) {
+          e.preventDefault();
+          document.getElementById("settingsSuccessMessage").style.display =
+            "block";
+          setTimeout(function () {
+            document.getElementById("settingsSuccessMessage").style.display =
+              "none";
+          }, 3000);
+        });
 
-      document.getElementById("cancelSettingsBtn")?.addEventListener("click", function () {
-        document.getElementById("settingsForm").reset();
-      });
+      document
+        .getElementById("cancelSettingsBtn")
+        ?.addEventListener("click", function () {
+          document.getElementById("settingsForm").reset();
+        });
 
       // Handle notification actions (approve/reject)
       function handleNotificationAction(notificationId, action) {
-        fetch('/notifications/action', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ notificationId, action })
+        fetch("/notifications/action", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          credentials: "include", // Ensure cookies/session are sent
+          body: JSON.stringify({ notificationId, action }),
         })
-        .then(response => response.json())
-        .then(data => {
-          if (data.success) {
-            const notificationCard = document.querySelector(`.notification-card[data-notification-id="${notificationId}"]`);
-            const statusElement = notificationCard.querySelector('.notification-status');
-            statusElement.textContent = action === 'approve' ? 'Approved' : 'Rejected';
-            statusElement.classList.remove('pending');
-            statusElement.classList.add(action === 'approve' ? 'approved' : 'rejected');
-            notificationCard.querySelector('.notification-actions').remove();
-            alert(`Notification ${action}d successfully!`);
-          } else {
-            alert(`Failed to ${action} notification: ${data.message}`);
-          }
-        })
-        .catch(error => {
-          console.error('Error handling notification action:', error);
-          alert('An error occurred while processing the request.');
-        });
+          .then((response) => {
+            if (!response.ok) {
+              throw new Error(`HTTP error! Status: ${response.status}`);
+            }
+            return response.json();
+          })
+          .then((data) => {
+            if (data.success) {
+              const notificationCard = document.querySelector(
+                `.notification-card[data-notification-id="${notificationId}"]`
+              );
+              const statusElement = notificationCard.querySelector(
+                ".notification-status"
+              );
+              statusElement.textContent =
+                action === "approve" ? "Approved" : "Rejected";
+              statusElement.classList.remove("pending");
+              statusElement.classList.add(
+                action === "approve" ? "approved" : "rejected"
+              );
+              notificationCard.querySelector(".notification-actions").remove();
+              alert(`Notification ${action}d successfully!`);
+            } else {
+              alert(`Failed to ${action} notification: ${data.message}`);
+            }
+          })
+          .catch((error) => {
+            console.error("Error handling notification action:", error);
+            alert("An error occurred while processing the request.");
+          });
       }
     </script>
   </body>

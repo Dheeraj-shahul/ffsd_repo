@@ -11,30 +11,19 @@ const workerSchema = new mongoose.Schema({
   serviceType: String, 
   experience: Number,
   price: Number, 
-  rateUnit: String, // From Service schema
+  rateUnit: String,
   availability: String,
   description: String,
-  image: String, // Already exists, will store the service/worker image
+  image: String,
   password: String,
-  status: { type: String, enum: ['Active', 'Suspended'], default: "Active" }, // Worker status (e.g., Active, Inactive)
-  serviceStatus: { type: String, default: "Available" }, // From Service schema (Available/Unavailable)
+  status: { type: String, enum: ['Active', 'Suspended'], default: "Active" },
+  serviceStatus: { type: String, default: "Available" },
   lastLogin: Date,
   bookingIds: [{ type: mongoose.Schema.Types.ObjectId, ref: "Booking" }],
   clientIds: [{ type: mongoose.Schema.Types.ObjectId, ref: "Tenant" }],
-  paymentId: { type: mongoose.Schema.Types.ObjectId, ref: "Payment" },
-  ratingId: {
-    type: {
-      average: Number,
-      reviews: [{
-        user: String,
-        rating: Number,
-        date: String,
-        comment: String,
-        serviceName: String // Optional: Keep for review context
-      }]
-    },
-    default: null
-  },
+  ratingId: { type: mongoose.Schema.Types.ObjectId, ref: "Rating" },
+  isBooked: { type: Boolean, default: false } // New field to track if worker is booked
+  
 }, { timestamps: true });
 
 module.exports = mongoose.model("Worker", workerSchema);

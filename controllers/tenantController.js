@@ -7,6 +7,7 @@ const Complaint = require('../models/complaint');
 const Payment = require('../models/payment');
 const Rating = require('../models/rating');
 const RentalHistory = require('../models/rentalhistory');
+const Notification = require('../models/notification');
 const mongoose = require('mongoose');
 
 // Dashboard Controller
@@ -68,6 +69,12 @@ exports.getDashboard = async (req, res) => {
       propertyId: { $exists: true }
     }).populate('propertyId');
 
+    // Fetch notifications for the tenant
+    const notifications = await Notification.find({ 
+      recipient: userId, 
+      recipientType: "Tenant" 
+    }).sort({ createdDate: -1 });
+
     res.render('pages/tenant_dashboard', {
       user: tenant,
       currentProperty,
@@ -79,7 +86,15 @@ exports.getDashboard = async (req, res) => {
       complaints,
       workers,
       rentalHistory: rentalHistory ? rentalHistory.propertyIds : [],
-      ratings
+      ratings,
+      notifications: notifications.map(n => ({
+        _id: n._id,
+        message: n.message,
+        workerName: n.workerName,
+        propertyName: n.propertyName,
+        createdDate: n.createdDate || new Date(),
+        status: n.status
+      }))
     });
   } catch (error) {
     console.error('Dashboard error:', error);

@@ -19,7 +19,8 @@ const notificationSchema = new mongoose.Schema({
   status: { type: String, enum: ['Pending', 'Completed'], default: 'Pending' },
   priority: String,
   createdDate: Date,
-  bookingId: { type: mongoose.Schema.Types.ObjectId, ref: "Booking" }
+  bookingId: { type: mongoose.Schema.Types.ObjectId, ref: "Booking" },
+  read: { type: Boolean, default: false } // Added to track if notification is read
 }, { timestamps: true });
 
 module.exports = mongoose.model("Notification", notificationSchema);
