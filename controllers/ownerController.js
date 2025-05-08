@@ -68,6 +68,31 @@ exports.getOwnerDashboard = async (req, res) => {
     // Fetch other data
     const payments = await Payment.find({ tenantId: { $in: tenantIds } });
 
+    // Create a map of property IDs to names
+    const propertyIdsForPayments = payments
+      .filter(
+        (payment) =>
+          payment.propertyId && mongoose.Types.ObjectId.isValid(payment.propertyId)
+      )
+      .map((payment) => payment.propertyId);
+    
+    const propertiesForPayments = await Property.find({
+      _id: { $in: propertyIdsForPayments },
+    })
+      .select("name")
+      .lean();
+    
+    const propertyMapForPayments = new Map();
+    propertiesForPayments.forEach((property) => {
+      propertyMapForPayments.set(property._id.toString(), property.name);
+    });
+
+    // Attach property name to each payment
+    payments.forEach((payment) => {
+      payment.property =
+        propertyMapForPayments.get(payment.propertyId?.toString()) || "N/A";
+    });
+
     const maintenanceRequests = await MaintenanceRequest.find({
       tenantId: { $in: tenantIds },
     }).lean();

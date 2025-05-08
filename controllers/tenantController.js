@@ -607,3 +607,152 @@ exports.markNotificationAsRead = async (req, res) => {
     res.status(500).json({ success: false, message: 'Server error: ' + error.message });
   }
 };
+
+
+exports.checkRecentPayment = async (req, res) => {
+  try {
+    if (!req.session.user || !req.session.user._id) {
+      console.log("Unauthorized access to check recent payment");
+      return res.status(401).json({ success: false, message: 'Unauthorized: Please log in' });
+    }
+    const tenantId = req.session.user._id;
+    console.log("Checking recent payment for tenant ID:", tenantId);
+
+    const property = await Property.findOne({ tenantId });
+    if (!property) {
+      console.log("No property found for tenant ID:", tenantId);
+      return res.status(404).json({ success: false, message: 'No property found for this tenant' });
+    }
+
+    const thirtyDaysAgo = new Date();
+    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+    const recentPayment = await Payment.findOne({
+      tenantId,
+      propertyId: property._id,
+      paymentDate: { $gte: thirtyDaysAgo },
+      status: 'Paid',
+    });
+
+    if (recentPayment) {
+      console.log("Recent payment found for tenant ID:", tenantId);
+      return res.status(200).json({ 
+        success: true, 
+        recentPayment: true, 
+        message: 'You have already paid this month\'s rent' 
+      });
+    }
+
+    console.log("No recent payment found for tenant ID:", tenantId);
+    return res.status(200).json({ 
+      success: true, 
+      recentPayment: false, 
+      message: 'No recent payment found, you can proceed to pay' 
+    });
+  } catch (error) {
+    console.error('Check recent payment error:', error);
+    return res.status(500).json({ success: false, message: 'Server error: ' + error.message });
+  }
+};
+
+exports.submitPayment = async (req, res) => {
+  try {
+    if (!req.session.user || !req.session.user._id) {
+      console.log("Unauthorized access to payment submission");
+      return res.status(401).json({ success: false, message: 'Unauthorized: Please log in' });
+    }
+    const { amount, paymentMethod, transactionId } = req.body;
+    const tenantId = req.session.user._id;
+    console.log("Submitting payment for tenant ID:", tenantId, { amount, paymentMethod, transactionId });
+
+    // Validate inputs
+    if (!amount || !paymentMethod || !transactionId) {
+      console.log("Validation failed: Missing required fields");
+      return res.status(400).json({ success: false, message: 'Amount, payment method, and transaction ID are required' });
+    }
+    if (isNaN(amount) || amount <= 0) {
+      console.log("Validation failed: Invalid amount");
+      return res.status(400).json({ success: false, message: 'Invalid payment amount' });
+    }
+
+    // Find the tenant's current property
+    const property = await Property.findOne({ tenantId });
+    if (!property) {
+      console.log("No property found for tenant ID:", tenantId);
+      return res.status(404).json({ success: false, message: 'No property found for this tenant' });
+    }
+
+    // Double-check for recent payment
+    const thirtyDaysAgo = new Date();
+    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+    const recentPayment = await Payment.findOne({
+      tenantId,
+      propertyId: property._id,
+      paymentDate: { $gte: thirtyDaysAgo },
+      status: 'Paid',
+    });
+
+    if (recentPayment) {
+      console.log("Recent payment found for tenant ID:", tenantId, "within last 30 days");
+      return res.status(400).json({ success: false, message: 'You have already paid this month\'s rent' });
+    }
+
+    // Create new payment
+    const newPayment = new Payment({
+      tenantId,
+      propertyId: property._id,
+      userName: `${req.session.user.firstName} ${req.session.user.lastName}`,
+      amount,
+      paymentDate: new Date(),
+      dueDate: new Date(),
+      paymentMethod,
+      status: 'Paid',
+      transactionId,
+      receiptUrl: `/receipts/${transactionId}.pdf`,
+    });
+
+    await newPayment.save();
+
+    // Update tenant's payment records
+    await Tenant.findByIdAndUpdate(tenantId, {
+      $push: { paymentIds: newPayment._id },
+    });
+
+    // Update property owner's payment records
+    await Owner.findByIdAndUpdate(property.ownerId, {
+      $push: { paymentIds: newPayment._id },
+    });
+
+    // Update next payment status (if exists)
+    const nextPayment = await Payment.findOne({
+      tenantId,
+      propertyId: property._id,
+      status: 'Pending',
+    }).sort({ dueDate: 1 });
+
+    if (nextPayment) {
+      nextPayment.status = 'Paid';
+      nextPayment.paymentDate = newPayment.paymentDate;
+      nextPayment.paymentMethod = newPayment.paymentMethod;
+      nextPayment.transactionId = newPayment.transactionId;
+      nextPayment.receiptUrl = newPayment.receiptUrl;
+      await nextPayment.save();
+    }
+
+    console.log("Payment submitted successfully for tenant ID:", tenantId);
+    res.status(201).json({
+      success: true,
+      message: 'Payment submitted successfully',
+      payment: {
+        _id: newPayment._id,
+        amount: newPayment.amount,
+        paymentDate: newPayment.paymentDate,
+        paymentMethod: newPayment.paymentMethod,
+        status: newPayment.status,
+        receiptUrl: newPayment.receiptUrl,
+      },
+    });
+  } catch (error) {
+    console.error('Payment submission error:', error);
+    res.status(500).json({ success: false, message: 'Server error: ' + error.message });
+  }
+};
