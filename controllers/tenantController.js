@@ -1,3 +1,4 @@
+const mongoose = require('mongoose');
 const Tenant = require('../models/tenant');
 const Property = require('../models/property');
 const Worker = require('../models/worker');
@@ -9,8 +10,9 @@ const Rating = require('../models/rating');
 const RentalHistory = require('../models/rentalhistory');
 const Notification = require('../models/notification');
 const WorkerBooking = require("../models/workerBooking");
-const mongoose = require('mongoose');
 
+
+// Dashboard Controller
 // Dashboard Controller
 exports.getDashboard = async (req, res) => {
   try {
@@ -24,29 +26,33 @@ exports.getDashboard = async (req, res) => {
     const tenant = await Tenant.findById(userId)
       .populate('savedListings')
       .populate({ path: 'maintenanceRequestIds', model: 'MaintenanceRequest', options: { sort: { 'dateReported': -1 } } })
-      .populate({ path: 'complaintIds', model: 'Complaint', options: { sort: { 'dateSubmitted': -1 } } })
-      .populate('domesticWorkerId');
+      .populate({ path: 'complaintIds', model: 'Complaint', options: { sort: { 'dateSubmitted': -1 } } });
 
     if (!tenant) {
       console.log("Tenant not found for ID:", userId);
       return res.status(404).json({ success: false, message: 'Tenant not found' });
     }
 
-    console.log("Tenant fetched", { 
-      tenantId: tenant._id, 
-      domesticWorkerId: tenant.domesticWorkerId ? tenant.domesticWorkerId.map(id => id.toString()) : [] 
-    });
-
-    // Fetch approved bookings to get worker IDs
+    // Fetch approved bookings for this tenant
     const approvedBookings = await WorkerBooking.find({ 
-      tenantId: tenant._id, 
+      tenantId: userId, 
       status: "Approved" 
-    }).select("workerId");
-    const workerIdsFromBookings = approvedBookings.map(b => b.workerId).filter(id => id);
-    console.log("Approved bookings for tenant", { tenantId: tenant._id, workerIds: workerIdsFromBookings.map(id => id.toString()) });
-
-    // Merge domesticWorkerId with worker IDs from bookings
-    tenant.domesticWorkerId = [...new Set([...(tenant.domesticWorkerId || []), ...workerIdsFromBookings])];
+    });
+    
+    console.log(`Found ${approvedBookings.length} approved bookings for tenant ID: ${userId}`);
+    
+    // Extract worker IDs from approved bookings
+    const workerIds = approvedBookings.map(booking => booking.workerId);
+    
+    // Fetch worker details for these IDs
+    let domesticWorkers = [];
+    if (workerIds.length > 0) {
+      domesticWorkers = await Worker.find({ 
+        _id: { $in: workerIds } 
+      }).populate('ratingId');
+      
+      console.log(`Fetched ${domesticWorkers.length} domestic workers from approved bookings`);
+    }
 
     const currentProperty = await Property.findOne({ tenantId: userId });
 
@@ -77,7 +83,8 @@ exports.getDashboard = async (req, res) => {
     const complaints = await Complaint.find({ tenantId: userId })
       .sort({ dateSubmitted: -1 });
 
-    const workers = await Worker.find({ clientIds: userId });
+    // For backward compatibility
+    const workers = await Worker.find({ clientIds: userId }).populate('ratingId');
 
     const rentalHistory = await RentalHistory.findOne({ tenantId: userId });
 
@@ -101,7 +108,7 @@ exports.getDashboard = async (req, res) => {
       activeMaintenanceRequests,
       completedMaintenanceRequests,
       complaints,
-      workers,
+      workers: domesticWorkers, // Use the workers from approved bookings
       rentalHistory: rentalHistory ? rentalHistory.propertyIds : [],
       ratings,
       notifications: notifications.map(n => ({

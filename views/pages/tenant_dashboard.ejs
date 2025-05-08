@@ -316,48 +316,72 @@
           </div>
         </div>
 
-        <!-- Domestic Workers Booking -->
-        <div id="movers" class="section">
-          <h3>Domestic Worker Services</h3>
-          <p>Book verified domestic workers nearby to complete your daily chores.</p>
-          <div class="service-categories">
-            <div class="service-category">
-              <h4>Cleaning Services</h4>
-              <p>Professional house cleaning</p>
-              <button class="book-button" onclick="location.href='/workerDetails?service=cleaning'">Find Cleaners</button>
+  <!-- Domestic Workers Booking -->
+<div id="movers" class="section">
+  <h3>Domestic Worker Services</h3>
+  <p>Book verified domestic workers nearby to complete your daily chores.</p>
+  <div class="service-categories">
+    <div class="service-category">
+      <h4>Cleaning Services</h4>
+      <p>Professional house cleaning</p>
+      <button class="book-button" onclick="location.href='/workerDetails?service=cleaning'">Find Cleaners</button>
+    </div>
+    <div class="service-category">
+      <h4>Cooking Services</h4>
+      <p>Skilled cooks for daily meals</p>
+      <button class="book-button" onclick="location.href='/workerDetails?service=cooking'">Find Cooks</button>
+    </div>
+    <div class="service-category">
+      <h4>Laundry Services</h4>
+      <p>Washing and ironing services</p>
+      <button class="book-button" onclick="location.href='/workerDetails?service=laundry'">Find Help</button>
+    </div>
+  </div>
+  <h4>Your Current Service Providers</h4>
+  <div class="worker-cards">
+    <% if (workers && workers.length > 0) { %>
+      <% workers.forEach(worker => { %>
+        <div class="worker-card">
+          <img src="<%= worker.image || '/resources/default-worker.jpg' %>" alt="Worker Photo" />
+          <div class="worker-details">
+            <h5><%= worker.firstName %> <%= worker.lastName %></h5>
+            <p><strong>Service:</strong> <%= worker.serviceType || 'N/A' %></p>
+            <p><strong>Schedule:</strong> <%= worker.availability || 'N/A' %></p>
+            <p><strong>Fee:</strong> ₹<%= worker.price || 'N/A' %> <%= worker.rateUnit ? '/' + worker.rateUnit : '' %></p>
+            <p><strong>Experience:</strong> <%= worker.experience ? worker.experience + ' years' : 'N/A' %></p>
+            <p><strong>Phone:</strong> <%= worker.phone || 'N/A' %></p>
+            
+            <div class="worker-status <%= worker.serviceStatus === 'Available' ? 'status-available' : 'status-unavailable' %>">
+              <%= worker.serviceStatus || 'Available' %>
             </div>
-            <div class="service-category">
-              <h4>Cooking Services</h4>
-              <p>Skilled cooks for daily meals</p>
-              <button class="book-button" onclick="location.href='/workerDetails?service=cooking'">Find Cooks</button>
-            </div>
-            <div class="service-category">
-              <h4>Laundry Services</h4>
-              <p>Washing and ironing services</p>
-              <button class="book-button" onclick="location.href='/workerDetails?service=laundry'">Find Help</button>
-            </div>
-          </div>
-          <h4>Your Current Service Providers</h4>
-          <div class="worker-cards">
-            <% (workers || []).forEach(worker => { %>
-            <div class="worker-card">
-              <img src="<%= worker.image || '/resources/default-worker.jpg' %>" alt="Worker Photo" />
-              <div class="worker-details">
-                <h5><%= worker.firstName %> <%= worker.lastName %></h5>
-                <p><strong>Service:</strong> <%= worker.serviceType || 'N/A' %></p>
-                <p><strong>Schedule:</strong> <%= worker.availability || 'N/A' %></p>
-                <p><strong>Monthly Fee:</strong> ₹<%= worker.price || 'N/A' %></p>
-                <p><strong>Phone:</strong> ₹<%= worker.phone || 'N/A' %></p>
 
-                <div class="rating">
-                  <span><%= worker.ratingId?.average ? '⭐'.repeat(Math.round(worker.ratingId.average)) : '' %></span>
-                  <%= worker.ratingId?.average ? worker.ratingId.average.toFixed(1) : 'N/A' %>
-                </div>
-              </div>
+            <div class="rating">
+              <% if (worker.ratingId && worker.ratingId.average) { %>
+                <span><%= '⭐'.repeat(Math.round(worker.ratingId.average)) %></span>
+                <%= worker.ratingId.average.toFixed(1) %>
+              <% } else { %>
+                <span>No ratings yet</span>
+              <% } %>
             </div>
-            <% }); %>
+            
+            <div class="worker-actions">
+              <button class="action-button view-button" onclick="location.href='/workers/detail/<%= worker._id %>'">
+                View Details
+              </button>
+              <!-- <button class="action-button book-button" onclick="location.href='/workers/booking/<%= worker._id %>'">
+                Manage Booking
+              </button> -->
+            </div>
           </div>
         </div>
+      <% }); %>
+    <% } else { %>
+      <div class="no-workers-message">
+        <p>You don't have any domestic workers assigned yet. Browse the services above to find help.</p>
+      </div>
+    <% } %>
+  </div>
+</div>
 
         <div id="notifications" class="section">
           <h3>Notifications</h3>

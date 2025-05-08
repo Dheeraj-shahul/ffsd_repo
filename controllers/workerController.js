@@ -717,6 +717,7 @@ exports.updateWorkerBookingStatus = async (req, res) => {
           await worker.save();
           console.log("Updated worker with tenant association:", {
             workerId: worker._id.toString(),
+            
             addedTenantId: tenantIdStr,
           });
         }
