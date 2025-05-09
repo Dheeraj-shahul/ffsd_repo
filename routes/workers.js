@@ -43,7 +43,8 @@ router.get("/api/workers/check-booked/:id", workerController.isAuthenticated, wo
 // API endpoint to delete worker account
 router.delete("/api/workers/delete-account/:id", workerController.isAuthenticated, workerController.deleteWorkerAccount);
 router.get("/worker_dashboard", workerController.renderWorkerDashboardSafer);
-
+// API endpoint to update worker settings
+router.post("/api/workers/update-settings", workerController.isAuthenticated, workerController.updateWorkerSettings);
 
 
 module.exports = router;

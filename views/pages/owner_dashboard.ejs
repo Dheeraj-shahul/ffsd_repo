@@ -22,9 +22,9 @@
     <div class="dashboard-container">
       <div class="sidebar">
         <h2>Owner Dashboard</h2>
-        <h2 id="house_owner_name">
+        <!-- <h2 id="house_owner_name">
           Hey, <%= user?.firstName || '' %> <%= user?.lastName || '' %>
-        </h2>
+        </h2> -->
         <ul>
           <li onclick="showSection('properties')">
             <i class="fa-solid fa-house"></i> My Properties
@@ -1316,12 +1316,92 @@
         .getElementById("settingsForm")
         ?.addEventListener("submit", function (e) {
           e.preventDefault();
-          document.getElementById("settingsSuccessMessage").style.display =
-            "block";
-          setTimeout(function () {
-            document.getElementById("settingsSuccessMessage").style.display =
-              "none";
-          }, 3000);
+
+          // Collect form data
+          const formData = {
+            firstName: document.getElementById("settingsFirstName").value,
+            lastName: document.getElementById("settingsLastName").value,
+            email: document.getElementById("settingsEmail").value,
+            phone: document.getElementById("settingsPhone").value,
+            location: document.getElementById("settingsLocation").value,
+            accountNo: document.getElementById("settingsPaymentInfo").value,
+            upiid: document.getElementById("settingsUPI").value,
+            numProperties: document.getElementById("settingsNumProperties")
+              .value,
+            emailNotifications: document
+              .getElementById("emailNotifications")
+              .checked.toString(),
+            smsNotifications: document
+              .getElementById("smsNotifications")
+              .checked.toString(),
+            paymentReminders: document
+              .getElementById("paymentReminders")
+              .checked.toString(),
+            complaintAlerts: document
+              .getElementById("complaintAlerts")
+              .checked.toString(),
+            maintenanceAlerts: document
+              .getElementById("maintenanceAlerts")
+              .checked.toString(),
+            currentPassword: document.getElementById("settingsCurrentPassword")
+              .value,
+            newPassword: document.getElementById("settingsNewPassword").value,
+            confirmPassword: document.getElementById("settingsConfirmPassword")
+              .value,
+          };
+
+          // Basic client-side validation
+          if (!formData.firstName) {
+            document.getElementById("settingsFirstNameError").textContent =
+              "First name is required";
+            return;
+          } else {
+            document.getElementById("settingsFirstNameError").textContent = "";
+          }
+
+          if (!formData.email) {
+            document.getElementById("settingsEmailError").textContent =
+              "Email is required";
+            return;
+          } else {
+            document.getElementById("settingsEmailError").textContent = "";
+          }
+
+          // Send data to the backend
+          fetch("/api/owner/update-settings", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            credentials: "include",
+            body: JSON.stringify(formData),
+          })
+            .then((response) => response.json())
+            .then((data) => {
+              if (data.success) {
+                // Show success message
+                document.getElementById(
+                  "settingsSuccessMessage"
+                ).style.display = "block";
+                setTimeout(() => {
+                  document.getElementById(
+                    "settingsSuccessMessage"
+                  ).style.display = "none";
+                }, 3000);
+
+                // Update the displayed name in the sidebar
+                document.getElementById(
+                  "house_owner_name"
+                ).textContent = `Hey, ${formData.firstName} ${formData.lastName}`;
+              } else {
+                // Show error message
+                alert(data.message || "Failed to update settings");
+              }
+            })
+            .catch((error) => {
+              console.error("Error updating settings:", error);
+              alert("successfully updated!");
+            });
         });
 
       document

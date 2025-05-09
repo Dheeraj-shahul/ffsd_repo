@@ -1,4 +1,4 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 const Worker = require("../models/worker");
 const Booking = require("../models/booking");
 const Tenant = require("../models/tenant");
@@ -488,17 +488,17 @@ exports.checkWorkerBookedStatus = async (req, res) => {
     const worker = await Worker.findById(workerId);
 
     if (!worker) {
-      return res.status(404).json({ error: 'Worker not found' });
+      return res.status(404).json({ error: "Worker not found" });
     }
 
     if (worker._id.toString() !== req.session.user._id) {
-      return res.status(403).json({ error: 'Unauthorized' });
+      return res.status(403).json({ error: "Unauthorized" });
     }
 
     res.json({ isBooked: worker.isBooked });
   } catch (error) {
-    console.error('Error checking worker booked status:', error);
-    res.status(500).json({ error: 'Error checking booked status' });
+    console.error("Error checking worker booked status:", error);
+    res.status(500).json({ error: "Error checking booked status" });
   }
 };
 
@@ -510,20 +510,22 @@ exports.deleteWorkerAccount = async (req, res) => {
 
     const worker = await Worker.findById(workerId);
     if (!worker) {
-      return res.status(404).json({ error: 'Worker not found' });
+      return res.status(404).json({ error: "Worker not found" });
     }
 
     if (worker._id.toString() !== req.session.user._id) {
-      return res.status(403).json({ error: 'Unauthorized' });
+      return res.status(403).json({ error: "Unauthorized" });
     }
 
     if (worker.isBooked) {
-      return res.status(400).json({ error: 'Cannot delete account: You are currently working' });
+      return res
+        .status(400)
+        .json({ error: "Cannot delete account: You are currently working" });
     }
 
     // Verify password (plain text comparison)
     if (password !== worker.password) {
-      return res.status(401).json({ error: 'Invalid password' });
+      return res.status(401).json({ error: "Invalid password" });
     }
 
     // Delete the worker
@@ -532,14 +534,14 @@ exports.deleteWorkerAccount = async (req, res) => {
     // Clear session
     req.session.destroy((err) => {
       if (err) {
-        console.error('Error destroying session:', err);
+        console.error("Error destroying session:", err);
       }
     });
 
-    res.json({ success: true, message: 'Account deleted successfully' });
+    res.json({ success: true, message: "Account deleted successfully" });
   } catch (error) {
-    console.error('Error deleting worker account:', error);
-    res.status(500).json({ error: 'Error deleting account' });
+    console.error("Error deleting worker account:", error);
+    res.status(500).json({ error: "Error deleting account" });
   }
 };
 
@@ -611,7 +613,6 @@ exports.bookWorkerCorrected = async (req, res) => {
   }
 };
 
-
 // This function should be added to the same file where updateWorkerBookingStatus exists
 // or imported from a notification service file
 
@@ -628,12 +629,15 @@ const sendNotificationToTenant = async (tenantId, data) => {
   try {
     // Get worker details for the notification
     const worker = await Worker.findById(data.workerId);
-    
+
     if (!worker) {
-      console.error("Worker not found when sending notification:", data.workerId);
+      console.error(
+        "Worker not found when sending notification:",
+        data.workerId
+      );
       return;
     }
-    
+
     // Create new notification object
     const notification = new Notification({
       type: "Booking Update",
@@ -646,37 +650,35 @@ const sendNotificationToTenant = async (tenantId, data) => {
       priority: "Medium",
       createdDate: new Date(),
       bookingId: data.bookingId,
-      read: false
+      read: false,
     });
-    
+
     // Save the notification to the database
     const savedNotification = await notification.save();
-    
+
     console.log("Notification created successfully:", {
       notificationId: savedNotification._id.toString(),
       tenantId: tenantId.toString(),
-      message: data.message
+      message: data.message,
     });
-    
+
     // Update the tenant's notificationIds array (optional but recommended for quick access)
     await Tenant.findByIdAndUpdate(
       tenantId,
       { $push: { notificationIds: savedNotification._id } },
       { new: true }
     );
-    
+
     return savedNotification;
   } catch (error) {
     console.error("Error sending notification to tenant:", {
       tenantId: tenantId.toString(),
       error: error.message,
-      stack: error.stack
+      stack: error.stack,
     });
     // Don't throw - just log the error since this is a secondary operation
   }
 };
-
-
 
 exports.getWorkerBookings = async (req, res) => {
   try {
@@ -751,79 +753,81 @@ exports.updateWorkerBookingStatus = async (req, res) => {
     });
 
     // Handle approval-specific logic
-     // Handle notification for Approved or Declined status
-if (status === "Approved" || status === "Declined") {
-  try {
-    // Find tenant and worker
-    const tenant = await Tenant.findById(updatedBooking.tenantId);
-    const worker = await Worker.findById(workerId);
+    // Handle notification for Approved or Declined status
+    if (status === "Approved" || status === "Declined") {
+      try {
+        // Find tenant and worker
+        const tenant = await Tenant.findById(updatedBooking.tenantId);
+        const worker = await Worker.findById(workerId);
 
-    if (!tenant || !worker) {
-      console.error("Tenant or worker not found for notification:", {
-        tenantId: updatedBooking.tenantId.toString(),
-        workerId: workerId.toString(),
-      });
-      return res.status(404).json({ error: "Tenant or worker not found" });
-    }
+        if (!tenant || !worker) {
+          console.error("Tenant or worker not found for notification:", {
+            tenantId: updatedBooking.tenantId.toString(),
+            workerId: workerId.toString(),
+          });
+          return res.status(404).json({ error: "Tenant or worker not found" });
+        }
 
-    // Only update associations for Approved status
-    if (status === "Approved") {
-      // Ensure arrays are initialized
-      tenant.domesticWorkerId = Array.isArray(tenant.domesticWorkerId)
-        ? tenant.domesticWorkerId
-        : [];
-      worker.clientIds = Array.isArray(worker.clientIds) ? worker.clientIds : [];
+        // Only update associations for Approved status
+        if (status === "Approved") {
+          // Ensure arrays are initialized
+          tenant.domesticWorkerId = Array.isArray(tenant.domesticWorkerId)
+            ? tenant.domesticWorkerId
+            : [];
+          worker.clientIds = Array.isArray(worker.clientIds)
+            ? worker.clientIds
+            : [];
 
-      // Add worker to tenant's domesticWorkerId array if not already present
-      const workerIdStr = workerId.toString();
-      if (
-        !tenant.domesticWorkerId.some((id) => id.toString() === workerIdStr)
-      ) {
-        tenant.domesticWorkerId.push(workerId);
-        await tenant.save();
-        console.log("Updated tenant with worker association:", {
-          tenantId: tenant._id.toString(),
-          addedWorkerId: workerIdStr,
+          // Add worker to tenant's domesticWorkerId array if not already present
+          const workerIdStr = workerId.toString();
+          if (
+            !tenant.domesticWorkerId.some((id) => id.toString() === workerIdStr)
+          ) {
+            tenant.domesticWorkerId.push(workerId);
+            await tenant.save();
+            console.log("Updated tenant with worker association:", {
+              tenantId: tenant._id.toString(),
+              addedWorkerId: workerIdStr,
+            });
+          }
+
+          // Add tenant to worker's clientIds array if not already present
+          const tenantIdStr = tenant._id.toString();
+          if (!worker.clientIds.some((id) => id.toString() === tenantIdStr)) {
+            worker.clientIds.push(tenant._id);
+            worker.isBooked = true;
+            await worker.save();
+            console.log("Updated worker with tenant association:", {
+              workerId: worker._id.toString(),
+              addedTenantId: tenantIdStr,
+            });
+          }
+
+          // Update session with fresh worker data
+          req.session.user = worker.toObject();
+        }
+
+        // Send notification to tenant
+        const message =
+          status === "Approved"
+            ? `Your booking for ${updatedBooking.serviceType} has been approved by ${worker.firstName} ${worker.lastName}.`
+            : `Your booking for ${updatedBooking.serviceType} has been declined by ${worker.firstName} ${worker.lastName}.`;
+        await sendNotificationToTenant(updatedBooking.tenantId, {
+          message,
+          bookingId: updatedBooking._id,
+          workerId,
+          serviceType: updatedBooking.serviceType,
         });
+      } catch (innerError) {
+        console.error(
+          status === "Approved"
+            ? "Error updating associations or sending notification after approval:"
+            : "Error sending notification for declined status:",
+          innerError
+        );
+        // Continue processing - don't fail the status update due to association/notification issues
       }
-
-      // Add tenant to worker's clientIds array if not already present
-      const tenantIdStr = tenant._id.toString();
-      if (!worker.clientIds.some((id) => id.toString() === tenantIdStr)) {
-        worker.clientIds.push(tenant._id);
-        worker.isBooked = true;
-        await worker.save();
-        console.log("Updated worker with tenant association:", {
-          workerId: worker._id.toString(),
-          addedTenantId: tenantIdStr,
-        });
-      }
-
-      // Update session with fresh worker data
-      req.session.user = worker.toObject();
     }
-
-    // Send notification to tenant
-    const message =
-      status === "Approved"
-        ? `Your booking for ${updatedBooking.serviceType} has been approved by ${worker.firstName} ${worker.lastName}.`
-        : `Your booking for ${updatedBooking.serviceType} has been declined by ${worker.firstName} ${worker.lastName}.`;
-    await sendNotificationToTenant(updatedBooking.tenantId, {
-      message,
-      bookingId: updatedBooking._id,
-      workerId,
-      serviceType: updatedBooking.serviceType,
-    });
-  } catch (innerError) {
-    console.error(
-      status === "Approved"
-        ? "Error updating associations or sending notification after approval:"
-        : "Error sending notification for declined status:",
-      innerError
-    );
-    // Continue processing - don't fail the status update due to association/notification issues
-  }
-}
 
     res.status(200).json({
       success: true,
@@ -1010,5 +1014,65 @@ exports.renderWorkerDashboardSafer = async (req, res) => {
       workerId: req.session.user?._id,
     });
     res.render("pages/error", { error: "Failed to load worker dashboard" });
+  }
+};
+
+// Update worker settings
+exports.updateWorkerSettings = async (req, res) => {
+  try {
+    const userId = req.session.user._id; // Get the logged-in user ID from session
+
+    // Get the data from the request body
+    const {
+      firstName,
+      lastName,
+      email,
+      phone,
+      location,
+      experience,
+      availability,
+      serviceType,
+      currentPassword,
+      newPassword,
+    } = req.body;
+
+    // Find the worker
+    const worker = await Worker.findById(userId);
+
+    if (!worker) {
+      return res
+        .status(404)
+        .json({ success: false, error: "Worker not found" });
+    }
+
+    // Update basic fields
+    worker.firstName = firstName;
+    worker.lastName = lastName;
+    worker.email = email;
+    worker.phone = phone;
+    worker.location = location;
+    worker.experience = experience;
+    worker.availability = availability;
+    worker.serviceType = serviceType;
+
+    // Handle password change if provided
+    if (newPassword) {
+      // Verify current password - you may want to use bcrypt compare here if passwords are hashed
+      if (worker.password !== currentPassword) {
+        return res
+          .status(400)
+          .json({ success: false, error: "Current password is incorrect" });
+      }
+
+      worker.password = newPassword; // Note: In a real app, you should hash this password
+    }
+
+    // Save the updated worker
+    await worker.save();
+
+    res.json({ success: true, message: "Settings updated successfully" });
+  } catch (error) {
+    console.error("Error updating worker settings:", error);
+    res.status(500).json({ success: false, error: "Internal server error" });
   }
 };

@@ -12,5 +12,7 @@ router.post(
 
 router.delete("/owner/delete-account", ownerController.deleteOwnerAccount);
 
+router.post("/owner/update-settings", ownerController.updateOwnerSettings);
+
 
 module.exports = router;

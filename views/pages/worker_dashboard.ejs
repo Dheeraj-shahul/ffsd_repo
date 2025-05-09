@@ -31,7 +31,7 @@
           <li onclick="showSection('services')"><i class="fa-solid fa-rectangle-list"></i> My Services</a></li>
           <li onclick="showSection('bookings')"><i class="fa-solid fa-clipboard-list" id="mybooking_icon"></i> My Bookings</a></li>
           <li onclick="showSection('clients')"><i class="fa-solid fa-users"></i> My Clients</a></li>
-          <li onclick="showSection('earnings')"><i class="fa-solid fa-hand-holding-dollar"></i> Earnings</a></li>
+          <!-- <li onclick="showSection('earnings')"><i class="fa-solid fa-hand-holding-dollar"></i> Earnings</a></li> -->
           <li onclick="showSection('reviews')"><i class="fa-solid fa-star-half-stroke"></i> Reviews & Ratings</a></li>
           <li onclick="showSection('settings')"><i class="fa-solid fa-gears"></i> Settings</a></li>
         </ul>
@@ -251,7 +251,7 @@
                     <option value="weekends" <%= user.availability === 'weekends' ? 'selected' : '' %>>Weekends Only</option>
                   </select>
                 </div>
-                <div class="form-group">
+                <!-- <div class="form-group">
                   <label>Services Offered</label>
                   <div class="checkbox-group">
                     <input
@@ -271,7 +271,7 @@
                     />
                     <label for="cooking">Cooking</label>
                   </div>
-                </div>
+                </div> -->
               </div>
               <div class="settings-section">
                 <h4>Change Password</h4>
@@ -539,15 +539,60 @@
       }
 
       // Handle settings form submission
-      document.getElementById('settingsForm').addEventListener('submit', function(e) {
-        e.preventDefault();
-        // Form validation and submission code would go here
-        document.getElementById('settingsSuccessMessage').style.display = 'block';
-        setTimeout(function() {
-          document.getElementById('settingsSuccessMessage').style.display = 'none';
-        }, 3000);
-      });
-
+      // Handle settings form submission
+document.getElementById('settingsForm').addEventListener('submit', function(e) {
+  e.preventDefault();
+  
+  // Collect form data
+  const formData = {
+    firstName: document.getElementById('settingsFirstName').value,
+    lastName: document.getElementById('settingsLastName').value,
+    email: document.getElementById('settingsEmail').value,
+    phone: document.getElementById('settingsPhone').value,
+    location: document.getElementById('settingsLocation').value,
+    experience: document.getElementById('settingsExperience').value,
+    availability: document.getElementById('settingsAvailability').value,
+    serviceType: document.getElementById('cleaning').checked ? 'cleaning' : 
+                document.getElementById('cooking').checked ? 'cooking' : '',
+  };
+  
+  // Handle password change if new password is provided
+  const currentPassword = document.getElementById('settingsCurrentPassword').value;
+  const newPassword = document.getElementById('settingsNewPassword').value;
+  const confirmPassword = document.getElementById('settingsConfirmPassword').value;
+  
+  if (newPassword) {
+    if (newPassword !== confirmPassword) {
+      alert('New passwords do not match');
+      return;
+    }
+    formData.currentPassword = currentPassword;
+    formData.newPassword = newPassword;
+  }
+  
+  // Send data to server
+  fetch('/api/workers/update-settings', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(formData)
+  })
+  .then(response => response.json())
+  .then(data => {
+    if (data.success) {
+      document.getElementById('settingsSuccessMessage').style.display = 'block';
+      setTimeout(function() {
+        document.getElementById('settingsSuccessMessage').style.display = 'none';
+      }, 3000);
+    } else {
+      alert('Error updating settings: ' + data.error);
+    }
+  })
+  .catch(error => {
+    alert('Error updating settings: ' + error.message);
+  });
+});
       // Handle cancel button click
       document.getElementById('cancelSettingsBtn').addEventListener('click', function() {
         if (confirm('Are you sure you want to discard your changes?')) {
