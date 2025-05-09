@@ -251,7 +251,8 @@
         { title: 'Monthly Revenue', value: `₹${stats.revenueMonthly?.toFixed(2)}` },
         { title: 'Active Properties', value: stats.propertiesActive },
         { title: 'Pending Properties', value: stats.propertiesPending },
-        { title: 'Available Workers', value: stats.workersAvailable }
+        { title: 'Available Workers', value: stats.workersAvailable },
+       
       ].forEach(stat => { %>
         <div class="stat-card">
           <h3><%= stat.title %></h3>
