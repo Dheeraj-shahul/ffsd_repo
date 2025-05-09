@@ -755,6 +755,141 @@
       
     }
   }
+
+
+
+
+
+  // Add filter functionality
+document.addEventListener("DOMContentLoaded", function() {
+  const filterForm = document.querySelector('.filters form');
+  
+  // Prevent form from submitting to server and handle filtering on client side
+  filterForm.addEventListener('submit', function(e) {
+    e.preventDefault();
+    applyFilters();
+  });
+  
+  // Function to apply all filters
+  function applyFilters() {
+    let filteredProperties = [...initialProperties];
+    
+    // Get filter values
+    const location = document.getElementById('location').value;
+    const propertyType = document.getElementById('property-type').value;
+    const priceRange = parseInt(document.getElementById('price-range').value);
+    const bedrooms = document.getElementById('bedroom-no').value;
+    const bathrooms = document.getElementById('bathroom-no').value;
+    const furnishing = document.getElementById('furnishing').value;
+    
+    // Get selected amenities
+    const selectedAmenities = Array.from(
+      document.querySelectorAll('input[name="amenities"]:checked')
+    ).map(checkbox => checkbox.value);
+    
+    // Apply location filter
+    if (location) {
+      filteredProperties = filteredProperties.filter(property => 
+        property.location.toLowerCase() === location.toLowerCase()
+      );
+    }
+    
+    // Apply property type filter
+    if (propertyType) {
+      filteredProperties = filteredProperties.filter(property => 
+        property.type.toLowerCase() === propertyType.toLowerCase() || 
+        property.subtype.toLowerCase() === propertyType.toLowerCase()
+      );
+    }
+    
+    // Apply price filter
+    filteredProperties = filteredProperties.filter(property => 
+      property.price <= priceRange
+    );
+    
+    // Apply bedroom filter
+    if (bedrooms) {
+      filteredProperties = filteredProperties.filter(property => 
+        property.beds.toString() === bedrooms
+      );
+    }
+    
+    // Apply bathroom filter
+    if (bathrooms) {
+      filteredProperties = filteredProperties.filter(property => 
+        property.baths.toString() === bathrooms
+      );
+    }
+    
+    // Apply furnishing filter
+    if (furnishing) {
+      filteredProperties = filteredProperties.filter(property => 
+        property.furnished.toLowerCase().includes(furnishing.toLowerCase())
+      );
+    }
+    
+    // Apply amenities filter
+    if (selectedAmenities.length > 0) {
+      filteredProperties = filteredProperties.filter(property => 
+        selectedAmenities.every(amenity => 
+          property.amenities.map(a => a.toLowerCase()).includes(amenity.toLowerCase())
+        )
+      );
+    }
+    
+    // Apply current sort
+    const currentSort = document.getElementById('sort').value;
+    applySorting(filteredProperties, currentSort);
+  }
+  
+  // Modified function to apply sorting and render
+  function applySorting(properties, sortBy) {
+    let sortedProperties = [...properties];
+    
+    switch (sortBy) {
+      case 'rating':
+        sortedProperties.sort((a, b) => b.rating - a.rating);
+        break;
+      case 'price-low-to-high':
+        sortedProperties.sort((a, b) => a.price - b.price);
+        break;
+      case 'price-high-to-low':
+        sortedProperties.sort((a, b) => b.price - a.price);
+        break;
+      case 'availability-soon':
+        sortedProperties.sort((a, b) => {
+          const dateA = a.availableFrom ? new Date(a.availableFrom) : new Date(9999, 0, 1);
+          const dateB = b.availableFrom ? new Date(b.availableFrom) : new Date(9999, 0, 1);
+          return dateA - dateB;
+        });
+        break;
+    }
+    
+    renderProperties(sortedProperties);
+  }
+  
+  // Update the sort select event listener to use the new function
+  const sortSelect = document.getElementById("sort");
+  sortSelect.addEventListener('change', function() {
+    applyFilters(); // This will apply filters and then sorting
+  });
+  
+  // Make individual filter controls also trigger filtering
+  document.getElementById('location').addEventListener('change', applyFilters);
+  document.getElementById('property-type').addEventListener('change', applyFilters);
+  document.getElementById('price-range').addEventListener('input', applyFilters);
+  document.getElementById('bedroom-no').addEventListener('change', applyFilters);
+  document.getElementById('bathroom-no').addEventListener('change', applyFilters);
+  document.getElementById('furnishing').addEventListener('change', applyFilters);
+  
+  // Add event listeners to all amenity checkboxes
+  document.querySelectorAll('input[name="amenities"]').forEach(checkbox => {
+    checkbox.addEventListener('change', applyFilters);
+  });
+});
+
+
+
       </script>
 </body>
 </html>

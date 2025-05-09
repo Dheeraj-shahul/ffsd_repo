@@ -1,0 +1,122 @@
+<link rel="stylesheet" href="/css/payment-view.css">
+
+<div class="payment-view">
+  <h2>Payment Details - <%= payment.id %></h2>
+
+  <div class="payment-details">
+    <div class="detail-group">
+      <h3>Payment Information</h3>
+      <p><strong>ID:</strong> <%= payment.id %></p>
+      <p><strong>Amount:</strong> ₹<%= payment.amount?.toFixed(2) || 'N/A' %></p>
+      <p><strong>Status:</strong> <%= payment.status %></p>
+      <p><strong>Date:</strong> <%= payment.paymentDate ? new Date(payment.paymentDate).toLocaleString() : 'N/A' %></p>
+      <p><strong>Method:</strong> <%= payment.paymentMethod || 'N/A' %></p>
+      <p><strong>Transaction ID:</strong> <%= payment.transactionId || 'N/A' %></p>
+      <p><strong>Due Date:</strong> <%= payment.dueDate ? new Date(payment.dueDate).toLocaleDateString() : 'N/A' %></p>
+      <p><strong>Receipt:</strong> 
+        <% if (payment.receiptUrl) { %>
+          <a href="<%= payment.receiptUrl %>" target="_blank">View Receipt</a>
+        <% } else { %>
+          N/A
+        <% } %>
+      </p>
+    </div>
+
+    <div class="detail-group">
+      <h3>User Information</h3>
+      <% if (payment.user) { %>
+        <p><strong>Name:</strong> 
+          <a href="/admin/user/<%= payment.user._id %>/tenant">
+            <%= payment.user.firstName %> <%= payment.user.lastName %>
+          </a>
+        </p>
+        <p><strong>Email:</strong> <%= payment.user.email %></p>
+        <p><strong>Phone:</strong> <%= payment.user.phone %></p>
+      <% } else if (payment.userName) { %>
+        <p><strong>Name:</strong> <%= payment.userName %></p>
+      <% } else { %>
+        <p>No user information available</p>
+      <% } %>
+    </div>
+
+    <% if (payment.booking) { %>
+      <div class="detail-group">
+        <h3>Booking Information</h3>
+        <p><strong>Booking ID:</strong> 
+          <a href="/admin/booking/<%= payment.booking._id %>">
+            <%= payment.booking._id %>
+          </a>
+        </p>
+        <p><strong>Property:</strong> <%= payment.booking.propertyName || 'N/A' %></p>
+        <p><strong>Dates:</strong> 
+          <%= payment.booking.startDate ? new Date(payment.booking.startDate).toLocaleDateString() : 'N/A' %> 
+          to 
+          <%= payment.booking.endDate ? new Date(payment.booking.endDate).toLocaleDateString() : 'N/A' %>
+        </p>
+      </div>
+    <% } %>
+
+    <div class="detail-group">
+      <h3>Actions</h3>
+      <div class="action-buttons">
+        <% if (payment.status === 'Completed') { %>
+          <button class="danger" onclick="refundPayment('<%= payment.id %>')">Refund</button>
+        <% } else if (payment.status === 'Failed') { %>
+          <button class="success" onclick="retryPayment('<%= payment.id %>')">Retry</button>
+        <% } %>
+        <a href="/admin/payments" class="btn">Back to List</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+    // Same refund/retry functions as in payment-view.ejs
+    function refundPayment(paymentId) {
+      if (confirm('Are you sure you want to refund this payment?')) {
+        fetch(`/admin/payment/${paymentId}/refund`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          }
+        })
+        .then(response => response.json())
+        .then(data => {
+          if (data.success) {
+            alert('Refund initiated successfully');
+            window.location.reload();
+          } else {
+            alert('Refund failed: ' + data.message);
+          }
+        })
+        .catch(error => {
+          console.error('Error:', error);
+          alert('An error occurred during refund');
+        });
+      }
+    }
+  
+    function retryPayment(paymentId) {
+      if (confirm('Are you sure you want to retry this payment?')) {
+        fetch(`/admin/payment/${paymentId}/retry`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          }
+        })
+        .then(response => response.json())
+        .then(data => {
+          if (data.success) {
+            alert('Payment retry initiated successfully');
+            window.location.reload();
+          } else {
+            alert('Payment retry failed: ' + data.message);
+          }
+        })
+        .catch(error => {
+          console.error('Error:', error);
+          alert('An error occurred during payment retry');
+        });
+      }
+    }
+  </script>

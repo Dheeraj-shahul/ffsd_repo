@@ -1,71 +1,115 @@
+
+
+<link rel="stylesheet" href="/css/maintenance-view.css">
+
 <div class="maintenance-view">
-    <h2>Maintenance Request - <%= request._id %></h2>
-  
-    <div class="maintenance-details">
-      <div class="detail-group">
-        <h3>Request Information</h3>
-        <p><strong>Issue Type:</strong> <%= request.issueType %></p>
-        <p><strong>Status:</strong> <%= request.status %></p>
-        <p><strong>Reported Date:</strong> <%= new Date(request.dateReported).toLocaleString() %></p>
-        <% if (request.completionDate) { %>
-          <p><strong>Completion Date:</strong> <%= new Date(request.completionDate).toLocaleString() %></p>
-        <% } %>
-        <p><strong>Description:</strong> <%= request.description %></p>
-      </div>
-  
-      <div class="detail-group">
-        <h3>Property Information</h3>
-        <p><strong>Name:</strong> 
-          <a href="/admin/property/<%= request.propertyId._id %>">
-            <%= request.propertyId.name %>
-          </a>
-        </p>
-        <p><strong>Location:</strong> <%= request.propertyId.location %></p>
-        <p><strong>Address:</strong> <%= request.propertyId.address %></p>
-      </div>
-  
-      <div class="detail-group">
-        <h3>Tenant Information</h3>
-        <p><strong>Name:</strong> 
-          <a href="/admin/user/<%= request.tenantId._id %>/tenant">
-            <%= request.tenantId.firstName %> <%= request.tenantId.lastName %>
-          </a>
-        </p>
-        <p><strong>Email:</strong> <%= request.tenantId.email %></p>
-        <p><strong>Phone:</strong> <%= request.tenantId.phone %></p>
-      </div>
-  
-      <div class="detail-group">
-        <h3>Owner Information</h3>
-        <p><strong>Name:</strong> 
-          <a href="/admin/user/<%= owner._id %>/owner">
-            <%= owner.firstName %> <%= owner.lastName %>
-          </a>
-        </p>
-        <p><strong>Email:</strong> <%= owner.email %></p>
-        <p><strong>Phone:</strong> <%= owner.phone %></p>
-      </div>
-  
-      <% if (request.assignedWorkerId) { %>
-        <div class="detail-group">
-          <h3>Worker Information</h3>
-          <p><strong>Name:</strong> 
-            <a href="/admin/user/<%= request.assignedWorkerId._id %>/worker">
-              <%= request.assignedWorkerId.firstName %> <%= request.assignedWorkerId.lastName %>
-            </a>
-          </p>
-          <p><strong>Service Type:</strong> <%= request.assignedWorkerId.serviceType %></p>
-        </div>
+  <h2>Maintenance Request - #<%= request._id.toString().slice(-6).toUpperCase() %></h2>
+
+  <div class="maintenance-details">
+    <div class="detail-group">
+      <h3>Request Information</h3>
+      <p><strong>Issue Type:</strong> <%= request.issueType %></p>
+      
+      <p>
+        <strong>Status:</strong> 
+        <span class="status-pill status-<%= request.status.toLowerCase() %>">
+          <%= request.status %>
+        </span>
+      </p>
+      
+      <p><strong>Reported Date:</strong> <%= new Date(request.dateReported).toLocaleString() %></p>
+      <% if (request.scheduledDate) { %>
+        <p><strong>Scheduled Date:</strong> <%= new Date(request.scheduledDate).toLocaleString() %></p>
       <% } %>
-  
+      <% if (request.completionDate) { %>
+        <p><strong>Completion Date:</strong> <%= new Date(request.completionDate).toLocaleString() %></p>
+      <% } %>
+      <p><strong>Description:</strong> <%= request.description %></p>
+      <% if (request.location) { %>
+        <p><strong>Specific Location:</strong> <%= request.location %></p>
+      <% } %>
+    </div>
+
+    <div class="detail-group">
+      <h3>Property Information</h3>
+      <p><strong>Name:</strong> 
+        <a href="/admin/property/<%= request.propertyId._id %>">
+          <%= request.propertyId.name %>
+        </a>
+      </p>
+      <p><strong>Location:</strong> <%= request.propertyId.location %></p>
+      <p><strong>Address:</strong> <%= request.propertyId.address %></p>
+    </div>
+
+    <div class="detail-group">
+      <h3>Tenant Information</h3>
+      <p><strong>Name:</strong> 
+        <a href="/admin/user/<%= request.tenantId._id %>/tenant">
+          <%= request.tenantId.firstName %> <%= request.tenantId.lastName %>
+        </a>
+      </p>
+      <p><strong>Email:</strong> <%= request.tenantId.email %></p>
+      <p><strong>Phone:</strong> <%= request.tenantId.phone %></p>
+    </div>
+
+    <div class="detail-group">
+      <h3>Owner Information</h3>
+      <p><strong>Name:</strong> 
+        <a href="/admin/user/<%= owner._id %>/owner">
+          <%= owner.firstName %> <%= owner.lastName %>
+        </a>
+      </p>
+      <p><strong>Email:</strong> <%= owner.email %></p>
+      <p><strong>Phone:</strong> <%= owner.phone %></p>
+    </div>
+
+    <% if (request.assignedWorkerId) { %>
       <div class="detail-group">
-        <h3>Actions</h3>
-        <div class="action-buttons">
-          <% if (request.status !== 'Completed') { %>
-            <button class="success" onclick="completeMaintenance('<%= request._id %>')">Mark as Completed</button>
-          <% } %>
-          <a href="/admin/maintenance-requests" class="btn">Back to List</a>
-        </div>
+        <h3>Worker Information</h3>
+        <p><strong>Name:</strong> 
+          <a href="/admin/user/<%= request.assignedWorkerId._id %>/worker">
+            <%= request.assignedWorkerId.firstName %> <%= request.assignedWorkerId.lastName %>
+          </a>
+        </p>
+        <p><strong>Service Type:</strong> <%= request.assignedWorkerId.serviceType %></p>
+      </div>
+    <% } %>
+
+    <div class="detail-group">
+      <h3>Actions</h3>
+      <div class="action-buttons">
+        <% if (request.status !== 'Completed') { %>
+          <button class="success" onclick="completeMaintenance('<%= request._id %>')">Mark as Completed</button>
+        <% } %>
+        <a href="/admin" class="btn">Back to List</a>
       </div>
     </div>
   </div>
+</div>
+
+<script>
+  function completeMaintenance(id) {
+    if (confirm('Are you sure you want to mark this maintenance request as completed?')) {
+      fetch(`/admin/maintenance/${id}/complete`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      })
+      .then(response => {
+        if (response.ok) {
+          alert('Maintenance request marked as completed!');
+          window.location.reload();
+        } else {
+          alert('An error occurred. Please try again.');
+        }
+      })
+      .catch(error => {
+        console.error('Error:', error);
+        alert('An error occurred. Please try again.');
+      });
+    }
+  }
+</script>
+
+<%- include('../partials/footer') %>

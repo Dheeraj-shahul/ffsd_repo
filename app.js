@@ -28,6 +28,8 @@ const bookingRoutes = require('./routes/bookingRoutes');
 
 // Admin Routes
 const adminRoutes=require('./routes/admin')
+const analyticsRoutes = require('./routes/analytics');
+
 
 
 
@@ -84,6 +86,7 @@ app.use('/', bookingRoutes);
 //admin routes
 app.use('/admin',adminRoutes);
 
+app.use('/api', analyticsRoutes);
 
 // Error handling middleware
 app.use((err, req, res, next) => {
