@@ -337,3 +337,66 @@ exports.updateMaintenanceRequestStatus = async (req, res) => {
     });
   }
 };
+
+// Delete owner account
+exports.deleteOwnerAccount = async (req, res) => {
+  try {
+    const ownerId = req.session.user?._id;
+    const { password } = req.body;
+
+    // Validate ownerId
+    if (!ownerId || !mongoose.Types.ObjectId.isValid(ownerId)) {
+      return res.status(401).json({ success: false, message: "Unauthorized: Invalid user ID" });
+    }
+
+    // Fetch owner
+    const owner = await Owner.findById(ownerId);
+    if (!owner) {
+      return res.status(404).json({ success: false, message: "Owner not found" });
+    }
+
+    // Validate password (plain text comparison)
+    if (password !== owner.password) {
+      return res.status(400).json({ success: false, message: "Incorrect password" });
+    }
+
+    // Fetch properties by ownerId
+    const properties = await Property.find({ ownerId: new mongoose.Types.ObjectId(ownerId) });
+
+    // Check if any properties are rented
+    const hasRentedProperties = properties.some((property) => property.isRented);
+    if (hasRentedProperties) {
+      return res.status(400).json({
+        success: false,
+        message: "Cannot delete account because one or more properties are currently rented",
+      });
+    }
+
+    // Delete all properties owned by the owner
+    if (properties.length > 0) {
+      await Property.deleteMany({ ownerId: new mongoose.Types.ObjectId(ownerId) });
+    }
+
+    // Delete the owner account
+    await Owner.findByIdAndDelete(ownerId);
+
+    // Clear session
+    req.session.destroy((err) => {
+      if (err) {
+        console.error("Error destroying session:", err);
+      }
+    });
+
+    return res.status(200).json({
+      success: true,
+      message: "Account and associated properties deleted successfully",
+    });
+  } catch (error) {
+    console.error("Error deleting owner account:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Server error while deleting account",
+      error: error.message,
+    });
+  }
+};

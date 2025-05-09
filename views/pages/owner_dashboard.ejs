@@ -410,6 +410,34 @@
           </div>
         </div>
 
+        <div id="deleteAccountOverlay" class="popup-overlay">
+          <div class="popup-container">
+            <h4 class="popup-title">Delete Account?</h4>
+            <p class="popup-message">
+              Are you sure you want to delete your account? This action cannot
+              be undone. Please enter your password to confirm.
+            </p>
+            <div class="form-group">
+              <label for="deleteAccountPassword">Password</label>
+              <input
+                type="password"
+                id="deleteAccountPassword"
+                name="password"
+                placeholder="Enter your password"
+              />
+              <div id="deleteAccountPasswordError" class="error"></div>
+            </div>
+            <div class="popup-buttons">
+              <button id="cancelDeleteAccount" class="cancel-button">
+                Cancel
+              </button>
+              <button id="confirmDeleteAccount" class="confirm-button">
+                Yes, Delete
+              </button>
+            </div>
+          </div>
+        </div>
+
         <div id="reports" class="section">
           <h3>Reports & Analytics</h3>
           <div class="reports-summary">
@@ -710,6 +738,7 @@
             </div>
 
             <div class="button-container">
+              <!-- Existing Save Changes and Cancel buttons -->
               <button
                 type="submit"
                 id="saveSettingsBtn"
@@ -723,6 +752,14 @@
                 class="settings-button secondary-button"
               >
                 Cancel
+              </button>
+              <!-- New Delete Account Button -->
+              <button
+                type="button"
+                id="deleteAccountBtn"
+                class="settings-button delete-button"
+              >
+                Delete Account
               </button>
             </div>
           </form>
@@ -791,6 +828,78 @@
     </div>
 
     <script>
+      document
+        .getElementById("deleteAccountBtn")
+        ?.addEventListener("click", function () {
+          const deleteAccountOverlay = document.getElementById(
+            "deleteAccountOverlay"
+          );
+          document.getElementById("deleteAccountPassword").value = ""; // Clear password input
+          document.getElementById("deleteAccountPasswordError").textContent =
+            ""; // Clear error message
+          deleteAccountOverlay.style.display = "flex";
+        });
+
+      // Handle delete account confirmation
+      document
+        .getElementById("confirmDeleteAccount")
+        ?.addEventListener("click", function () {
+          const password = document.getElementById(
+            "deleteAccountPassword"
+          ).value;
+          const errorElement = document.getElementById(
+            "deleteAccountPasswordError"
+          );
+
+          if (!password) {
+            errorElement.textContent = "Please enter your password";
+            return;
+          }
+
+          // Send delete account request to the server
+          fetch("/api/owner/delete-account", {
+            method: "DELETE",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            credentials: "include",
+            body: JSON.stringify({ password }),
+          })
+            .then((response) => response.json())
+            .then((data) => {
+              if (data.success) {
+                // Redirect to login or home page after successful deletion
+                alert("Account deleted successfully!");
+                window.location.href = "/login";
+              } else {
+                errorElement.textContent =
+                  data.message || "Failed to delete account";
+              }
+            })
+            .catch((error) => {
+              console.error("Error deleting account:", error);
+              errorElement.textContent =
+                "An error occurred while deleting the account";
+            });
+        });
+
+      // Cancel delete account action
+      document
+        .getElementById("cancelDeleteAccount")
+        ?.addEventListener("click", function () {
+          document.getElementById("deleteAccountOverlay").style.display =
+            "none";
+        });
+
+      // Close delete account overlay when clicking outside
+      window.addEventListener("click", function (event) {
+        const deleteAccountOverlay = document.getElementById(
+          "deleteAccountOverlay"
+        );
+        if (event.target === deleteAccountOverlay) {
+          deleteAccountOverlay.style.display = "none";
+        }
+      });
       // Function to refresh notifications section
       function refreshNotifications() {
         fetch("/api/notifications", {

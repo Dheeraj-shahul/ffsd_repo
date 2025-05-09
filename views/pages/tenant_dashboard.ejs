@@ -27,6 +27,7 @@
       .notification.success { background-color: #4caf50; }
       .notification.error { background-color: #f44336; }
       .notification.show { opacity: 1; }
+      .notification-card{padding: 20px;}
     </style>
   </head>
   <body>
@@ -243,15 +244,15 @@
                 <span class="status completed">Completed</span>
               </div>
               <p>
-                <strong>Date Reported:</strong> <%= request.dateReported ? new Date(request.dateReported).toLocaleDateString() : 'N/A' %>
+                <strong>Date Reported:</strong> <%= request.createdAt ? new Date(request.createdAt).toLocaleDateString() : 'N/A' %>
               </p>
               <p>
-                <strong>Date Completed:</strong> <%= request.completedDate ? new Date(request.completedDate).toLocaleDateString() : 'N/A' %>
+                <strong>Date Completed:</strong> <%= request.updatedAt ? new Date(request.updatedAt).toLocaleDateString() : 'N/A' %>
               </p>
               <p><strong>Description:</strong> <%= request.description || 'N/A' %></p>
-              <p>
+              <!-- <p>
                 <strong>Serviced By:</strong> <%= request.assignedTo || 'N/A' %>
-              </p>
+              </p> -->
             </div>
             <% }); %>
           </div>
