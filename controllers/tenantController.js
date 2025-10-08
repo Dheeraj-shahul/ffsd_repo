@@ -65,6 +65,12 @@ exports.getDashboard = async (req, res) => {
       console.log(
         `Fetched ${domesticWorkers.length} domestic workers from approved bookings`
       );
+    } else {
+      // If no approved bookings, show all available workers
+      domesticWorkers = await Worker.find({}).populate("ratingId");
+      console.log(
+        `No approved bookings found. Showing all available workers: ${domesticWorkers.length}`
+      );
     }
 
     const currentProperty = await Property.findOne({ tenantId: userId });
@@ -117,6 +123,12 @@ exports.getDashboard = async (req, res) => {
       recipientType: "Tenant",
     }).sort({ createdDate: -1 });
 
+    // Fetch worker payments for this tenant
+    const workerPayments = await Payment.find({
+      tenantId: userId,
+      type: "Worker",
+    }).sort({ paymentDate: -1 });
+
     res.render("pages/tenant_dashboard", {
       user: tenant,
       currentProperty,
@@ -137,6 +149,7 @@ exports.getDashboard = async (req, res) => {
         createdDate: n.createdDate || new Date(),
         status: n.status,
       })),
+      workerPayments,
     });
   } catch (error) {
     console.error("Dashboard error:", error);
@@ -484,7 +497,7 @@ exports.changePassword = async (req, res) => {
         .json({ success: false, message: "Tenant not found" });
     }
 
-    // Verify current password 
+    // Verify current password
     if (tenant.password !== currentPassword) {
       console.log("Incorrect current password for tenant ID:", tenantId);
       return res
@@ -1130,6 +1143,59 @@ exports.deleteAccount = async (req, res) => {
   } catch (error) {
     console.error("Delete account error:", error);
     return res
+      .status(500)
+      .json({ success: false, message: "Server error: " + error.message });
+  }
+};
+
+// Handle worker payment from tenant dashboard
+exports.submitWorkerPayment = async (req, res) => {
+  try {
+    if (!req.session.user || !req.session.user._id) {
+      return res
+        .status(401)
+        .json({ success: false, message: "Unauthorized: Please log in" });
+    }
+    const tenantId = req.session.user._id;
+    const { workerId, amount, paymentMethod, transactionId } = req.body;
+    if (!workerId || !amount || !paymentMethod || !transactionId) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Missing required fields" });
+    }
+    if (isNaN(amount) || amount <= 0) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Invalid payment amount" });
+    }
+    const Worker = require("../models/worker");
+    const WorkerPayment = require("../models/workerPayment");
+    const worker = await Worker.findById(workerId);
+    if (!worker) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Worker not found" });
+    }
+    const newWorkerPayment = new WorkerPayment({
+      tenantId,
+      workerId: worker._id,
+      userName: `${req.session.user.firstName} ${req.session.user.lastName}`,
+      amount,
+      paymentDate: new Date(),
+      paymentMethod,
+      status: "Paid",
+      transactionId,
+      receiptUrl: `/receipts/${transactionId}.pdf`,
+    });
+    await newWorkerPayment.save();
+    res.status(201).json({
+      success: true,
+      message: "Worker payment submitted successfully",
+      payment: newWorkerPayment,
+    });
+  } catch (error) {
+    console.error("Worker payment error:", error);
+    res
       .status(500)
       .json({ success: false, message: "Server error: " + error.message });
   }

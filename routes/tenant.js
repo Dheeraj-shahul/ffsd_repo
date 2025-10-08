@@ -3,6 +3,13 @@ const router = express.Router();
 const tenantController = require("../controllers/tenantController");
 const isAuthenticated = require("../middleware/auth");
 
+// Worker payment submission
+router.post(
+  "/worker-payment",
+  isAuthenticated,
+  tenantController.submitWorkerPayment
+);
+
 // Debug log for tenant routes
 router.use((req, res, next) => {
   console.log(`Tenant route: ${req.method} ${req.url}`);
@@ -53,10 +60,18 @@ router.post(
   isAuthenticated,
   tenantController.markNotificationAsRead
 );
-router.post('/check-recent-payment', isAuthenticated, tenantController.checkRecentPayment);
+router.post(
+  "/check-recent-payment",
+  isAuthenticated,
+  tenantController.checkRecentPayment
+);
 router.post("/payment", isAuthenticated, tenantController.submitPayment);
 
-router.post("/check-account-status", isAuthenticated, tenantController.checkAccountStatus);
+router.post(
+  "/check-account-status",
+  isAuthenticated,
+  tenantController.checkAccountStatus
+);
 router.post("/delete-account", isAuthenticated, tenantController.deleteAccount);
 
 module.exports = router;

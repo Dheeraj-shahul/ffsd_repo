@@ -3,6 +3,7 @@ const Worker = require("../models/worker");
 const Booking = require("../models/booking");
 const Tenant = require("../models/tenant");
 const Payment = require("../models/payment");
+const WorkerPayment = require("../models/workerPayment");
 const WorkerBooking = require("../models/workerBooking");
 const Notification = require("../models/notification");
 const formidable = require("formidable");
@@ -84,15 +85,17 @@ exports.renderWorkerDashboard = async (req, res) => {
       contact: client.phone || "N/A",
     }));
 
-    // Fetch earnings and transactions
-    const payments = await Payment.find({ _id: { $in: user.paymentId || [] } });
+    // Fetch earnings and transactions from WorkerPayment model
+    const payments = await WorkerPayment.find({
+      workerId: new mongoose.Types.ObjectId(user._id),
+    });
     const transactions = payments.map((payment) => ({
-      title:
-        payment.type === "weekly" ? "Weekly Contract" : "Recent Transaction",
-      serviceName: payment.serviceName || user.serviceType || "N/A",
-      clientName: payment.clientName || "N/A",
-      date: payment.date ? new Date(payment.date).toLocaleDateString() : "N/A",
-      period: payment.period || null,
+      title: "Worker Payment",
+      serviceName: user.serviceType || "N/A",
+      clientName: payment.userName || "N/A",
+      date: payment.paymentDate
+        ? new Date(payment.paymentDate).toLocaleDateString()
+        : "N/A",
       amount: payment.amount || 0,
       status: payment.status || "Pending",
     }));
@@ -271,7 +274,6 @@ exports.registerWorker = async (req, res) => {
         : false;
 
       if (
-        !fullName ||
         !phone ||
         !email ||
         !city ||
@@ -961,14 +963,17 @@ exports.renderWorkerDashboardSafer = async (req, res) => {
       return clientData;
     });
 
-    const payments = await Payment.find({ _id: { $in: user.paymentId || [] } });
+    // Fetch earnings and transactions from WorkerPayment model
+    const payments = await WorkerPayment.find({
+      workerId: new mongoose.Types.ObjectId(user._id),
+    });
     const transactions = payments.map((payment) => ({
-      title:
-        payment.type === "weekly" ? "Weekly Contract" : "Recent Transaction",
-      serviceName: payment.serviceName || user.serviceType || "N/A",
-      clientName: payment.clientName || "N/A",
-      date: payment.date ? new Date(payment.date).toLocaleDateString() : "N/A",
-      period: payment.period || null,
+      title: "Worker Payment",
+      serviceName: user.serviceType || "N/A",
+      clientName: payment.userName || "N/A",
+      date: payment.paymentDate
+        ? new Date(payment.paymentDate).toLocaleDateString()
+        : "N/A",
       amount: payment.amount || 0,
       status: payment.status || "Pending",
     }));
