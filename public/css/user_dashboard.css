@@ -513,6 +513,91 @@ body {
   font-size: 14px;
 }
 
+/* Add these specific styles for worker payment functionality */
+.worker-payment-section {
+  margin-top: 20px;
+  padding-top: 20px;
+  border-top: 1px solid #eee;
+}
+
+.worker-payment-section h6 {
+  margin-bottom: 10px;
+  color: #333;
+  font-size: 14px;
+}
+
+.payment-status {
+  display: inline-block;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: bold;
+}
+
+.status-paid {
+  background: #d4edda;
+  color: #155724;
+}
+
+.status-pending {
+  background: #fff3cd;
+  color: #856404;
+}
+
+.status-overdue {
+  background: #f8d7da;
+  color: #721c24;
+}
+
+.pay-worker-btn {
+  background: #28a745;
+  color: white;
+  padding: 8px 16px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  margin-right: 10px;
+  margin-top: 10px;
+}
+
+.pay-worker-btn:hover:not(:disabled) {
+  background: #218838;
+}
+
+.pay-worker-btn:disabled {
+  background: #6c757d;
+  cursor: not-allowed;
+}
+
+/* Specific styles for worker payment history table */
+.payment-history-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 20px;
+}
+
+.payment-history-table th,
+.payment-history-table td {
+  padding: 12px;
+  text-align: left;
+  border-bottom: 1px solid #ddd;
+}
+
+.payment-history-table th {
+  background: #f8f9fa;
+  font-weight: bold;
+}
+
+/* Worker payment popup specific styles */
+#worker-payment-popup .popup-content {
+  max-width: 500px;
+}
+
+#worker-payment-popup .form-group {
+  margin-bottom: 15px;
+}
+
 .rating {
   margin-top: 5px;
   color: #ffc107;

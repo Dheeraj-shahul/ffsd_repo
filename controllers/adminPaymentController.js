@@ -3,7 +3,7 @@ const Tenant = require('../models/tenant');
 const Booking = require('../models/booking');
 const Property = require('../models/property');
 
-// In adminPaymentController.js
+
 exports.getPaymentDetails = async (req, res) => {
     try {
       const { id } = req.params;
@@ -52,14 +52,13 @@ exports.getPaymentDetails = async (req, res) => {
   };
 
 
-// Add these methods to your existing controller
+
 
 exports.refundPayment = async (req, res) => {
     try {
       const { id } = req.params;
       
-      // Implement your refund logic here
-      // Example:
+      
       const payment = await Payment.findByIdAndUpdate(
         id,
         { status: 'Refunded' },
@@ -81,11 +80,10 @@ exports.refundPayment = async (req, res) => {
     try {
       const { id } = req.params;
       
-      // Implement your payment retry logic here
-      // Example:
+      
       const payment = await Payment.findByIdAndUpdate(
         id,
-        { status: 'Pending' }, // Or whatever status indicates retry
+        { status: 'Pending' },
         { new: true }
       );
       
@@ -93,7 +91,7 @@ exports.refundPayment = async (req, res) => {
         return res.status(404).json({ success: false, message: 'Payment not found' });
       }
       
-      // Here you would typically call your payment gateway API to retry the payment
+      
       
       res.json({ success: true, message: 'Payment retry initiated' });
     } catch (error) {

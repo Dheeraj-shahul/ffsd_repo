@@ -484,7 +484,7 @@ exports.changePassword = async (req, res) => {
         .json({ success: false, message: "Tenant not found" });
     }
 
-    // Verify current password (plain text)
+    // Verify current password 
     if (tenant.password !== currentPassword) {
       console.log("Incorrect current password for tenant ID:", tenantId);
       return res
