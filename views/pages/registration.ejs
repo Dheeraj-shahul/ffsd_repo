@@ -318,6 +318,7 @@
             </div>
             
             <button type="submit">Register</button>
+            <div id="serverError" class="error" style="display:none;"></div>
             
             <div class="divider">
                 <span>OR</span>
@@ -357,7 +358,8 @@
         // Run on page load to set initial state
         handleUserTypeChange();
         
-        document.getElementById('registerForm').addEventListener('submit', function(event) {
+        document.getElementById('registerForm').addEventListener('submit', async function(event) {
+            event.preventDefault();
             let isValid = true;
             
             // Basic validation for required fields
@@ -466,8 +468,32 @@
                 document.getElementById('confirmPasswordError').style.display = 'none';
             }
             
-            if (!isValid) {
-                event.preventDefault();
+            if (!isValid) return;
+
+            // Gather form data
+            const form = event.target;
+            const formData = new FormData(form);
+            const data = Object.fromEntries(formData.entries());
+
+            // Remove confirmPassword before sending to server
+            delete data.confirmPassword;
+
+            try {
+                const res = await fetch('/register', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+                const result = await res.json();
+                if (res.ok && result.redirectUrl) {
+                    window.location.href = result.redirectUrl;
+                } else {
+                    document.getElementById('serverError').textContent = result.error || 'Registration failed';
+                    document.getElementById('serverError').style.display = 'block';
+                }
+            } catch (err) {
+                document.getElementById('serverError').textContent = 'Network error';
+                document.getElementById('serverError').style.display = 'block';
             }
         });
         

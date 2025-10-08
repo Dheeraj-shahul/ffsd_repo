@@ -31,8 +31,6 @@ const adminRoutes=require('./routes/admin')
 const analyticsRoutes = require('./routes/analytics');
 
 
-
-
 require("dns").setDefaultResultOrder("ipv4first"); // Force IPv4
 
 const app = express();
@@ -117,8 +115,6 @@ app.get("/register", (req, res) => {
 
 // POST: Handle Registration
 app.post("/register", async (req, res) => {
-  console.log("Received POST /register with body:", req.body);
-
   const {
     userType,
     firstName,
@@ -134,24 +130,11 @@ app.post("/register", async (req, res) => {
     upiid,
   } = req.body;
 
-  // Input validation
   if (!userType || !firstName || !lastName || !email || !password) {
-    console.log("Validation failed: Missing required fields");
-    return res.render("pages/registration", {
-      userType,
-      serviceType,
-      firstName,
-      lastName,
-      email,
-      phone,
-      location,
-      error: "Missing required fields",
-    });
+    return res.status(400).json({ error: "Missing required fields" });
   }
 
   try {
-    // Check for existing user
-    console.log("Checking for existing user with email:", email);
     const existingUserPromises = [
       Tenant.findOne({ email }),
       Worker.findOne({ email }),
@@ -163,84 +146,24 @@ app.post("/register", async (req, res) => {
     )?.value;
 
     if (existingUser) {
-      console.log("Existing user found:", existingUser);
-      return res.render("pages/registration", {
-        userType,
-        serviceType,
-        firstName,
-        lastName,
-        email,
-        phone,
-        location,
-        error: "Email already exists",
-      });
+      return res.status(400).json({ error: "Email already exists" });
     }
 
     let newUser;
-    console.log("Creating new user for userType:", userType);
-
     if (userType === "tenant") {
-      newUser = new Tenant({
-        firstName,
-        lastName,
-        email,
-        phone,
-        location,
-        password,
-      });
+      newUser = new Tenant({ firstName, lastName, email, phone, location, password });
     } else if (userType === "worker") {
-      newUser = new Worker({
-        firstName,
-        lastName,
-        email,
-        phone,
-        location,
-        serviceType,
-        experience: Number(experience) || null,
-        password,
-      });
+      newUser = new Worker({ firstName, lastName, email, phone, location, serviceType, experience: Number(experience) || null, password });
     } else if (userType === "owner") {
-      newUser = new Owner({
-        firstName,
-        lastName,
-        email,
-        phone,
-        location,
-        numProperties: Number(numProperties) || null,
-        password,
-        accountNo,
-        upiid,
-      });
+      newUser = new Owner({ firstName, lastName, email, phone, location, numProperties: Number(numProperties) || null, password, accountNo, upiid });
     } else {
-      console.log("Invalid user type:", userType);
-      return res.render("pages/registration", {
-        userType,
-        serviceType,
-        firstName,
-        lastName,
-        email,
-        phone,
-        location,
-        error: "Invalid user type",
-      });
+      return res.status(400).json({ error: "Invalid user type" });
     }
 
-    console.log("Saving new user:", newUser);
     await newUser.save();
-    console.log("New user saved successfully:", newUser);
-    res.redirect("/login");
+    return res.status(200).json({ redirectUrl: "/login" });
   } catch (err) {
-    console.error("Error registering user:", err);
-    res.render("pages/registration", {
-      userType,
-      serviceType,
-      firstName,
-      lastName,
-      email,
-      phone,
-      location,
-      error: `Registration failed: ${err.message}`,
-    });
+    return res.status(500).json({ error: `Registration failed: ${err.message}` });
   }
 });
 
