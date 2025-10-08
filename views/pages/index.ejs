@@ -197,143 +197,86 @@
       </div>
     </section>
 
-    <!-- Popular Listings -->
-    <div class="hidden-section listings">
-      <h2 class="side-heading">Popular Listings</h2>
-      <div class="listing-container">
-        <div class="info" id="property-info">
-          <h2>Hyderabad</h2>
-          <p>Duplex House</p>
-        </div>
-        <div class="image">
-          <img id="property-image" src="image1.jpg" alt="House Image" />
-        </div>
-        <div class="price-container">
-          <div class="price">&#8377; 50,000</div>
-          <button class="contact-btn">Contact Now</button>
-        </div>
-        <div class="controls">
-          <button onclick="prevProperty()">&#8249;</button>
-          <button onclick="nextProperty()">&#8250;</button>
-        </div>
-      </div>
+<!-- Backend data passed from the route -->
+<% 
+  const properties = propertiesData || []; // Popular listings (is_popular: true, isVerified: true, isRented: false)
+  const sliderProperties = sliderPropertiesData || []; // Slider properties
+%>
+
+<!-- Popular Listings -->
+<div class="hidden-section listings">
+  <h2 class="side-heading">Popular Listings</h2>
+  <div class="listing-container">
+    <div class="info" id="property-info">
+      <% if (properties.length > 0) { %>
+        <h2><%= properties[0].location %></h2>
+        <p><%= properties[0].subtype %></p>
+      <% } else { %>
+        <h2>No Popular Properties</h2>
+        <p>Please check back later</p>
+      <% } %>
     </div>
+    <div class="image">
+      <% if (properties.length > 0 && properties[0].images && properties[0].images.length > 0 && properties[0].images[0]) { %>
+        <img id="property-image" src="<%= properties[0].images[0] %>" alt="Property Image" />
+      <% } else { %>
+        <img id="property-image" src="/images/placeholder.jpg" alt="Property Image" />
+      <% } %>
+    </div>
+    <div class="price-container">
+      <% if (properties.length > 0) { %>
+        <div class="price">&#8377; <%= properties[0].price.toLocaleString('en-IN') %></div>
+      <% } else { %>
+        <div class="price">&#8377; 0</div>
+      <% } %>
+      <button class="contact-btn" data-id="<%= properties[0]._id %>">Contact Now</button>
+
+    </div>
+    <div class="controls">
+      <button onclick="prevProperty()">&#8249;</button>
+      <button onclick="nextProperty()">&#8250;</button>
+    </div>
+  </div>
+</div>
 
     <!-- Slider-container-->
     <div class="hidden-section slider-container">
-      <button class="nav-button prev" onclick="prevSlide1()">&#10094;</button>
-      <div class="slider">
+  <button class="nav-button prev" onclick="prevSlide1()">&#10094;</button>
+  <div class="slider">
+    <% if (sliderProperties.length > 0) { %>
+      <% sliderProperties.forEach(property => { %>
         <div class="card">
           <div
             class="slider-image"
             style="
-              background-image: url('https://mkone.in/wp-content/uploads/2022/05/clubhouse.jpeg');
+              background-image: url('<%= property.images && property.images.length > 0 ? property.images[0] : '/images/placeholder.jpg' %>');
             "
           ></div>
           <div class="content">
-            <h2>MK One - Luxury 3BHK</h2>
-            <p>
-              Located in Yendada, Visakhapatnam. Premium flats with world-class
-              amenities.
-            </p>
-            <a class="button" href="/property?id=1">View Details</a>
+            <h2><%= property.name %></h2>
+            <p><%= property.description || 'No description available' %></p>
+            <a class="button" href="/property?id=<%= property._id %>">View Details</a>
           </div>
         </div>
-        <div class="card">
-          <div
-            class="slider-image"
-            style="
-              background-image: url('https://mkbuilders.in/wp-content/uploads/2022/02/12-1024x520.jpg');
-            "
-          ></div>
-          <div class="content">
-            <h2>MK One - Luxury 4BHK</h2>
-            <p>Spacious 4BHK with sea-facing balconies and modern interiors.</p>
-            <a class="button" href="/property?id=2">View Details</a>
-          </div>
-        </div>
-        <div class="card">
-          <div
-            class="slider-image"
-            style="
-              background-image: url('https://imagecdn.99acres.com/media1/21999/8/439988362O-1725432430520.jpg');
-            "
-          ></div>
-          <div class="content">
-            <h2>Green Residency</h2>
-            <p>Eco-friendly homes with lush greenery and serene views.</p>
-            <a class="button" href="/property?id=3">View Details</a>
-          </div>
-        </div>
-        <div class="card">
-          <div
-            class="slider-image"
-            style="
-              background-image: url('https://images.skyscrapercenter.com/building/skylinetowers_(c)tamniyatglobal.jpg');
-            "
-          ></div>
-          <div class="content">
-            <h2>Skyline Towers</h2>
-            <p>
-              High-rise apartments offering luxury living with stunning city
-              views.
-            </p>
-            <a class="button" href="/property?id=4">View Details</a>
-          </div>
-        </div>
-
-        <div class="card">
-          <div
-            class="slider-image"
-            style="
-              background-image: url('https://is1-3.housingcdn.com/4f2250e8/a64f1d7aa6c9efee555452a30d318c64/v0/fs/lakeview_apartment-birati-kolkata-balaji_developers_kolkata.jpeg');
-            "
-          ></div>
-          <div class="content">
-            <h2>Lakeview Apartments</h2>
-            <p>
-              Exclusive lakeside properties with breathtaking natural beauty.
-            </p>
-            <a class="button" href="/property?id=5">View Details</a>
-          </div>
-        </div>
-
-        <div class="card">
-          <div
-            class="slider-image"
-            style="
-              background-image: url('https://storage.googleapis.com/denovamobility-b82f5.appspot.com/properties/CityScape%20Residences/gallery/dfinFeu9JclpGNx_url_1564882006.jpg?GoogleAccessId=firebase-adminsdk-abh1t%40denovamobility-b82f5.iam.gserviceaccount.com&Expires=33123375190&Signature=XueHbvUt8xhQVdpETxhf%2FeXgbbWYH%2BZ2sw5k1xG%2FlQJr2drRLi1Xyqefh8lX1hwH0bxul5bsFJg9VElMb5geFlmvLu6xQS8DDqIy3uSwcI0ICqG1roo5kpQ1pcvDGEaeasOVzlwf8gFMKSjGIvFXhcb%2Fldck7%2BmSJLVoR1Rb9RZqLpoanUK%2F6VLyo%2BIwUTxMasUtDr3rsSgo%2FUEjfCbpQXptYwxbwrIJQAS31O5g6uBzYv%2B7zlMtw5wj3Avf5CKuCYhta6qKGfqw3yNxt2dGpCuNWbIKa9YOkZfWWqKrwyHKFat9uVXQAATnhm%2FgzfbJHfCOoFIoW%2BGhFOm7rXgr5A%3D%3D&generation=1566466390446638');
-            "
-          ></div>
-          <div class="content">
-            <h2>Cityscape Residences</h2>
-            <p>
-              Modern urban homes with smart technology for comfortable living.
-            </p>
-            <a class="button" href="/property?id=6">View Details</a>
-          </div>
-        </div>
-
-        <div class="card">
-          <div
-            class="slider-image"
-            style="
-              background-image: url('https://content.jdmagicbox.com/comp/nashik/c1/0253px253.x253.180630100800.e9c1/catalogue/the-orchid-villa-nashik-6krtjcwgej.jpg');
-            "
-          ></div>
-          <div class="content">
-            <h2>Orchid Villas</h2>
-            <p>
-              Luxury villas in a peaceful environment, perfect for family
-              living.
-            </p>
-            <a class="button" href="/property?id=7">View Details</a>
-          </div>
+      <% }) %>
+    <% } else { %>
+      <div class="card">
+        <div
+          class="slider-image"
+          style="
+            background-image: url('/images/placeholder.jpg');
+          "
+        ></div>
+        <div class="content">
+          <h2>No Properties Available</h2>
+          <p>Please check back later</p>
+          <a class="button" href="#">View Details</a>
         </div>
       </div>
-      <button class="nav-button next" onclick="nextSlide1()">&#10095;</button>
-    </div>
-
+    <% } %>
+  </div>
+  <button class="nav-button next" onclick="nextSlide1()">&#10095;</button>
+</div>
     <!--news section-->
 
     <div class="hidden-section news-container">
@@ -639,35 +582,38 @@
       // Fetch and insert navbar inside a Shadow DOM
 
       const properties = [
-        {
-          place: "Hyderabad",
-          type: "Duplex House",
-          image:
-            "https://assets.isu.pub/document-structure/230520175041-8fcf61d6fb73ca89b6e18706761d01a9/v1/6cfadc014bc2bf03eef3eaa40401de4c.jpeg",
-          price: "₹ 50,000",
-        },
-        {
-          place: "Bangalore",
-          type: "Box Type Apartment",
-          image:
-            "https://static.asianpaints.com/content/dam/asianpaintsbeautifulhomes/202403/box-house-designs/modern-box-house-design.jpg",
-          price: "₹ 40,000",
-        },
-        {
-          place: "Chennai",
-          type: "Flat",
-          image:
-            "https://drahomes.in/images/front-elevation-of-dra-clover-selaiyur-chennai.png",
-          price: "₹ 35,000",
-        },
-        {
-          place: "Mumbai",
-          type: "Villa",
-          image:
-            "https://r-xx.bstatic.com/xdata/images/hotel/608x352/378097493.webp?k=bd35eebb83e54d275ae6731676b35fc75d1662e089023c68adacf689a51c3775&o=",
-          price: "₹ 70,000",
-        },
-      ];
+  <% if (properties.length > 0) { %>
+    <% properties.forEach((property, index) => { %>
+      {
+        place: "<%= property.location %>",
+        type: "<%= property.subtype %>",
+        image: "<%= property.images && property.images.length > 0 && property.images[0] ? property.images[0] : '/images/placeholder.jpg' %>",
+        price: "₹ <%= property.price.toLocaleString('en-IN') %>"
+      }<%= index < properties.length - 1 ? ',' : '' %>
+    <% }) %>
+  <% } else { %>
+    {
+      place: "No Popular Properties",
+      type: "N/A",
+      image: "/images/placeholder.jpg",
+      price: "₹ 0"
+    }
+  <% } %>
+];
+
+ document.addEventListener("DOMContentLoaded", () => {
+    const buttons = document.querySelectorAll(".contact-btn");
+
+    buttons.forEach(button => {
+      button.addEventListener("click", () => {
+        const propertyId = button.getAttribute("data-id");
+        if (propertyId) {
+          // Redirect to property details page
+          window.location.href = `/property?id=${propertyId}`;
+        }
+      });
+    });
+  });
 
       let currentIndex1 = 0;
       let carouselInterval1;

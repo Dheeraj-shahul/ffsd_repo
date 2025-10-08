@@ -4,6 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login</title>
+    
+<!-- Include Font Awesome for the eye icon -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@100;200;300;400;500;600;700;800;900&display=swap');
 
@@ -133,13 +136,33 @@
             margin-top: 3px;
             display: none;
         }
+
+        .password-container {
+        position: relative;
+        width: 100%;
+    }
+    .password-container input {
+        width: 100%;
+        padding-right: 40px; /* Space for the eye icon */
+        box-sizing: border-box;
+    }
+    .toggle-password {
+        position: absolute;
+        right: 10px;
+        top: 60%;
+        transform: translateY(-50%);
+        cursor: pointer;
+    }
+    .toggle-password i {
+        color: #666;
+    }
         
     </style>
 </head>
 <body>
     <div class="login-container">
         <h2>Login</h2>
-        <form id="loginForm" action="/login" method="POST">
+        <form id="loginForm">
     
             <!-- Role Selection -->
             <label for="userType">Select Role:</label>
@@ -156,24 +179,29 @@
             <input type="email" id="email" name="email" placeholder="Enter your email" value="<%= typeof email !== 'undefined' ? email : '' %>" required>
             <div id="emailError" class="error-text"><%= errors && errors.email ? errors.email : 'Email is required' %></div>
     
-            <!-- Password Input -->
-            <label for="password">Password:</label>
+             <!-- Password Input -->
+        <label for="password">Password:</label>
+        <div class="password-container">
             <input type="password" id="password" name="password" placeholder="Enter your password" value="<%= typeof password !== 'undefined' ? password : '' %>" required>
-            <div id="passwordError" class="error-text">
-                <%= errors && errors.password ? errors.password : 'Password is required' %>
-            </div>
+            <span class="toggle-password">
+                <i class="fa fa-eye" id="togglePasswordIcon"></i>
+            </span>
+        </div>
+        <div id="passwordError" class="error-text">
+            <%= errors && errors.password ? errors.password : 'Password is required' %>
+        </div>
 
-            <% if (errors && errors.auth) { %>
-                <div class="error-text visible" style="text-align: center;">
-                    <%= errors.auth %>
-                </div>
-            <% } %>
+        <% if (errors && errors.auth) { %>
+            <div class="error-text visible" style="text-align: center;">
+                <%= errors.auth %>
+            </div>
+        <% } %>
             
             <!-- Forgot Password Link -->
             <a href="/forgot-password" class="forgot-password">Forgot Password?</a>
     
             <!-- Submit Button -->
-            <button type="submit">Login</button>
+            <button type="submit" id="loginBtn">Login</button>
     
             <!-- Sign Up Link -->
             <p>Don't have an account? <a href="/register" style="color: rgb(34, 143, 244); text-decoration: underline; font-size: 14px; cursor: pointer;">Sign up</a></p>
@@ -200,6 +228,61 @@
                 alert("<%= errors.auth %>");
             };
         <% } %>
+
+         // Toggle password visibility
+    document.getElementById("togglePasswordIcon").addEventListener("click", function () {
+        const passwordInput = document.getElementById("password");
+        const icon = this;
+        if (passwordInput.type === "password") {
+            passwordInput.type = "text";
+            icon.classList.remove("fa-eye");
+            icon.classList.add("fa-eye-slash");
+        } else {
+            passwordInput.type = "password";
+            icon.classList.remove("fa-eye-slash");
+            icon.classList.add("fa-eye");
+        }
+    });
+
+
+         document.getElementById("loginForm").addEventListener("submit", function (e) {
+    e.preventDefault(); // Stop normal form submission
+
+    const userType = document.getElementById("userType").value;
+    const email = document.getElementById("email").value;
+    const password = document.getElementById("password").value;
+
+    const xhttp = new XMLHttpRequest();
+    xhttp.open("POST", "/login", true);
+    xhttp.setRequestHeader("Content-Type", "application/json");
+
+    xhttp.onload = function () {
+      if (xhttp.status === 200) {
+        // Successful login → server may send HTML redirect or JSON
+        try {
+          const response = JSON.parse(xhttp.responseText);
+          if (response.redirectUrl) {
+            window.location.href = response.redirectUrl; // go to dashboard
+          } else {
+            alert("Login successful!");
+          }
+        } catch (err) {
+          // If server sent HTML, just replace page
+          document.body.innerHTML = xhttp.responseText;
+        }
+      } else {
+        alert("Login failed: " + xhttp.responseText);
+      }
+    };
+
+    xhttp.send(
+      JSON.stringify({
+        userType,
+        email,
+        password
+      })
+    );
+  });
     </script>
 </body>
 </html>

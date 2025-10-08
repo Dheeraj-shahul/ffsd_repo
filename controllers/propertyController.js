@@ -45,6 +45,7 @@ exports.listProperty = async (req, res) => {
     const pincode = getField(fields.pincode);
     const landmark = getField(fields.landmark);
     const price = getField(fields["rent-amount"]);
+    const mapLink = getField(fields["map-link"]);
     const securityDeposit = getField(fields["security-deposit"]);
     const maintenance = getField(fields.maintenance);
     const availableFrom = getField(fields["available-from"]);
@@ -133,6 +134,7 @@ exports.listProperty = async (req, res) => {
         : amenities
         ? [amenities]
         : [],
+      map: mapLink || "", // Save map-link to map field
       price: parseFloat(price),
       status: "Pending",
       isRented: false,

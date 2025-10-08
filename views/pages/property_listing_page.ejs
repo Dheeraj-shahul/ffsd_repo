@@ -19,27 +19,6 @@
   </head>
 
   <body>
-    <!-- <div id="header">
-      <div id="logo">
-        <div id="brandid">RentEase</div>
-        <div id="tagline">Your One-Stop Rental Solution</div>
-      </div>
-     
-      <button class="nav-toggle" onclick="toggleNav()">☰</button>
-
-      <nav id="nav-menu">
-        <a href="#">Home</a>
-        <a href="#">Properties</a>
-        <a href="#">Services</a>
-        <a href="#">About Us</a>
-        <a href="#">Contact Us</a>
-        <a href="#">FAQs</a>
-      </nav>
-      <div class="cta">
-        <a href="./loginpage.html">Login/SignUp</a>
-      </div>
-      <div class="overlay" id="overlay"></div>
-    </div> -->
     <%- include('../partials/header') %>
 
     <div class="page-container">
@@ -64,8 +43,6 @@
                   <option value="commercial">Commercial Space</option>
                 </select>
               </div>
-
-
               <div class="form-group">
                 <label for="property-subtype">Property Subtype*</label>
                 <select id="property-subtype" name="property-subtype" required>
@@ -80,7 +57,7 @@
                   <option value="other">Other</option>
                 </select>
               </div>
-              
+            </div>
 
             <div class="form-row">
               <div class="form-group">
@@ -182,6 +159,19 @@
                   name="pincode"
                   required
                   placeholder="Pincode"
+                />
+              </div>
+
+              
+            </div>
+            <div class="form-row">
+              <div class="form-group full-width">
+                <label for="map-link">Google Maps Embed Link</label>
+                <input
+                  type="url"
+                  id="map-link"
+                  name="map-link"
+                  placeholder="Paste Google Maps embed link (e.g., https://www.google.com/maps/embed?...)"
                 />
               </div>
             </div>
@@ -346,7 +336,6 @@
                 <input type="checkbox" id="ac" name="amenities" value="ac" />
                 <label for="ac">Water supply</label>
               </div>
-
               <div class="amenity-checkbox">
                 <input
                   type="checkbox"

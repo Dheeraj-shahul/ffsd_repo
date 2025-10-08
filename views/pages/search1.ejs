@@ -1,760 +1,864 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Results Page</title>
-    <link rel="stylesheet" href="/css/search.css">
+    <link rel="stylesheet" href="/css/search.css" />
     <style>
-        /* General Styles */
-        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@100;200;300;400;500;600;700;800;900&display=swap');
-        body {
-            font-family: 'Poppins', sans-serif;
-            margin: 0;
-            padding: 0;
-            display: flex;
-            flex-direction: column;
-            background-color: #f4f4f4;
-        }
-
-        /* Sidebar Styles */
-        aside {
-            width: 270px;
-            background: #333;
-            padding: 20px;
-            box-shadow: 2px 0px 5px rgba(0, 0, 0, 0.1);
-            height: 100vh;
-            color: white;
-            position: fixed;
-            left: 0;
-            top: 0;
-            transition: transform 0.5s ease-in-out;
-            margin-left:-9px;
-            margin-top:-5px;
-            
-                
-                
-        }
-
-        /* Hide sidebar on mobile (initially off-screen) */
-        @media (max-width: 768px) {
-            aside {
-                transform: translateX(-100%);
-                position: fixed;
-                height: 100%;
-                z-index: 1000;
-            }
-        }
-        @media (max-width: 480px) {
-            aside {
-                transform: translateX(-100%);
-                position: fixed;
-                height: 100%;
-                z-index: 1000;
-                
-                
-                
-            }
-        }
-
-        /* Show sidebar on mobile when active */
-        aside.active {
-            transform: translateX(0);
-        }
-
-        /* Small filter icon (mobile only) */
-        .filter-icon {
-            display: none;
-            position: fixed;
-            top: 90px;
-            left: 10px;
-            background: #ffc109;
-            color: black;
-            padding: 10px;
-            padding-bottom: 4px;
-            padding-right: 8px;
-            padding-left: 8px;
-            border-radius: 5px;
-            cursor: pointer;
-            z-index: 2000;
-        }
-
-        @media (max-width: 768px) {
-            .filter-icon {
-                display: block;
-            }
-        }
-
-        /* Sort options */
-        .sort-options {
-            margin: 20px;
-        }
-
-        .sort-options select {
-            padding: 5px;
-        }
-
-        /* Content section */
-        .content {
-            margin-left: 270px;
-            padding: 20px;
-            flex: 1;
-        }
-
-        @media (max-width: 768px) {
-            .content {
-                margin-left: 0;
-            }
-        }
-
-        /* Close overlay (mobile) */
-        .overlay {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.5);
-            z-index: 999;
-        }
-
-        .overlay.active {
-            display: block;
-        }
-
-        h2 {
-            color: #ff6f00;
-            text-align: center;
-            margin-right:70px;
-        }
-
-        aside h2 {
-            margin-bottom: 10px;
-            color: #ffc107;
-        }
-
-        .filters {
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-        }
-
-        .filter-group {
-            display: flex;
-            flex-direction: column;
-        }
-
-        .filter-group label {
-            font-weight: bold;
-            margin-bottom: 5px;
-        }
-
-        select {
-            background-color: #f2e2b2;
-            padding: 8px;
-            border-radius: 5px;
-            color: black;
-            font-weight: bold;
-        }
-
-        select:hover {
-            border-color: #e0a800;
-        }
-
-        #priceValue {
-            background-color: #f2e2b2;
-            padding: 8px;
-            border-radius: 5px;
-            color: black;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        input[type="range"],
-        aside button {
-            padding: 8px;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-            margin-bottom: 10px;
-            cursor: pointer;
-        }
-
-        input[type="range"]::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            background-color: red;
-        }
-
-        /* Amenities Styling */
-        fieldset {
-            border: 1px solid #ccc;
-            padding: 10px;
-            border-radius: 5px;
-        }
-
-        .amenities-group {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 8px;
-            padding: 5px;
-        }
-
-        .amenities-group label {
-            display: flex;
-            align-items: center;
-            gap: 5px;
-            font-size: 15px;
-        }
-
-        .amenities-group input[type="checkbox"] {
-            cursor: pointer;
-            margin-right: 10px;
-            font-weight: bold;
-            font-size: 15px;
-        }
-
-        label {
-            font-weight: bold;
-            font-size: 15px;
-            font-family: 'Poppins', sans-serif;
-        }
-
-        legend {
-            font-size: 15px;
-            font-weight: bold;
-            color: white;
-            margin-bottom: 10px;
-            font-family: 'Poppins', sans-serif;
-        }
-
-        /* Search Button */
-        .filters button {
-            background: #ffc109;
-            color: black;
-            border: none;
-            padding: 10px;
-            cursor: pointer;
-            border-radius: 5px;
-            font-size: 14px;
-            font-weight: bold;
-            font-family: 'Poppins', sans-serif;
-        }
-
-        .filters button:hover {
-            background: #ff6f00;
-        }
-
-        /* Results Section */
-        .results {
-            background: #fff;
-            padding: 15px;
-            border-radius: 0%;
-            box-shadow: 0px 0px 5px rgba(0, 0, 0, 0.2);
-            margin-left: 20px;
-        }
-        
-        @media(max-width: 768px) {
-            .results {
-                margin-left: 10px;
-                margin-right: 10px;
-            }
-            .filter-icon {
-                margin-top: -6px;
-                margin-left: 30px;
-                position: fixed;
-            }
-
-            #sidebar {
-        position: fixed;
-        top: 0;
-        left: 0; 
-        bottom:-200px;
-        width: 50vw; /* Half of the viewport width */
-        overflow-y: auto; /* Allow full scroll */
-        background: #333;
-       
-        
-        padding-bottom:200px;
-        
-    }
-        }
-
-        @media(max-width: 480px) {
-            .filter-icon {
-                margin-top: -10px;
-                margin-left: 3px;
-                background-color: transparent;
-            }
-        }
-
-        #result-list {
-            list-style: none;
-            padding: 0;
-        }
-
-        #result-list li {
-            padding: 10px;
-            border-bottom: 1px solid #ddd;
-        }
-
-        /* Pagination */
-        .pagination {
-            margin-top: 15px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .pagination span {
-            font-size: 16px;
-            line-height: 1;
-        }
-
-        
-
-        .pagination button:hover {
-            background: #ff6f00;
-        }
-
-        /* Back to Search Link */
-        section a {
-            display: inline-block;
-            margin-top: 15px;
-            text-decoration: none;
-            color: #007bff;
-            padding-left: 20px;
-        }
-
-        section a:hover {
-            text-decoration: underline;
-            color: #ff6f00 !important;
-        }
-        
-        #navbar-container {
-            position: fixed;
-            z-index: 100;
-            width: 100%;
-        }
-        
-        .container {
-            padding-top: 60px;
-        }
-        
-        .testing {
-            margin-left: 50px;
-            margin-right: 40px;
-            margin-top: -30px;
-        }
-        
-        * {
-            margin-right: 0px;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
-        /* Base styles */
-#sidebar {
-    width: 100%;
-    max-width: 300px; /* Adjust width as needed */
-    padding: 16px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-}
-
-/* Make sidebar scrollable on mobile */
-@media (max-width: 480px) {
-    #sidebar {
-        position: fixed;
-        top: 0;
-        left: 0; 
-        bottom: 0;
-        width: 50vw; /* Half of the viewport width */
-        overflow-y: auto; /* Allow full scroll */
-        background: #333;
-        z-index: 999; /* Keep above other content */
-    }
-
-    /* Ensure amenities section is scrollable */
-    .amenities-group {
+      /* General Styles */
+      @import url("https://fonts.googleapis.com/css2?family=Poppins:wght@100;200;300;400;500;600;700;800;900&display=swap");
+      body {
+        font-family: "Poppins", sans-serif;
+        margin: 0;
+        padding: 0;
         display: flex;
-        flex-wrap: wrap; /* Allow checkboxes to wrap */
-        gap: 8px; /* Space between checkboxes */
-    }
+        flex-direction: column;
+        background-color: #f4f4f4;
+      }
 
-    /* If needed, ensure no element overflows */
-    fieldset {
-        min-width: 100%;
-        box-sizing: border-box; /* Include padding in width */
-    }
-    #sidebar::-webkit-scrollbar {
-        display: none; 
-}
-}
-@media(min-width:1024px){
-    #sidebar {
+      /* Sidebar Styles */
+      aside {
+        width: 270px;
+        background: #333;
+        padding: 20px;
+        box-shadow: 2px 0px 5px rgba(0, 0, 0, 0.1);
+        height: 100vh;
+        color: white;
+        position: fixed;
+        left: 0;
+        top: 0;
+        transition: transform 0.5s ease-in-out;
+        margin-left: -9px;
+        margin-top: -5px;
+      }
+
+      /* Hide sidebar on mobile (initially off-screen) */
+      @media (max-width: 768px) {
+        aside {
+          transform: translateX(-100%);
+          position: fixed;
+          height: 100%;
+          z-index: 1000;
+        }
+      }
+      @media (max-width: 480px) {
+        aside {
+          transform: translateX(-100%);
+          position: fixed;
+          height: 100%;
+          z-index: 1000;
+        }
+      }
+
+      /* Show sidebar on mobile when active */
+      aside.active {
+        transform: translateX(0);
+      }
+
+      /* Small filter icon (mobile only) */
+      .filter-icon {
+        display: none;
+        position: fixed;
+        top: 90px;
+        left: 10px;
+        background: #ffc109;
+        color: black;
+        padding: 10px;
+        padding-bottom: 4px;
+        padding-right: 8px;
+        padding-left: 8px;
+        border-radius: 5px;
+        cursor: pointer;
+        z-index: 2000;
+      }
+
+      @media (max-width: 768px) {
+        .filter-icon {
+          display: block;
+        }
+      }
+
+      /* Sort options */
+      .sort-options {
+        margin: 20px;
+      }
+
+      .sort-options select {
+        padding: 5px;
+      }
+
+      /* Content section */
+      .content {
+        margin-left: 270px;
+        padding: 20px;
+        flex: 1;
+      }
+
+      @media (max-width: 768px) {
+        .content {
+          margin-left: 0;
+        }
+      }
+
+      /* Close overlay (mobile) */
+      .overlay {
+        display: none;
         position: fixed;
         top: 0;
-        left: 0; 
-        bottom:-200px;
-        width: 50vw; /* Half of the viewport width */
-        overflow-y: auto; /* Allow full scroll */
-        background: #333;
-       
-        margin-top:60px;
-        padding-bottom:200px;
-        
-    }
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5);
+        z-index: 999;
+      }
 
-    #sidebar::-webkit-scrollbar {
-    display: none; 
-}
-}
+      .overlay.active {
+        display: block;
+      }
 
+      h2 {
+        color: #ff6f00;
+        text-align: center;
+        margin-right: 70px;
+      }
+
+      aside h2 {
+        margin-bottom: 10px;
+        color: #ffc107;
+      }
+
+      .filters {
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+      }
+
+      .filter-group {
+        display: flex;
+        flex-direction: column;
+      }
+
+      .filter-group label {
+        font-weight: bold;
+        margin-bottom: 5px;
+      }
+
+      select {
+        background-color: #f2e2b2;
+        padding: 8px;
+        border-radius: 5px;
+        color: black;
+        font-weight: bold;
+      }
+
+      select:hover {
+        border-color: #e0a800;
+      }
+
+      #priceValue {
+        background-color: #f2e2b2;
+        padding: 8px;
+        border-radius: 5px;
+        color: black;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      input[type="range"],
+      aside button {
+        padding: 8px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        margin-bottom: 10px;
+        cursor: pointer;
+      }
+
+      input[type="range"]::-webkit-slider-thumb {
+        -webkit-appearance: none;
+        background-color: red;
+      }
+
+      /* Amenities Styling */
+      fieldset {
+        border: 1px solid #ccc;
+        padding: 10px;
+        border-radius: 5px;
+      }
+
+      .amenities-group {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 8px;
+        padding: 5px;
+      }
+
+      .amenities-group label {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        font-size: 15px;
+      }
+
+      .amenities-group input[type="checkbox"] {
+        cursor: pointer;
+        margin-right: 10px;
+        font-weight: bold;
+        font-size: 15px;
+      }
+
+      label {
+        font-weight: bold;
+        font-size: 15px;
+        font-family: "Poppins", sans-serif;
+      }
+
+      legend {
+        font-size: 15px;
+        font-weight: bold;
+        color: white;
+        margin-bottom: 10px;
+        font-family: "Poppins", sans-serif;
+      }
+
+      /* Search Button */
+      .filters button {
+        background: #ffc109;
+        color: black;
+        border: none;
+        padding: 10px;
+        cursor: pointer;
+        border-radius: 5px;
+        font-size: 14px;
+        font-weight: bold;
+        font-family: "Poppins", sans-serif;
+      }
+
+      .filters button:hover {
+        background: #ff6f00;
+      }
+
+      /* Results Section */
+      .results {
+        background: #fff;
+        padding: 15px;
+        border-radius: 0%;
+        box-shadow: 0px 0px 5px rgba(0, 0, 0, 0.2);
+        margin-left: 20px;
+      }
+
+      @media (max-width: 768px) {
+        .results {
+          margin-left: 10px;
+          margin-right: 10px;
+        }
+        .filter-icon {
+          margin-top: -6px;
+          margin-left: 30px;
+          position: fixed;
+        }
+
+        #sidebar {
+          position: fixed;
+          top: 0;
+          left: 0;
+          bottom: -200px;
+          width: 50vw; /* Half of the viewport width */
+          overflow-y: auto; /* Allow full scroll */
+          background: #333;
+          padding-bottom: 200px;
+        }
+      }
+
+      @media (max-width: 480px) {
+        .filter-icon {
+          margin-top: -10px;
+          margin-left: 3px;
+          background-color: transparent;
+        }
+      }
+
+      #result-list {
+        list-style: none;
+        padding: 0;
+      }
+
+      #result-list li {
+        padding: 10px;
+        border-bottom: 1px solid #ddd;
+      }
+
+      /* Pagination */
+      .pagination {
+        margin-top: 15px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 10px;
+      }
+
+      .pagination span {
+        font-size: 16px;
+        line-height: 1;
+      }
+
+      .pagination button:hover {
+        background: #ff6f00;
+      }
+
+      /* Back to Search Link */
+      section a {
+        display: inline-block;
+        margin-top: 15px;
+        text-decoration: none;
+        color: #007bff;
+        padding-left: 20px;
+      }
+
+      section a:hover {
+        text-decoration: underline;
+        color: #ff6f00 !important;
+      }
+
+      #navbar-container {
+        position: fixed;
+        z-index: 100;
+        width: 100%;
+      }
+
+      .container {
+        padding-top: 60px;
+      }
+
+      .testing {
+        margin-left: 50px;
+        margin-right: 40px;
+        margin-top: -30px;
+      }
+
+      * {
+        margin-right: 0px;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+      }
+      /* Base styles */
+      #sidebar {
+        width: 100%;
+        max-width: 300px; /* Adjust width as needed */
+        padding: 16px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      }
+
+      /* Make sidebar scrollable on mobile */
+      @media (max-width: 480px) {
+        #sidebar {
+          position: fixed;
+          top: 0;
+          left: 0;
+          bottom: 0;
+          width: 50vw; /* Half of the viewport width */
+          overflow-y: auto; /* Allow full scroll */
+          background: #333;
+          z-index: 999; /* Keep above other content */
+        }
+
+        /* Ensure amenities section is scrollable */
+        .amenities-group {
+          display: flex;
+          flex-wrap: wrap; /* Allow checkboxes to wrap */
+          gap: 8px; /* Space between checkboxes */
+        }
+
+        /* If needed, ensure no element overflows */
+        fieldset {
+          min-width: 100%;
+          box-sizing: border-box; /* Include padding in width */
+        }
+        #sidebar::-webkit-scrollbar {
+          display: none;
+        }
+      }
+      @media (min-width: 1024px) {
+        #sidebar {
+          position: fixed;
+          top: 0;
+          left: 0;
+          bottom: -200px;
+          width: 50vw; /* Half of the viewport width */
+          overflow-y: auto; /* Allow full scroll */
+          background: #333;
+          margin-top: 60px;
+          padding-bottom: 200px;
+        }
+
+        #sidebar::-webkit-scrollbar {
+          display: none;
+        }
+      }
+
+      /* Close button for sidebar */
+      .close-sidebar {
+        display: none;
+        background: #ffc109;
+        color: black;
+        border: none;
+        padding: 8px 12px;
+        cursor: pointer;
+        border-radius: 5px;
+        font-size: 14px;
+        font-weight: bold;
+        font-family: "Poppins", sans-serif;
+        margin-bottom: 15px;
+      }
+
+      @media (max-width: 768px) {
+        .close-sidebar {
+          display: block;
+        }
+      }
+
+      .close-sidebar:hover {
+        background: #ff6f00;
+      }
     </style>
-</head>
-<body>
-
+  </head>
+  <body>
     <%- include('../partials/header') %>
-    
+
     <div class="container">
-        <!-- Small Filter icon (mobile only) -->
-        <div class="filter-icon" id="filter-icon">
-          <img src="https://cdn-icons-png.flaticon.com/128/3839/3839020.png" alt="Filter" width="25" height="25">
-        </div>
-    
-        <!-- Overlay for mobile -->
-        <div class="overlay" id="overlay"></div>
-    
-        <!-- Sidebar Filters -->
-        <aside id="sidebar">
-          <h2>Apply Filters</h2>
-          <form action="/search" method="GET">
-            <div class="filters">
-              <div class="filter-group">
-                <label for="location">Location:</label>
-                <select name="location" id="location">
-                  <option value="">Select Location</option>
-                  <option value="chennai">Chennai</option>
-                  <option value="kolkata">Kolkata</option>
-                  <option value="visakhapatnam">Visakhapatnam</option>
-                  <option value="mumbai">Mumbai</option>
-                  <option value="hyderabad">Hyderabad</option>
-                  <option value="bangalore">Bangalore</option>
-                  <option value="delhi">Delhi</option>
-                </select>
-              </div>
-    
-              <div class="filter-group">
-                <label for="property-type">Property Type:</label>
-                <select name="property-type" id="property-type">
-                  <option value="">Select Type</option>
-                  <option value="flat">Flat</option>
-                  <option value="house">House</option>
-                  <option value="apartment">Apartment</option>
-                </select>
-              </div>
-    
-              <div class="filter-group">
-                <label for="price-range">Price Range:</label>
-                <input type="range" id="price-range" name="price" min="3500" max="100000" step="1000" oninput="priceValue.innerText = this.value">
-                <span id="priceValue">15000</span>
-              </div>
-    
-              <div class="filter-group">
-                <label for="bedrooms">Bedrooms:</label>
-                <select name="bedroom-no" id="bedroom-no">
-                  <option value="">Select No. of Bedrooms</option>
-                  <option value="1">1</option>
-                  <option value="2">2</option>
-                  <option value="3">3</option>
-                  <option value="4">4</option>
-                </select>
-              </div>
-    
-              <div class="filter-group">
-                <label for="bathrooms">Bathrooms:</label>
-                <select name="bathroom-no" id="bathroom-no">
-                  <option value="">Select No. of Bathrooms</option>
-                  <option value="1">1</option>
-                  <option value="2">2</option>
-                  <option value="3">3</option>
-                </select>
-              </div>
-    
-              <div class="filter-group">
-                <label for="furnishing">Furnishing:</label>
-                <select name="furnishing" id="furnishing">
-                  <option value="">Select Furnishing Type</option>
-                  <option value="furnished">Furnished</option>
-                  <option value="unfurnished">Unfurnished</option>
-                  <option value="semi-furnished">Semi-Furnished</option>
-                </select>
-              </div>
-    
-              <fieldset>
-                <legend>Amenities:</legend>
-                <div class="amenities-group">
-                  <label><input type="checkbox" name="amenities" value="parking"> Parking</label>
-                  <label><input type="checkbox" name="amenities" value="wifi"> WiFi</label>
-                  <label><input type="checkbox" name="amenities" value="pool"> Pool</label>
-                  <label><input type="checkbox" name="amenities" value="gym"> Gym</label>
-                  <label><input type="checkbox" name="amenities" value="security"> Security</label>
-                  <label><input type="checkbox" name="amenities" value="balcony"> Balcony</label>
-                  <label><input type="checkbox" name="amenities" value="water supply"> Water Supply</label>
-                  <label><input type="checkbox" name="amenities" value="kids play area"> Kids Play Area</label>
-                  <label><input type="checkbox" name="amenities" value="lift"> Lift</label>
-                </div>
-              </fieldset>
-    
-              <button type="submit">Search Homes</button>
-            </div>
-          </form>
-        </aside>
-    
-        <!-- Main Content -->
-        <section class="content">
-          <h2>Search Results</h2>
-    
-          <!-- Sorting Options -->
-          <div class="sort-options">
-            <label for="sort">Sort by:</label>
-            <select id="sort">
-              <option value="rating">Rating</option>
-              <option value="price-low-to-high">Price: Low to High</option>
-              <option value="price-high-to-low">Price: High to Low</option>
-              <option value="availability-soon">Availability: Soon</option>
-            </select>
-          </div>
-    
-          <!-- Results Section -->
-          <div class="results">
-            <h2 class="section-title">Featured Houses</h2>
-            <ul id="result-list" class="property-grid">
-              <% if (properties && properties.length > 0) { %>
-                <% properties.forEach(property => { %>
-                  <li class="property-card">
-                    <div class="property-image">
-                      <img src="<%= property.images[0] %>" alt="Property Image">
-                      <div class="property-type"><%= property.subtype %></div>
-                    </div>
-                    <div class="property-info">
-                      <h3 class="property-name"><%= property.name %></h3>
-                      <p class="property-address"><%= property.address %></p>
-                      <p class="property-category">Type: <%= property.type %></p>
-                      <div class="property-features">
-                        <div class="feature"><span class="feature-icon">🛏️</span> <%= property.beds %> Beds</div>
-                        <div class="feature"><span class="feature-icon">🛁</span> <%= property.baths %> Baths</div>
-                        <div class="feature"><span class="feature-icon">🛋️</span> <%= property.furnished %></div>
-                      </div>
-                      <div class="rating">
-                        <div class="stars">
-                          <% for (let i = 1; i <= 5; i++) { %>
-                            <% if (i <= property.rating) { %>
-                              ★
-                            <% } else { %>
-                              ☆
-                            <% } %>
-                          <% } %>
-                        </div>
-                        <div class="review-count">(<%= property.reviews %> reviews)</div>
-                      </div>
-                      <div class="property-price">₹<%= property.price %></div>
-                      <p class="property-location">Location: <%= property.location %></p>
-                      <div class="property-amenities">
-                        <strong>Amenities:</strong>
-                        <% property.amenities.forEach(amenity => { %>
-                          <span class="amenity"><%= amenity %></span><%= amenity !== property.amenities[property.amenities.length - 1] ? ', ' : '' %>
-                        <% }); %>
-                      </div>
-                      <div class="property-footer">
-                        <a href="/property?id=<%= property._id %>" class="btn">View Details</a>
-                        <button class="btn wishlist-btn" onclick="saveProperty('<%= property._id %>')">❤ Save</button>
-                      </div>
-                    </div>
-                  </li>
-                <% }); %>
-              <% } else { %>
-                <li>No results found</li>
-              <% } %>
-            </ul>
-          </div>
-          <a href="/">Back to Home</a>
-        </section>
+      <!-- Small Filter icon (mobile only) -->
+      <div class="filter-icon" id="filter-icon">
+        <img
+          src="https://cdn-icons-png.flaticon.com/128/3839/3839020.png"
+          alt="Filter"
+          width="25"
+          height="25"
+        />
       </div>
-    
-      <script>
-        // Sorting Script
-        const initialProperties = <%- JSON.stringify(properties) %>;
-        document.addEventListener("DOMContentLoaded", function() {
+
+      <!-- Overlay for mobile -->
+      <div class="overlay" id="overlay"></div>
+
+      <!-- Sidebar Filters -->
+      <aside id="sidebar">
+        <button class="close-sidebar" id="close-sidebar">Close</button>
+        <h2>Apply Filters</h2>
+        <form action="/search" method="GET" id="filter-form">
+          <div class="filters">
+            <div class="filter-group">
+              <label for="location">Location:</label>
+              <select name="location" id="location">
+                <option value="">Select Location</option>
+                <option value="chennai">Chennai</option>
+                <option value="kolkata">Kolkata</option>
+                <option value="visakhapatnam">Visakhapatnam</option>
+                <option value="mumbai">Mumbai</option>
+                <option value="hyderabad">Hyderabad</option>
+                <option value="bangalore">Bangalore</option>
+                <option value="delhi">Delhi</option>
+              </select>
+            </div>
+
+            <div class="filter-group">
+              <label for="property-type">Property Type:</label>
+              <select name="property-type" id="property-type">
+                <option value="">Select Type</option>
+                <option value="flat">Flat</option>
+                <option value="house">House</option>
+                <option value="apartment">Apartment</option>
+              </select>
+            </div>
+
+            <div class="filter-group">
+              <label for="price-range">Price Range:</label>
+              <input
+                type="range"
+                id="price-range"
+                name="price"
+                min="3500"
+                max="100000"
+                step="1000"
+                oninput="priceValue.innerText = this.value"
+              />
+              <span id="priceValue">15000</span>
+            </div>
+
+            <div class="filter-group">
+              <label for="bedrooms">Bedrooms:</label>
+              <select name="bedroom-no" id="bedroom-no">
+                <option value="">Select No. of Bedrooms</option>
+                <option value="1">1</option>
+                <option value="2">2</option>
+                <option value="3">3</option>
+                <option value="4">4</option>
+              </select>
+            </div>
+
+            <div class="filter-group">
+              <label for="bathrooms">Bathrooms:</label>
+              <select name="bathroom-no" id="bathroom-no">
+                <option value="">Select No. of Bathrooms</option>
+                <option value="1">1</option>
+                <option value="2">2</option>
+                <option value="3">3</option>
+              </select>
+            </div>
+
+            <div class="filter-group">
+              <label for="furnishing">Furnishing:</label>
+              <select name="furnishing" id="furnishing">
+                <option value="">Select Furnishing Type</option>
+                <option value="furnished">Furnished</option>
+                <option value="unfurnished">Unfurnished</option>
+                <option value="semi-furnished">Semi-Furnished</option>
+              </select>
+            </div>
+
+            <fieldset>
+              <legend>Amenities:</legend>
+              <div class="amenities-group">
+                <label
+                  ><input type="checkbox" name="amenities[]" value="parking" />
+                  Parking</label
+                >
+                <label
+                  ><input type="checkbox" name="amenities[]" value="wifi" />
+                  WiFi</label
+                >
+                <label
+                  ><input type="checkbox" name="amenities[]" value="pool" />
+                  Pool</label
+                >
+                <label
+                  ><input type="checkbox" name="amenities[]" value="gym" />
+                  Gym</label
+                >
+                <label
+                  ><input type="checkbox" name="amenities[]" value="security" />
+                  Security</label
+                >
+                <label
+                  ><input type="checkbox" name="amenities[]" value="balcony" />
+                  Balcony</label
+                >
+                <label
+                  ><input
+                    type="checkbox"
+                    name="amenities[]"
+                    value="water supply"
+                  />
+                  Water Supply</label
+                >
+                <label
+                  ><input
+                    type="checkbox"
+                    name="amenities[]"
+                    value="kids play area"
+                  />
+                  Kids Play Area</label
+                >
+                <label
+                  ><input type="checkbox" name="amenities[]" value="lift" />
+                  Lift</label
+                >
+              </div>
+            </fieldset>
+
+            <button type="submit">Search Homes</button>
+          </div>
+        </form>
+      </aside>
+
+      <!-- Main Content -->
+      <section class="content">
+        <h2>Search Results</h2>
+
+        <!-- Sorting Options -->
+        <div class="sort-options">
+          <label for="sort">Sort by:</label>
+          <select id="sort">
+            <option value="rating">Rating</option>
+            <option value="price-low-to-high">Price: Low to High</option>
+            <option value="price-high-to-low">Price: High to Low</option>
+            <option value="availability-soon">Availability: Soon</option>
+          </select>
+        </div>
+
+        <!-- Results Section -->
+        <div class="results">
+          <h2 class="section-title">Featured Houses</h2>
+          <ul id="result-list" class="property-grid">
+            <% if (properties && properties.length > 0) { %> <%
+            properties.forEach(property => { %>
+            <li class="property-card">
+              <div class="property-image">
+                <img src="<%= property.images[0] %>" alt="Property Image" />
+                <div class="property-type"><%= property.subtype %></div>
+              </div>
+              <div class="property-info">
+                <h3 class="property-name"><%= property.name %></h3>
+                <p class="property-address"><%= property.address %></p>
+                <p class="property-category">Type: <%= property.type %></p>
+                <div class="property-features">
+                  <div class="feature">
+                    <span class="feature-icon">🛏️</span> <%= property.beds %>
+                    Beds
+                  </div>
+                  <div class="feature">
+                    <span class="feature-icon">🛁</span> <%= property.baths %>
+                    Baths
+                  </div>
+                  <div class="feature">
+                    <span class="feature-icon">🛋️</span> <%= property.furnished
+                    %>
+                  </div>
+                </div>
+                <div class="rating">
+                  <div class="stars">
+                    <% for (let i = 1; i <= 5; i++) { %> <% if (i <=
+                    property.rating) { %> ★ <% } else { %> ☆ <% } %> <% } %>
+                  </div>
+                  <div class="review-count">
+                    (<%= property.reviews %> reviews)
+                  </div>
+                </div>
+                <div class="property-price">₹<%= property.price %></div>
+                <p class="property-location">
+                  Location: <%= property.location %>
+                </p>
+                <div class="property-amenities">
+                  <strong>Amenities:</strong>
+                  <% property.amenities.forEach(amenity => { %>
+                  <span class="amenity"><%= amenity %></span><%= amenity !==
+                  property.amenities[property.amenities.length - 1] ? ', ' : ''
+                  %> <% }); %>
+                </div>
+                <div class="property-footer">
+                  <a href="/property?id=<%= property._id %>" class="btn"
+                    >View Details</a
+                  >
+                  <button
+                    class="btn wishlist-btn"
+                    data-property-id="<%= property._id %>"
+                    onclick="saveProperty('<%= property._id %>')"
+                  >
+                    ❤ Save
+                  </button>
+                </div>
+              </div>
+            </li>
+            <% }); %> <% } else { %>
+            <li>No results found</li>
+            <% } %>
+          </ul>
+        </div>
+        <a href="/">Back to Home</a>
+      </section>
+    </div>
+
+    <script>
+      // Sorting Script
+      const initialProperties = <%- JSON.stringify(properties) %>;
+      document.addEventListener("DOMContentLoaded", function() {
           const sortSelect = document.getElementById("sort");
           const resultList = document.getElementById("result-list");
-    
-          // Sort and re-render when dropdown changes
-          sortSelect.addEventListener('change', function() {
-            const sortBy = this.value;
-            let sortedProperties = [...initialProperties];
-    
-            switch (sortBy) {
-              case 'rating':
-                sortedProperties.sort((a, b) => b.rating - a.rating);
-                break;
-              case 'price-low-to-high':
-                sortedProperties.sort((a, b) => a.price - b.price);
-                break;
-              case 'price-high-to-low':
-                sortedProperties.sort((a, b) => b.price - a.price);
-                break;
-              case 'availability-soon':
-                sortedProperties.sort((a, b) => {
-                  const dateA = a.availableFrom ? new Date(a.availableFrom) : new Date(9999, 0, 1);
-                  const dateB = b.availableFrom ? new Date(b.availableFrom) : new Date(9999, 0, 1);
-                  return dateA - dateB;
-                });
-                break;
-            }
-    
-            renderProperties(sortedProperties);
-          });
-    
-          // Function to render properties
-          function renderProperties(props) {
-            resultList.innerHTML = '';
-            if (props.length === 0) {
-              resultList.innerHTML = '<li>No results found</li>';
-              return;
-            }
-    
-            props.forEach(property => {
-              const li = document.createElement('li');
-              li.className = 'property-card';
-              li.innerHTML = `
-                <div class="property-image">
-                  <img src="${property.images[0]}" alt="Property Image">
-                  <div class="property-type">${property.subtype}</div>
-                </div>
-                <div class="property-info">
-                  <h3 class="property-name">${property.name}</h3>
-                  <p class="property-address">${property.address}</p>
-                  <p class="property-category">Type: ${property.type}</p>
-                  <div class="property-features">
-                    <div class="feature"><span class="feature-icon">🛏️</span> ${property.beds} Beds</div>
-                    <div class="feature"><span class="feature-icon">🛁</span> ${property.baths} Baths</div>
-                    <div class="feature"><span class="feature-icon">🛋️</span> ${property.furnished}</div>
-                  </div>
-                  <div class="rating">
-                    <div class="stars">
-                      ${Array(5).fill(0).map((_, i) => i < property.rating ? '★' : '☆').join('')}
-                    </div>
-                    <div class="review-count">(${property.reviews} reviews)</div>
-                  </div>
-                  <div class="property-price">₹${property.price}</div>
-                  <p class="property-location">Location: ${property.location}</p>
-                  <div class="property-amenities">
-                    <strong>Amenities:</strong>
-                    ${property.amenities.map((amenity, idx) => `<span class="amenity">${amenity}</span>${idx < property.amenities.length - 1 ? ', ' : ''}`).join('')}
-                  </div>
-                  <div class="property-footer">
-                    <a href="/property?id=${property._id}" class="btn">View Details</a>
-                    <button class="btn wishlist-btn">❤ Save</button>
-                  </div>
-                </div>
-              `;
-              resultList.appendChild(li);
-            });
-          }
-    
-          // Sidebar toggle for mobile
           const filterIcon = document.getElementById("filter-icon");
           const sidebar = document.getElementById("sidebar");
           const overlay = document.getElementById("overlay");
-    
-          function toggleSidebar() {
-            const isActive = sidebar.classList.contains("active");
-            if (isActive) {
-              sidebar.classList.remove("active");
-              overlay.classList.remove("active");
-              filterIcon.style.display = "block";
-            } else {
-              sidebar.classList.add("active");
-              overlay.classList.add("active");
-              filterIcon.style.display = "none";
-            }
-          }
-    
-          filterIcon.addEventListener("click", toggleSidebar);
-          overlay.addEventListener("click", function() {
-            sidebar.classList.remove("active");
-            overlay.classList.remove("active");
-            filterIcon.style.display = "block";
+          const closeSidebarButton = document.getElementById("close-sidebar");
+          const filterForm = document.getElementById("filter-form");
+
+          // Sort and re-render when dropdown changes
+          sortSelect.addEventListener('change', function() {
+              const sortBy = this.value;
+              let sortedProperties = [...initialProperties];
+
+              switch (sortBy) {
+                  case 'rating':
+                      sortedProperties.sort((a, b) => b.rating - a.rating);
+                      break;
+                  case 'price-low-to-high':
+                      sortedProperties.sort((a, b) => a.price - b.price);
+                      break;
+                  case 'price-high-to-low':
+                      sortedProperties.sort((a, b) => b.price - a.price);
+                      break;
+                  case 'availability-soon':
+                      sortedProperties.sort((a, b) => {
+                          const dateA = a.availableFrom ? new Date(a.availableFrom) : new Date(9999, 0, 1);
+                          const dateB = b.availableFrom ? new Date(b.availableFrom) : new Date(9999, 0, 1);
+                          return dateA - dateB;
+                      });
+                      break;
+              }
+
+              renderProperties(sortedProperties);
           });
-    
+
+          // Function to render properties
+          function renderProperties(props) {
+              resultList.innerHTML = '';
+              if (props.length === 0) {
+                  resultList.innerHTML = '<li>No results found</li>';
+                  return;
+              }
+
+              props.forEach(property => {
+                  const li = document.createElement('li');
+                  li.className = 'property-card';
+                  li.innerHTML = `
+                      <div class="property-image">
+                          <img src="${property.images[0]}" alt="Property Image">
+                          <div class="property-type">${property.subtype}</div>
+                      </div>
+                      <div class="property-info">
+                          <h3 class="property-name">${property.name}</h3>
+                          <p class="property-address">${property.address}</p>
+                          <p class="property-category">Type: ${property.type}</p>
+                          <div class="property-features">
+                              <div class="feature"><span class="feature-icon">🛏️</span> ${property.beds} Beds</div>
+                              <div class="feature"><span class="feature-icon">🛁</span> ${property.baths} Baths</div>
+                              <div class="feature"><span class="feature-icon">🛋️</span> ${property.furnished}</div>
+                          </div>
+                          <div class="rating">
+                              <div class="stars">
+                                  ${Array(5).fill(0).map((_, i) => i < property.rating ? '★' : '☆').join('')}
+                              </div>
+                              <div class="review-count">(${property.reviews} reviews)</div>
+                          </div>
+                          <div class="property-price">₹${property.price}</div>
+                          <p class="property-location">Location: ${property.location}</p>
+                          <div class="property-amenities">
+                              <strong>Amenities:</strong>
+                              ${property.amenities.map((amenity, idx) => `<span class="amenity">${amenity}</span>${idx < property.amenities.length - 1 ? ', ' : ''}`).join('')}
+                          </div>
+                          <div class="property-footer">
+                              <a href="/property?id=${property._id}" class="btn">View Details</a>
+                              <button class="btn wishlist-btn" data-property-id="${property._id}" onclick="saveProperty('${property._id}')">❤ Save</button>
+                          </div>
+                      </div>
+                  `;
+                  resultList.appendChild(li);
+              });
+          }
+
+          // Sidebar toggle function
+          function toggleSidebar() {
+              const isActive = sidebar.classList.contains("active");
+              if (isActive) {
+                  sidebar.classList.remove("active");
+                  overlay.classList.remove("active");
+                  filterIcon.style.display = "block";
+                  document.body.style.overflow = "auto"; // Restore scrolling
+              } else {
+                  sidebar.classList.add("active");
+                  overlay.classList.add("active");
+                  filterIcon.style.display = "none";
+                  document.body.style.overflow = "hidden"; // Prevent background scrolling
+              }
+          }
+
+          // Event listeners for sidebar toggle
+          filterIcon.addEventListener("click", toggleSidebar);
+          overlay.addEventListener("click", toggleSidebar);
+          closeSidebarButton.addEventListener("click", toggleSidebar);
+
+          // Handle window resize to ensure proper sidebar state
+          window.addEventListener("resize", function() {
+              if (window.innerWidth > 768 && sidebar.classList.contains("active")) {
+                  toggleSidebar(); // Close sidebar on resize to desktop
+              }
+          });
+
+          // Handle filter form submission
+          filterForm.addEventListener("submit", function(event) {
+              event.preventDefault(); // Prevent default form submission
+              const formData = new FormData(filterForm);
+              const queryParams = new URLSearchParams();
+
+              // Append all form data to query params
+              for (const [key, value] of formData) {
+                  if (key === 'amenities[]' && value) {
+                      // Handle multiple amenities by appending each one
+                      if (queryParams.has('amenities')) {
+                          queryParams.set('amenities', queryParams.get('amenities') + ',' + value);
+                      } else {
+                          queryParams.append('amenities', value);
+                      }
+                  } else if (value) {
+                      queryParams.append(key, value);
+                  }
+              }
+
+              // Redirect to search with query parameters
+              window.location.href = `/search?${queryParams.toString()}`;
+          });
+
           // Display selected price range value
           const priceInput = document.getElementById("price-range");
           const priceValue = document.getElementById("priceValue");
           if (priceInput) {
-            priceInput.addEventListener("input", function() {
-              priceValue.innerText = this.value;
-            });
+              priceInput.addEventListener("input", function() {
+                  priceValue.innerText = this.value;
+              });
           }
-        });
-
-
-     // saved listings
-
-     async function saveProperty(propertyId) {
-    try {
-      console.log('Attempting to save property with ID:', propertyId);
-      const user = <%- JSON.stringify(request.session.user || null) %>;
-      console.log('Session user:', JSON.stringify(user, null, 2));
-      if (!user || !user._id) {
-        console.log('No user session, redirecting to login');
-        alert('Please log in to save properties.');
-        window.location.href = '/login?redirect=' + encodeURIComponent(window.location.href);
-        return;
-      }
-      if (user.userType !== 'tenant') {
-        console.log('User is not a tenant:', user.userType);
-        alert('Only tenants can save properties.');
-        return;
-      }
-
-      const payload = { propertyId, action: 'save' };
-      console.log('Sending POST to /tenant/saved-property with:', payload);
-      const response = await fetch('/tenant/saved-property', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
       });
 
-      console.log('Response status:', response.status, 'OK:', response.ok);
-      if (response.status === 404) {
-        console.error('Route /tenant/saved-property not found');
-        throw new Error('Server error: /tenant/saved-property route not found. Please check server configuration.');
-      }
+      // Saved listings
+      async function saveProperty(propertyId) {
+          try {
+              console.log('Attempting to save property with ID:', propertyId);
+              const user = <%- JSON.stringify(request.session.user || null) %>;
+              console.log('Session user:', JSON.stringify(user, null, 2));
+              if (!user || !user._id) {
+                  console.log('No user session, redirecting to login');
+                  alert('Please log in to save properties.');
+                  window.location.href = '/login?redirect=' + encodeURIComponent(window.location.href);
+                  return;
+              }
+              if (user.userType !== 'tenant') {
+                  console.log('User is not a tenant:', user.userType);
+                  alert('Only tenants can save properties.');
+                  return;
+              }
 
-      const contentType = response.headers.get('content-type');
-      if (!contentType || !contentType.includes('application/json')) {
-        const text = await response.text();
-        console.error('Non-JSON response received:', text.slice(0, 100));
-        throw new Error('Server returned non-JSON response, possibly a login page or error page');
-      }
+              const payload = { propertyId, action: 'save' };
+              console.log('Sending POST to /tenant/saved-property with:', payload);
+              const response = await fetch('/tenant/saved-property', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify(payload)
+              });
 
-      const result = await response.json();
-      console.log('Response from /tenant/saved-property:', result);
-      if (result.success) {
-        alert('Property saved successfully!');
-        document.querySelector(`[data-property-id="${propertyId}"] .wishlist-btn`)
-          .classList.add('saved');
-      } else {
-        console.error('Failed to save property:', result.message);
-        alert(result.message || 'Failed to save property.');
+              console.log('Response status:', response.status, 'OK:', response.ok);
+              if (response.status === 404) {
+                  console.error('Route /tenant/saved-property not found');
+                  throw new Error('Server error: /tenant/saved-property route not found. Please check server configuration.');
+              }
+
+              const contentType = response.headers.get('content-type');
+              if (!contentType || !contentType.includes('application/json')) {
+                  const text = await response.text();
+                  console.error('Non-JSON response received:', text.slice(0, 100));
+                  throw new Error('Server returned non-JSON response, possibly a login page or error page');
+              }
+
+              const result = await response.json();
+              console.log('Response from /tenant/saved-property:', result);
+              if (result.success) {
+                  alert('Property saved successfully!');
+                  document.querySelector(`[data-property-id="${propertyId}"] .wishlist-btn`)
+                      .classList.add('saved');
+              } else {
+                  console.error('Failed to save property:', result.message);
+                  alert(result.message || 'Failed to save property.');
+              }
+          } catch (error) {
+              console.error('Error saving property:', error.message, error.stack);
+          }
       }
-    } catch (error) {
-      console.error('Error saving property:', error.message, error.stack);
-      
-    }
-  }
-      </script>
-</body>
+    </script>
+  </body>
 </html>

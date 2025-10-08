@@ -100,18 +100,17 @@
                 <div id="prop_view">
                   <button
                     class="prop_button"
-<<<<<<< HEAD
+
                     onclick="location.href='/property?id=<%=property._id%>'"
                   >
                     Property Details
                   </button>
                   <% if (property.isRented === true) { %>
-=======
+
                     onclick="location.href='/property?id=1'"
                   >
                     Property Details
                   </button>
->>>>>>> 636494e34b2ec4c5273e407ba14a0b608d5efc89
                   <button class="prop_button" onclick="showSection('payments')">
                     Rent Details
                   </button>
@@ -121,9 +120,9 @@
                   >
                     View Complaints
                   </button>
-<<<<<<< HEAD
+
                   <% } %>
-=======
+
                 </div>
               </div>
             </div>
@@ -178,7 +177,7 @@
                   <button class="prop_button" onclick="showSection('payments')">
                     Rent Details
                   </button>
->>>>>>> 636494e34b2ec4c5273e407ba14a0b608d5efc89
+
                   <button
                     class="delete_button"
                     onclick="showDeleteConfirmation('<%= property._id %>', <%= property.isRented %>)"
@@ -241,11 +240,11 @@
                 <li><strong>Contact:</strong> <%= tenant.phone || 'N/A' %></li>
                 <li><strong>Email:</strong> <%= tenant.email || 'N/A' %></li>
               </ul>
-<<<<<<< HEAD
+
               <!-- <button class="msg_button">View Messages</button> -->
-=======
+
               <button class="msg_button">View Messages</button>
->>>>>>> 636494e34b2ec4c5273e407ba14a0b608d5efc89
+
               <button class="msg_button contact_tenant_button">
                 Contact Tenant
               </button>

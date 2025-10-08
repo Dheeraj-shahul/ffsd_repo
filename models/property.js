@@ -18,6 +18,7 @@ const propertySchema = new mongoose.Schema({
   rating: Number,
   reviews: Number,
   isVerified: { type: Boolean, default: false },
+  is_popular: { type: Boolean, default: false }, // New field for popular listings
 
   // Fields from the second schema
   address: String,
