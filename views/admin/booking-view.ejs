@@ -1,3 +1,6 @@
+<link rel="stylesheet" href="/css/booking-view.css">
+
+
 <div class="booking-view">
     <h2>Booking Details - <%= booking._id %></h2>
   
@@ -53,7 +56,7 @@
             <button class="success" onclick="approveBooking('<%= booking._id %>')">Approve</button>
             <button class="danger" onclick="rejectBooking('<%= booking._id %>')">Reject</button>
           <% } %>
-          <a href="/admin/service-bookings" class="btn">Back to List</a>
+          <a href="/admin" class="btn">Back to List</a>
         </div>
       </div>
     </div>

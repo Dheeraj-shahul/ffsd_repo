@@ -517,6 +517,19 @@ body {
   }
 }
 
+.danger-button {
+  background-color: #dc3545;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  cursor: pointer;
+  border-radius: 5px;
+  font-size: 16px;
+}
+.danger-button:hover {
+  background-color: #c82333;
+}
+
 @media (max-width: 768px) {
   #header {
     height: 10vh;

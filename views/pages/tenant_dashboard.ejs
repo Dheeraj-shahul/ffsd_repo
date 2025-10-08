@@ -12,6 +12,23 @@
       crossorigin="anonymous"
       referrerpolicy="no-referrer"
     />
+    <style>
+      .notification {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        padding: 15px;
+        border-radius: 5px;
+        color: white;
+        z-index: 1000;
+        opacity: 0;
+        transition: opacity 0.5s;
+      }
+      .notification.success { background-color: #4caf50; }
+      .notification.error { background-color: #f44336; }
+      .notification.show { opacity: 1; }
+      .notification-card{padding: 20px;}
+    </style>
   </head>
   <body>
     <!-- Header -->
@@ -44,9 +61,6 @@
           <li onclick="showSection('notifications')">
             <i class="fa-solid fa-bell"></i> Notifications
           </li>
-          <li onclick="showSection('history')">
-            <i class="fa-solid fa-clock-rotate-left"></i> Rental History
-          </li>
           <li onclick="showSection('savedListings')">
             <i class="fa-solid fa-bookmark"></i> Saved Listings
           </li>
@@ -67,7 +81,7 @@
           <% if (currentProperty) { %>
           <div class="property-summary">
             <h4>Currently Renting</h4>
-            <div class="property-card" id="home_proprty_card">
+            <div class="property-card" id="home_property_card">
               <div class="img_container">
                 <img
                   src="<%= currentProperty.images && currentProperty.images[0] ? currentProperty.images[0] : '/images/default-property.jpg' %>"
@@ -88,23 +102,10 @@
                 <p>
                   <strong>Monthly Rent:</strong> ₹<%= currentProperty.price || 'N/A' %>
                 </p>
-                <p>
-                  <strong>Due Date:</strong> <%= nextPayment ? new Date(nextPayment.dueDate).toLocaleDateString() : 'N/A' %>
-                </p>
-                <p>
-                  <strong>Lease Period:</strong> <%= rentalHistory && rentalHistory.length && rentalHistory[0] ? new Date(rentalHistory[0].startDate).toLocaleDateString() + ' - ' + (rentalHistory[0].endDate ? new Date(rentalHistory[0].endDate).toLocaleDateString() : 'Ongoing') : 'N/A' %>
-                </p>
               </div>
             </div>
           </div>
           <div class="quick-stats">
-            <div class="stat-box">
-              <h4>Next Rent Due</h4>
-              <p>₹<%= nextPayment ? nextPayment.amount : 'N/A' %></p>
-              <p>
-                <%= nextPayment ? 'Due in ' + Math.ceil((new Date(nextPayment.dueDate) - new Date()) / (1000 * 60 * 60 * 24)) + ' days' : 'N/A' %>
-              </p>
-            </div>
             <div class="stat-box">
               <h4>Active Maintenance</h4>
               <p><%= activeMaintenanceRequests ? activeMaintenanceRequests.length : 0 %> Pending Requests</p>
@@ -122,18 +123,19 @@
         <!-- Rent Payments Section -->
         <div id="rentPayments" class="section">
           <h3>Rent Payments</h3>
-          <% if (nextPayment) { %>
+          <% if (currentProperty) { %>
           <div class="current-rent">
+            <% if (nextPayment) { %>
             <p>
               Next Rent Due: <strong>₹<%= nextPayment.amount %></strong> on <%= new Date(nextPayment.dueDate).toLocaleDateString() %>
             </p>
-            <button
-              class="pay-buttons"
-              onclick="alert('Payment processing not implemented')"
-            >
-              Pay Now
-            </button>
+            <% } else { %>
+            <p>No rent due date available.</p>
+            <% } %>
+            <button class="pay-buttons" onclick="checkRecentPayment()">Pay Rent</button>
           </div>
+          <% } else { %>
+          <p>No current property rented.</p>
           <% } %>
           <h4>Payment History</h4>
           <div id="payment-history-container">
@@ -164,6 +166,47 @@
               </tbody>
             </table>
           </div>
+
+          <!-- Payment Popup -->
+          <div id="payment-popup-container" class="popup-container" style="display: none;">
+            <div class="popup-content">
+              <span class="close-btn" onclick="closePaymentPopup()">×</span>
+              <h3>Pay Rent</h3>
+              <form id="payment-form" action="/tenant/payment">
+                <div class="form-group">
+                  <label for="rent-amount">Rent Amount (₹):</label>
+                  <input
+                    type="number"
+                    id="rent-amount"
+                    value="<%= currentProperty ? currentProperty.price : '' %>"
+                    readonly
+                  />
+                </div>
+                <div class="form-group">
+                  <label for="payment-method">Payment Method:</label>
+                  <select id="payment-method" required>
+                    <option value="">Select Payment Method</option>
+                    <option value="Credit Card">Credit Card</option>
+                    <option value="Debit Card">Debit Card</option>
+                    <option value="UPI">UPI</option>
+                    <option value="Bank Transfer">Bank Transfer</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label for="transaction-id">Transaction ID:</label>
+                  <input
+                    type="text"
+                    id="transaction-id"
+                    placeholder="Enter transaction ID"
+                    required
+                  />
+                </div>
+                <div class="form-group">
+                  <button type="submit" class="submit-btn">Submit Payment</button>
+                </div>
+              </form>
+            </div>
+          </div>
         </div>
 
         <!-- Maintenance Request Section -->
@@ -178,22 +221,16 @@
                 <h5><%= request.issueType || 'Unknown' %> Issue</h5>
                 <span
                   class="status <%= request.status ? request.status.toLowerCase().replace(' ', '-') : 'pending' %>"
-                  ><%= request.status || 'Pending' %></span
-                >
+                ><%= request.status || 'Pending' %></span>
               </div>
               <p>
-                <strong>Date Reported:</strong> <%= request.dateReported ? new Date(request.dateReported).toLocaleDateString() : 'N/A' %>
+                <strong>Date Reported:</strong> <%= request.scheduledDate ? new Date(request.scheduledDate).toLocaleDateString() : 'N/A' %>
               </p>
               <p><strong>Description:</strong> <%= request.description || 'N/A' %></p>
               <p><strong>Location:</strong> <%= request.location || 'N/A' %></p>
               <p>
                 <strong>Assigned To:</strong> <%= request.assignedTo || 'Awaiting assignment' %>
               </p>
-              <% if (request.scheduledDate) { %>
-              <p>
-                <strong>Scheduled For:</strong> <%= new Date(request.scheduledDate).toLocaleString() %>
-              </p>
-              <% } %>
               <button class="small-button">Update</button>
             </div>
             <% }); %>
@@ -207,15 +244,15 @@
                 <span class="status completed">Completed</span>
               </div>
               <p>
-                <strong>Date Reported:</strong> <%= request.dateReported ? new Date(request.dateReported).toLocaleDateString() : 'N/A' %>
+                <strong>Date Reported:</strong> <%= request.createdAt ? new Date(request.createdAt).toLocaleDateString() : 'N/A' %>
               </p>
               <p>
-                <strong>Date Completed:</strong> <%= request.completedDate ? new Date(request.completedDate).toLocaleDateString() : 'N/A' %>
+                <strong>Date Completed:</strong> <%= request.updatedAt ? new Date(request.updatedAt).toLocaleDateString() : 'N/A' %>
               </p>
               <p><strong>Description:</strong> <%= request.description || 'N/A' %></p>
-              <p>
+              <!-- <p>
                 <strong>Serviced By:</strong> <%= request.assignedTo || 'N/A' %>
-              </p>
+              </p> -->
             </div>
             <% }); %>
           </div>
@@ -267,6 +304,23 @@
           </div>
         </div>
 
+        <div id="delete-account-popup" class="popup-container" style="display: none;">
+          <div class="popup-content">
+            <span class="close-btn" onclick="closeDeleteAccountPopup()">×</span>
+            <h3>Confirm Account Deletion</h3>
+            <p>This action will permanently delete your account and all associated data. Please enter your password to confirm.</p>
+            <form id="delete-account-form">
+              <div class="form-group">
+                <label for="delete-password">Password:</label>
+                <input type="password" id="delete-password" required />
+              </div>
+              <div class="form-group">
+                <button type="submit" class="submit-btn">Confirm Deletion</button>
+              </div>
+            </form>
+          </div>
+        </div>
+
         <!-- Complaint Submission Section -->
         <div id="complaints" class="section">
           <h3>Submit a Query / Complaint</h3>
@@ -301,8 +355,7 @@
                 <h5><%= complaint.subject || 'N/A' %></h5>
                 <span
                   class="status <%= complaint.status ? complaint.status.toLowerCase().replace(' ', '-') : 'open' %>"
-                  ><%= complaint.status || 'Open' %></span
-                >
+                ><%= complaint.status || 'Open' %></span>
               </div>
               <p>
                 <strong>Date:</strong> <%= complaint.dateSubmitted ? new Date(complaint.dateSubmitted).toLocaleDateString() : 'N/A' %>
@@ -316,76 +369,168 @@
           </div>
         </div>
 
-  <!-- Domestic Workers Booking -->
-<div id="movers" class="section">
-  <h3>Domestic Worker Services</h3>
-  <p>Book verified domestic workers nearby to complete your daily chores.</p>
-  <div class="service-categories">
-    <div class="service-category">
-      <h4>Cleaning Services</h4>
-      <p>Professional house cleaning</p>
-      <button class="book-button" onclick="location.href='/workerDetails?service=cleaning'">Find Cleaners</button>
-    </div>
-    <div class="service-category">
-      <h4>Cooking Services</h4>
-      <p>Skilled cooks for daily meals</p>
-      <button class="book-button" onclick="location.href='/workerDetails?service=cooking'">Find Cooks</button>
-    </div>
-    <div class="service-category">
-      <h4>Laundry Services</h4>
-      <p>Washing and ironing services</p>
-      <button class="book-button" onclick="location.href='/workerDetails?service=laundry'">Find Help</button>
-    </div>
-  </div>
-  <h4>Your Current Service Providers</h4>
-  <div class="worker-cards">
-    <% if (workers && workers.length > 0) { %>
-      <% workers.forEach(worker => { %>
-        <div class="worker-card">
-          <img src="<%= worker.image || '/resources/default-worker.jpg' %>" alt="Worker Photo" />
-          <div class="worker-details">
-            <h5><%= worker.firstName %> <%= worker.lastName %></h5>
-            <p><strong>Service:</strong> <%= worker.serviceType || 'N/A' %></p>
-            <p><strong>Schedule:</strong> <%= worker.availability || 'N/A' %></p>
-            <p><strong>Fee:</strong> ₹<%= worker.price || 'N/A' %> <%= worker.rateUnit ? '/' + worker.rateUnit : '' %></p>
-            <p><strong>Experience:</strong> <%= worker.experience ? worker.experience + ' years' : 'N/A' %></p>
-            <p><strong>Phone:</strong> <%= worker.phone || 'N/A' %></p>
-            
-            <div class="worker-status <%= worker.serviceStatus === 'Available' ? 'status-available' : 'status-unavailable' %>">
-              <%= worker.serviceStatus || 'Available' %>
-            </div>
-
-            <div class="rating">
-              <% if (worker.ratingId && worker.ratingId.average) { %>
-                <span><%= '⭐'.repeat(Math.round(worker.ratingId.average)) %></span>
-                <%= worker.ratingId.average.toFixed(1) %>
-              <% } else { %>
-                <span>No ratings yet</span>
-              <% } %>
-            </div>
-            
-            <div class="worker-actions">
-              <!-- <button class="action-button view-button" onclick="location.href='/workers/detail/<%= worker._id %>'">
-                View Details
-              </button> -->
-              <!-- <button class="action-button book-button" onclick="location.href='/workers/booking/<%= worker._id %>'">
-                Manage Booking
-              </button> -->
-            </div>
-          </div>
-        </div>
-      <% }); %>
-    <% } else { %>
-      <div class="no-workers-message">
-        <p>You don't have any domestic workers assigned yet. Browse the services above to find help.</p>
+        <!-- Domestic Workers Booking -->
+        <div id="movers" class="section">
+        <!-- Worker Payment Popup -->
+<div id="worker-payment-popup" class="popup-container" style="display: none;">
+  <div class="popup-content">
+    <span class="close-btn" onclick="closeWorkerPaymentPopup()">×</span>
+    <h3>Pay Worker</h3>
+    <form id="worker-payment-form">
+      <div class="form-group">
+        <label for="worker-name">Worker Name:</label>
+        <input type="text" id="worker-name" readonly />
+        <input type="hidden" id="worker-id" />
       </div>
-    <% } %>
+      
+      <div class="form-group">
+        <label for="service-type">Service Type:</label>
+        <input type="text" id="service-type" readonly />
+      </div>
+      
+      <div class="form-group">
+        <label for="payment-amount">Payment Amount (₹):</label>
+        <input type="number" id="payment-amount" readonly />
+      </div>
+      
+      <div class="form-group">
+        <label for="payment-period">Payment Period:</label>
+        <select id="payment-period" required>
+          <option value="">Select Payment Period</option>
+          <option value="daily">Daily</option>
+          <option value="weekly">Weekly</option>
+          <option value="monthly">Monthly</option>
+        </select>
+      </div>
+      
+      <div class="form-group">
+        <label for="work-date">Work Date/Period:</label>
+        <input type="date" id="work-date" required />
+      </div>
+      
+      <div class="form-group">
+        <label for="worker-payment-method">Payment Method:</label>
+        <select id="worker-payment-method" required>
+          <option value="">Select Payment Method</option>
+          <option value="Cash">Cash</option>
+          <option value="UPI">UPI</option>
+          <option value="Bank Transfer">Bank Transfer</option>
+          <option value="Digital Wallet">Digital Wallet</option>
+        </select>
+      </div>
+      
+      <div class="form-group">
+        <label for="worker-transaction-id">Transaction ID (if applicable):</label>
+        <input type="text" id="worker-transaction-id" placeholder="Enter transaction ID for digital payments" />
+      </div>
+      
+      <div class="form-group">
+        <label for="payment-notes">Notes (optional):</label>
+        <textarea id="payment-notes" rows="3" placeholder="Additional notes about this payment"></textarea>
+      </div>
+      
+      <div class="form-group">
+        <button type="submit" class="submit-btn">Submit Payment</button>
+      </div>
+    </form>
   </div>
 </div>
+          <h3>Domestic Worker Services</h3>
+          <p>Book verified domestic workers nearby to complete your daily chores.</p>
+          <div class="service-categories">
+            <div class="service-category">
+              <h4>Cleaning Services</h4>
+              <p>Professional house cleaning</p>
+              <button class="book-button" onclick="location.href='/workerDetails?service=cleaning'">Find Cleaners</button>
+            </div>
+            <div class="service-category">
+              <h4>Cooking Services</h4>
+              <p>Skilled cooks for daily meals</p>
+              <button class="book-button" onclick="location.href='/workerDetails?service=cooking'">Find Cooks</button>
+            </div>
+            <div class="service-category">
+              <h4>Laundry Services</h4>
+              <p>Washing and ironing services</p>
+              <button class="book-button" onclick="location.href='/workerDetails?service=laundry'">Find Help</button>
+            </div>
+          </div>
+          <h4>Your Current Service Providers</h4>
+         <!-- Replace the existing worker cards section with this enhanced version -->
+<div class="worker-cards">
+  <% if (workers && workers.length > 0) { %>
+    <% workers.forEach((worker, index) => { %>
+      <div class="worker-card" data-worker-id="<%= worker._id || `worker_${index}` %>">
+        <img src="<%= worker.image || '/resources/default-worker.jpg' %>" alt="Worker Photo" />
+        <div class="worker-details">
+          <h5 class="worker-name"><%= worker.firstName %> <%= worker.lastName %></h5>
+          <p><strong>Service:</strong> <span class="worker-service"><%= worker.serviceType || 'N/A' %></span></p>
+          <p><strong>Schedule:</strong> <span class="worker-schedule"><%= worker.availability || 'N/A' %></span></p>
+          <p><strong>Fee:</strong> ₹<span class="worker-fee"><%= worker.price || 'N/A' %></span> <span class="worker-rate-unit"><%= worker.rateUnit ? '/' + worker.rateUnit : '' %></span></p>
+          <p><strong>Experience:</strong> <span class="worker-experience"><%= worker.experience ? worker.experience + ' years' : 'N/A' %></span></p>
+          <p><strong>Phone:</strong> <span class="worker-phone"><%= worker.phone || 'N/A' %></span></p>
+          
+          <div class="rating">
+            <% if (worker.ratingId && worker.ratingId.average) { %>
+              <span class="worker-rating"><%= '⭐'.repeat(Math.round(worker.ratingId.average)) %> <%= worker.ratingId.average.toFixed(1) %></span>
+            <% } else { %>
+              <span class="worker-rating">No ratings yet</span>
+            <% } %>
+          </div>
+          
+          <!-- Enhanced Payment Section -->
+          <div class="worker-payment-section">
+            <h6>Payment Status</h6>
+            <p>Last Payment: <span class="last-payment-date"><%= worker.lastPaymentDate ? new Date(worker.lastPaymentDate).toLocaleDateString() : 'Never' %></span></p>
+            <p>Status: <span class="payment-status <%= worker.paymentStatus === 'paid' ? 'status-paid' : 'status-pending' %>"><%= worker.paymentStatus === 'paid' ? 'Paid' : 'Pending' %></span></p>
+            <button class="pay-worker-btn" onclick="showWorkerPaymentPopup(this)" <%= worker.paymentStatus === 'paid' ? 'disabled' : '' %>>
+              <%= worker.paymentStatus === 'paid' ? 'Paid' : 'Pay Worker' %>
+            </button>
+            <button class="book-button" onclick="viewWorkerProfile(this)">View Profile</button>
+          </div>
+        </div>
+      </div>
+    <% }); %>
+  <% } else { %>
+    <div class="no-workers-message">
+      <p>You don't have any domestic workers assigned yet. Browse the services above to find help.</p>
+    </div>
+  <% } %>
+</div>
+<h4>Worker Payment History</h4>
+<table class="payment-history-table">
+  <thead>
+    <tr>
+      <th>Date</th>
+      <th>Worker</th>
+      <th>Service</th>
+      <th>Amount</th>
+      <th>Payment Method</th>
+      <th>Status</th>
+      <th>Receipt</th>
+    </tr>
+  </thead>
+  <tbody id="worker-payment-history-body">
+    <% (workerPayments || []).forEach(payment => { %>
+      <tr>
+        <td><%= payment.paymentDate ? new Date(payment.paymentDate).toLocaleDateString() : 'N/A' %></td>
+        <td><%= payment.workerName || 'N/A' %></td>
+        <td><%= payment.serviceType || 'N/A' %></td>
+        <td>₹<%= payment.amount || 'N/A' %></td>
+        <td><%= payment.paymentMethod || 'N/A' %></td>
+        <td class="<%= payment.status ? payment.status.toLowerCase() : 'completed' %>">
+          <%= payment.status || 'Completed' %>
+        </td>
+        <td><a href="<%= payment.receiptUrl || '#' %>">View</a></td>
+      </tr>
+    <% }); %>
+  </tbody>
+</table>
+        </div>
 
+        <!-- Notifications Section -->
         <div id="notifications" class="section">
           <h3>Notifications</h3>
-          <div classrast="notification-container">
+          <div class="notification-container">
             <% if (notifications && Array.isArray(notifications) && notifications.length > 0) { %>
               <% notifications.forEach(notification => { %>
                 <div class="notification-card <%= notification.read ? 'read' : 'unread' %>" data-notification-id="<%= notification._id %>">
@@ -402,38 +547,6 @@
             <% } else { %>
               <p>No notifications available.</p>
             <% } %>
-          </div>
-        </div>
-
-        <!-- Rental History -->
-        <div id="history" class="section">
-          <h3>Rental History</h3>
-          <div class="history-timeline">
-            <% (rentalHistory || []).forEach(history => { %>
-            <div class="history-item">
-              <div class="timeline-dot"></div>
-              <div class="history-content">
-                <h4><%= history.property && history.property.name ? history.property.name : 'Unknown Property' %></h4>
-                <p>
-                  <strong>Period:</strong> <%= history.startDate ? new Date(history.startDate).toLocaleDateString() : 'N/A' %> - <%= history.endDate ? new Date(history.endDate).toLocaleDateString() : 'Present' %>
-                </p>
-                <p><strong>Monthly Rent:</strong> ₹<%= history.rent || 'N/A' %></p>
-                <p><strong>Owner:</strong> <%= history.owner || 'N/A' %></p>
-                <p><strong>Address:</strong> <%= history.address || 'N/A' %></p>
-                <p>
-                  <strong>Status:</strong>
-                  <span class="status <%= history.status ? history.status.toLowerCase() : 'current' %>">
-                    <%= history.status || 'Current' %>
-                  </span>
-                </p>
-                <% if (history.reasonForMoving) { %>
-                <p>
-                  <strong>Reason for Moving:</strong> <%= history.reasonForMoving %>
-                </p>
-                <% } %>
-              </div>
-            </div>
-            <% }); %>
           </div>
         </div>
 
@@ -467,7 +580,7 @@
                 <div class="card-actions">
 
                   <button class="book-button" onclick="location.href='/book-property?id=<%= property._id %>'">Book Now</button>
-                  <a href="/property?id=<%= property._id %>" class="view-details">View Details</a>
+                  <a href="/property?id=<%= property._id %>" class="view-details book-button">View Details</a>
                   <button class="remove-button" data-property-id="<%= property._id %>">
                     Remove
                   </button>
@@ -645,7 +758,7 @@
                   <label for="address">Current Address</label>
                   <textarea id="address"><%= user.location || '' %></textarea>
                 </div>
-                <button type="submit" class="settings-submission-class">
+                <button type="submit" class="settings-submission-class book-button">
                   Update Profile
                 </button>
               </form>
@@ -665,7 +778,7 @@
                   <label for="confirm-password">Confirm New Password</label>
                   <input type="password" id="confirm-password" />
                 </div>
-                <button type="submit" class="settings-submission-class">
+                <button type="submit" class="settings-submission-class book-button">
                   Change Password
                 </button>
               </form>
@@ -698,10 +811,14 @@
                   <input type="checkbox" id="new-listings" <%= user.newListings ? 'checked' : '' %> />
                   <label for="new-listings" class="button"></label>
                 </div>
-                <button type="submit" class="settings-submission-class">
+                <button type="submit" class="settings-submission-class book-button">
                   Save Preferences
                 </button>
               </form>
+            </div>
+            <div id="delete-account-section">
+              <h4>Delete Account</h4>
+              <button class="settings-submission-class delete-account-btn remove-button" >Delete Account</button>
             </div>
           </div>
         </div>
@@ -709,51 +826,85 @@
     </div>
 
     <script>
-
-
-async function markNotificationAsRead(notificationId) {
-  console.log("Marking notification as read:", { notificationId });
-  try {
-    const response = await fetch("/tenant/notification/read", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ notificationId }),
-    });
-    const result = await response.json();
-    console.log("Mark notification response:", result);
-    if (result.success) {
-      showNotification(result.message || "Notification marked as read", "success");
-      const notificationCard = document.querySelector(`.notification-card[data-notification-id="${notificationId}"]`);
-      if (notificationCard) {
-        notificationCard.classList.remove("unread");
-        notificationCard.classList.add("read");
-        const readStatus = notificationCard.querySelector("p:nth-child(5)");
-        if (readStatus) readStatus.innerHTML = "<strong>Read:</strong> Read";
-        const markButton = notificationCard.querySelector(".mark-read-button");
-        if (markButton) markButton.remove();
-      } else {
-        console.warn(`Notification card with ID ${notificationId} not found in DOM`);
-      }
-    } else {
-      showNotification(result.message || "Error marking notification as read", "error");
-    }
-  } catch (error) {
-    console.error("Mark notification error:", error);
-    showNotification("Failed to mark notification as read. Please try again.", "error");
+      function showDeleteAccountPopup() {
+  const popup = document.getElementById("delete-account-popup");
+  if (popup) {
+    popup.style.display = "flex";
   }
 }
 
-document.addEventListener("click", (event) => {
-  if (event.target.classList.contains("mark-read-button")) {
-    const notificationId = event.target.dataset.notificationId;
-    if (notificationId) {
-      markNotificationAsRead(notificationId);
-    }
+function closeDeleteAccountPopup() {
+  const popup = document.getElementById("delete-account-popup");
+  if (popup) {
+    popup.style.display = "none";
   }
-});
+}
 
+async function deleteAccount(password) {
+  console.log("Attempting to delete account");
+  try {
+    const response = await fetch("/tenant/delete-account", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ password }),
+    });
+    const result = await response.json();
+    console.log("Delete account response:", result);
+    if (result.success) {
+      showNotification(result.message, "success");
+      setTimeout(() => {
+        window.location.href = "/logout";
+      }, 2000);
+    } else {
+      showNotification(result.message || "Error deleting account", "error");
+    }
+  } catch (error) {
+    console.error("Delete account error:", error);
+    showNotification("Failed to delete account. Please try again.", "error");
+  }
+}
 
+// Add this inside the DOMContentLoaded event listener, after the existing event listeners
+const deleteAccountForm = document.getElementById("delete-account-form");
+const deleteAccountBtn = document.querySelector(".delete-account-btn");
 
+if (deleteAccountBtn) {
+  deleteAccountBtn.addEventListener("click", async () => {
+    console.log("Delete account button clicked");
+    try {
+      const response = await fetch("/tenant/check-account-status", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+      });
+      const result = await response.json();
+      console.log("Check account status response:", result);
+      if (result.success && !result.hasActiveRentals && !result.hasActiveBookings) {
+        showDeleteAccountPopup();
+      } else {
+        showNotification(
+          result.message || "Cannot delete account due to active rentals or worker bookings",
+          "error"
+        );
+      }
+    } catch (error) {
+      console.error("Check account status error:", error);
+      showNotification("Error checking account status", "error");
+    }
+  });
+}
+
+if (deleteAccountForm) {
+  deleteAccountForm.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    const password = document.getElementById("delete-password")?.value;
+    if (!password) {
+      showNotification("Password is required", "error");
+      return;
+    }
+    await deleteAccount(password);
+    closeDeleteAccountPopup();
+  });
+}
       function showSection(sectionId) {
         console.log("Showing section:", sectionId);
         const sections = document.querySelectorAll(".section");
@@ -792,6 +943,184 @@ document.addEventListener("click", (event) => {
         }
       }
 
+      function showNotification(message, type) {
+        const notification = document.createElement("div");
+        notification.className = `notification ${type}`;
+        notification.textContent = message;
+        document.body.appendChild(notification);
+        setTimeout(() => notification.classList.add("show"), 100);
+        setTimeout(() => {
+          notification.classList.remove("show");
+          setTimeout(() => notification.remove(), 500);
+        }, 3000);
+      }
+
+      async function markNotificationAsRead(notificationId) {
+        console.log("Marking notification as read:", { notificationId });
+        try {
+          const response = await fetch("/tenant/notification/read", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ notificationId }),
+          });
+          const result = await response.json();
+          console.log("Mark notification response:", result);
+          if (result.success) {
+            showNotification(result.message || "Notification marked as read", "success");
+            const notificationCard = document.querySelector(`.notification-card[data-notification-id="${notificationId}"]`);
+            if (notificationCard) {
+              notificationCard.classList.remove("unread");
+              notificationCard.classList.add("read");
+              const readStatus = notificationCard.querySelector("p:nth-child(5)");
+              if (readStatus) readStatus.innerHTML = "<strong>Read:</strong> Read";
+              const markButton = notificationCard.querySelector(".mark-read-button");
+              if (markButton) markButton.remove();
+            } else {
+              console.warn(`Notification card with ID ${notificationId} not found in DOM`);
+            }
+          } else {
+            showNotification(result.message || "Error marking notification as read", "error");
+          }
+        } catch (error) {
+          console.error("Mark notification error:", error);
+          showNotification("Failed to mark notification as read. Please try again.", "error");
+        }
+      }
+
+      async function removeSavedProperty(propertyId) {
+        console.log("Removing saved property:", { propertyId });
+        try {
+          const response = await fetch("/tenant/saved-property", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ propertyId, action: "remove" }),
+          });
+          if (!response.ok) {
+            throw new Error(`Server error: ${response.status}`);
+          }
+          const result = await response.json();
+          console.log("Remove property response:", result);
+          if (result.success) {
+            showNotification(result.message || "Property removed successfully", "success");
+            const propertyCard = document.querySelector(`.property-card[data-property-id="${propertyId}"]`);
+            if (propertyCard) {
+              propertyCard.remove();
+            } else {
+              console.warn(`Property card with ID ${propertyId} not found in DOM`);
+            }
+          } else {
+            showNotification(result.message || "Error removing property", "error");
+          }
+        } catch (error) {
+          console.error("Remove property error:", error);
+          showNotification("Failed to remove property. Please try again.", "error");
+        }
+      }
+
+      async function checkRecentPayment() {
+        console.log("Checking recent payment");
+        try {
+          const response = await fetch("/tenant/check-recent-payment", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+          });
+          const result = await response.json();
+          console.log("Check recent payment response:", result);
+          if (result.success && !result.recentPayment) {
+            showPaymentPopup();
+          } else {
+            showNotification(result.message || "You have already paid this month's rent", "error");
+          }
+        } catch (error) {
+          console.error("Check recent payment error:", error);
+          showNotification("Error checking payment status", "error");
+        }
+      }
+
+      function showPaymentPopup() {
+        const popup = document.getElementById("payment-popup-container");
+        if (popup) {
+          popup.style.display = "flex";
+        }
+      }
+
+      function closePaymentPopup() {
+        const popup = document.getElementById("payment-popup-container");
+        if (popup) {
+          popup.style.display = "none";
+        }
+      }
+
+      function addNewRequest(request) {
+        const activeRequestsContainer = document.querySelector(".maintenance-cards");
+        if (activeRequestsContainer) {
+          const newCard = document.createElement("div");
+          newCard.className = "maintenance-card";
+          newCard.innerHTML = `
+            <div class="maintenance-header">
+              <h5>${request.issueType || 'Unknown'} Issue</h5>
+              <span class="status pending">Pending</span>
+            </div>
+            <p><strong>Date Reported:</strong> ${request.dateReported ? new Date(request.dateReported).toLocaleDateString() : 'N/A'}</p>
+            <p><strong>Description:</strong> ${request.description || 'N/A'}</p>
+            <p><strong>Location:</strong> ${request.location || 'N/A'}</p>
+            ${request.scheduledDate ? `<p><strong>Preferred Date:</strong> ${new Date(request.scheduledDate).toLocaleDateString()}</p>` : ""}
+            <p><strong>Assigned To:</strong> Awaiting assignment</p>
+            <button class="small-button">Update</button>
+          `;
+          activeRequestsContainer.insertBefore(newCard, activeRequestsContainer.firstChild);
+        }
+      }
+
+      function addNewComplaint(complaint) {
+        const complaintsContainer = document.querySelector(".complaints-history");
+        if (complaintsContainer) {
+          const newItem = document.createElement("div");
+          newItem.className = "complaint-item";
+          newItem.innerHTML = `
+            <div class="complaint-header">
+              <h5>${complaint.subject || 'N/A'}</h5>
+              <span class="status open">Open</span>
+            </div>
+            <p><strong>Date:</strong> ${complaint.dateSubmitted ? new Date(complaint.dateSubmitted).toLocaleDateString() : 'N/A'}</p>
+            <p><strong>Description:</strong> ${complaint.description || 'N/A'}</p>
+          `;
+          complaintsContainer.insertBefore(newItem, complaintsContainer.firstChild);
+        }
+      }
+
+      function addNewReview(rating) {
+        const reviewsContainer = document.querySelector(".past-reviews");
+        if (reviewsContainer) {
+          const newCard = document.createElement("div");
+          newCard.className = "review-card";
+          newCard.innerHTML = `
+            <div class="review-header">
+              <h5>${rating.propertyId && rating.propertyId.name ? rating.propertyId.name : 'Unknown Property'}</h5>
+              <div class="rating">${rating.rating ? "⭐".repeat(rating.rating) : ''} ${rating.rating ? rating.rating.toFixed(1) : 'N/A'}</div>
+            </div>
+            <p class="review-date">Reviewed on: ${rating.date ? new Date(rating.date).toLocaleDateString() : 'N/A'}</p>
+            <p class="review-text">${rating.review || 'No review provided'}</p>
+          `;
+          reviewsContainer.insertBefore(newCard, reviewsContainer.firstChild);
+        }
+      }
+
+      function addNewPayment(payment) {
+        const paymentTableBody = document.querySelector(".payment-history tbody");
+        if (paymentTableBody) {
+          const newRow = document.createElement("tr");
+          newRow.innerHTML = `
+            <td>${payment.paymentDate ? new Date(payment.paymentDate).toLocaleDateString() : 'N/A'}</td>
+            <td>₹${payment.amount || 'N/A'}</td>
+            <td>${payment.paymentMethod || 'N/A'}</td>
+            <td class="${payment.status ? payment.status.toLowerCase() : ''}">${payment.status || 'N/A'}</td>
+            <td><a href="${payment.receiptUrl || '#'}">View</a></td>
+          `;
+          paymentTableBody.insertBefore(newRow, paymentTableBody.firstChild);
+        }
+      }
+
       document.addEventListener("DOMContentLoaded", function () {
         const overlay = document.getElementById("overlay");
         if (overlay) {
@@ -813,6 +1142,7 @@ document.addEventListener("click", (event) => {
         const profileForm = document.getElementById("profile-form");
         const passwordForm = document.getElementById("password-form");
         const notificationForm = document.getElementById("notification-form");
+        const paymentForm = document.getElementById("payment-form");
 
         if (bookButton) {
           bookButton.addEventListener("click", function () {
@@ -835,9 +1165,7 @@ document.addEventListener("click", (event) => {
         }
 
         if (maintenanceForm) {
-          maintenanceForm.addEventListener("submit", async function (event) {
-            event.preventDefault();
-            event.stopPropagation();
+          maintenanceForm.addEventListener("submit", async function () {
             const issueType = document.getElementById("issue-type")?.value;
             const description = document.getElementById("description")?.value;
             const location = document.getElementById("location")?.value;
@@ -858,24 +1186,22 @@ document.addEventListener("click", (event) => {
               const result = await response.json();
               console.log("Maintenance response:", result);
               if (result.success) {
-                alert(result.message);
+                showNotification(result.message, "success");
                 addNewRequest(result.request);
                 maintenanceForm.reset();
                 if (popup) popup.style.display = "none";
               } else {
-                alert(result.message || "Error submitting request");
+                showNotification(result.message || "Error submitting request", "error");
               }
             } catch (error) {
               console.error("Maintenance form error:", error);
-              alert("Error submitting request");
+              showNotification("Error submitting request", "error");
             }
           });
         }
 
         if (complaintForm) {
-          complaintForm.addEventListener("submit", async function (event) {
-            event.preventDefault();
-            event.stopPropagation();
+          complaintForm.addEventListener("submit", async function () {
             const category = complaintForm.querySelector("select")?.value;
             const subject = complaintForm.querySelector("input")?.value;
             const description = complaintForm.querySelector("textarea")?.value;
@@ -890,27 +1216,30 @@ document.addEventListener("click", (event) => {
               const result = await response.json();
               console.log("Complaint response:", result);
               if (result.success) {
-                alert(result.message);
+                showNotification(result.message, "success");
                 addNewComplaint(result.complaint);
                 complaintForm.reset();
               } else {
-                alert(result.message || "Error submitting complaint");
+                showNotification(result.message || "Error submitting complaint", "error");
               }
             } catch (error) {
               console.error("Complaint form error:", error);
-              alert("Error submitting complaint");
+              showNotification("Error submitting complaint", "error");
             }
           });
         }
 
         if (reviewForm) {
           reviewForm.addEventListener("click", async function () {
-            const propertyId = document.getElementById("star-rating")?.dataset.propertyId;
+            const starRating = document.getElementById("star-rating");
+            const reviewText = document.getElementById("review-text");
+            if (!starRating || !reviewText) return;
+            const propertyId = starRating.dataset.propertyId;
             const rating = document.querySelectorAll("#star-rating span.active").length;
-            const review = document.getElementById("review-text")?.value;
+            const review = reviewText.value;
 
             if (!rating) {
-              alert("Please select a rating");
+              showNotification("Please select a rating", "error");
               return;
             }
 
@@ -924,40 +1253,38 @@ document.addEventListener("click", (event) => {
               const result = await response.json();
               console.log("Review response:", result);
               if (result.success) {
-                alert(result.message);
+                showNotification(result.message, "success");
                 addNewReview(result.rating);
-                if (document.getElementById("review-text")) document.getElementById("review-text").value = "";
+                reviewText.value = "";
                 document.querySelectorAll("#star-rating span").forEach(s => s.classList.remove("active"));
               } else {
-                alert(result.message || "Error submitting review");
+                showNotification(result.message || "Error submitting review", "error");
               }
             } catch (error) {
               console.error("Review form error:", error);
-              alert("Error submitting review");
+              showNotification("Error submitting review", "error");
             }
           });
         }
 
         if (profileForm) {
-          profileForm.addEventListener("submit", async function (event) {
-            event.preventDefault();
-            event.stopPropagation();
+          profileForm.addEventListener("submit", async function () {
             const fullname = document.getElementById("fullname")?.value.trim();
             const email = document.getElementById("email")?.value.trim();
             const phone = document.getElementById("phone")?.value.trim();
             const location = document.getElementById("address")?.value.trim();
 
             if (!fullname || !email) {
-              alert("Full name and email are required");
+              showNotification("Full name and email are required", "error");
               return;
             }
             const nameParts = fullname.split(" ").filter(part => part);
             if (nameParts.length < 2) {
-              alert("Please provide both first and last names");
+              showNotification("Please provide both first and last names", "error");
               return;
             }
             if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-              alert("Please provide a valid email address");
+              showNotification("Please provide a valid email address", "error");
               return;
             }
 
@@ -980,49 +1307,39 @@ document.addEventListener("click", (event) => {
               const result = await response.json();
               console.log("Profile update response:", result);
               if (result.success) {
-                alert(result.message);
-                if (document.getElementById("fullname")) {
-                  document.getElementById("fullname").value = `${result.user.firstName} ${result.user.lastName}`;
-                }
-                if (document.getElementById("email")) {
-                  document.getElementById("email").value = result.user.email;
-                }
-                if (document.getElementById("phone")) {
-                  document.getElementById("phone").value = result.user.phone || '';
-                }
-                if (document.getElementById("address")) {
-                  document.getElementById("address").value = result.user.location || '';
-                }
+                showNotification(result.message, "success");
+                document.getElementById("fullname").value = `${result.user.firstName} ${result.user.lastName}`;
+                document.getElementById("email").value = result.user.email;
+                document.getElementById("phone").value = result.user.phone || '';
+                document.getElementById("address").value = result.user.location || '';
                 showSection('settings');
                 window.location.hash = 'settings';
               } else {
-                alert(result.message || "Error updating profile");
+                showNotification(result.message || "Error updating profile", "error");
               }
             } catch (error) {
               console.error("Profile form error:", error);
-              alert("Error updating profile");
+              showNotification("Error updating profile", "error");
             }
           });
         }
 
         if (passwordForm) {
-          passwordForm.addEventListener("submit", async function (event) {
-            event.preventDefault();
-            event.stopPropagation();
+          passwordForm.addEventListener("submit", async function () {
             const currentPassword = document.getElementById("current-password")?.value;
             const newPassword = document.getElementById("new-password")?.value;
             const confirmPassword = document.getElementById("confirm-password")?.value;
 
             if (!currentPassword || !newPassword || !confirmPassword) {
-              alert("All password fields are required");
+              showNotification("All password fields are required", "error");
               return;
             }
             if (newPassword !== confirmPassword) {
-              alert("New passwords do not match");
+              showNotification("New passwords do not match", "error");
               return;
             }
             if (newPassword.length < 6) {
-              alert("New password must be at least 6 characters");
+              showNotification("New password must be at least 6 characters", "error");
               return;
             }
 
@@ -1036,24 +1353,22 @@ document.addEventListener("click", (event) => {
               const result = await response.json();
               console.log("Password change response:", result);
               if (result.success) {
-                alert(result.message);
+                showNotification(result.message, "success");
                 passwordForm.reset();
                 showSection('settings');
                 window.location.hash = 'settings';
               } else {
-                alert(result.message || "Error changing password");
+                showNotification(result.message || "Error changing password", "error");
               }
             } catch (error) {
               console.error("Password form error:", error);
-              alert("Error changing password");
+              showNotification("Error changing password", "error");
             }
           });
         }
 
         if (notificationForm) {
-          notificationForm.addEventListener("submit", async function (event) {
-            event.preventDefault();
-            event.stopPropagation();
+          notificationForm.addEventListener("submit", async function () {
             const emailNotifications = document.getElementById("email-notifications")?.checked;
             const smsNotifications = document.getElementById("sms-notifications")?.checked;
             const rentReminders = document.getElementById("rent-reminders")?.checked;
@@ -1082,131 +1397,76 @@ document.addEventListener("click", (event) => {
               const result = await response.json();
               console.log("Notification preferences response:", result);
               if (result.success) {
-                alert(result.message);
-                if (document.getElementById("email-notifications")) {
-                  document.getElementById("email-notifications").checked = result.user.emailNotifications;
-                }
-                if (document.getElementById("sms-notifications")) {
-                  document.getElementById("sms-notifications").checked = result.user.smsNotifications;
-                }
-                if (document.getElementById("rent-reminders")) {
-                  document.getElementById("rent-reminders").checked = result.user.rentReminders;
-                }
-                if (document.getElementById("maintenance-updates")) {
-                  document.getElementById("maintenance-updates").checked = result.user.maintenanceUpdates;
-                }
-                if (document.getElementById("new-listings")) {
-                  document.getElementById("new-listings").checked = result.user.newListings;
-                }
+                showNotification(result.message, "success");
+                document.getElementById("email-notifications").checked = result.user.emailNotifications;
+                document.getElementById("sms-notifications").checked = result.user.smsNotifications;
+                document.getElementById("rent-reminders").checked = result.user.rentReminders;
+                document.getElementById("maintenance-updates").checked = result.user.maintenanceUpdates;
+                document.getElementById("new-listings").checked = result.user.newListings;
                 showSection('settings');
                 window.location.hash = 'settings';
               } else {
-                alert(result.message || "Error updating preferences");
+                showNotification(result.message || "Error updating preferences", "error");
               }
             } catch (error) {
               console.error("Notification form error:", error);
-              alert("Error updating preferences");
+              showNotification("Error updating preferences", "error");
             }
           });
         }
 
-        async function removeSavedProperty(propertyId) {
-          console.log("Removing saved property:", { propertyId });
-          try {
-            const response = await fetch("/tenant/saved-property", {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ propertyId, action: "remove" }),
-            });
-            if (!response.ok) {
-              throw new Error(`Server error: ${response.status}`);
-            }
-            const result = await response.json();
-            console.log("Remove property response:", result);
-            if (result.success) {
-              showNotification(result.message || "Property removed successfully", "success");
-              const propertyCard = document.querySelector(`.property-card[data-property-id="${propertyId}"]`);
-              if (propertyCard) {
-                propertyCard.remove();
+        if (paymentForm) {
+          paymentForm.addEventListener("submit", async function () {
+            const amount = document.getElementById("rent-amount")?.value;
+            const paymentMethod = document.getElementById("payment-method")?.value;
+            const transactionId = document.getElementById("transaction-id")?.value;
+
+            console.log("Submitting payment:", { amount, paymentMethod, transactionId });
+            try {
+              const response = await fetch("/tenant/payment", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                  amount,
+                  paymentMethod,
+                  transactionId,
+                }),
+              });
+              const result = await response.json();
+              console.log("Payment response:", result);
+              if (result.success) {
+                showNotification(result.message, "success");
+                addNewPayment(result.payment);
+                paymentForm.reset();
+                closePaymentPopup();
+                const currentRentDiv = document.querySelector(".current-rent p");
+                if (currentRentDiv) {
+                  currentRentDiv.innerHTML = "<p>No rent due date available.</p>";
+                }
               } else {
-                console.warn(`Property card with ID ${propertyId} not found in DOM`);
+                showNotification(result.message || "Error processing payment", "error");
               }
-            } else {
-              showNotification(result.message || "Error removing property", "error");
+            } catch (error) {
+              console.error("Payment form error:", error);
+              showNotification("Error processing payment", "error");
             }
-          } catch (error) {
-            console.error("Remove property error:", error);
-            showNotification("Failed to remove property. Please try again.", "error");
+          });
+        }
+
+        document.addEventListener("click", async (event) => {
+          if (event.target.classList.contains("mark-read-button")) {
+            const notificationId = event.target.dataset.notificationId;
+            if (notificationId) {
+              await markNotificationAsRead(notificationId);
+            }
           }
-        }
-
-        function showNotification(message, type) {
-          alert(message);
-        }
-
-        document.addEventListener("click", (event) => {
           if (event.target.classList.contains("remove-button")) {
             const propertyId = event.target.dataset.propertyId;
             if (propertyId) {
-              removeSavedProperty(propertyId);
+              await removeSavedProperty(propertyId);
             }
           }
         });
-
-        function addNewRequest(request) {
-          const activeRequestsContainer = document.querySelector(".maintenance-cards");
-          if (activeRequestsContainer) {
-            const newCard = document.createElement("div");
-            newCard.className = "maintenance-card";
-            newCard.innerHTML = `
-              <div class="maintenance-header">
-                <h5>${request.issueType || 'Unknown'} Issue</h5>
-                <span class="status pending">Pending</span>
-              </div>
-              <p><strong>Date Reported:</strong> ${request.dateReported ? new Date(request.dateReported).toLocaleDateString() : 'N/A'}</p>
-              <p><strong>Description:</strong> ${request.description || 'N/A'}</p>
-              <p><strong>Location:</strong> ${request.location || 'N/A'}</p>
-              ${request.scheduledDate ? `<p><strong>Preferred Date:</strong> ${new Date(request.scheduledDate).toLocaleDateString()}</p>` : ""}
-              <p><strong>Assigned To:</strong> Awaiting assignment</p>
-              <button class="small-button">Update</button>
-            `;
-            activeRequestsContainer.insertBefore(newCard, activeRequestsContainer.firstChild);
-          }
-        }
-
-        function addNewComplaint(complaint) {
-          const complaintsContainer = document.querySelector(".complaints-history");
-          if (complaintsContainer) {
-            const newItem = document.createElement("div");
-            newItem.className = "complaint-item";
-            newItem.innerHTML = `
-              <div class="complaint-header">
-                <h5>${complaint.subject || 'N/A'}</h5>
-                <span class="status open">Open</span>
-              </div>
-              <p><strong>Date:</strong> ${complaint.dateSubmitted ? new Date(complaint.dateSubmitted).toLocaleDateString() : 'N/A'}</p>
-              <p><strong>Description:</strong> ${complaint.description || 'N/A'}</p>
-            `;
-            complaintsContainer.insertBefore(newItem, complaintsContainer.firstChild);
-          }
-        }
-
-        function addNewReview(rating) {
-          const reviewsContainer = document.querySelector(".past-reviews");
-          if (reviewsContainer) {
-            const newCard = document.createElement("div");
-            newCard.className = "review-card";
-            newCard.innerHTML = `
-              <div class="review-header">
-                <h5>${rating.propertyId && rating.propertyId.name ? rating.propertyId.name : 'Unknown Property'}</h5>
-                <div class="rating">${rating.rating ? "⭐".repeat(rating.rating) : ''} ${rating.rating ? rating.rating.toFixed(1) : 'N/A'}</div>
-              </div>
-              <p class="review-date">Reviewed on: ${rating.date ? new Date(rating.date).toLocaleDateString() : 'N/A'}</p>
-              <p class="review-text">${rating.review || 'No review provided'}</p>
-            `;
-            reviewsContainer.insertBefore(newCard, reviewsContainer.firstChild);
-          }
-        }
 
         const stars = document.querySelectorAll("#star-rating span");
         stars.forEach((star, index) => {
@@ -1229,7 +1489,221 @@ document.addEventListener("click", (event) => {
             event.stopPropagation();
           });
         });
+        // Add this inside your existing document.addEventListener("DOMContentLoaded", function () {
+
+// Worker Payment Form Handler
+const workerPaymentForm = document.getElementById('worker-payment-form');
+if (workerPaymentForm) {
+  workerPaymentForm.addEventListener('submit', async function(event) {
+    event.preventDefault();
+    
+    const workerId = document.getElementById('worker-id')?.value;
+    const workerName = document.getElementById('worker-name')?.value;
+    const serviceType = document.getElementById('service-type')?.value;
+    const amount = document.getElementById('payment-amount')?.value;
+    const paymentPeriod = document.getElementById('payment-period')?.value;
+    const workDate = document.getElementById('work-date')?.value;
+    const paymentMethod = document.getElementById('worker-payment-method')?.value;
+    const transactionId = document.getElementById('worker-transaction-id')?.value;
+    const notes = document.getElementById('payment-notes')?.value;
+    
+    if (!workerId || !amount || !paymentPeriod || !workDate || !paymentMethod) {
+      showNotification('Please fill in all required fields', 'error');
+      return;
+    }
+    
+    const paymentData = {
+      workerId,
+      workerName,
+      serviceType,
+      amount: parseFloat(amount),
+      paymentPeriod,
+      workDate,
+      paymentMethod,
+      transactionId,
+      notes
+    };
+    
+    console.log('Submitting worker payment:', paymentData);
+    try {
+      const response = await fetch('/tenant/worker-payment', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(paymentData)
       });
+      
+      const result = await response.json();
+      console.log('Worker payment response:', result);
+      
+      if (result.success) {
+        showNotification(result.message || 'Payment processed successfully', 'success');
+        addWorkerPaymentToHistory(result.payment);
+        updateWorkerPaymentStatus(paymentData.workerId, 'paid');
+        closeWorkerPaymentPopup();
+      } else {
+        showNotification(result.message || 'Error processing payment', 'error');
+      }
+    } catch (error) {
+      console.error('Worker payment error:', error);
+      showNotification('Failed to process payment. Please try again.', 'error');
+    }
+  });
+}
+
+// Worker Payment Popup Event Listeners
+const workerPaymentPopup = document.getElementById('worker-payment-popup');
+if (workerPaymentPopup) {
+  window.addEventListener('click', function(event) {
+    if (event.target === workerPaymentPopup) {
+      closeWorkerPaymentPopup();
+    }
+  });
+}
+
+// Enhance existing worker cards with payment functionality
+const workerCards = document.querySelectorAll('.worker-card');
+workerCards.forEach((card, index) => {
+  // Add worker ID if not present
+  if (!card.dataset.workerId) {
+    card.dataset.workerId = `worker_${index + 1}`;
+  }
+});
+
+
+      });
+      // Worker Payment Functions - Add these to your existing JavaScript
+
+function showWorkerPaymentPopup(button) {
+  const workerCard = button.closest('.worker-card');
+  if (!workerCard) return;
+  
+  // Extract worker information from the card
+  const workerName = workerCard.querySelector('.worker-name')?.textContent || 
+                    workerCard.querySelector('h5')?.textContent || '';
+  const serviceType = workerCard.querySelector('.worker-service')?.textContent || 
+                     workerCard.querySelector('p:nth-child(2)')?.textContent.replace('Service: ', '') || '';
+  const workerFee = workerCard.querySelector('.worker-fee')?.textContent || 
+                   workerCard.querySelector('p:nth-child(4)')?.textContent.match(/₹(\d+)/)?.[1] || '';
+  const workerId = workerCard.dataset.workerId || button.dataset.workerId;
+  
+  // Populate the popup form
+  document.getElementById('worker-name').value = workerName;
+  document.getElementById('worker-id').value = workerId;
+  document.getElementById('service-type').value = serviceType;
+  document.getElementById('payment-amount').value = workerFee;
+  
+  // Show the popup
+  const popup = document.getElementById('worker-payment-popup');
+  if (popup) {
+    popup.style.display = 'flex';
+  }
+}
+
+function closeWorkerPaymentPopup() {
+  const popup = document.getElementById('worker-payment-popup');
+  if (popup) {
+    popup.style.display = 'none';
+    document.getElementById('worker-payment-form').reset();
+  }
+}
+
+async function checkRecentWorkerPayment(workerId) {
+  console.log('Checking recent worker payment for:', workerId);
+  try {
+    const response = await fetch('/tenant/check-recent-worker-payment', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ workerId })
+    });
+    const result = await response.json();
+    console.log('Check recent worker payment response:', result);
+    return result;
+  } catch (error) {
+    console.error('Check recent worker payment error:', error);
+    showNotification('Error checking payment status', 'error');
+    return { success: false };
+  }
+}
+
+function addWorkerPaymentToHistory(payment) {
+  const historyTableBody = document.getElementById('worker-payment-history-body');
+  if (historyTableBody) {
+    const newRow = document.createElement('tr');
+    newRow.innerHTML = `
+      <td>${payment.paymentDate ? new Date(payment.paymentDate).toLocaleDateString() : new Date().toLocaleDateString()}</td>
+      <td>${payment.workerName || 'N/A'}</td>
+      <td>${payment.serviceType || 'N/A'}</td>
+      <td>₹${payment.amount || 'N/A'}</td>
+      <td>${payment.paymentMethod || 'N/A'}</td>
+      <td class="${payment.status ? payment.status.toLowerCase() : 'completed'}">${payment.status || 'Completed'}</td>
+      <td><a href="${payment.receiptUrl || '#'}" ${payment.receiptUrl ? '' : 'style="pointer-events:none;color:#ccc;"'}>View</a></td>
+    `;
+    historyTableBody.insertBefore(newRow, historyTableBody.firstChild);
+  }
+}
+
+function updateWorkerPaymentStatus(workerId, status) {
+  const workerCard = document.querySelector(`.worker-card[data-worker-id="${workerId}"]`);
+  if (workerCard) {
+    const statusElement = workerCard.querySelector('.payment-status');
+    const lastPaymentElement = workerCard.querySelector('.last-payment-date');
+    const payButton = workerCard.querySelector('.pay-worker-btn');
+    
+    if (statusElement) {
+      statusElement.className = `payment-status status-${status}`;
+      statusElement.textContent = status.charAt(0).toUpperCase() + status.slice(1);
+    }
+    
+    if (lastPaymentElement) {
+      lastPaymentElement.textContent = new Date().toLocaleDateString();
+    }
+    
+    if (payButton && status === 'paid') {
+      payButton.disabled = true;
+      payButton.textContent = 'Paid';
+    }
+  }
+}
+
+function viewWorkerProfile(button) {
+  const workerCard = button.closest('.worker-card');
+  const workerId = workerCard?.dataset.workerId || button.dataset.workerId;
+  if (workerId) {
+    window.location.href = `/worker-profile?id=${workerId}`;
+  }
+}
+
+async function loadWorkerPaymentHistory() {
+  try {
+    const response = await fetch('/tenant/worker-payment-history');
+    const result = await response.json();
+    
+    if (result.success && result.payments) {
+      const historyTableBody = document.getElementById('worker-payment-history-body');
+      if (historyTableBody) {
+        historyTableBody.innerHTML = '';
+        result.payments.forEach(payment => {
+          addWorkerPaymentToHistory(payment);
+        });
+      }
+    }
+  } catch (error) {
+    console.error('Error loading worker payment history:', error);
+  }
+}
+
+// Override the existing showSection function to handle worker payment history
+const originalShowSection = showSection;
+showSection = function(sectionId) {
+  originalShowSection(sectionId);
+  
+  // Load worker payment history when movers section is shown
+  if (sectionId === 'movers') {
+    setTimeout(() => {
+      loadWorkerPaymentHistory();
+    }, 100);
+  }
+};
     </script>
   </body>
 </html>

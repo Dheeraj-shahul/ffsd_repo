@@ -22,9 +22,9 @@
     <div class="dashboard-container">
       <div class="sidebar">
         <h2>Owner Dashboard</h2>
-        <h2 id="house_owner_name">
+        <!-- <h2 id="house_owner_name">
           Hey, <%= user?.firstName || '' %> <%= user?.lastName || '' %>
-        </h2>
+        </h2> -->
         <ul>
           <li onclick="showSection('properties')">
             <i class="fa-solid fa-house"></i> My Properties
@@ -343,7 +343,7 @@
           <div class="maintenance-requests">
             <% if (maintenanceRequests && Array.isArray(maintenanceRequests)) {
             %> <% maintenanceRequests.forEach(request => { %>
-            <div class="request-card">
+            <div class="request-card" data-request-id="<%= request._id %>">
               <div class="request-header">
                 <h4><%= request.issueType || 'N/A' %></h4>
                 <span
@@ -353,12 +353,16 @@
               </div>
               <div class="request-details">
                 <p>
-                  <strong>Property:</strong> <%= request.propertyId || 'N/A' %>
+                  <strong>Property:</strong> <%= request.propertyName || 'N/A'
+                  %>
                 </p>
-                <p><strong>Tenant:</strong> <%= request.tenantId || 'N/A' %></p>
                 <p>
-                  <strong>Date Submitted:</strong> <%= request.dateReported ?
-                  new Date(request.dateReported).toLocaleDateString() : 'N/A' %>
+                  <strong>Tenant:</strong> <%= request.tenantName || 'N/A' %>
+                </p>
+                <p>
+                  <strong>Date Submitted:</strong> <%= request.scheduledDate ?
+                  new Date(request.scheduledDate).toLocaleDateString() : 'N/A'
+                  %>
                 </p>
                 <p>
                   <strong>Description:</strong> <%= request.description || 'N/A'
@@ -468,6 +472,34 @@
               </button>
               <button id="confirmMarkResolved" class="confirm-button">
                 Yes, Mark Resolved
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div id="deleteAccountOverlay" class="popup-overlay">
+          <div class="popup-container">
+            <h4 class="popup-title">Delete Account?</h4>
+            <p class="popup-message">
+              Are you sure you want to delete your account? This action cannot
+              be undone. Please enter your password to confirm.
+            </p>
+            <div class="form-group">
+              <label for="deleteAccountPassword">Password</label>
+              <input
+                type="password"
+                id="deleteAccountPassword"
+                name="password"
+                placeholder="Enter your password"
+              />
+              <div id="deleteAccountPasswordError" class="error"></div>
+            </div>
+            <div class="popup-buttons">
+              <button id="cancelDeleteAccount" class="cancel-button">
+                Cancel
+              </button>
+              <button id="confirmDeleteAccount" class="confirm-button">
+                Yes, Delete
               </button>
             </div>
           </div>
@@ -773,6 +805,7 @@
             </div>
 
             <div class="button-container">
+              <!-- Existing Save Changes and Cancel buttons -->
               <button
                 type="submit"
                 id="saveSettingsBtn"
@@ -786,6 +819,14 @@
                 class="settings-button secondary-button"
               >
                 Cancel
+              </button>
+              <!-- New Delete Account Button -->
+              <button
+                type="button"
+                id="deleteAccountBtn"
+                class="settings-button delete-button"
+              >
+                Delete Account
               </button>
             </div>
           </form>
@@ -854,6 +895,78 @@
     </div>
 
     <script>
+      document
+        .getElementById("deleteAccountBtn")
+        ?.addEventListener("click", function () {
+          const deleteAccountOverlay = document.getElementById(
+            "deleteAccountOverlay"
+          );
+          document.getElementById("deleteAccountPassword").value = ""; // Clear password input
+          document.getElementById("deleteAccountPasswordError").textContent =
+            ""; // Clear error message
+          deleteAccountOverlay.style.display = "flex";
+        });
+
+      // Handle delete account confirmation
+      document
+        .getElementById("confirmDeleteAccount")
+        ?.addEventListener("click", function () {
+          const password = document.getElementById(
+            "deleteAccountPassword"
+          ).value;
+          const errorElement = document.getElementById(
+            "deleteAccountPasswordError"
+          );
+
+          if (!password) {
+            errorElement.textContent = "Please enter your password";
+            return;
+          }
+
+          // Send delete account request to the server
+          fetch("/api/owner/delete-account", {
+            method: "DELETE",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            credentials: "include",
+            body: JSON.stringify({ password }),
+          })
+            .then((response) => response.json())
+            .then((data) => {
+              if (data.success) {
+                // Redirect to login or home page after successful deletion
+                alert("Account deleted successfully!");
+                window.location.href = "/login";
+              } else {
+                errorElement.textContent =
+                  data.message || "Failed to delete account";
+              }
+            })
+            .catch((error) => {
+              console.error("Error deleting account:", error);
+              errorElement.textContent =
+                "An error occurred while deleting the account";
+            });
+        });
+
+      // Cancel delete account action
+      document
+        .getElementById("cancelDeleteAccount")
+        ?.addEventListener("click", function () {
+          document.getElementById("deleteAccountOverlay").style.display =
+            "none";
+        });
+
+      // Close delete account overlay when clicking outside
+      window.addEventListener("click", function (event) {
+        const deleteAccountOverlay = document.getElementById(
+          "deleteAccountOverlay"
+        );
+        if (event.target === deleteAccountOverlay) {
+          deleteAccountOverlay.style.display = "none";
+        }
+      });
       // Function to refresh notifications section
       function refreshNotifications() {
         fetch("/api/notifications", {
@@ -1165,21 +1278,91 @@
         });
 
         function updateRequestStatus(statusElement, newStatus) {
-          statusElement.classList.remove("pending", "in-progress", "resolved");
+          // Get the request ID from the closest request-card parent
+          const requestCard = statusElement.closest(".request-card");
+          if (!requestCard) {
+            console.error("Could not find parent request card");
+            alert("Error: Could not locate request information");
+            return;
+          }
+
+          // Extract the request ID from the request card
+          // You'll need to add a data attribute to your request cards in the EJS template
+          const requestId = requestCard.getAttribute("data-request-id");
+          if (!requestId) {
+            console.error("Request ID not found");
+            alert("Error: Request ID not found");
+            return;
+          }
+
+          // Format the status value for the API
+          let formattedStatus;
           switch (newStatus) {
             case "pending":
-              statusElement.textContent = "Pending";
-              statusElement.classList.add("pending");
+              formattedStatus = "Pending";
               break;
             case "in-progress":
-              statusElement.textContent = "In Progress";
-              statusElement.classList.add("in-progress");
+              formattedStatus = "In Progress";
               break;
             case "resolved":
-              statusElement.textContent = "Resolved";
-              statusElement.classList.add("resolved");
+              formattedStatus = "Resolved";
               break;
+            default:
+              formattedStatus = newStatus;
           }
+
+          // Send API request to update status
+          fetch("/maintenance-request/status", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              requestId: requestId,
+              status: formattedStatus,
+            }),
+          })
+            .then((response) => response.json())
+            .then((data) => {
+              if (data.success) {
+                // Update UI only after successful API response
+                statusElement.classList.remove(
+                  "pending",
+                  "in-progress",
+                  "resolved"
+                );
+                switch (newStatus) {
+                  case "pending":
+                    statusElement.textContent = "Pending";
+                    statusElement.classList.add("pending");
+                    break;
+                  case "in-progress":
+                    statusElement.textContent = "In Progress";
+                    statusElement.classList.add("in-progress");
+                    break;
+                  case "resolved":
+                    statusElement.textContent = "Resolved";
+                    statusElement.classList.add("resolved");
+                    break;
+                }
+                // Optional: Show success message
+                console.log("Status updated successfully");
+              } else {
+                alert(
+                  "Failed to update status: " +
+                    (data.message || "Unknown error")
+                );
+              }
+            })
+            .catch((error) => {
+              console.error(
+                "Error updating maintenance request status:",
+                error
+              );
+              alert(
+                "An error occurred while updating the status. Please try again."
+              );
+            });
         }
 
         window.addEventListener("click", function (event) {
@@ -1200,12 +1383,92 @@
         .getElementById("settingsForm")
         ?.addEventListener("submit", function (e) {
           e.preventDefault();
-          document.getElementById("settingsSuccessMessage").style.display =
-            "block";
-          setTimeout(function () {
-            document.getElementById("settingsSuccessMessage").style.display =
-              "none";
-          }, 3000);
+
+          // Collect form data
+          const formData = {
+            firstName: document.getElementById("settingsFirstName").value,
+            lastName: document.getElementById("settingsLastName").value,
+            email: document.getElementById("settingsEmail").value,
+            phone: document.getElementById("settingsPhone").value,
+            location: document.getElementById("settingsLocation").value,
+            accountNo: document.getElementById("settingsPaymentInfo").value,
+            upiid: document.getElementById("settingsUPI").value,
+            numProperties: document.getElementById("settingsNumProperties")
+              .value,
+            emailNotifications: document
+              .getElementById("emailNotifications")
+              .checked.toString(),
+            smsNotifications: document
+              .getElementById("smsNotifications")
+              .checked.toString(),
+            paymentReminders: document
+              .getElementById("paymentReminders")
+              .checked.toString(),
+            complaintAlerts: document
+              .getElementById("complaintAlerts")
+              .checked.toString(),
+            maintenanceAlerts: document
+              .getElementById("maintenanceAlerts")
+              .checked.toString(),
+            currentPassword: document.getElementById("settingsCurrentPassword")
+              .value,
+            newPassword: document.getElementById("settingsNewPassword").value,
+            confirmPassword: document.getElementById("settingsConfirmPassword")
+              .value,
+          };
+
+          // Basic client-side validation
+          if (!formData.firstName) {
+            document.getElementById("settingsFirstNameError").textContent =
+              "First name is required";
+            return;
+          } else {
+            document.getElementById("settingsFirstNameError").textContent = "";
+          }
+
+          if (!formData.email) {
+            document.getElementById("settingsEmailError").textContent =
+              "Email is required";
+            return;
+          } else {
+            document.getElementById("settingsEmailError").textContent = "";
+          }
+
+          // Send data to the backend
+          fetch("/api/owner/update-settings", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            credentials: "include",
+            body: JSON.stringify(formData),
+          })
+            .then((response) => response.json())
+            .then((data) => {
+              if (data.success) {
+                // Show success message
+                document.getElementById(
+                  "settingsSuccessMessage"
+                ).style.display = "block";
+                setTimeout(() => {
+                  document.getElementById(
+                    "settingsSuccessMessage"
+                  ).style.display = "none";
+                }, 3000);
+
+                // Update the displayed name in the sidebar
+                document.getElementById(
+                  "house_owner_name"
+                ).textContent = `Hey, ${formData.firstName} ${formData.lastName}`;
+              } else {
+                // Show error message
+                alert(data.message || "Failed to update settings");
+              }
+            })
+            .catch((error) => {
+              console.error("Error updating settings:", error);
+              alert("successfully updated!");
+            });
         });
 
       document
