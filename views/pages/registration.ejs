@@ -312,6 +312,7 @@
             </div>
             
             <button type="submit">Register</button>
+            <div id="serverError" class="error" style="display:none;"></div>
             
             <div class="divider">
                 <span>OR</span>
@@ -349,6 +350,8 @@
         // Run on page load to set initial state
         handleUserTypeChange();
         
+        document.getElementById('registerForm').addEventListener('submit', async function(event) {
+            event.preventDefault();
         document.getElementById('registerForm').addEventListener('submit', async function(event) {
             event.preventDefault();
             let isValid = true;
@@ -460,90 +463,14 @@
                 document.getElementById('confirmPasswordError').style.display = 'none';
             }
             
-            if (isValid) {
-                const formData = {
-                    userType,
-                    firstName,
-                    lastName,
-                    email,
-                    phone,
-                    location,
-                    serviceType: userType === 'worker' ? serviceType : undefined,
-                    experience: userType === 'worker' ? experience : undefined,
-                    numProperties: userType === 'owner' ? numProperties : undefined,
-                    password
-                };
-                
-                try {
-                    console.log('Sending form data:', formData);
-                    const response = await fetch('/register', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify(formData)
-                    });
-                    
-                    console.log('Response status:', response.status);
-                    const data = await response.json();
-                    console.log('Response data:', data);
-                    
-                    if (response.ok) {
-                        console.log('Registration successful, redirecting to /login');
-                        window.location.href = '/login';
-                    } else {
-                        if (data.error && data.error.toLowerCase().includes('email already exists')) {
-                            console.log('Email already exists detected');
-                            document.getElementById('emailError').textContent = 'This email is already registered. Please use a different email or log in.';
-                            document.getElementById('emailError').style.display = 'block';
-                        } else {
-                            console.log('Other error:', data.error);
-                            alert(data.error || 'Registration failed');
-                            document.getElementById('emailError').textContent = '';
-                            document.getElementById('emailError').style.display = 'none';
-                        }
-                    }
-                } catch (error) {
-                    console.error('Fetch error:', error);
-                    alert('Registration failed: ' + error.message);
-                    document.getElementById('emailError').textContent = '';
-                    document.getElementById('emailError').style.display = 'none';
-                }
+            if (!isValid) {
+                event.preventDefault();
             }
         });
         
-        async function registerWithGoogle() {
-            try {
-                console.log('Initiating Google registration');
-                const response = await fetch('/register/google', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    }
-                });
-                
-                console.log('Google response status:', response.status);
-                const data = await response.json();
-                console.log('Google response data:', data);
-                
-                if (response.ok) {
-                    console.log('Google registration successful');
-                    alert("Login successfully");
-                    window.location.href = '/login';
-                } else {
-                    if (data.error && data.error.toLowerCase().includes('email already exists')) {
-                        console.log('Google registration: Email already exists');
-                        document.getElementById('emailError').textContent = 'This email is already registered. Please use a different email or log in.';
-                        document.getElementById('emailError').style.display = 'block';
-                    } else {
-                        console.log('Google registration error:', data.error);
-                        alert(data.error || 'Google registration failed');
-                    }
-                }
-            } catch (error) {
-                console.error('Google registration fetch error:', error);
-                alert('Google registration failed: ' + error.message);
-            }
+        function registerWithGoogle() {
+            alert("login successfully--");
+            console.log('Register with Google clicked');
         }
     </script>
 </body>
