@@ -73,5 +73,11 @@ router.post(
   tenantController.checkAccountStatus
 );
 router.post("/delete-account", isAuthenticated, tenantController.deleteAccount);
+// Unrent property request
+router.post(
+  "/unrent-property",
+  isAuthenticated,
+  tenantController.requestUnrentProperty
+);
 
 module.exports = router;
