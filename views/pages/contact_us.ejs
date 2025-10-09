@@ -130,6 +130,46 @@
         cursor: pointer;
         font-weight: bold;
       }
+
+      /* Modal styles for a better user experience */
+      .modal {
+        display: none;
+        position: fixed;
+        z-index: 1000;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5);
+        justify-content: center;
+        align-items: center;
+      }
+      .modal-content {
+        background-color: #fefefe;
+        padding: 20px;
+        border: 1px solid #888;
+        width: 80%;
+        max-width: 400px;
+        text-align: center;
+        border-radius: 10px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        position: relative;
+      }
+      .close-button {
+        color: #aaa;
+        float: right;
+        font-size: 28px;
+        font-weight: bold;
+        position: absolute;
+        top: 10px;
+        right: 15px;
+      }
+      .close-button:hover,
+      .close-button:focus {
+        color: black;
+        text-decoration: none;
+        cursor: pointer;
+      }
     </style>
     <link
       rel="stylesheet"
@@ -137,7 +177,6 @@
     />
   </head>
   <body>
-    <%- include('../partials/header') %>
     <div class="whole_container">
       <div class="container">
         <div class="contact-section">
@@ -203,35 +242,87 @@
         </div>
       </div>
     </div>
+
+    <!-- Success/Error Message Modal -->
+    <div id="statusModal" class="modal">
+        <div class="modal-content">
+            <span class="close-button">&times;</span>
+            <p id="modalMessage"></p>
+        </div>
+    </div>
+    
     <script>
       document
         .getElementById("contactForm")
-        .addEventListener("submit", function (e) {
+        .addEventListener("submit", async function (e) {
           e.preventDefault();
 
-          // Get form values
           const email = document.getElementById("email").value;
           const phone = document.getElementById("phone").value;
+          const modal = document.getElementById("statusModal");
+          const modalMessage = document.getElementById("modalMessage");
+          const closeButton = document.querySelector(".close-button");
 
           // Validate email (must be a Gmail address)
           const emailRegex = /^[a-zA-Z0-9._%+-]+@gmail\.com$/;
           if (!emailRegex.test(email)) {
-            alert("Please enter a valid Gmail address.");
+            modalMessage.textContent = "Please enter a valid Gmail address.";
+            modal.style.display = "flex";
             return;
           }
 
           // Validate phone number (must be 10 digits)
           const phoneRegex = /^\d{10}$/;
           if (phone && !phoneRegex.test(phone)) {
-            alert("Please enter a valid 10-digit phone number.");
+            modalMessage.textContent = "Please enter a valid 10-digit phone number.";
+            modal.style.display = "flex";
             return;
           }
 
-          // If validation passes, show success message
-          window.alert(
-            "Thank you for your message! We will get back to you shortly."
-          );
-          this.reset();
+          // Gather form data
+          const formData = {
+            name: document.getElementById("name").value,
+            email: email,
+            phone: phone,
+            subject: document.getElementById("subject").value,
+            message: document.getElementById("message").value
+          };
+          
+          modalMessage.textContent = "Submitting your message...";
+          modal.style.display = "flex";
+
+          try {
+              const response = await fetch('/submit-form', {
+                  method: 'POST',
+                  headers: {
+                      'Content-Type': 'application/json'
+                  },
+                  body: JSON.stringify(formData)
+              });
+
+              const result = await response.json();
+
+              if (response.ok) {
+                  modalMessage.textContent = "Thank you for your message! We will get back to you shortly.";
+                  e.target.reset();
+              } else {
+                  modalMessage.textContent = `Error: ${result.error || 'Failed to submit form.'}`;
+              }
+          } catch (error) {
+              modalMessage.textContent = "Network error. Please ensure the backend server is running.";
+              console.error('Fetch error:', error);
+          }
+          
+          // Close the modal when the user clicks on 'x'
+          closeButton.onclick = function() {
+              modal.style.display = "none";
+          }
+          // Close the modal when the user clicks anywhere outside of the modal
+          window.onclick = function(event) {
+              if (event.target == modal) {
+                  modal.style.display = "none";
+              }
+          }
         });
     </script>
   </body>
