@@ -12,7 +12,7 @@ const Booking = require("./models/booking");
 const Payment = require("./models/payment");
 const Notification = require("./models/notification");
 const Setting = require("./models/setting");
-
+const Contact = require('./models/contactus'); // new Contact model
 const Complaint = require("./models/complaint");
 const Rating = require("./models/rating");
 const RentalHistory = require("./models/rentalhistory");
@@ -441,6 +441,48 @@ app.get("/privacy_policy", (req, res) => {
 app.get("/contact_us", (req, res) => {
   res.render("pages/contact_us");
 });
+
+
+// POST route to handle contact form submission
+app.post('/submit-form', async (req, res) => {
+  try {
+    const { name, email, phone, subject, message } = req.body;
+
+    // Basic validation
+    if (!name || !email || !subject || !message) {
+      return res.status(400).json({ error: 'Name, email, subject, and message are required' });
+    }
+
+    // Validate email (must be a Gmail address)
+    const emailRegex = /^[a-zA-Z0-9._%+-]+@gmail\.com$/;
+    if (!emailRegex.test(email)) {
+      return res.status(400).json({ error: 'Please provide a valid Gmail address' });
+    }
+
+    // Validate phone number if provided (must be 10 digits)
+    if (phone && !/^\d{10}$/.test(phone)) {
+      return res.status(400).json({ error: 'Please provide a valid 10-digit phone number' });
+    }
+
+    // Create new contact entry
+    const contact = new Contact({
+      name,
+      email,
+      phone: phone || '',
+      subject,
+      message,
+    });
+
+    // Save to MongoDB
+    await contact.save();
+
+    res.status(200).json({ message: 'Form submitted successfully' });
+  } catch (error) {
+    console.error('Error submitting form:', error);
+    res.status(500).json({ error: 'Server error, please try again later' });
+  }
+});
+
 
 app.get("/about_us", (req, res) => {
   res.render("pages/about_us");
