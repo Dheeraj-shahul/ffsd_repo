@@ -103,6 +103,37 @@
                   <strong>Monthly Rent:</strong> ₹<%= currentProperty.price || 'N/A' %>
                 </p>
               </div>
+              <button id="unrent-btn" class="btn btn-danger">Request Unrent</button>
+                <div id="unrent-modal" class="modal" style="display:none;">
+                  <div class="modal-content">
+                    <span class="close" id="close-unrent-modal">&times;</span>
+                    <h4>Unrent Property</h4>
+                    <p>Are you sure you want to request to unrent this property?</p>
+                    <textarea id="unrent-reason" placeholder="Reason (optional)" style="width:100%;margin-bottom:10px;"></textarea>
+                    <button id="confirm-unrent" class="btn btn-danger">Confirm Unrent</button>
+                  </div>
+                </div>
+                <script>
+                  document.getElementById('unrent-btn').onclick = function() {
+                    document.getElementById('unrent-modal').style.display = 'block';
+                  };
+                  document.getElementById('close-unrent-modal').onclick = function() {
+                    document.getElementById('unrent-modal').style.display = 'none';
+                  };
+                  document.getElementById('confirm-unrent').onclick = function() {
+                    const reason = document.getElementById('unrent-reason').value;
+                    fetch('/tenant/unrent-property', {
+                      method: 'POST',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify({ reason })
+                    })
+                    .then(res => res.json())
+                    .then(data => {
+                      alert(data.message);
+                      if (data.success) location.reload();
+                    });
+                  };
+                </script>
             </div>
           </div>
           <div class="quick-stats">
@@ -117,6 +148,19 @@
           </div>
           <% } else { %>
           <p>No current property rented.</p>
+          <% } %>
+          <!-- Show Unrent Request Status -->
+          <% if (notifications && notifications.length > 0) { %>
+            <div class="unrent-status">
+              <h4>Unrent Requests</h4>
+              <% notifications.forEach(function(n) { if (n.type === 'Unrent Request') { %>
+                <div class="unrent-request-status">
+                  <strong>Status:</strong> <%= n.status %> <br>
+                  <strong>Reason:</strong> <%= n.unrentReason || n.reason || 'N/A' %> <br>
+                  <strong>Date:</strong> <%= n.createdDate ? new Date(n.createdDate).toLocaleDateString() : 'N/A' %>
+                </div>
+              <% } }); %>
+            </div>
           <% } %>
         </div>
 

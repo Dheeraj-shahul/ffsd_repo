@@ -10,6 +10,7 @@ const Rating = require("../models/rating");
 const RentalHistory = require("../models/rentalhistory");
 const Notification = require("../models/notification");
 const WorkerBooking = require("../models/workerBooking");
+const UnrentRequest = require("../models/unrentRequest");
 
 // Dashboard Controller
 // Dashboard Controller
@@ -1198,5 +1199,107 @@ exports.submitWorkerPayment = async (req, res) => {
     res
       .status(500)
       .json({ success: false, message: "Server error: " + error.message });
+  }
+};
+
+exports.requestUnrentProperty = async (req, res) => {
+  try {
+    if (!req.session.user || !req.session.user._id) {
+      return res
+        .status(401)
+        .json({ success: false, message: "Unauthorized: Please log in" });
+    }
+
+    const tenantId = req.session.user._id;
+    const property = await Property.findOne({ tenantId });
+    if (!property) {
+      return res
+        .status(404)
+        .json({ success: false, message: "No property found for this tenant" });
+    }
+    // Check if this month's rent is paid
+    const thirtyDaysAgo = new Date();
+    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+    const recentPayment = await Payment.findOne({
+      tenantId,
+      propertyId: property._id,
+      paymentDate: { $gte: thirtyDaysAgo },
+      status: "Paid",
+    });
+    if (!recentPayment) {
+      return res.status(400).json({
+        success: false,
+        message: "Please pay this month's rent before requesting to unrent.",
+      });
+    }
+    // Find owner
+    const owner = await Owner.findById(property.ownerId);
+    if (!owner) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Owner not found" });
+    }
+    // Create UnrentRequest
+    const unrentReason = req.body.reason || "No reason provided";
+    const unrentRequest = new UnrentRequest({
+      propertyId: property._id,
+      tenantId,
+      ownerId: owner._id,
+      reason: unrentReason,
+      status: "Pending",
+      rentPaid: true,
+      createdDate: new Date(),
+    });
+    const savedUnrentRequest = await unrentRequest.save();
+    // Create notification and link to UnrentRequest
+    const notification = new Notification({
+      type: "Unrent Request",
+      message: `Tenant ${req.session.user.firstName} ${
+        req.session.user.lastName
+      } has requested to unrent property ${property.name || property._id}.`,
+      recipient: owner._id,
+      recipientType: "Owner",
+      recipientName: `${owner.firstName} ${owner.lastName}`,
+      propertyId: property._id,
+      propertyName: property.name || "N/A",
+      tenantId,
+      tenantName: `${req.session.user.firstName} ${req.session.user.lastName}`,
+      status: "Pending",
+      createdDate: new Date(),
+      read: false,
+      unrentRequestId: savedUnrentRequest._id,
+    });
+    const savedNotification = await notification.save();
+    savedUnrentRequest.notificationId = savedNotification._id;
+    await savedUnrentRequest.save();
+    await Owner.findByIdAndUpdate(owner._id, {
+      $push: { notificationIds: savedNotification._id },
+    });
+    await Tenant.findByIdAndUpdate(tenantId, {
+      $push: { notificationIds: savedNotification._id },
+    });
+    console.log("Unrent request created:", {
+      unrentRequestId: savedUnrentRequest._id,
+      notificationId: savedNotification._id,
+      tenantId,
+      ownerId: owner._id,
+      propertyId: property._id,
+    });
+    return res.status(200).json({
+      success: true,
+      message: "Unrent request sent to owner for approval.",
+      unrentRequestId: savedUnrentRequest._id,
+      notificationId: savedNotification._id,
+    });
+  } catch (error) {
+    console.error("Unrent property error:", {
+      error: error.message,
+      stack: error.stack,
+      tenantId: req.session.user?._id,
+    });
+    res.status(500).json({
+      success: false,
+      message: "Server error: " + error.message,
+    });
   }
 };

@@ -7,6 +7,7 @@ const MaintenanceRequest = require("../models/MaintenanceRequest");
 const Complaint = require("../models/complaint");
 const Agreement = require("../models/Agreement");
 const Notification = require("../models/notification");
+const UnrentRequest = require("../models/unrentRequest");
 
 exports.getOwnerDashboard = async (req, res) => {
   try {
@@ -127,7 +128,6 @@ exports.getOwnerDashboard = async (req, res) => {
         `${tenant.firstName} ${tenant.lastName}`
       );
     });
-
     // Fetch properties
     const propertiesForRequests = await Property.find({
       _id: { $in: propertyIdsForRequests },
@@ -516,6 +516,122 @@ exports.updateOwnerSettings = async (req, res) => {
       success: false,
       message: "Server error while updating settings",
       error: error.message,
+    });
+  }
+};
+exports.approveUnrentProperty = async (req, res) => {
+  try {
+    const { unrentRequestId, action } = req.body;
+    const ownerId = req.session.user._id;
+    // Validate inputs
+    if (!unrentRequestId || !action) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Missing required fields" });
+    }
+    if (!mongoose.Types.ObjectId.isValid(unrentRequestId)) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Invalid UnrentRequest ID" });
+    }
+    // UnrentRequest is already required at the top
+    const unrentRequest = await UnrentRequest.findById(unrentRequestId);
+    if (!unrentRequest) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Unrent request not found" });
+    }
+    if (unrentRequest.ownerId.toString() !== ownerId) {
+      return res.status(403).json({ success: false, message: "Unauthorized" });
+    }
+    const propertyId = unrentRequest.propertyId;
+    const tenantId = unrentRequest.tenantId;
+    // Approve or reject
+    if (action === "approve") {
+      // Create rental history record
+      const RentalHistory = require("../models/rentalhistory");
+      await new RentalHistory({
+        propertyId,
+        tenantId,
+        ownerId,
+        startDate: null,
+        endDate: new Date(),
+        monthlyRent: null,
+        status: "Completed",
+      }).save();
+      // Update property status
+      const property = await Property.findById(propertyId);
+      if (property) {
+        property.tenantId = null;
+        property.status = "Available";
+        property.isRented = false;
+        property.lastRentedDate = null;
+        await property.save();
+      }
+      // Update tenant
+      await Tenant.findByIdAndUpdate(tenantId, {
+        $unset: { propertyId: "" },
+        $push: { rentalHistory: propertyId },
+      });
+      // Update owner
+      await Owner.findByIdAndUpdate(ownerId, {
+        $pull: { tenantIds: tenantId },
+      });
+      // Update UnrentRequest status
+      unrentRequest.status = "Approved";
+      unrentRequest.completedDate = new Date();
+      await unrentRequest.save();
+      // Update notification status
+      if (unrentRequest.notificationId) {
+        await Notification.findByIdAndUpdate(unrentRequest.notificationId, {
+          status: "Approved",
+          read: true,
+          completedDate: new Date(),
+        });
+      }
+      // Cancel any pending payments
+      await Payment.updateMany(
+        {
+          propertyId,
+          tenantId,
+          status: "Pending",
+        },
+        {
+          $set: { status: "Cancelled" },
+        }
+      );
+      return res.status(200).json({
+        success: true,
+        message: "Property unrented successfully",
+        property: {
+          id: propertyId,
+          status: "Available",
+        },
+      });
+    } else if (action === "reject") {
+      unrentRequest.status = "Rejected";
+      unrentRequest.completedDate = new Date();
+      await unrentRequest.save();
+      if (unrentRequest.notificationId) {
+        await Notification.findByIdAndUpdate(unrentRequest.notificationId, {
+          status: "Rejected",
+          read: true,
+          completedDate: new Date(),
+        });
+      }
+      return res
+        .status(200)
+        .json({ success: true, message: "Unrent request rejected" });
+    } else {
+      return res
+        .status(400)
+        .json({ success: false, message: "Invalid action" });
+    }
+  } catch (error) {
+    console.error("Approve unrent property error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Server error while processing unrent request",
     });
   }
 };
