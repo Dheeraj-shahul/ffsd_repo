@@ -385,6 +385,14 @@ exports.getAllWorkers = async (req, res) => {
       filter["ratingId.average"] = { $gte: parseInt(rating) };
     }
 
+    // If the user is a logged-in tenant, exclude workers they have already booked
+    if (req.session.user && req.session.user.userType === "tenant") {
+      const tenant = await Tenant.findById(req.session.user._id).select("domesticWorkerId");
+      if (tenant && tenant.domesticWorkerId && tenant.domesticWorkerId.length > 0) {
+        filter._id = { $nin: tenant.domesticWorkerId }; // Exclude booked workers
+      }
+    }
+
     const workers = await Worker.find(filter);
     res.json(workers);
   } catch (error) {
@@ -392,6 +400,7 @@ exports.getAllWorkers = async (req, res) => {
     res.status(500).json({ error: "Error fetching worker details" });
   }
 };
+
 
 // Get a single worker by ID
 exports.getWorkerById = async (req, res) => {
@@ -410,6 +419,7 @@ exports.getWorkerById = async (req, res) => {
   }
 };
 
+
 // Filter workers based on multiple criteria
 exports.filterWorkers = async (req, res) => {
   try {
@@ -424,6 +434,14 @@ exports.filterWorkers = async (req, res) => {
     if (serviceType) filter.serviceType = serviceType;
     if (rating) {
       filter["ratingId.average"] = { $gte: parseInt(rating) };
+    }
+
+    // If the user is a logged-in tenant, exclude workers they have already booked
+    if (req.session.user && req.session.user.userType === "tenant") {
+      const tenant = await Tenant.findById(req.session.user._id).select("domesticWorkerId");
+      if (tenant && tenant.domesticWorkerId && tenant.domesticWorkerId.length > 0) {
+        filter._id = { $nin: tenant.domesticWorkerId }; // Exclude booked workers
+      }
     }
 
     const workers = await Worker.find(filter);
@@ -587,6 +605,12 @@ exports.bookWorkerCorrected = async (req, res) => {
       return res.status(404).json({ error: "Tenant not found" });
     }
 
+    // Ensure the worker is not already in the tenant's domesticWorkerId array
+    if (tenant.domesticWorkerId.includes(workerId)) {
+      console.log("Worker already booked by tenant", { workerId, tenantId });
+      return res.status(400).json({ error: "Worker already booked" });
+    }
+
     const newBooking = new WorkerBooking({
       tenantId,
       workerId,
@@ -599,6 +623,9 @@ exports.bookWorkerCorrected = async (req, res) => {
 
     await newBooking.save();
     console.log("New booking created", { bookingId: newBooking._id });
+
+    // Optionally, update domesticWorkerId here if booking is immediately approved
+    // For now, this is handled in updateWorkerBookingStatus when status is set to "Approved"
 
     return res
       .status(200)
@@ -614,7 +641,6 @@ exports.bookWorkerCorrected = async (req, res) => {
     return res.status(500).json({ error: "Server error while booking worker" });
   }
 };
-
 // This function should be added to the same file where updateWorkerBookingStatus exists
 // or imported from a notification service file
 

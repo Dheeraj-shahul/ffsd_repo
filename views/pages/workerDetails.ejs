@@ -782,100 +782,107 @@
     }
     
     // Show worker details modal
-    async function showWorkerDetails(workerId) {
-      try {
-        console.log('Fetching worker details for ID:', workerId);
-        const response = await fetch(`/api/workers/${workerId}`);
-        if (!response.ok) {
-          throw new Error(`Server responded with status: ${response.status}`);
-        }
-        const worker = await response.json();
-        console.log('Worker details fetched:', worker);
-        const modal = document.getElementById("workerModal");
-        const modalContent = document.getElementById("modalContent");
-        const firstName = worker.firstName || 'Unknown';
-        const lastName = worker.lastName || '';
-        const location = worker.location ? worker.location.charAt(0).toUpperCase() + worker.location.slice(1) : 'Location unknown';
-        const serviceType = worker.serviceType || 'General Services';
-        const experience = worker.experience || 0;
-        const price = worker.price ? `₹${worker.price.toLocaleString()}` : 'Contact for price';
-        const rating = worker.ratingId?.average || 'N/A';
-        const description = worker.description || 'No description available';
-        const image = worker.image || '/images/default-worker.jpg';
-        const isAuthenticated = <%= user ? 'true' : 'false' %>;
-        const isTenant = isAuthenticated && '<%= user?.userType %>' === 'tenant';
-        console.log('User auth status:', { isAuthenticated, isTenant, userType: '<%= user?.userType %>' });
-        
-        let reviewsHtml = '<p>No reviews available</p>';
-        if (worker.ratingId?.reviews && worker.ratingId.reviews.length > 0) {
-          reviewsHtml = worker.ratingId.reviews.map(review => `
-            <div class="review-item">
-              <div class="review-header">
-                <span class="review-user">${review.user || 'Anonymous'}</span>
-                <span class="review-rating">★ ${review.rating}</span>
-              </div>
-              <div class="review-date">${review.date || 'N/A'}</div>
-              <p>${review.comment || 'No comment'}</p>
-            </div>
-          `).join('');
-        }
-    
-        modalContent.innerHTML = `
-          <div class="worker-modal-header">
-            <div class="worker-modal-image">
-              <img src="${image}" alt="${firstName} ${lastName}" onerror="this.src='/images/default-worker.jpg'">
-            </div>
-            <div class="worker-modal-title">
-              <h2 class="worker-modal-name">${firstName} ${lastName}</h2>
-              <div class="worker-modal-services">
-                <span class="worker-modal-service">${serviceType}</span>
-              </div>
-              <p class="worker-modal-location">📍 ${location}</p>
-              <div class="worker-modal-stats">
-                <div class="worker-modal-stat">
-                  <span class="worker-modal-stat-value">${price}</span>
-                  <span class="worker-modal-stat-label">per month</span>
-                </div>
-                <div class="worker-modal-stat">
-                  <span class="worker-modal-stat-value">★ ${rating}</span>
-                  <span class="worker-modal-stat-label">rating</span>
-                </div>
-                <div class="worker-modal-stat">
-                  <span class="worker-modal-stat-value">${experience} years</span>
-                  <span class="worker-modal-stat-label">experience</span>
-                </div>
-              </div>
-              <button class="worker-modal-book-btn" 
-                      onclick="${isTenant ? `confirmBooking('${worker._id}', '${serviceType}')` : `redirectToLogin()`}"
-                      ${isTenant ? '' : 'title="Please log in as a tenant to book"'}>
-                Book Now
-              </button>
-            </div>
-          </div>
-          <div class="worker-modal-description">
-            <h3 class="section-title">About</h3>
-            <p>${description}</p>
-          </div>
-          <div class="availability-container">
-            <h3 class="section-title">Availability</h3>
-            <div class="availability-grid">
-              ${worker.availability ? 
-                '<div class="time-slot available">Available</div>' : 
-                '<div class="time-slot unavailable">Not Available</div>'}
-            </div>
-          </div>
-          <div class="reviews-container">
-            <h3 class="section-title">Reviews</h3>
-            ${reviewsHtml}
-          </div>
-        `;
-    
-        modal.style.display = "block";
-      } catch (error) {
-        console.error('Error fetching worker details:', error);
-        alert('Error loading worker details: ' + error.message);
-      }
+async function showWorkerDetails(workerId) {
+  try {
+    console.log('Fetching worker details for ID:', workerId);
+    const response = await fetch(`/api/workers/${workerId}`);
+    if (!response.ok) {
+      throw new Error(`Server responded with status: ${response.status}`);
     }
+    const worker = await response.json();
+    console.log('Worker details fetched:', worker);
+
+    // If the worker is not found or not available for this tenant, show an error
+    if (!worker || worker.serviceStatus !== "Available") {
+      alert('This worker is not available.');
+      return;
+    }
+
+    const modal = document.getElementById("workerModal");
+    const modalContent = document.getElementById("modalContent");
+    const firstName = worker.firstName || 'Unknown';
+    const lastName = worker.lastName || '';
+    const location = worker.location ? worker.location.charAt(0).toUpperCase() + worker.location.slice(1) : 'Location unknown';
+    const serviceType = worker.serviceType || 'General Services';
+    const experience = worker.experience || 0;
+    const price = worker.price ? `₹${worker.price.toLocaleString()}` : 'Contact for price';
+    const rating = worker.ratingId?.average || 'N/A';
+    const description = worker.description || 'No description available';
+    const image = worker.image || '/images/default-worker.jpg';
+    const isAuthenticated = <%= user ? 'true' : 'false' %>;
+    const isTenant = isAuthenticated && '<%= user?.userType %>' === 'tenant';
+    console.log('User auth status:', { isAuthenticated, isTenant, userType: '<%= user?.userType %>' });
+
+    let reviewsHtml = '<p>No reviews available</p>';
+    if (worker.ratingId?.reviews && worker.ratingId.reviews.length > 0) {
+      reviewsHtml = worker.ratingId.reviews.map(review => `
+        <div class="review-item">
+          <div class="review-header">
+            <span class="review-user">${review.user || 'Anonymous'}</span>
+            <span class="review-rating">★ ${review.rating}</span>
+          </div>
+          <div class="review-date">${review.date || 'N/A'}</div>
+          <p>${review.comment || 'No comment'}</p>
+        </div>
+      `).join('');
+    }
+
+    modalContent.innerHTML = `
+      <div class="worker-modal-header">
+        <div class="worker-modal-image">
+          <img src="${image}" alt="${firstName} ${lastName}" onerror="this.src='/images/default-worker.jpg'">
+        </div>
+        <div class="worker-modal-title">
+          <h2 class="worker-modal-name">${firstName} ${lastName}</h2>
+          <div class="worker-modal-services">
+            <span class="worker-modal-service">${serviceType}</span>
+          </div>
+          <p class="worker-modal-location">📍 ${location}</p>
+          <div class="worker-modal-stats">
+            <div class="worker-modal-stat">
+              <span class="worker-modal-stat-value">${price}</span>
+              <span class="worker-modal-stat-label">per month</span>
+            </div>
+            <div class="worker-modal-stat">
+              <span class="worker-modal-stat-value">★ ${rating}</span>
+              <span class="worker-modal-stat-label">rating</span>
+            </div>
+            <div class="worker-modal-stat">
+              <span class="worker-modal-stat-value">${experience} years</span>
+              <span class="worker-modal-stat-label">experience</span>
+            </div>
+          </div>
+          <button class="worker-modal-book-btn" 
+                  onclick="${isTenant ? `confirmBooking('${worker._id}', '${serviceType}')` : `redirectToLogin()`}"
+                  ${isTenant ? '' : 'title="Please log in as a tenant to book"'}>
+            Book Now
+          </button>
+        </div>
+      </div>
+      <div class="worker-modal-description">
+        <h3 class="section-title">About</h3>
+        <p>${description}</p>
+      </div>
+      <div class="availability-container">
+        <h3 class="section-title">Availability</h3>
+        <div class="availability-grid">
+          ${worker.availability ? 
+            '<div class="time-slot available">Available</div>' : 
+            '<div class="time-slot unavailable">Not Available</div>'}
+        </div>
+      </div>
+      <div class="reviews-container">
+        <h3 class="section-title">Reviews</h3>
+        ${reviewsHtml}
+      </div>
+    `;
+
+    modal.style.display = "block";
+  } catch (error) {
+    console.error('Error fetching worker details:', error);
+    alert('Error loading worker details: ' + error.message);
+  }
+}
     
     // Confirm and submit booking
     async function confirmBooking(workerId, serviceType) {

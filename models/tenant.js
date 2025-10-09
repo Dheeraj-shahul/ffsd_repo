@@ -16,7 +16,7 @@ const tenantSchema = new mongoose.Schema({
   maintenanceRequestIds: [{ type: mongoose.Schema.Types.ObjectId, ref: "MaintenanceRequest" }],
   complaintIds: [{ type: mongoose.Schema.Types.ObjectId, ref: "Complaint" }],
   notificationIds: [{ type: mongoose.Schema.Types.ObjectId, ref: "Notification" }],
-  domesticWorkerId: { type: mongoose.Schema.Types.ObjectId, ref: "Worker" },
+  domesticWorkerId: [{ type: mongoose.Schema.Types.ObjectId, ref: "Worker" }], // Changed to array
   rentalHistoryIds: [{ type: mongoose.Schema.Types.ObjectId, ref: "RentalHistory" }],
   ratingIds: [{ type: mongoose.Schema.Types.ObjectId, ref: "Rating" }],
   emailNotifications: { type: Boolean, default: true },

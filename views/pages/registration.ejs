@@ -1,4 +1,3 @@
-<!-- register.ejs -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -9,34 +8,34 @@
         @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@100;200;300;400;500;600;700;800;900&display=swap');
 
         html {
-        height: 100%;
-        margin: 0;
-        padding: 0;
-    }
+            height: 100%;
+            margin: 0;
+            padding: 0;
+        }
 
-    body {
-        font-family: 'Poppins', sans-serif;
-        display: flex;
-        align-items: flex-start; 
-        justify-content: center;
-        margin: 0;
-        background-image: url('/images/login.jpg');
-        background-size: cover;
-        background-position: center;
-        background-repeat: no-repeat;
-        min-height: 100vh; 
-        padding: 40px 20px;
-        overflow-y: auto; 
-    }
+        body {
+            font-family: 'Poppins', sans-serif;
+            display: flex;
+            align-items: flex-start; 
+            justify-content: center;
+            margin: 0;
+            background-image: url('/images/login.jpg');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            min-height: 100vh; 
+            padding: 40px 20px;
+            overflow-y: auto; 
+        }
 
-    .container {
-        background-color: #333;
-        border-radius: 20px;
-        box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
-        width: 400px;
-        padding: 30px 50px;
-        margin: 20px 0; 
-    }
+        .container {
+            background-color: #333;
+            border-radius: 20px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+            width: 400px;
+            padding: 30px 50px;
+            margin: 20px 0; 
+        }
 
         .header {
             text-align: center;
@@ -74,7 +73,8 @@
             font-size: 14px;
             width: 95%;
         }
-        select{
+
+        select {
             width: 100%;
         }
 
@@ -176,17 +176,18 @@
         .location-fields {
             display: none;
         }
-        #first{
+
+        #first {
             margin-right: 5px;
         }
 
         @media (max-height: 600px) {
-    body {
-        align-items: flex-start;
-        padding-top: 20px;
-        padding-bottom: 20px;
-    }
-}
+            body {
+                align-items: flex-start;
+                padding-top: 20px;
+                padding-bottom: 20px;
+            }
+        }
     </style>
 </head>
 <body>
@@ -196,13 +197,13 @@
             <p>Create your account today</p>
         </div>
         
-        <form id="registerForm" action="/register" method="POST">
+        <form id="registerForm">
             <div class="form-group">
                 <label for="userType">I am a</label>
                 <select id="userType" name="userType" onchange="handleUserTypeChange()">
-                    <option value="tenant" <%= userType === 'tenant' ? 'selected' : '' %>>Tenant/Renter</option>
-                    <option value="owner" <%= userType === 'owner' ? 'selected' : '' %>>Homeowner/Property Owner</option>
-                    <option value="worker" <%= userType === 'worker' ? 'selected' : '' %>>Domestic Worker</option>
+                    <option value="tenant">Tenant/Renter</option>
+                    <option value="owner">Homeowner/Property Owner</option>
+                    <option value="worker">Domestic Worker</option>
                 </select>
             </div>
             
@@ -212,9 +213,8 @@
                     <input type="text" 
                            id="firstName" 
                            name="firstName" 
-                           placeholder="First name" 
-                           value="<%= typeof firstName !== 'undefined' ? firstName : '' %>">
-                    <div id="firstNameError" class="error"><%= typeof errors !== 'undefined' && errors.firstName ? errors.firstName : '' %></div>
+                           placeholder="First name">
+                    <div id="firstNameError" class="error"></div>
                 </div>
                 
                 <div class="form-group" id="last">
@@ -222,9 +222,8 @@
                     <input type="text" 
                            id="lastName" 
                            name="lastName" 
-                           placeholder="Last name"
-                           value="<%= typeof lastName !== 'undefined' ? lastName : '' %>">
-                    <div id="lastNameError" class="error"><%= typeof errors !== 'undefined' && errors.lastName ? errors.lastName : '' %></div>
+                           placeholder="Last name">
+                    <div id="lastNameError" class="error"></div>
                 </div>
             </div>
             
@@ -233,9 +232,8 @@
                 <input type="email" 
                        id="email" 
                        name="email" 
-                       placeholder="Enter your email"
-                       value="<%= typeof email !== 'undefined' ? email : '' %>">
-                <div id="emailError" class="error"><%= typeof errors !== 'undefined' && errors.email ? errors.email : '' %></div>
+                       placeholder="Enter your email">
+                <div id="emailError" class="error"></div>
             </div>
             
             <div class="form-group">
@@ -243,9 +241,8 @@
                 <input type="tel" 
                        id="phone" 
                        name="phone" 
-                       placeholder="Enter your phone number"
-                       value="<%= typeof phone !== 'undefined' ? phone : '' %>">
-                <div id="phoneError" class="error"><%= typeof errors !== 'undefined' && errors.phone ? errors.phone : '' %></div>
+                       placeholder="Enter your phone number">
+                <div id="phoneError" class="error"></div>
             </div>
             
             <div class="form-group">
@@ -253,26 +250,25 @@
                 <input type="text" 
                        id="location" 
                        name="location" 
-                       placeholder="City, State, Country"
-                       value="<%= typeof location !== 'undefined' ? location : '' %>">
-                <div id="locationError" class="error"><%= typeof errors !== 'undefined' && errors.location ? errors.location : '' %></div>
+                       placeholder="City, State, Country">
+                <div id="locationError" class="error"></div>
             </div>
             
             <!-- Worker-specific fields -->
-            <div id="workerFields" class="location-fields" style="display: <%= (typeof userType !== 'undefined' && userType === 'worker') ? 'block' : 'none' %>">
+            <div id="workerFields" class="location-fields" style="display: none">
                 <div class="form-group">
                     <label for="serviceType">Service Type</label>
                     <select id="serviceType" name="serviceType">
-                        <option value="" disabled <%= typeof serviceType === 'undefined' || !serviceType ? 'selected' : '' %>>Select service type</option>
-                        <option value="cooking" <%= serviceType === 'cooking' ? 'selected' : '' %>>Cooking</option>
-                        <option value="cleaning" <%= serviceType === 'cleaning' ? 'selected' : '' %>>Cleaning</option>
-                        <option value="laundry" <%= serviceType === 'laundry' ? 'selected' : '' %>>Laundry</option>
-                        <option value="childcare" <%= serviceType === 'childcare' ? 'selected' : '' %>>Childcare</option>
-                        <option value="eldercare" <%= serviceType === 'eldercare' ? 'selected' : '' %>>Elder Care</option>
-                        <option value="gardening" <%= serviceType === 'gardening' ? 'selected' : '' %>>Gardening</option>
-                        <option value="other" <%= serviceType === 'other' ? 'selected' : '' %>>Other</option>
+                        <option value="" disabled selected>Select service type</option>
+                        <option value="cooking">Cooking</option>
+                        <option value="cleaning">Cleaning</option>
+                        <option value="laundry">Laundry</option>
+                        <option value="childcare">Childcare</option>
+                        <option value="eldercare">Elder Care</option>
+                        <option value="gardening">Gardening</option>
+                        <option value="other">Other</option>
                     </select>
-                    <div id="serviceTypeError" class="error"><%= typeof errors !== 'undefined' && errors.serviceType ? errors.serviceType : '' %></div>
+                    <div id="serviceTypeError" class="error"></div>
                 </div>
                 
                 <div class="form-group">
@@ -281,21 +277,19 @@
                            id="experience" 
                            name="experience" 
                            min="0" 
-                           placeholder="Years of experience"
-                           value="<%= typeof experience !== 'undefined' ? experience : '' %>">
+                           placeholder="Years of experience">
                 </div>
             </div>
             
             <!-- Homeowner-specific fields -->
-            <div id="homeownerFields" class="location-fields" style="display: <%= (typeof userType !== 'undefined' && userType === 'homeowner') ? 'block' : 'none' %>">
+            <div id="homeownerFields" class="location-fields" style="display: none">
                 <div class="form-group">
                     <label for="numProperties">Number of Properties</label>
                     <input type="number" 
                            id="numProperties" 
                            name="numProperties" 
                            min="1" 
-                           placeholder="How many properties do you own?"
-                           value="<%= typeof numProperties !== 'undefined' ? numProperties : '' %>">
+                           placeholder="How many properties do you own?">
                 </div>
             </div>
             
@@ -305,7 +299,7 @@
                        id="password" 
                        name="password" 
                        placeholder="Create a password">
-                <div id="passwordError" class="error"><%= typeof errors !== 'undefined' && errors.password ? errors.password : '' %></div>
+                <div id="passwordError" class="error"></div>
             </div>
             
             <div class="form-group">
@@ -314,7 +308,7 @@
                        id="confirmPassword" 
                        name="confirmPassword" 
                        placeholder="Confirm your password">
-                <div id="confirmPasswordError" class="error"><%= typeof errors !== 'undefined' && errors.confirmPassword ? errors.confirmPassword : '' %></div>
+                <div id="confirmPasswordError" class="error"></div>
             </div>
             
             <button type="submit">Register</button>
@@ -347,17 +341,16 @@
             // Show fields based on user type
             if (userType === 'worker') {
                 document.getElementById('workerFields').style.display = 'block';
-            }else if (userType === 'homeowner') {
+            } else if (userType === 'owner') {
                 document.getElementById('homeownerFields').style.display = 'block';
             }
-
-            
         }
         
         // Run on page load to set initial state
         handleUserTypeChange();
         
-        document.getElementById('registerForm').addEventListener('submit', function(event) {
+        document.getElementById('registerForm').addEventListener('submit', async function(event) {
+            event.preventDefault();
             let isValid = true;
             
             // Basic validation for required fields
@@ -369,6 +362,9 @@
             const password = document.getElementById('password').value;
             const confirmPassword = document.getElementById('confirmPassword').value;
             const userType = document.getElementById('userType').value;
+            const serviceType = document.getElementById('serviceType').value;
+            const experience = document.getElementById('experience').value;
+            const numProperties = document.getElementById('numProperties').value;
             
             // First Name validation
             if (!firstName) {
@@ -387,7 +383,6 @@
             } else {
                 document.getElementById('lastNameError').style.display = 'none';
             }
-            
             
             // Email validation
             if (!email) {
@@ -426,7 +421,6 @@
             
             // Service type validation for workers
             if (userType === 'worker') {
-                const serviceType = document.getElementById('serviceType').value;
                 if (!serviceType) {
                     document.getElementById('serviceTypeError').textContent = 'Please select a service type';
                     document.getElementById('serviceTypeError').style.display = 'block';
@@ -466,14 +460,90 @@
                 document.getElementById('confirmPasswordError').style.display = 'none';
             }
             
-            if (!isValid) {
-                event.preventDefault();
+            if (isValid) {
+                const formData = {
+                    userType,
+                    firstName,
+                    lastName,
+                    email,
+                    phone,
+                    location,
+                    serviceType: userType === 'worker' ? serviceType : undefined,
+                    experience: userType === 'worker' ? experience : undefined,
+                    numProperties: userType === 'owner' ? numProperties : undefined,
+                    password
+                };
+                
+                try {
+                    console.log('Sending form data:', formData);
+                    const response = await fetch('/register', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(formData)
+                    });
+                    
+                    console.log('Response status:', response.status);
+                    const data = await response.json();
+                    console.log('Response data:', data);
+                    
+                    if (response.ok) {
+                        console.log('Registration successful, redirecting to /login');
+                        window.location.href = '/login';
+                    } else {
+                        if (data.error && data.error.toLowerCase().includes('email already exists')) {
+                            console.log('Email already exists detected');
+                            document.getElementById('emailError').textContent = 'This email is already registered. Please use a different email or log in.';
+                            document.getElementById('emailError').style.display = 'block';
+                        } else {
+                            console.log('Other error:', data.error);
+                            alert(data.error || 'Registration failed');
+                            document.getElementById('emailError').textContent = '';
+                            document.getElementById('emailError').style.display = 'none';
+                        }
+                    }
+                } catch (error) {
+                    console.error('Fetch error:', error);
+                    alert('Registration failed: ' + error.message);
+                    document.getElementById('emailError').textContent = '';
+                    document.getElementById('emailError').style.display = 'none';
+                }
             }
         });
         
-        function registerWithGoogle() {
-            alert("login successfully--");
-            console.log('Register with Google clicked');
+        async function registerWithGoogle() {
+            try {
+                console.log('Initiating Google registration');
+                const response = await fetch('/register/google', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                console.log('Google response status:', response.status);
+                const data = await response.json();
+                console.log('Google response data:', data);
+                
+                if (response.ok) {
+                    console.log('Google registration successful');
+                    alert("Login successfully");
+                    window.location.href = '/login';
+                } else {
+                    if (data.error && data.error.toLowerCase().includes('email already exists')) {
+                        console.log('Google registration: Email already exists');
+                        document.getElementById('emailError').textContent = 'This email is already registered. Please use a different email or log in.';
+                        document.getElementById('emailError').style.display = 'block';
+                    } else {
+                        console.log('Google registration error:', data.error);
+                        alert(data.error || 'Google registration failed');
+                    }
+                }
+            } catch (error) {
+                console.error('Google registration fetch error:', error);
+                alert('Google registration failed: ' + error.message);
+            }
         }
     </script>
 </body>

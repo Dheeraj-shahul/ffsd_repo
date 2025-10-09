@@ -100,17 +100,11 @@
                 <div id="prop_view">
                   <button
                     class="prop_button"
-
                     onclick="location.href='/property?id=<%=property._id%>'"
                   >
                     Property Details
                   </button>
                   <% if (property.isRented === true) { %>
-
-                    onclick="location.href='/property?id=1'"
-                  >
-                    Property Details
-                  </button>
                   <button class="prop_button" onclick="showSection('payments')">
                     Rent Details
                   </button>
@@ -120,64 +114,7 @@
                   >
                     View Complaints
                   </button>
-
                   <% } %>
-
-                </div>
-              </div>
-            </div>
-            <div id="gs_container" class="after_scroll_container">
-              <div class="sc_image_cotainer">
-                <img src="images/1bhk.avif" class="sc_image" />
-              </div>
-              <div class="main_sen">Single Bedroom Flat</div>
-              <div class="sc_text">
-                <div class="prop_details">
-                  <ul>
-                    <li><strong>Location:</strong> 5-12/b, Krishnalanka</li>
-                    <li><strong>City:</strong> VIZAG</li>
-                    <li><strong>Monthly Rent:</strong> ₹8,500</li>
-                    <li><strong>Current status:</strong> VACANT</li>
-                  </ul>
-                </div>
-
-                <div id="prop_view">
-                  <button
-                    class="prop_button"
-                    onclick="location.href='/property?id=2'"
-                  >
-                    Property Details
-                  </button>
-                  <!-- <button class="prop_button">List Property</button> -->
-                </div>
-              </div>
-            </div>
-            <div id="gs_container" class="after_scroll_container">
-              <div class="sc_image_cotainer">
-                <img src="images/login.jpg" class="sc_image" />
-              </div>
-              <div class="main_sen">3 BHK Luxury Villa</div>
-              <div class="sc_text">
-                <div class="prop_details">
-                  <ul>
-                    <li><strong>Location:</strong> Benz Circle, MG Road</li>
-                    <li><strong>City:</strong> VIJAYAWADA</li>
-                    <li><strong>Monthly Rent:</strong> ₹25,000</li>
-                    <li><strong>Current status:</strong> RENTED</li>
-                  </ul>
-                </div>
-
-                <div id="prop_view">
-                  <button
-                    class="prop_button"
-                    onclick="location.href='/property?id=3'"
-                  >
-                    Property Details
-                  </button>
-                  <button class="prop_button" onclick="showSection('payments')">
-                    Rent Details
-                  </button>
-
                   <button
                     class="delete_button"
                     onclick="showDeleteConfirmation('<%= property._id %>', <%= property.isRented %>)"
@@ -240,11 +177,7 @@
                 <li><strong>Contact:</strong> <%= tenant.phone || 'N/A' %></li>
                 <li><strong>Email:</strong> <%= tenant.email || 'N/A' %></li>
               </ul>
-
               <!-- <button class="msg_button">View Messages</button> -->
-
-              <button class="msg_button">View Messages</button>
-
               <button class="msg_button contact_tenant_button">
                 Contact Tenant
               </button>

@@ -550,7 +550,7 @@
           </div>
         </div>
 
-        <!-- Saved Listings -->
+                <!-- Saved Listings -->
         <div id="savedListings" class="section">
           <h3>Saved Listings</h3>
           <p>
@@ -578,105 +578,11 @@
                   <span><%= property.furnished || 'N/A' %></span>
                 </div>
                 <div class="card-actions">
-
                   <button class="book-button" onclick="location.href='/book-property?id=<%= property._id %>'">Book Now</button>
                   <a href="/property?id=<%= property._id %>" class="view-details book-button">View Details</a>
                   <button class="remove-button" data-property-id="<%= property._id %>">
                     Remove
                   </button>
-
-                  <button
-                    class="book-button"
-                    onclick="location.href='/property?id=1'"
-                  >
-                    View Details
-                  </button>
-                  <button class="remove-button">Remove</button>
-                </div>
-              </div>
-            </div>
-
-            <div class="property-card">
-              <div class="img_container">
-                <img
-                  src="https://imagecdn.99acres.com/media1/26835/7/536707293M-1738721192640.webp"
-                  alt="Property Image"
-                />
-              </div>
-              <div class="property-info">
-                <h4>Modern 2BHK with Garden</h4>
-                <p><strong>Location:</strong> Gachibowli, Hyderabad</p>
-                <p><strong>Rent:</strong> ₹30,000/month</p>
-                <p><strong>Available From:</strong> April 15, 2023</p>
-                <div class="property-features">
-                  <span>2 BHK</span>
-                  <span>1200 sq.ft</span>
-                  <span>Semi-Furnished</span>
-                </div>
-                <div class="card-actions">
-                  <button
-                    class="book-button"
-                    onclick="location.href='/property?id=2'"
-                  >
-                    View Details
-                  </button>
-                  <button class="remove-button">Remove</button>
-                </div>
-              </div>
-            </div>
-
-            <div class="property-card">
-              <div class="img_container">
-                <img
-                  src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTpzko2cckPQQt7_ufax8x6_EeXkCBz8Ssxtg&s"
-                  alt="Property Image"
-                />
-              </div>
-              <div class="property-info">
-                <h4>Spacious 1BHK Near Metro</h4>
-                <p><strong>Location:</strong> Ameerpet, Hyderabad</p>
-                <p><strong>Rent:</strong> ₹18,000/month</p>
-                <p><strong>Available From:</strong> Immediate</p>
-                <div class="property-features">
-                  <span>1 BHK</span>
-                  <span>750 sq.ft</span>
-                  <span>Unfurnished</span>
-                </div>
-                <div class="card-actions">
-                  <button
-                    class="book-button"
-                    onclick="location.href='/property?id=3'"
-                  >
-                    View Details
-                  </button>
-                  <button class="remove-button">Remove</button>
-                </div>
-              </div>
-            </div>
-
-            <div class="property-card">
-              <div class="img_container">
-                <img src="/images/login.jpg" alt="Property Image" />
-              </div>
-              <div class="property-info">
-                <h4>Premium 4BHK Villa</h4>
-                <p><strong>Location:</strong> Banjara Hills, Hyderabad</p>
-                <p><strong>Rent:</strong> ₹65,000/month</p>
-                <p><strong>Available From:</strong> June 1, 2023</p>
-                <div class="property-features">
-                  <span>4 BHK</span>
-                  <span>2500 sq.ft</span>
-                  <span>Fully Furnished</span>
-                </div>
-                <div class="card-actions">
-                  <button
-                    class="book-button"
-                    onclick="location.href='/property?id=1'"
-                  >
-                    View Details
-                  </button>
-                  <button class="remove-button">Remove</button>
-
                 </div>
               </div>
             </div>
@@ -686,7 +592,6 @@
             <% } %>
           </div>
         </div>
-
         <!-- Reviews & Ratings Section -->
         <div id="ratings" class="section">
           <h3>Reviews & Ratings</h3>
