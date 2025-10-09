@@ -1,13 +1,16 @@
 const express = require("express");
 const mongoose = require("mongoose");
 const path = require("path");
-
 const session = require("express-session");
+const nodemailer = require("nodemailer");
+const bcrypt = require("bcryptjs");
+const rateLimit = require("express-rate-limit");
+require("dotenv").config();
 
 const Property = require("./models/property");
-const Tenant = require("./models/tenant"); // New model
-const Worker = require("./models/worker"); // New model
-const Owner = require("./models/owner"); // New model
+const Tenant = require("./models/tenant");
+const Worker = require("./models/worker");
+const Owner = require("./models/owner");
 const Booking = require("./models/booking");
 const Payment = require("./models/payment");
 const Notification = require("./models/notification");
@@ -19,22 +22,18 @@ const RentalHistory = require("./models/rentalhistory");
 const MaintenanceRequest = require("./models/MaintenanceRequest");
 const Admin = require("./models/admin");
 
-//Routes
 const propertyRoutes = require("./routes/property");
 const workerRoutes = require("./routes/workers");
 const TenantRoutes = require("./routes/tenant");
 const ownerRoutes = require("./routes/owner");
 const bookingRoutes = require("./routes/bookingRoutes");
+const adminRoutes = require("./routes/admin");
+const analyticsRoutes = require("./routes/analytics");
 
-// Admin Routes
-const adminRoutes=require('./routes/admin')
-const analyticsRoutes = require('./routes/analytics');
-
-
-require("dns").setDefaultResultOrder("ipv4first"); // Force IPv4
+require("dns").setDefaultResultOrder("ipv4first");
 
 const app = express();
-const PORT = 3000;
+const PORT = process.env.PORT || 3000;
 
 // Connect to MongoDB
 mongoose
@@ -51,40 +50,70 @@ app.set("view engine", "ejs");
 app.set("views", path.join(__dirname, "views"));
 app.use(express.static(path.join(__dirname, "public")));
 
-// Session middleware setup with MongoDB store
 app.use(
   session({
     secret: "your_secret_key",
     resave: false,
     saveUninitialized: false,
-    cookie: {
-      maxAge: 24 * 60 * 60 * 1000, // 1 day
-    },
+    cookie: { maxAge: 24 * 60 * 60 * 1000 },
   })
 );
 
-// Authentication middleware
 const isAuthenticated = require("./middleware/auth");
 
-// Pass user data to all views
 app.use((req, res, next) => {
   res.locals.user = req.session.user || null;
   next();
 });
 
-// Routes
+// Validate email configuration
+if (!process.env.GMAIL_USER || !process.env.GMAIL_PASS) {
+  console.error('Email configuration missing. Please check your .env file.');
+  console.error('GMAIL_USER and GMAIL_PASS must be set for password reset functionality.');
+  console.error('See README.md for setup instructions.');
+}
 
-// Property Routes
+// Import email utilities
+const { sendOTPEmail, verifyEmailConfig } = require('./utils/emailUtils');
+
+// Verify email configuration on startup
+verifyEmailConfig().then(isValid => {
+  if (isValid) {
+    console.log('✅ Email system is ready');
+  } else {
+    console.error('⚠️ Email system is not properly configured');
+  }
+});
+
+// Rate limiter for /forgot-password
+const forgotPasswordLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 5, // 5 requests
+  message: "Too many OTP requests, please try again later.",
+});
+
+// Generate a 6-digit OTP
+function generateOtp() {
+  return Math.floor(100000 + Math.random() * 900000).toString();
+}
+
+// Routes
 app.use("/api/property", propertyRoutes);
 app.use("/", workerRoutes);
 app.use("/tenant", TenantRoutes);
 app.use("/", ownerRoutes);
 app.use("/", bookingRoutes);
+app.use("/admin", adminRoutes);
+app.use("/api", analyticsRoutes);
 
-//admin routes
-app.use('/admin',adminRoutes);
-
-app.use('/api', analyticsRoutes);
+// Dashboard Route
+app.get("/dashboard", isAuthenticated, (req, res) => {
+  const userType = req.session.user?.userType;
+  if (!userType) {
+    return res.redirect("/login?error=Please log in");
+  }
+  return res.redirect(getDashboardUrl(userType));
+});
 
 // Error handling middleware
 app.use((err, req, res, next) => {
@@ -95,82 +124,204 @@ app.use((err, req, res, next) => {
   });
 });
 
-// Route for property listing page
-app.get("/list-property", isAuthenticated, (req, res) => {
-  if (req.session.user.userType !== "owner") {
-    return redirectToDashboard(req, res);
-  }
-  res.render("pages/propertylisting");
-});
-
-// GET: Render Registration Page
-app.get("/register", (req, res) => {
-  console.log("Rendering registration page");
-  res.render("pages/registration", {
-    userType: "",
-    serviceType: "",
-    error: null,
-  });
-});
-
-// POST: Handle Registration
-app.post("/register", async (req, res) => {
-  const {
-    userType,
-    firstName,
-    lastName,
-    email,
-    phone,
-    location,
-    serviceType,
-    experience,
-    numProperties,
-    password,
-    accountNo,
-    upiid,
-  } = req.body;
-
-  if (!userType || !firstName || !lastName || !email || !password) {
-    return res.status(400).json({ error: "Missing required fields" });
-  }
+// Forgot Password - Send OTP
+app.post("/forgot-password", forgotPasswordLimiter, async (req, res) => {
+  const { email } = req.body;
 
   try {
-    const existingUserPromises = [
-      Tenant.findOne({ email }),
-      Worker.findOne({ email }),
-      Owner.findOne({ email }),
-    ];
-    const results = await Promise.allSettled(existingUserPromises);
-    const existingUser = results.find(
-      (result) => result.status === "fulfilled" && result.value
-    )?.value;
-
-    if (existingUser) {
-      return res.status(400).json({ error: "Email already exists" });
+    console.log('Forgot password request for:', email);
+    
+    // Try to find user in each model
+    let user = null;
+    let userModel = null;
+    
+    const tenant = await Tenant.findOne({ email });
+    const owner = await Owner.findOne({ email });
+    const worker = await Worker.findOne({ email });
+    
+    if (tenant) {
+      user = tenant;
+      userModel = 'tenant';
+    } else if (owner) {
+      user = owner;
+      userModel = 'owner';
+    } else if (worker) {
+      user = worker;
+      userModel = 'worker';
     }
 
-    let newUser;
-    if (userType === "tenant") {
-      newUser = new Tenant({ firstName, lastName, email, phone, location, password });
-    } else if (userType === "worker") {
-      newUser = new Worker({ firstName, lastName, email, phone, location, serviceType, experience: Number(experience) || null, password });
-    } else if (userType === "owner") {
-      newUser = new Owner({ firstName, lastName, email, phone, location, numProperties: Number(numProperties) || null, password, accountNo, upiid });
-    } else {
-      return res.status(400).json({ error: "Invalid user type" });
+    if (!user) {
+      console.log('Email not found:', email);
+      return res.json({ success: false, error: "Email not found" });
     }
 
-    await newUser.save();
-    return res.status(200).json({ redirectUrl: "/login" });
+    const otp = generateOtp();
+    const otpExpires = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
+
+    console.log('Generated OTP for user:', {
+      email,
+      userModel,
+      otpLength: otp.length,
+      expires: otpExpires
+    });
+
+    // Save OTP to user record first
+    user.otp = otp;
+    user.otpExpires = otpExpires;
+    await user.save();
+
+    // Send OTP email using the new utility
+    const emailSent = await sendOTPEmail(email, otp);
+    
+    if (!emailSent) {
+      // If email fails, remove the OTP from user record
+      user.otp = null;
+      user.otpExpires = null;
+      await user.save();
+      return res.json({ success: false, error: "Failed to send OTP. Please try again." });
+    }
+
+    return res.json({ success: true, message: "OTP sent to your email" });
   } catch (err) {
-    return res.status(500).json({ error: `Registration failed: ${err.message}` });
+    console.error("Error in forgot password flow:", err);
+    return res.json({ success: false, error: "Server error. Please try again later." });
+  }
+});
+
+// Verify OTP
+app.post("/verify-otp", async (req, res) => {
+  const { email, otp } = req.body;
+
+  try {
+    console.log('Verifying OTP for:', email);
+
+    // Find user in each model
+    let user = null;
+    let userModel = null;
+    
+    const tenant = await Tenant.findOne({ email });
+    const owner = await Owner.findOne({ email });
+    const worker = await Worker.findOne({ email });
+    
+    if (tenant) {
+      user = tenant;
+      userModel = 'tenant';
+    } else if (owner) {
+      user = owner;
+      userModel = 'owner';
+    } else if (worker) {
+      user = worker;
+      userModel = 'worker';
+    }
+
+    if (!user) {
+      console.log('User not found for OTP verification:', email);
+      return res.json({ success: false, error: "User not found" });
+    }
+
+    console.log('OTP verification attempt:', {
+      email,
+      userModel,
+      hasOtp: !!user.otp,
+      otpMatches: user.otp === otp,
+      otpExpired: user.otpExpires < Date.now()
+    });
+
+    if (!user.otp) {
+      return res.json({ success: false, error: "No OTP requested" });
+    }
+
+    if (user.otp !== otp) {
+      return res.json({ success: false, error: "Invalid OTP" });
+    }
+
+    if (user.otpExpires < Date.now()) {
+      return res.json({ success: false, error: "OTP has expired" });
+    }
+
+    return res.json({ success: true, message: "OTP verified" });
+  } catch (err) {
+    console.error("Error verifying OTP:", err);
+    return res.json({ success: false, error: "Server error" });
+  }
+});
+
+// Reset Password
+app.post("/reset-password", async (req, res) => {
+  const { email, password } = req.body;
+
+  try {
+    console.log('Password reset attempt for:', email);
+
+    if (!password || password.length < 8) {
+      return res.json({ 
+        success: false, 
+        error: "Password must be at least 8 characters long" 
+      });
+    }
+
+    // Find user in each model
+    let user = null;
+    let userModel = null;
+    
+    const tenant = await Tenant.findOne({ email }).select('+password');
+    const owner = await Owner.findOne({ email }).select('+password');
+    const worker = await Worker.findOne({ email }).select('+password');
+    
+    if (tenant) {
+      user = tenant;
+      userModel = 'tenant';
+    } else if (owner) {
+      user = owner;
+      userModel = 'owner';
+    } else if (worker) {
+      user = worker;
+      userModel = 'worker';
+    }
+
+    if (!user) {
+      console.log('User not found for password reset:', email);
+      return res.json({ success: false, error: "User not found" });
+    }
+
+    console.log('Reset password verification:', {
+      email,
+      userModel,
+      hasOtp: !!user.otp,
+      otpExpired: user.otpExpires < Date.now()
+    });
+
+    if (!user.otp) {
+      return res.json({ success: false, error: "Please verify OTP first" });
+    }
+
+    if (user.otpExpires < Date.now()) {
+      return res.json({ success: false, error: "OTP has expired, please request a new one" });
+    }
+
+    // Hash the new password
+    const hashedPassword = await bcrypt.hash(password, 10);
+    user.password = hashedPassword;
+    user.otp = null;
+    user.otpExpires = null;
+    await user.save();
+
+    console.log('Password reset successful:', {
+      email,
+      userModel
+    });
+
+    return res.json({ success: true, message: "Password reset successful" });
+  } catch (err) {
+    console.error("Error resetting password:", err);
+    return res.json({ success: false, error: "Server error" });
   }
 });
 
 // GET: Render Login Page
 app.get("/login", (req, res) => {
   if (req.session.user) {
-    return redirectToDashboard(req, res);
+    return res.redirect("/dashboard");
   }
   res.render("pages/login", {
     userType: "",
@@ -181,41 +332,93 @@ app.get("/login", (req, res) => {
   });
 });
 
-// POST: Handle Login Logic
+// Login Route
 app.post("/login", async (req, res) => {
-  console.log("POST /login received:", req.body);
   const { userType, email, password } = req.body;
-  const errors = {};
-
-  if (!userType) errors.userType = "Role is required";
-  if (!email) errors.email = "Email is required";
-  if (!password) errors.password = "Password is required";
-
-  if (Object.keys(errors).length > 0) {
-    return res.status(400).json({ errors });
-  }
-
   try {
+    console.log('Login - Received request:', {
+      userType,
+      email,
+      hasPassword: !!password,
+      passwordLength: password ? password.length : 0
+    });
+
+    if (!userType || !email || !password) {
+      return res.status(400).json({ error: "Missing required fields" });
+    }
+
     let user;
+    let Model;
+    
+    // Determine which model to use
     if (userType === "tenant") {
-      user = await Tenant.findOne({ email, password });
-    } else if (userType === "worker") {
-      user = await Worker.findOne({ email, password });
+      Model = Tenant;
     } else if (userType === "owner") {
-      user = await Owner.findOne({ email, password });
+      Model = Owner;
+    } else if (userType === "worker") {
+      Model = Worker;
     } else {
-      errors.auth = "Invalid user type";
-      return res.status(400).json({ errors });
+      return res.status(400).json({ error: "Invalid user type" });
+    }
+
+    // Find user and explicitly select password
+    user = await Model.findOne({ email }).select('+password');
+    
+    console.log('Login - Database query result:', {
+      found: !!user,
+      userType,
+      email,
+      hasPasswordField: user ? !!user.password : false,
+      passwordFieldLength: user && user.password ? user.password.length : 0
+    });
+
+    if (!user) {
+      return res.status(404).json({ error: "Create an account first" });
+    }
+
+    if (!user.password) {
+      console.log('Login - No password hash found in database');
+      return res.status(401).json({ error: "Password not set for this account" });
     }
 
     if (!user) {
-      errors.auth = "Invalid email, password, or user type";
-      return res.status(400).json({ errors });
+      return res.status(404).json({ error: "Create an account first" });
     }
 
-    if (user.status === "Suspended") {
-      errors.auth = "Your account is suspended temporarily";
-      return res.status(403).json({ errors });
+    // Use bcrypt to compare password
+    try {
+      console.log('Login - Before password comparison:', {
+        providedPasswordLength: password.length,
+        storedHashLength: user.password.length,
+        storedHashStartsWith: user.password.substring(0, 7) // Show just the beginning of the hash
+      });
+
+      // Verify the stored hash is in correct bcrypt format
+      if (!user.password.startsWith('$2')) {
+        console.log('Login - Invalid hash format in database');
+        // Re-hash the password if it's not in bcrypt format
+        user.password = await bcrypt.hash(user.password, 10);
+        await user.save();
+      }
+
+      const isMatch = await bcrypt.compare(password, user.password);
+      
+      console.log('Login - Password comparison complete:', {
+        isMatch,
+        email,
+        userType
+      });
+
+      if (!isMatch) {
+        return res.status(401).json({ error: "Incorrect password" });
+      }
+    } catch (error) {
+      console.error('Login - Password comparison error:', {
+        error: error.message,
+        email,
+        userType
+      });
+      return res.status(500).json({ error: "Error verifying password" });
     }
 
     req.session.user = {
@@ -233,21 +436,127 @@ app.post("/login", async (req, res) => {
       newListings: user.newListings || false,
     };
 
-    console.log("Login successful, user ID:", req.session.user._id);
-    return res.status(200).json({ redirectUrl: getDashboardUrl(userType) });
+    return res.json({ success: true, redirectUrl: getDashboardUrl(userType) });
   } catch (err) {
-    console.error("Error during login:", err);
-    res.status(500).json({ errors: { auth: "Server error" } });
+    console.error("Login error:", err);
+    return res.status(500).json({ error: "Server error" });
   }
 });
 
-// Redirect to Dashboard
-function redirectToDashboard(req, res) {
-  if (!req.session.user || !req.session.user.userType) {
-    return res.redirect("/login?error=Please log in");
+// Registration Route
+app.post("/register", async (req, res) => {
+  const {
+    userType,
+    firstName,
+    lastName,
+    email,
+    phone,
+    location,
+    serviceType,
+    experience,
+    numProperties,
+    password,
+    accountNo,
+    upiid,
+  } = req.body;
+
+  try {
+    // Validate required fields
+    if (!userType || !firstName || !lastName || !email || !password) {
+      return res.status(400).json({ error: "Missing required fields" });
+    }
+
+    // Validate email format
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      return res.status(400).json({ error: "Invalid email format" });
+    }
+
+    // Validate password length
+    if (password.length < 8) {
+      return res.status(400).json({ error: "Password must be at least 8 characters" });
+    }
+
+    // Check for existing user
+    const existingUser =
+      (await Tenant.findOne({ email })) ||
+      (await Owner.findOne({ email })) ||
+      (await Worker.findOne({ email }));
+
+    if (existingUser) {
+      return res.status(400).json({ error: "Email already exists" });
+    }
+
+    // Hash password
+    console.log('Registration - Before hashing:', {
+      email,
+      userType,
+      passwordLength: password.length
+    });
+    
+    const hashedPassword = await bcrypt.hash(password, 10);
+    
+    console.log('Registration - After hashing:', {
+      email,
+      userType,
+      hashedPasswordLength: hashedPassword.length
+    });
+    
+    let newUser;
+
+    // Create new user based on userType
+    if (userType === "tenant") {
+      newUser = new Tenant({
+        firstName,
+        lastName,
+        email,
+        phone,
+        location,
+        password: hashedPassword,
+        userType: "tenant",
+      });
+    } else if (userType === "worker") {
+      if (!serviceType || !experience) {
+        return res.status(400).json({ error: "Service type and experience required for workers" });
+      }
+      newUser = new Worker({
+        firstName,
+        lastName,
+        email,
+        phone,
+        location,
+        serviceType,
+        experience: Number(experience) || 0,
+        password: hashedPassword,
+        userType: "worker",
+      });
+    } else if (userType === "owner") {
+      if (!numProperties || !accountNo || !upiid) {
+        return res.status(400).json({ error: "Number of properties, account number, and UPI ID required for owners" });
+      }
+      newUser = new Owner({
+        firstName,
+        lastName,
+        email,
+        phone,
+        location,
+        numProperties: Number(numProperties) || 0,
+        password: hashedPassword,
+        accountNo,
+        upiid,
+        userType: "owner",
+      });
+    } else {
+      return res.status(400).json({ error: "Invalid user type" });
+    }
+
+    await newUser.save();
+    return res.json({ success: true, redirectUrl: "/login", message: "Registration successful" });
+  } catch (err) {
+    console.error("Registration error:", err);
+    return res.status(500).json({ error: `Registration failed: ${err.message}` });
   }
-  return res.redirect(getDashboardUrl(req.session.user.userType));
-}
+});
 
 // Helper function to get dashboard URL based on userType
 function getDashboardUrl(userType) {
@@ -260,82 +569,52 @@ function getDashboardUrl(userType) {
   }
   return "/login?error=Invalid user type";
 }
+
 // Logout route
 app.get("/logout", (req, res) => {
-  req.session.destroy();
-  res.redirect("/");
+  req.session.destroy((err) => {
+    if (err) {
+      console.error("Session destroy error:", err);
+    }
+    res.redirect("/");
+  });
 });
 
-//Dashboard Routes
-// app.get("/tenant_dashboard", isAuthenticated, (req, res) => {
-//   const user = req.session.user;
-//   if (user.userType !== "tenant") {
-//     return redirectToDashboard(req, res);
-//   }
-//   res.render("pages/tenant_dashboard", { user });
-// });
-
-// app.get("/owner_dashboard", isAuthenticated, (req, res) => {
-//   const user = req.session.user;
-//   if (user.userType !== "owner") {
-//     return redirectToDashboard(req, res);
-//   }
-//   res.render("pages/owner_dashboard", { user });
-// });
-
-// app.get("/worker_dashboard", isAuthenticated, (req, res) => {
-//   const user = req.session.user;
-//   if (user.userType !== "worker") {
-//     return redirectToDashboard(req, res);
-//   }
-//   res.render("pages/worker_dashboard", { user });
-// });
-
-app.get('/', async (req, res) => {
+// Home Route
+app.get("/", async (req, res) => {
   try {
-    // Fetch properties for Popular Listings
-    // Popular Listings (show only not rented, verified, and marked popular)
-const propertiesData = await Property.find({
-  isRented: false,
-  isVerified: true,
-  is_popular: true
-})
-.select("_id location subtype price images")
-.limit(10)
-.lean();
+    const propertiesData = await Property.find({
+      isRented: false,
+      isVerified: true,
+      is_popular: true,
+    })
+      .select("_id location subtype price images")
+      .limit(10)
+      .lean();
 
+    const sliderPropertiesData = await Property.find({
+      isRented: false,
+      isVerified: true,
+    })
+      .select("name description images _id")
+      .limit(10)
+      .lean();
 
-
-    // Slider Container (show only not rented, verified properties)
-const sliderPropertiesData = await Property.find({
-  isRented: false,
-  isVerified: true
-})
-.select("name description images _id")
-.limit(10)
-.lean();
-
-
-
-    // Render the index.ejs template with fetched data
-    res.render('pages/index', {
+    res.render("pages/index", {
       propertiesData,
-      sliderPropertiesData
+      sliderPropertiesData,
     });
   } catch (error) {
-    console.error('Error fetching properties:', error);
-    // Render with empty arrays and an error message if query fails
-    res.render('pages/index', {
+    console.error("Error fetching properties:", error);
+    res.render("pages/index", {
       propertiesData: [],
       sliderPropertiesData: [],
-      error: 'Failed to load properties'
+      error: "Failed to load properties",
     });
   }
 });
 
-
-// Route to render search.ejs
-// Route to render search.ejs
+// Search Route
 app.get("/search", async (req, res) => {
   try {
     const {
@@ -348,25 +627,21 @@ app.get("/search", async (req, res) => {
       amenities,
     } = req.query;
 
-    // Build the query object dynamically
     let query = {
       $and: [
-        {
-          $or: [{ isRented: false }, { isRented: { $exists: false } }],
-        },
+        { $or: [{ isRented: false }, { isRented: { $exists: false } }] },
         { isVerified: true },
       ],
     };
 
-    // Add filters to the query if they exist
     if (location) {
-      query.location = { $regex: location, $options: "i" }; // Case-insensitive match
+      query.location = { $regex: location, $options: "i" };
     }
     if (propertyType) {
       query.type = propertyType;
     }
     if (price) {
-      query.price = { $lte: Number(price) }; // Properties with price less than or equal to the selected value
+      query.price = { $lte: Number(price) };
     }
     if (bedrooms) {
       query.beds = Number(bedrooms);
@@ -378,15 +653,13 @@ app.get("/search", async (req, res) => {
       query.furnished = furnishing;
     }
     if (amenities) {
-      // Amenities are sent as a comma-separated string (e.g., "parking,wifi")
       const amenitiesArray = amenities.split(",").map((item) => item.trim());
       if (amenitiesArray.length > 0) {
-        query.amenities = { $all: amenitiesArray }; // Match all selected amenities
+        query.amenities = { $all: amenitiesArray };
       }
     }
 
     const properties = await Property.find(query);
-
     res.render("pages/search1", { properties, request: req });
   } catch (err) {
     console.error("Error fetching properties for search:", err);
@@ -394,16 +667,15 @@ app.get("/search", async (req, res) => {
   }
 });
 
-// Route to the property listing
-// Route to the property listing page (form for owners)
+// Property Listing Page
 app.get("/property_listing_page", isAuthenticated, (req, res) => {
   if (req.session.user.userType !== "owner") {
-    return redirectToDashboard(req, res);
+    return res.redirect(getDashboardUrl(req.session.user.userType));
   }
   res.render("pages/property_listing_page");
 });
 
-// Route for property details
+// Property Details Route
 app.get("/property", async (req, res) => {
   const propertyId = req.query.id;
   try {
@@ -425,7 +697,28 @@ app.get("/property", async (req, res) => {
   }
 });
 
-// Other static routes
+// Static Routes
+app.get("/register", (req, res) => {
+  const data = {
+    error: null,
+    userType: req.query.userType || 'tenant',
+    firstName: '',
+    lastName: '',
+    email: '',
+    phone: '',
+    location: '',
+    serviceType: '',
+    experience: '',
+    numProperties: '',
+    accountNo: '',
+    upiid: '',
+    errors: {},
+    success: false
+  };
+  console.log('Rendering registration with data:', data); // Debug log
+  res.render("pages/registration", data);
+});
+
 app.get("/worker_register", (req, res) => {
   res.render("pages/worker_register");
 });
@@ -488,14 +781,13 @@ app.get("/about_us", (req, res) => {
   res.render("pages/about_us");
 });
 
-// Authentication Middleware
+// Authentication Middleware for Admin
 function isAuthenticate(req, res, next) {
   if (req.session.adminId) {
     return next();
   }
   res.redirect("/admin/login");
 }
-
 
 // Admin Login Routes
 app.get("/admin/login", (req, res) => {
@@ -506,7 +798,7 @@ app.post("/admin/login", async (req, res) => {
   const { username, password } = req.body;
   try {
     const admin = await Admin.findOne({ username });
-    if (!admin || admin.password !== password) {
+    if (!admin || !(await bcrypt.compare(password, admin.password))) {
       return res.render("pages/adminlogin", {
         error: "Invalid username or password",
       });
@@ -522,7 +814,6 @@ app.post("/admin/login", async (req, res) => {
 // Admin Dashboard Route
 app.get("/admin", isAuthenticate, async (req, res) => {
   try {
-    // Existing dashboard logic remains unchanged
     const totalProperties = await Property.countDocuments();
     const totalRenters = await Tenant.countDocuments();
     const totalOwners = await Owner.countDocuments();
@@ -772,7 +1063,27 @@ app.get("/admin", isAuthenticate, async (req, res) => {
     res.status(500).send("Server Error");
   }
 });
-// Start server
-app.listen(PORT, () => {
-  console.log(`Server running at http://localhost:${PORT}`);
-});
+
+// Start server with error handling
+const startServer = (port) => {
+  try {
+    app.listen(port, () => {
+      console.log(`Server running at http://localhost:${port}`);
+      console.log('Email configuration:', {
+        user: process.env.GMAIL_USER ? 'Configured' : 'Missing',
+        pass: process.env.GMAIL_PASS ? 'Configured' : 'Missing'
+      });
+    }).on('error', (err) => {
+      if (err.code === 'EADDRINUSE') {
+        console.log(`Port ${port} is busy, trying ${port + 1}`);
+        startServer(port + 1);
+      } else {
+        console.error('Server error:', err);
+      }
+    });
+  } catch (err) {
+    console.error('Failed to start server:', err);
+  }
+};
+
+startServer(PORT);

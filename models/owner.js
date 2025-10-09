@@ -9,7 +9,19 @@ const ownerSchema = new mongoose.Schema({
   phone: String,
   location: String,
   numProperties: Number,
-  password: String,
+  password: {
+    type: String,
+    required: true,
+    select: false // Don't include password by default
+  },
+  otp: {
+    type: String,
+    default: null
+  },
+  otpExpires: {
+    type: Date,
+    default: null
+  },
   accountNo: String,
   upiid: String,
   status: { type: String, enum: ['Active', 'Suspended'], default: "Active" },
@@ -30,7 +42,10 @@ const ownerSchema = new mongoose.Schema({
     payment: { type: Boolean, default: true },
     complaint: { type: Boolean, default: true },
     maintenance: { type: Boolean, default: true }
-  }
+  },
+
+  otp: { type: String }, // Store OTP
+  otpExpires: { type: Date }, // OTP expiry time
 
 }, { timestamps: true });
 

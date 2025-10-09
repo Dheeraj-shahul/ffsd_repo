@@ -11,6 +11,7 @@ const RentalHistory = require("../models/rentalhistory");
 const Notification = require("../models/notification");
 const WorkerBooking = require("../models/workerBooking");
 const UnrentRequest = require("../models/unrentRequest");
+const bcrypt = require("bcryptjs");
 
 // Dashboard Controller
 // Dashboard Controller
@@ -1202,6 +1203,7 @@ exports.submitWorkerPayment = async (req, res) => {
   }
 };
 
+<<<<<<< HEAD
 exports.requestUnrentProperty = async (req, res) => {
   try {
     if (!req.session.user || !req.session.user._id) {
@@ -1301,5 +1303,23 @@ exports.requestUnrentProperty = async (req, res) => {
       success: false,
       message: "Server error: " + error.message,
     });
+=======
+exports.login = async (req, res) => {
+  const { email, password } = req.body;
+  try {
+    const tenant = await Tenant.findOne({ email }).select("+password");
+    if (!tenant) {
+      return res.status(401).render("pages/login", { error: "Account not found" });
+    }
+    const isMatch = await bcrypt.compare(password, tenant.password);
+    if (!isMatch) {
+      return res.status(401).render("pages/login", { error: "Incorrect password" });
+    }
+    // Set session and redirect as needed
+    req.session.user = tenant.toObject();
+    res.redirect("/tenants/dashboard");
+  } catch (err) {
+    res.status(500).render("pages/login", { error: "Server error" });
+>>>>>>> 3b6d6a9 (password,ajax used in login & registration for users)
   }
 };
