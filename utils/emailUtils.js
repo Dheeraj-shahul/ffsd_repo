@@ -57,7 +57,6 @@ async function sendOTPEmail(recipientEmail, otp) {
                 </div>
             `
         };
-
         const info = await transporter.sendMail(mailOptions);
         console.log('OTP Email sent successfully:', {
             to: recipientEmail,
