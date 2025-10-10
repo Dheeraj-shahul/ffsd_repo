@@ -520,7 +520,7 @@ exports.updateOwnerSettings = async (req, res) => {
     });
   }
 };
-<<<<<<< HEAD
+
 exports.approveUnrentProperty = async (req, res) => {
   try {
     const { unrentRequestId, action } = req.body;
@@ -635,7 +635,8 @@ exports.approveUnrentProperty = async (req, res) => {
       success: false,
       message: "Server error while processing unrent request",
     });
-=======
+  }
+};
 
 exports.login = async (req, res) => {
   const { email, password } = req.body;
@@ -653,6 +654,5 @@ exports.login = async (req, res) => {
     res.redirect("/owners/dashboard");
   } catch (err) {
     res.status(500).render("pages/login", { error: "Server error" });
->>>>>>> 3b6d6a9 (password,ajax used in login & registration for users)
   }
 };

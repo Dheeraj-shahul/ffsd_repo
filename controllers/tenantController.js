@@ -1203,7 +1203,6 @@ exports.submitWorkerPayment = async (req, res) => {
   }
 };
 
-<<<<<<< HEAD
 exports.requestUnrentProperty = async (req, res) => {
   try {
     if (!req.session.user || !req.session.user._id) {
@@ -1303,7 +1302,9 @@ exports.requestUnrentProperty = async (req, res) => {
       success: false,
       message: "Server error: " + error.message,
     });
-=======
+  }
+};
+
 exports.login = async (req, res) => {
   const { email, password } = req.body;
   try {
@@ -1320,6 +1321,5 @@ exports.login = async (req, res) => {
     res.redirect("/tenants/dashboard");
   } catch (err) {
     res.status(500).render("pages/login", { error: "Server error" });
->>>>>>> 3b6d6a9 (password,ajax used in login & registration for users)
   }
 };
