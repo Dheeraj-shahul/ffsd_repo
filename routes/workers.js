@@ -76,4 +76,14 @@ router.post(
   workerController.updateWorkerSettings
 );
 
+// API endpoint to debook a worker
+router.post(
+  "/api/workers/debook/:id",
+  workerController.isAuthenticated,
+  workerController.debookWorker
+);
+
+
+
+
 module.exports = router;

@@ -663,3 +663,223 @@ body {
     grid-template-columns: 1fr;
   }
 }
+
+
+/* Notifications Section Styles */
+.notification-container {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding: 20px 0;
+}
+
+.notification-card {
+  background: white;
+  border-radius: 8px;
+  padding: 20px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  border-left: 4px solid #3498db;
+  transition: all 0.3s ease;
+  position: relative;
+}
+
+.notification-card:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  transform: translateY(-2px);
+}
+
+.notification-card.unread {
+  background: #f0f8ff;
+  border-left-color: #2980b9;
+}
+
+.notification-card.read {
+  opacity: 0.8;
+  border-left-color: #95a5a6;
+}
+
+.notification-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 15px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid #ecf0f1;
+}
+
+.notification-header i {
+  font-size: 24px;
+}
+
+.notification-header.debooking {
+  color: #e74c3c;
+}
+
+.notification-header.debooking i {
+  color: #e74c3c;
+}
+
+.notification-header.booking-update {
+  color: #27ae60;
+}
+
+.notification-header.booking-update i {
+  color: #27ae60;
+}
+
+.notification-header.general {
+  color: #3498db;
+}
+
+.notification-header.general i {
+  color: #3498db;
+}
+
+.notification-header strong {
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.notification-card p {
+  margin: 10px 0;
+  color: #2c3e50;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.notification-card p strong {
+  color: #34495e;
+  font-weight: 600;
+  margin-right: 5px;
+}
+
+.notification-status {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.notification-status.info {
+  background: #e3f2fd;
+  color: #1976d2;
+}
+
+.notification-status.approved {
+  background: #e8f5e9;
+  color: #2e7d32;
+}
+
+.notification-status.rejected {
+  background: #ffebee;
+  color: #c62828;
+}
+
+.notification-status.pending {
+  background: #fff3e0;
+  color: #ef6c00;
+}
+
+.mark-read-button {
+  margin-top: 15px;
+  padding: 8px 16px;
+  background: #3498db;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  transition: background 0.3s ease;
+}
+
+.mark-read-button:hover {
+  background: #2980b9;
+}
+
+.mark-read-button:active {
+  transform: scale(0.98);
+}
+
+.no-notifications {
+  text-align: center;
+  padding: 40px;
+  color: #7f8c8d;
+  font-size: 16px;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+  .notification-card {
+    padding: 15px;
+  }
+
+  .notification-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 5px;
+  }
+
+  .notification-header i {
+    font-size: 20px;
+  }
+
+  .notification-header strong {
+    font-size: 16px;
+  }
+
+  .notification-card p {
+    font-size: 13px;
+  }
+
+  .mark-read-button {
+    width: 100%;
+    padding: 10px;
+  }
+}
+
+/* Animation for new notifications */
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.notification-card.unread {
+  animation: slideIn 0.3s ease-out;
+}
+
+/* Scroll styling for notification container */
+.notification-container {
+  max-height: 600px;
+  overflow-y: auto;
+  padding-right: 10px;
+}
+
+.notification-container::-webkit-scrollbar {
+  width: 8px;
+}
+
+.notification-container::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 4px;
+}
+
+.notification-container::-webkit-scrollbar-thumb {
+  background: #bdc3c7;
+  border-radius: 4px;
+}
+
+.notification-container::-webkit-scrollbar-thumb:hover {
+  background: #95a5a6;
+}

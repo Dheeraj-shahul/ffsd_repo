@@ -34,6 +34,7 @@
           <li onclick="showSection('earnings')"><i class="fa-solid fa-hand-holding-dollar"></i> Earnings</a></li>
           <li onclick="showSection('reviews')"><i class="fa-solid fa-star-half-stroke"></i> Reviews & Ratings</a></li>
           <li onclick="showSection('settings')"><i class="fa-solid fa-gears"></i> Settings</a></li>
+          <li onclick="showSection('notifications')"><i class="fa-solid fa-bell"></i>Notifications</li>
         </ul>
       </div>
 
@@ -165,6 +166,52 @@
           </div>
           <button class="report-button">View All Reviews</button>
         </div>
+
+        <div id="notifications" class="section">
+  <h3>Notifications</h3>
+  <div class="notification-container">
+    <% if (notifications && Array.isArray(notifications) && notifications.length > 0) { %>
+      <% notifications.forEach(notification => { %>
+        <div class="notification-card <%= notification.read ? 'read' : 'unread' %>" 
+             data-notification-id="<%= notification._id %>">
+          
+          <% if (notification.type === 'Debooking') { %>
+            <div class="notification-header debooking">
+              <i class="fa-solid fa-user-xmark"></i>
+              <strong>Debooking Notice</strong>
+            </div>
+          <% } else if (notification.type === 'Booking Update') { %>
+            <div class="notification-header booking-update">
+              <i class="fa-solid fa-calendar-check"></i>
+              <strong>Booking Update</strong>
+            </div>
+          <% } else { %>
+            <div class="notification-header general">
+              <i class="fa-solid fa-bell"></i>
+              <strong><%= notification.type || 'Notification' %></strong>
+            </div>
+          <% } %>
+          
+          <p><strong>Message:</strong> <%= notification.message %></p>
+          
+          <% if (notification.tenantName) { %>
+            <p><strong>From:</strong> <%= notification.tenantName %></p>
+          <% } %>
+          
+          <p><strong>Date:</strong> <%= new Date(notification.createdDate).toLocaleString() %></p>
+          
+          <p><strong>Status:</strong> 
+            <span class="notification-status <%= notification.status ? notification.status.toLowerCase() : 'info' %>">
+              <%= notification.status || 'Info' %>
+            </span>
+          </p>
+        </div>
+      <% }) %>
+    <% } else { %>
+      <p class="no-notifications">No notifications available.</p>
+    <% } %>
+  </div>
+</div>
 
         <div id="settings" class="section">
           <h3>Account Settings</h3>
@@ -663,6 +710,36 @@ document.getElementById('settingsForm').addEventListener('submit', function(e) {
             alert('Error checking booking status: ' + error.message);
           });
       }
+
+      function markNotificationAsRead(notificationId) {
+  fetch('/api/workers/notifications/read', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({ notificationId })
+  })
+  .then(response => response.json())
+  .then(data => {
+    if (data.success) {
+      const notificationCard = document.querySelector(`.notification-card[data-notification-id="${notificationId}"]`);
+      if (notificationCard) {
+        notificationCard.classList.remove('unread');
+        notificationCard.classList.add('read');
+        const markButton = notificationCard.querySelector('.mark-read-button');
+        if (markButton) markButton.remove();
+        const readStatus = notificationCard.querySelector('p:last-of-type');
+        if (readStatus) readStatus.innerHTML = '<strong>Read:</strong> Read';
+      }
+      alert('Notification marked as read');
+    } else {
+      alert('Error marking notification as read: ' + data.error);
+    }
+  })
+  .catch(error => {
+    alert('Error marking notification as read: ' + error.message);
+  });
+}
     </script>
   </body>
 </html>
