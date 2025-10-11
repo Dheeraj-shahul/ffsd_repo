@@ -5,8 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login</title>
     
-<!-- Include Font Awesome for the eye icon -->
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <!-- Include Font Awesome for the eye icon -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@100;200;300;400;500;600;700;800;900&display=swap');
 
@@ -15,45 +15,38 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            
             background-color: #f5f5f5;
             margin: 0;
-            
-            
             background-image: url('login.jpg');
             background-size: cover;
             background-position: center;
             background-repeat: no-repeat;
-            height:100vh;
-            overflow:hidden;
+            height: 100vh;
+            overflow: hidden;
         }
         
-        html{
-            height:100vh;
-            overflow:hidden;
-            margin:0;
-            padding:0;
+        html {
+            height: 100vh;
+            overflow: hidden;
+            margin: 0;
+            padding: 0;
         }
-    
 
         .login-container {
-            background-color:#333;
+            background-color: #333;
             border-radius: 10px;
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
             width: 300px;
-            padding-right:70px;
-            padding-left:70px;
-            padding-bottom:20px;
-            margin-left:50px;
-            margin-right:50px;
+            padding: 20px 70px;
+            margin: 0 50px;
         }
        
-        label{
-            font-size:15px;
-            color:white;
+        label {
+            font-size: 15px;
+            color: white;
             display: block;
-            margin-bottom:-9px;
-            margin-top:10px;
+            margin-bottom: -9px;
+            margin-top: 10px;
         }
         
         h2 {
@@ -100,8 +93,8 @@
             font-size: 16px;
             cursor: pointer;
             margin-top: 15px;
-            font-weight:bold;
-            font-family:'Poppins', sans-serif;
+            font-weight: bold;
+            font-family: 'Poppins', sans-serif;
         }
 
         button:hover {
@@ -112,6 +105,7 @@
             text-align: center;
             font-size: 14px;
             margin-top: 10px;
+            color: white;
         }
 
         .social-login {
@@ -125,11 +119,7 @@
             cursor: pointer;
         }
         
-        p{
-            color:white;
-        }
-        
-        /* error message styling */
+        /* Error message styling */
         .error-text {
             color: #ff4444;
             font-size: 14px;
@@ -138,82 +128,79 @@
         }
 
         .password-container {
-        position: relative;
-        width: 100%;
-    }
-    .password-container input {
-        width: 100%;
-        padding-right: 40px; /* Space for the eye icon */
-        box-sizing: border-box;
-    }
-    .toggle-password {
-        position: absolute;
-        right: 10px;
-        top: 60%;
-        transform: translateY(-50%);
-        cursor: pointer;
-    }
-    .toggle-password i {
-        color: #666;
-    }
+            position: relative;
+            width: 100%;
+        }
+        .password-container input {
+            width: 100%;
+            padding-right: 40px; /* Space for the eye icon */
+            box-sizing: border-box;
+        }
+        .toggle-password {
+            position: absolute;
+            right: 10px;
+            top: 60%;
+            transform: translateY(-50%);
+            cursor: pointer;
+        }
+        .toggle-password i {
+            color: #666;
+        }
 
-    /* Modal styles */
-    .modal-bg {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background-color: rgba(0, 0, 0, 0.8);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        z-index: 1000;
-    }
+        /* Modal styles */
+        .modal-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
 
-    .modal {
-        background-color: #fff;
-        padding: 20px;
-        border-radius: 10px;
-        box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
-        width: 300px;
-        position: relative;
-    }
+        .modal {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+            width: 300px;
+            position: relative;
+        }
 
-    .modal-close {
-        position: absolute;
-        top: 10px;
-        right: 10px;
-        background: none;
-        border: none;
-        font-size: 18px;
-        cursor: pointer;
-    }
+        .modal-close {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: none;
+            border: none;
+            font-size: 18px;
+            cursor: pointer;
+        }
 
-    .modal-btn {
-        background-color: #007bff;
-        color: white;
-        border: none;
-        padding: 10px;
-        border-radius: 5px;
-        cursor: pointer;
-        width: 100%;
-        margin-top: 10px;
-    }
+        .modal-btn {
+            background-color: #FFC107;
+            color: black;
+            border: none;
+            padding: 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 10px;
+            font-weight: bold;
+        }
 
-    .modal-btn:hover {
-        background-color: #0056b3;
-    }
-
-    /* Add any additional styles for the modal here */
-        
+        .modal-btn:hover {
+            background-color: #ff6f00;
+        }
     </style>
 </head>
 <body>
     <div class="login-container">
         <h2>Login</h2>
         <form id="loginForm">
-    
             <!-- Role Selection -->
             <label for="userType">Select Role:</label>
             <select id="userType" name="userType" required>
@@ -223,39 +210,39 @@
                 <option value="worker" <%= userType === 'worker' ? 'selected' : '' %>>Worker</option>
             </select>
             <div id="roleError" class="error-text">Please select a userType</div>
-    
+
             <!-- Email Input -->
             <label for="email">Email:</label>
             <input type="email" id="email" name="email" placeholder="Enter your email" value="<%= typeof email !== 'undefined' ? email : '' %>" required>
             <div id="emailError" class="error-text"><%= errors && errors.email ? errors.email : 'Email is required' %></div>
-    
-             <!-- Password Input -->
-        <label for="password">Password:</label>
-        <div class="password-container">
-            <input type="password" id="password" name="password" placeholder="Enter your password" value="<%= typeof password !== 'undefined' ? password : '' %>" required>
-            <span class="toggle-password">
-                <i class="fa fa-eye" id="togglePasswordIcon"></i>
-            </span>
-        </div>
-        <div id="passwordError" class="error-text">
-            <%= errors && errors.password ? errors.password : 'Password is required' %>
-        </div>
 
-        <% if (errors && errors.auth) { %>
-            <div class="error-text visible" style="text-align: center;">
-                <%= errors.auth %>
+            <!-- Password Input -->
+            <label for="password">Password:</label>
+            <div class="password-container">
+                <input type="password" id="password" name="password" placeholder="Enter your password" value="<%= typeof password !== 'undefined' ? password : '' %>" required>
+                <span class="toggle-password">
+                    <i class="fa fa-eye" id="togglePasswordIcon"></i>
+                </span>
             </div>
-        <% } %>
-            
+            <div id="passwordError" class="error-text">
+                <%= errors && errors.password ? errors.password : 'Password is required' %>
+            </div>
+
+            <% if (error) { %>
+                <div class="error-text" style="display: block; text-align: center;">
+                    <%= error %>
+                </div>
+            <% } %>
+
             <!-- Forgot Password Link -->
-            <a href="/forgot-password" class="forgot-password">Forgot Password?</a>
-    
+            <a href="#" class="forgot-password" onclick="openOtpModal()">Forgot Password?</a>
+
             <!-- Submit Button -->
             <button type="submit" id="loginBtn">Login</button>
-    
+
             <!-- Sign Up Link -->
             <p>Don't have an account? <a href="/register" style="color: rgb(34, 143, 244); text-decoration: underline; font-size: 14px; cursor: pointer;">Sign up</a></p>
-    
+
             <!-- Social Login -->
             <div class="social-login">
                 <p>Sign in With:</p>
@@ -265,9 +252,6 @@
                     <img src="https://cdn2.iconfinder.com/data/icons/social-icons-33/128/Instagram-128.png" alt="Instagram">
                 </div>
             </div>
-
-          
-    
         </form>
 
         <!-- OTP Modal -->
@@ -277,18 +261,18 @@
                 <h3 style="color: #FFC107;">Reset Password</h3>
                 <div id="otpStep1">
                     <input type="email" id="otpEmail" placeholder="Enter your registered email" required style="border:2px solid #FFC107;">
-                    <button class="modal-btn" onclick="sendOtp()" style="background:#FFC107;color:#222;">Send OTP</button>
+                    <button class="modal-btn" onclick="sendOtp()">Send OTP</button>
                     <div id="otpEmailError" class="error-text"></div>
                 </div>
                 <div id="otpStep2" style="display:none;">
                     <input type="text" id="otpCode" maxlength="6" placeholder="Enter OTP" required style="border:2px solid #FFC107;">
-                    <button class="modal-btn" onclick="verifyOtp()" style="background:#FFC107;color:#222;">Verify OTP</button>
+                    <button class="modal-btn" onclick="verifyOtp()">Verify OTP</button>
                     <div id="otpCodeError" class="error-text"></div>
                 </div>
                 <div id="otpStep3" style="display:none;">
                     <input type="password" id="newPassword" placeholder="New Password" required style="border:2px solid #FFC107;">
                     <input type="password" id="confirmNewPassword" placeholder="Confirm Password" required style="border:2px solid #FFC107;">
-                    <button class="modal-btn" onclick="resetPassword()" style="background:#FFC107;color:#222;">Reset Password</button>
+                    <button class="modal-btn" onclick="resetPassword()">Reset Password</button>
                     <div id="newPasswordError" class="error-text"></div>
                 </div>
                 <div id="otpSuccessMsg" style="color:green; margin-top:10px; display:none;"></div>
@@ -296,219 +280,240 @@
             </div>
         </div>
     </div>
-    
 
     <script>
-     <% if (errors && errors.auth) { %>
-    window.onload = function () {
-      alert("<%= errors.auth %>");
-    };
-  <% } %>
+        <% if (error) { %>
+            alert("<%= error %>");
+        <% } %>
 
-  // Toggle password visibility
-  document.getElementById("togglePasswordIcon").addEventListener("click", function () {
-    const passwordInput = document.getElementById("password");
-    const icon = this;
-    if (passwordInput.type === "password") {
-      passwordInput.type = "text";
-      icon.classList.remove("fa-eye");
-      icon.classList.add("fa-eye-slash");
-    } else {
-      passwordInput.type = "password";
-      icon.classList.remove("fa-eye-slash");
-      icon.classList.add("fa-eye");
-    }
-  });
+        // Toggle password visibility
+        document.getElementById("togglePasswordIcon").addEventListener("click", function () {
+            const passwordInput = document.getElementById("password");
+            const icon = this;
+            if (passwordInput.type === "password") {
+                passwordInput.type = "text";
+                icon.classList.remove("fa-eye");
+                icon.classList.add("fa-eye-slash");
+            } else {
+                passwordInput.type = "password";
+                icon.classList.remove("fa-eye-slash");
+                icon.classList.add("fa-eye");
+            }
+        });
 
-  // Handle login form submission
-  document.getElementById("loginForm").addEventListener("submit", function (e) {
-    e.preventDefault();
+        // Handle login form submission
+        document.getElementById("loginForm").addEventListener("submit", function (e) {
+            e.preventDefault();
 
-    const userType = document.getElementById("userType").value;
-    const email = document.getElementById("email").value;
-    const password = document.getElementById("password").value;
+            const userType = document.getElementById("userType").value;
+            const email = document.getElementById("email").value;
+            const password = document.getElementById("password").value;
 
-    const xhttp = new XMLHttpRequest();
-    xhttp.open("POST", "/login", true);
-    xhttp.setRequestHeader("Content-Type", "application/json");
+            if (!userType) {
+                document.getElementById("roleError").style.display = "block";
+                return;
+            }
+            if (!email) {
+                document.getElementById("emailError").style.display = "block";
+                return;
+            }
+            if (!password) {
+                document.getElementById("passwordError").style.display = "block";
+                return;
+            }
 
-    xhttp.onload = function () {
-      if (xhttp.status === 200) {
-        try {
-          const response = JSON.parse(xhttp.responseText);
-          if (response.redirectUrl) {
-            window.location.href = response.redirectUrl;
-          } else {
-            alert("Login successful!");
-          }
-        } catch (err) {
-          document.body.innerHTML = xhttp.responseText;
+            const xhr = new XMLHttpRequest();
+            xhr.open("POST", "/login", true);
+            xhr.setRequestHeader("Content-Type", "application/json");
+
+            xhr.onload = function () {
+                try {
+                    const response = JSON.parse(xhr.responseText);
+                    if (xhr.status === 200 && response.success) {
+                        window.location.href = response.redirectUrl;
+                    } else {
+                        alert("Login failed: " + response.error);
+                    }
+                } catch (err) {
+                    document.body.innerHTML = xhr.responseText;
+                }
+            };
+
+            xhr.onerror = function () {
+                alert("Network error occurred. Please try again.");
+            };
+
+            xhr.send(JSON.stringify({ userType, email, password }));
+        });
+
+        // OTP Modal functions
+        function openOtpModal() {
+            document.getElementById("otpModalBg").style.display = "flex";
         }
-      } else {
-        const response = JSON.parse(xhttp.responseText);
-        alert("Login failed: " + response.error);
-      }
-    };
 
-    xhttp.send(
-      JSON.stringify({
-        userType,
-        email,
-        password,
-      })
-    );
-  });
-
-  // OTP Modal functions
-  document.querySelector(".forgot-password").addEventListener("click", function (e) {
-    e.preventDefault();
-    closeOtpModal();
-    document.getElementById("otpModalBg").style.display = "flex";
-  });
-
-  function closeOtpModal() {
-    document.getElementById("otpModalBg").style.display = "none";
-    document.getElementById("otpStep1").style.display = "block";
-    document.getElementById("otpStep2").style.display = "none";
-    document.getElementById("otpStep3").style.display = "none";
-    document.getElementById("otpEmail").value = "";
-    document.getElementById("otpCode").value = "";
-    document.getElementById("newPassword").value = "";
-    document.getElementById("confirmNewPassword").value = "";
-    document.getElementById("otpEmailError").innerText = "";
-    document.getElementById("otpCodeError").innerText = "";
-    document.getElementById("newPasswordError").innerText = "";
-    document.getElementById("otpSuccessMsg").style.display = "none";
-  }
-
-  function validateEmail(email) {
-    const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return re.test(String(email).toLowerCase());
-  }
-
-  // Step 1: Send OTP
-  function sendOtp() {
-    const email = document.getElementById("otpEmail").value.trim();
-    const emailError = document.getElementById("otpEmailError");
-    emailError.style.display = "none";
-
-    if (!validateEmail(email)) {
-      emailError.innerText = "Invalid email format";
-      emailError.style.display = "block";
-      return;
-    }
-
-    const xhttp = new XMLHttpRequest();
-    xhttp.open("POST", "/forgot-password", true);
-    xhttp.setRequestHeader("Content-Type", "application/json");
-
-    xhttp.onload = function () {
-      try {
-        const response = JSON.parse(xhttp.responseText);
-        if (xhttp.status === 200 && response.success) {
-          document.getElementById("otpStep1").style.display = "none";
-          document.getElementById("otpStep2").style.display = "block";
-          document.getElementById("otpSuccessMsg").innerText = "OTP sent to your email!";
-          document.getElementById("otpSuccessMsg").style.display = "block";
-          setTimeout(() => {
+        function closeOtpModal() {
+            document.getElementById("otpModalBg").style.display = "none";
+            document.getElementById("otpStep1").style.display = "block";
+            document.getElementById("otpStep2").style.display = "none";
+            document.getElementById("otpStep3").style.display = "none";
+            document.getElementById("otpEmail").value = "";
+            document.getElementById("otpCode").value = "";
+            document.getElementById("newPassword").value = "";
+            document.getElementById("confirmNewPassword").value = "";
+            document.getElementById("otpEmailError").innerText = "";
+            document.getElementById("otpCodeError").innerText = "";
+            document.getElementById("newPasswordError").innerText = "";
             document.getElementById("otpSuccessMsg").style.display = "none";
-          }, 3000);
-        } else {
-          emailError.innerText = response.error || "Failed to send OTP";
-          emailError.style.display = "block";
         }
-      } catch (err) {
-        emailError.innerText = "Server error";
-        emailError.style.display = "block";
-      }
-    };
 
-    xhttp.send(JSON.stringify({ email }));
-  }
-
-  // Step 2: Verify OTP
-  function verifyOtp() {
-    const email = document.getElementById("otpEmail").value.trim();
-    const otpCode = document.getElementById("otpCode").value.trim();
-    const otpCodeError = document.getElementById("otpCodeError");
-    otpCodeError.style.display = "none";
-
-    if (otpCode.length !== 6) {
-      otpCodeError.innerText = "OTP must be 6 digits";
-      otpCodeError.style.display = "block";
-      return;
-    }
-
-    const xhttp = new XMLHttpRequest();
-    xhttp.open("POST", "/verify-otp", true);
-    xhttp.setRequestHeader("Content-Type", "application/json");
-
-    xhttp.onload = function () {
-      try {
-        const response = JSON.parse(xhttp.responseText);
-        if (xhttp.status === 200 && response.success) {
-          document.getElementById("otpStep2").style.display = "none";
-          document.getElementById("otpStep3").style.display = "block";
-        } else {
-          otpCodeError.innerText = response.error || "Invalid OTP";
-          otpCodeError.style.display = "block";
+        function validateEmail(email) {
+            const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            return re.test(String(email).toLowerCase());
         }
-      } catch (err) {
-        otpCodeError.innerText = "Server error";
-        otpCodeError.style.display = "block";
-      }
-    };
 
-    xhttp.send(JSON.stringify({ email, otp: otpCode }));
-  }
+        // Step 1: Send OTP
+        function sendOtp() {
+            const email = document.getElementById("otpEmail").value.trim();
+            const emailError = document.getElementById("otpEmailError");
+            emailError.style.display = "none";
 
-  // Step 3: Reset Password
-  function resetPassword() {
-    const email = document.getElementById("otpEmail").value.trim();
-    const newPassword = document.getElementById("newPassword").value;
-    const confirmNewPassword = document.getElementById("confirmNewPassword").value;
-    const newPasswordError = document.getElementById("newPasswordError");
-    newPasswordError.style.display = "none";
+            if (!validateEmail(email)) {
+                emailError.innerText = "Invalid email format";
+                emailError.style.display = "block";
+                return;
+            }
 
-    if (newPassword.length < 8) {
-      newPasswordError.innerText = "Password must be at least 8 characters";
-      newPasswordError.style.display = "block";
-      return;
-    }
+            const xhr = new XMLHttpRequest();
+            xhr.open("POST", "/forgot-password", true);
+            xhr.setRequestHeader("Content-Type", "application/json");
 
-    if (newPassword !== confirmNewPassword) {
-      newPasswordError.innerText = "Passwords do not match";
-      newPasswordError.style.display = "block";
-      return;
-    }
+            xhr.onload = function () {
+                try {
+                    const response = JSON.parse(xhr.responseText);
+                    if (xhr.status === 200 && response.success) {
+                        alert(`Your OTP is: ${response.otp}\nPlease enter this OTP to verify your identity.`);
+                        document.getElementById("otpStep1").style.display = "none";
+                        document.getElementById("otpStep2").style.display = "block";
+                        document.getElementById("otpSuccessMsg").innerText = "OTP sent to your email!";
+                        document.getElementById("otpSuccessMsg").style.display = "block";
+                        setTimeout(() => {
+                            document.getElementById("otpSuccessMsg").style.display = "none";
+                        }, 3000);
+                    } else {
+                        emailError.innerText = response.error || "Failed to send OTP";
+                        emailError.style.display = "block";
+                    }
+                } catch (err) {
+                    emailError.innerText = "Server error";
+                    emailError.style.display = "block";
+                }
+            };
 
-    const xhttp = new XMLHttpRequest();
-    xhttp.open("POST", "/reset-password", true);
-    xhttp.setRequestHeader("Content-Type", "application/json");
+            xhr.onerror = function () {
+                emailError.innerText = "Network error";
+                emailError.style.display = "block";
+            };
 
-    xhttp.onload = function () {
-      try {
-        const response = JSON.parse(xhttp.responseText);
-        if (xhttp.status === 200 && response.success) {
-          document.getElementById("otpSuccessMsg").innerText = "Password reset successful! Redirecting to login...";
-          document.getElementById("otpSuccessMsg").style.display = "block";
-          setTimeout(() => {
-            closeOtpModal();
-            window.location.href = "/login";
-          }, 2000);
-        } else {
-          newPasswordError.innerText = response.error || "Failed to reset password";
-          newPasswordError.style.display = "block";
+            xhr.send(JSON.stringify({ email }));
         }
-      } catch (err) {
-        newPasswordError.innerText = "Server error";
-        newPasswordError.style.display = "block";
-      }
-    };
 
-    xhttp.send(JSON.stringify({ email, password: newPassword }));
-  }
+        // Step 2: Verify OTP
+        function verifyOtp() {
+            const email = document.getElementById("otpEmail").value.trim();
+            const otpCode = document.getElementById("otpCode").value.trim();
+            const otpCodeError = document.getElementById("otpCodeError");
+            otpCodeError.style.display = "none";
 
+            if (otpCode.length !== 6 || isNaN(otpCode)) {
+                otpCodeError.innerText = "OTP must be a 6-digit number";
+                otpCodeError.style.display = "block";
+                return;
+            }
+
+            const xhr = new XMLHttpRequest();
+            xhr.open("POST", "/verify-otp", true);
+            xhr.setRequestHeader("Content-Type", "application/json");
+
+            xhr.onload = function () {
+                try {
+                    const response = JSON.parse(xhr.responseText);
+                    if (xhr.status === 200 && response.success) {
+                        document.getElementById("otpStep2").style.display = "none";
+                        document.getElementById("otpStep3").style.display = "block";
+                        document.getElementById("otpSuccessMsg").innerText = "OTP verified successfully!";
+                        document.getElementById("otpSuccessMsg").style.display = "block";
+                        setTimeout(() => {
+                            document.getElementById("otpSuccessMsg").style.display = "none";
+                        }, 2000);
+                    } else {
+                        otpCodeError.innerText = response.error || "Invalid OTP";
+                        otpCodeError.style.display = "block";
+                    }
+                } catch (err) {
+                    otpCodeError.innerText = "Server error";
+                    otpCodeError.style.display = "block";
+                }
+            };
+
+            xhr.onerror = function () {
+                otpCodeError.innerText = "Network error";
+                otpCodeError.style.display = "block";
+            };
+
+            xhr.send(JSON.stringify({ email, otp: otpCode }));
+        }
+
+        // Step 3: Reset Password
+        function resetPassword() {
+            const email = document.getElementById("otpEmail").value.trim();
+            const newPassword = document.getElementById("newPassword").value;
+            const confirmNewPassword = document.getElementById("confirmNewPassword").value;
+            const newPasswordError = document.getElementById("newPasswordError");
+            newPasswordError.style.display = "none";
+
+            if (newPassword.length < 8) {
+                newPasswordError.innerText = "Password must be at least 8 characters";
+                newPasswordError.style.display = "block";
+                return;
+            }
+
+            if (newPassword !== confirmNewPassword) {
+                newPasswordError.innerText = "Passwords do not match";
+                newPasswordError.style.display = "block";
+                return;
+            }
+
+            const xhr = new XMLHttpRequest();
+            xhr.open("POST", "/reset-password", true);
+            xhr.setRequestHeader("Content-Type", "application/json");
+
+            xhr.onload = function () {
+                try {
+                    const response = JSON.parse(xhr.responseText);
+                    if (xhr.status === 200 && response.success) {
+                        document.getElementById("otpSuccessMsg").innerText = "Password reset successful! Redirecting to login...";
+                        document.getElementById("otpSuccessMsg").style.display = "block";
+                        setTimeout(() => {
+                            closeOtpModal();
+                            window.location.href = "/login";
+                        }, 2000);
+                    } else {
+                        newPasswordError.innerText = response.error || "Failed to reset password";
+                        newPasswordError.style.display = "block";
+                    }
+                } catch (err) {
+                    newPasswordError.innerText = "Server error";
+                    newPasswordError.style.display = "block";
+                }
+            };
+
+            xhr.onerror = function () {
+                newPasswordError.innerText = "Network error";
+                newPasswordError.style.display = "block";
+            };
+
+            xhr.send(JSON.stringify({ email, password: newPassword }));
+        }
     </script>
 </body>
 </html>

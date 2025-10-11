@@ -8,7 +8,7 @@ const WorkerBooking = require("../models/workerBooking");
 const Notification = require("../models/notification");
 const formidable = require("formidable");
 const fs = require("fs");
-const bcrypt = require("bcryptjs");
+// bcrypt removed; plain-text password comparisons are used per requirement
 
 // Middleware to check if user is authenticated
 exports.isAuthenticated = (req, res, next) => {
@@ -544,8 +544,8 @@ exports.deleteWorkerAccount = async (req, res) => {
         .json({ error: "Cannot delete account: You are currently working" });
     }
 
-    // Use bcrypt to compare password
-    if (!(await bcrypt.compare(password, worker.password))) {
+    // Plain-text password comparison per request
+    if (worker.password !== password) {
       return res.status(401).json({ error: "Invalid password" });
     }
 
@@ -1089,13 +1089,13 @@ exports.updateWorkerSettings = async (req, res) => {
 
     // Handle password change if provided
     if (newPassword) {
-      // Use bcrypt to compare password
-      if (!(await bcrypt.compare(currentPassword, worker.password))) {
+      // Plain-text comparison
+      if (currentPassword !== worker.password) {
         return res
           .status(400)
           .json({ success: false, error: "Current password is incorrect" });
       }
-      worker.password = await bcrypt.hash(newPassword, 10);
+      worker.password = newPassword;
     }
 
     // Save the updated worker
@@ -1121,8 +1121,8 @@ exports.login = async (req, res) => {
   if (!user) {
     return res.status(401).render("pages/login", { error: "Account not found" });
   }
-  const isMatch = await bcrypt.compare(password, user.password);
-  if (!isMatch) {
+  // Plain-text comparison
+  if (user.password !== password) {
     return res.status(401).render("pages/login", { error: "Incorrect password" });
   }
   // ...set session and redirect...
