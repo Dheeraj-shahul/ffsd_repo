@@ -774,9 +774,8 @@
             <% if (notifications && Array.isArray(notifications)) { %> <%
             notifications.forEach(notification => { %>
             <div
-              class="notification-card <%= notification.read ? 'read' : 'unread' %>"
-              data-notification-id="<%= notification._id || '' %>"
-              data-unrent-request-id="<%= notification.unrentRequestId || '' %>"
+              class="notification-card"
+              data-notification-id="<%= notification._id %>"
             >
               <div class="notification-header">
                 <h4><%= notification.type || 'Booking Request' %></h4>
@@ -803,47 +802,22 @@
                   Date(notification.createdDate).toLocaleDateString() : 'N/A' %>
                 </p>
               </div>
-              <% if (notification.type === 'Unrent Request') { %>
-              <div class="unrent-details">
-                <p>
-                  <strong>Tenant:</strong> <%= notification.tenantName || 'N/A'
-                  %>
-                </p>
-                <p>
-                  <strong>Reason:</strong> <%= notification.unrentReason ||
-                  notification.reason || 'N/A' %>
-                </p>
-                <p>
-                  <strong>Rent Paid:</strong> <%= notification.rentPaid ? 'Yes'
-                  : 'No' %>
-                </p>
-              </div>
-              <% } %> <% if (notification.type === 'Unrent Request') { %> <% if
-              (notification.status === 'Pending' &&
-              notification.unrentRequestId) { %>
+              <% if (notification.status === 'Pending') { %>
               <div class="notification-actions">
                 <button
                   class="action-button approve-button"
-                  onclick="handleUnrentRequestAction('<%= notification.unrentRequestId %>', 'approve')"
+                  onclick="handleNotificationAction('<%= notification._id %>', 'approve')"
                 >
                   Approve
                 </button>
                 <button
                   class="action-button reject-button"
-                  onclick="handleUnrentRequestAction('<%= notification.unrentRequestId %>', 'reject')"
+                  onclick="handleNotificationAction('<%= notification._id %>', 'reject')"
                 >
                   Reject
                 </button>
               </div>
-              <% } else if (notification.status === 'Pending' &&
-              !notification.unrentRequestId) { %>
-              <div
-                class="notification-warning"
-                style="color: red; font-weight: bold; margin-top: 10px"
-              >
-                Cannot approve/reject: Unrent request information missing.
-              </div>
-              <% } %> <% } %>
+              <% } %>
             </div>
             <% }) %> <% } else { %>
             <p>No notifications available.</p>
@@ -1582,6 +1556,67 @@
 
         // Refresh notifications
         refreshNotifications();
+      }
+
+      function handleNotificationAction(notificationId, action) {
+        fetch("/notifications/action", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          credentials: "include", // Ensure cookies/session are sent
+          body: JSON.stringify({ notificationId, action }),
+        })
+          .then((response) => {
+            // Check if response is ok (status in the range 200-299)
+            if (!response.ok) {
+              return response.json().then((errorData) => {
+                throw new Error(
+                  errorData.message || `HTTP error! Status: ${response.status}`
+                );
+              });
+            }
+            return response.json();
+          })
+          .then((data) => {
+            if (data.success) {
+              const notificationCard = document.querySelector(
+                `.notification-card[data-notification-id="${notificationId}"]`
+              );
+              const statusElement = notificationCard.querySelector(
+                ".notification-status"
+              );
+              // Update status text and class
+              statusElement.textContent =
+                action === "approve" ? "Approved" : "Rejected";
+              statusElement.classList.remove("pending");
+              statusElement.classList.add(
+                action === "approve" ? "approved" : "rejected"
+              );
+              // Remove action buttons
+              const actions = notificationCard.querySelector(
+                ".notification-actions"
+              );
+              if (actions) {
+                actions.remove();
+              }
+              // Show success message
+              alert(
+                `Notification ${
+                  action === "approve" ? "approved" : "rejected"
+                } successfully!`
+              );
+              refreshNotifications();
+            } else {
+              alert(
+                `Failed to ${action} notification: ${
+                  data.message || "Unknown error"
+                }`
+              );
+            }
+          })
+          .catch((error) => {
+            console.error("Error handling notification action:", error);
+            alert(`Failed to process the request: ${error.message}`);
+          });
       }
     </script>
   </body>
