@@ -8,6 +8,7 @@ const WorkerBooking = require("../models/workerBooking");
 const Notification = require("../models/notification");
 const formidable = require("formidable");
 const fs = require("fs");
+const workerBooking = require("../models/workerBooking");
 
 // Middleware to check if user is authenticated
 exports.isAuthenticated = (req, res, next) => {
@@ -950,7 +951,11 @@ exports.debookWorker = async (req, res) => {
     worker.clientIds = worker.clientIds.filter(
       id => id.toString() !== tenantId
     );
-    
+
+    //remve from workerbooking
+    WorkerBooking.deleteMany({ tenantId, workerId, status: "Approved" });
+    await workerBooking.save();
+
     // Update worker's isBooked status
     worker.isBooked = worker.clientIds.length > 0;
     await worker.save();

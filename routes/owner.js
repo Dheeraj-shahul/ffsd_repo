@@ -3,7 +3,7 @@ const router = express.Router();
 const ownerController = require("../controllers/ownerController");
 const propertyController = require("../controllers/propertyController");
 const isAuthenticated = require("../middleware/auth");
-const UnrentRequest = require("../models/UnrentRequest");
+const UnrentRequest = require("../models/unrentRequest");
 
 router.get("/owner_dashboard", ownerController.getOwnerDashboard);
 router.post(

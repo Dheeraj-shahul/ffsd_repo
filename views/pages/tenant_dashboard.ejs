@@ -510,9 +510,9 @@
             </div>
             
             <div class="worker-payment-section">
-              <h6>Payment Status</h6>
-              <p>Last Payment: <span class="last-payment-date"><%= worker.lastPaymentDate ? new Date(worker.lastPaymentDate).toLocaleDateString() : 'Never' %></span></p>
-              <p>Status: <span class="payment-status <%= worker.paymentStatus === 'paid' ? 'status-paid' : 'status-pending' %>"><%= worker.paymentStatus === 'paid' ? 'Paid' : 'Pending' %></span></p>
+              <h6>Payment</h6>
+              <!-- <p>Last Payment: <span class="last-payment-date"><%= worker.lastPaymentDate ? new Date(worker.lastPaymentDate).toLocaleDateString() : 'Never' %></span></p> -->
+              <!-- <p>Status: <span class="payment-status <%= worker.paymentStatus === 'paid' ? 'status-paid' : 'status-pending' %>"><%= worker.paymentStatus === 'paid' ? 'Paid' : 'Pending' %></span></p> -->
               <button class="pay-worker-btn" onclick="showWorkerPaymentPopup(this)" <%= worker.paymentStatus === 'paid' ? 'disabled' : '' %>>
                 <%= worker.paymentStatus === 'paid' ? 'Paid' : 'Pay Worker' %>
               </button>
