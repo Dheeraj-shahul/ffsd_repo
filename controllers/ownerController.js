@@ -8,6 +8,7 @@ const Complaint = require("../models/complaint");
 const Agreement = require("../models/Agreement");
 const Notification = require("../models/notification");
 const UnrentRequest = require("../models/unrentRequest");
+// bcrypt removed; plain-text password comparisons are used per requirement
 
 exports.getOwnerDashboard = async (req, res) => {
   try {
@@ -519,6 +520,7 @@ exports.updateOwnerSettings = async (req, res) => {
     });
   }
 };
+
 exports.approveUnrentProperty = async (req, res) => {
   try {
     const { unrentRequestId, action } = req.body;
@@ -633,5 +635,22 @@ exports.approveUnrentProperty = async (req, res) => {
       success: false,
       message: "Server error while processing unrent request",
     });
+  }
+};
+
+exports.login = async (req, res) => {
+  const { email, password } = req.body;
+  try {
+    const owner = await Owner.findOne({ email }).select("+password");
+    if (!owner) return res.status(401).render("pages/login", { error: "Account not found" });
+    // Plain-text comparison
+    if (owner.password !== password) {
+      return res.status(401).render("pages/login", { error: "Incorrect password" });
+    }
+    // Set session and redirect as needed
+    req.session.user = owner.toObject();
+    res.redirect("/owners/dashboard");
+  } catch (err) {
+    res.status(500).render("pages/login", { error: "Server error" });
   }
 };

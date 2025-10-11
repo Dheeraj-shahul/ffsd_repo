@@ -13,29 +13,29 @@
             padding: 0;
         }
 
-        body {
-            font-family: 'Poppins', sans-serif;
-            display: flex;
-            align-items: flex-start; 
-            justify-content: center;
-            margin: 0;
-            background-image: url('/images/login.jpg');
-            background-size: cover;
-            background-position: center;
-            background-repeat: no-repeat;
-            min-height: 100vh; 
-            padding: 40px 20px;
-            overflow-y: auto; 
-        }
+    body {
+        font-family: 'Poppins', sans-serif;
+        display: flex;
+        align-items: flex-start; 
+        justify-content: center;
+        margin: 0;
+        background-image: url('/images/login.jpg');
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
+        min-height: 100vh; 
+        padding: 40px 20px;
+        overflow-y: auto; 
+    }
 
-        .container {
-            background-color: #333;
-            border-radius: 20px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
-            width: 400px;
-            padding: 30px 50px;
-            margin: 20px 0; 
-        }
+    .container {
+        background-color: #333;
+        border-radius: 20px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+        width: 400px;
+        padding: 30px 50px;
+        margin: 20px 0; 
+    }
 
         .header {
             text-align: center;
@@ -101,6 +101,10 @@
             font-size: 12px;
             margin-top: 5px;
             display: none;
+        }
+
+        .error.visible {
+            display: block;
         }
 
         .links {
@@ -201,10 +205,11 @@
             <div class="form-group">
                 <label for="userType">I am a</label>
                 <select id="userType" name="userType" onchange="handleUserTypeChange()">
-                    <option value="tenant">Tenant/Renter</option>
-                    <option value="owner">Homeowner/Property Owner</option>
-                    <option value="worker">Domestic Worker</option>
+                    <option value="tenant" <%= userType === 'tenant' ? 'selected' : '' %>>Tenant/Renter</option>
+                    <option value="owner" <%= userType === 'owner' ? 'selected' : '' %>>Homeowner/Property Owner</option>
+                    <option value="worker" <%= userType === 'worker' ? 'selected' : '' %>>Domestic Worker</option>
                 </select>
+                <div id="userTypeError" class="error"></div>
             </div>
             
             <div class="form-row">
@@ -213,8 +218,9 @@
                     <input type="text" 
                            id="firstName" 
                            name="firstName" 
-                           placeholder="First name">
-                    <div id="firstNameError" class="error"></div>
+                           placeholder="First name" 
+                           value="<%= typeof firstName !== 'undefined' ? firstName : '' %>">
+                    <div id="firstNameError" class="error"><%= typeof errors !== 'undefined' && errors.firstName ? errors.firstName : '' %></div>
                 </div>
                 
                 <div class="form-group" id="last">
@@ -255,18 +261,18 @@
             </div>
             
             <!-- Worker-specific fields -->
-            <div id="workerFields" class="location-fields" style="display: none">
+            <div id="workerFields" class="location-fields" style="display: <%= (typeof userType !== 'undefined' && userType === 'worker') ? 'block' : 'none' %>">
                 <div class="form-group">
                     <label for="serviceType">Service Type</label>
                     <select id="serviceType" name="serviceType">
-                        <option value="" disabled selected>Select service type</option>
-                        <option value="cooking">Cooking</option>
-                        <option value="cleaning">Cleaning</option>
-                        <option value="laundry">Laundry</option>
-                        <option value="childcare">Childcare</option>
-                        <option value="eldercare">Elder Care</option>
-                        <option value="gardening">Gardening</option>
-                        <option value="other">Other</option>
+                        <option value="" disabled <%= typeof serviceType === 'undefined' || !serviceType ? 'selected' : '' %>>Select service type</option>
+                        <option value="cooking" <%= serviceType === 'cooking' ? 'selected' : '' %>>Cooking</option>
+                        <option value="cleaning" <%= serviceType === 'cleaning' ? 'selected' : '' %>>Cleaning</option>
+                        <option value="laundry" <%= serviceType === 'laundry' ? 'selected' : '' %>>Laundry</option>
+                        <option value="childcare" <%= serviceType === 'childcare' ? 'selected' : '' %>>Childcare</option>
+                        <option value="eldercare" <%= serviceType === 'eldercare' ? 'selected' : '' %>>Elder Care</option>
+                        <option value="gardening" <%= serviceType === 'gardening' ? 'selected' : '' %>>Gardening</option>
+                        <option value="other" <%= serviceType === 'other' ? 'selected' : '' %>>Other</option>
                     </select>
                     <div id="serviceTypeError" class="error"></div>
                 </div>
@@ -277,19 +283,21 @@
                            id="experience" 
                            name="experience" 
                            min="0" 
-                           placeholder="Years of experience">
+                           placeholder="Years of experience"
+                           value="<%= typeof experience !== 'undefined' ? experience : '' %>">
                 </div>
             </div>
             
             <!-- Homeowner-specific fields -->
-            <div id="homeownerFields" class="location-fields" style="display: none">
+            <div id="homeownerFields" class="location-fields" style="display: <%= (typeof userType !== 'undefined' && userType === 'homeowner') ? 'block' : 'none' %>">
                 <div class="form-group">
                     <label for="numProperties">Number of Properties</label>
                     <input type="number" 
                            id="numProperties" 
                            name="numProperties" 
                            min="1" 
-                           placeholder="How many properties do you own?">
+                           placeholder="How many properties do you own?"
+                           value="<%= typeof numProperties !== 'undefined' ? numProperties : '' %>">
                 </div>
             </div>
             
@@ -312,7 +320,7 @@
             </div>
             
             <button type="submit">Register</button>
-            <div id="serverError" class="error" style="display:none;"></div>
+            <div id="serverError" class="error"></div>
             
             <div class="divider">
                 <span>OR</span>
@@ -337,12 +345,12 @@
             
             // Hide all specific fields first
             document.getElementById('workerFields').style.display = 'none';
-            document.getElementById('homeownerFields').style.display = 'none';
+            document.getElementById('ownerFields').style.display = 'none';
             
             // Show fields based on user type
             if (userType === 'worker') {
                 document.getElementById('workerFields').style.display = 'block';
-            } else if (userType === 'owner') {
+            }else if (userType === 'homeowner') {
                 document.getElementById('homeownerFields').style.display = 'block';
             }
         }
@@ -356,121 +364,153 @@
             event.preventDefault();
             let isValid = true;
             
-            // Basic validation for required fields
-            const firstName = document.getElementById('firstName').value;
-            const lastName = document.getElementById('lastName').value;
-            const email = document.getElementById('email').value;
-            const phone = document.getElementById('phone').value;
-            const location = document.getElementById('location').value;
+            // Reset errors
+            document.querySelectorAll('.error').forEach(error => error.classList.remove('visible'));
+            
+            // Gather form data
+            const firstName = document.getElementById('firstName').value.trim();
+            const lastName = document.getElementById('lastName').value.trim();
+            const email = document.getElementById('email').value.trim();
+            const phone = document.getElementById('phone').value.trim();
+            const location = document.getElementById('location').value.trim();
             const password = document.getElementById('password').value;
             const confirmPassword = document.getElementById('confirmPassword').value;
             const userType = document.getElementById('userType').value;
-            const serviceType = document.getElementById('serviceType').value;
-            const experience = document.getElementById('experience').value;
-            const numProperties = document.getElementById('numProperties').value;
             
             // First Name validation
             if (!firstName) {
                 document.getElementById('firstNameError').textContent = 'First name is required';
-                document.getElementById('firstNameError').style.display = 'block';
+                document.getElementById('firstNameError').classList.add('visible');
                 isValid = false;
-            } else {
-                document.getElementById('firstNameError').style.display = 'none';
             }
             
             // Last Name validation
             if (!lastName) {
                 document.getElementById('lastNameError').textContent = 'Last name is required';
-                document.getElementById('lastNameError').style.display = 'block';
+                document.getElementById('lastNameError').classList.add('visible');
                 isValid = false;
-            } else {
-                document.getElementById('lastNameError').style.display = 'none';
             }
             
             // Email validation
             if (!email) {
                 document.getElementById('emailError').textContent = 'Email is required';
-                document.getElementById('emailError').style.display = 'block';
+                document.getElementById('emailError').classList.add('visible');
                 isValid = false;
             } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
                 document.getElementById('emailError').textContent = 'Please enter a valid email address';
-                document.getElementById('emailError').style.display = 'block';
+                document.getElementById('emailError').classList.add('visible');
                 isValid = false;
-            } else {
-                document.getElementById('emailError').style.display = 'none';
             }
             
             // Phone validation
             if (!phone) {
                 document.getElementById('phoneError').textContent = 'Phone number is required';
-                document.getElementById('phoneError').style.display = 'block';
+                document.getElementById('phoneError').classList.add('visible');
                 isValid = false;
             } else if (!/^[0-9]{10}$/.test(phone)) {
                 document.getElementById('phoneError').textContent = 'Please enter a valid 10-digit phone number';
-                document.getElementById('phoneError').style.display = 'block';
+                document.getElementById('phoneError').classList.add('visible');
                 isValid = false;
-            } else {
-                document.getElementById('phoneError').style.display = 'none';
             }
             
             // Location validation
             if (!location) {
                 document.getElementById('locationError').textContent = 'Location is required';
-                document.getElementById('locationError').style.display = 'block';
+                document.getElementById('locationError').classList.add('visible');
                 isValid = false;
-            } else {
-                document.getElementById('locationError').style.display = 'none';
             }
             
-            // Service type validation for workers
+            // Worker-specific validation
             if (userType === 'worker') {
                 if (!serviceType) {
                     document.getElementById('serviceTypeError').textContent = 'Please select a service type';
-                    document.getElementById('serviceTypeError').style.display = 'block';
+                    document.getElementById('serviceTypeError').classList.add('visible');
                     isValid = false;
-                } else {
-                    document.getElementById('serviceTypeError').style.display = 'none';
+                }
+                if (!experience || experience < 0) {
+                    document.getElementById('experienceError').textContent = 'Please enter valid years of experience';
+                    document.getElementById('experienceError').classList.add('visible');
+                    isValid = false;
+                }
+            }
+            
+            // Owner-specific validation
+            if (userType === 'owner') {
+                if (!numProperties || numProperties < 1) {
+                    document.getElementById('numPropertiesError').textContent = 'Please enter a valid number of properties';
+                    document.getElementById('numPropertiesError').classList.add('visible');
+                    isValid = false;
+                }
+                if (!accountNo) {
+                    document.getElementById('accountNoError').textContent = 'Account number is required';
+                    document.getElementById('accountNoError').classList.add('visible');
+                    isValid = false;
+                }
+                if (!upiid) {
+                    document.getElementById('upiidError').textContent = 'UPI ID is required';
+                    document.getElementById('upiidError').classList.add('visible');
+                    isValid = false;
                 }
             }
             
             // Password validation
             if (!password) {
                 document.getElementById('passwordError').textContent = 'Password is required';
-                document.getElementById('passwordError').style.display = 'block';
+                document.getElementById('passwordError').classList.add('visible');
                 isValid = false;
             } else if (password.length < 8) {
                 document.getElementById('passwordError').textContent = 'Password must be at least 8 characters';
-                document.getElementById('passwordError').style.display = 'block';
+                document.getElementById('passwordError').classList.add('visible');
                 isValid = false;
             } else if (!/[A-Z]/.test(password) || !/[a-z]/.test(password) || !/[0-9]/.test(password)) {
-                document.getElementById('passwordError').textContent = 'Password must contain uppercase, lowercase letters and numbers';
-                document.getElementById('passwordError').style.display = 'block';
+                document.getElementById('passwordError').textContent = 'Password must contain uppercase, lowercase letters, and numbers';
+                document.getElementById('passwordError').classList.add('visible');
                 isValid = false;
-            } else {
-                document.getElementById('passwordError').style.display = 'none';
             }
             
             // Confirm Password validation
             if (!confirmPassword) {
                 document.getElementById('confirmPasswordError').textContent = 'Please confirm your password';
-                document.getElementById('confirmPasswordError').style.display = 'block';
+                document.getElementById('confirmPasswordError').classList.add('visible');
                 isValid = false;
             } else if (confirmPassword !== password) {
                 document.getElementById('confirmPasswordError').textContent = 'Passwords do not match';
-                document.getElementById('confirmPasswordError').style.display = 'block';
+                document.getElementById('confirmPasswordError').classList.add('visible');
                 isValid = false;
-            } else {
-                document.getElementById('confirmPasswordError').style.display = 'none';
             }
             
-            if (!isValid) {
-                event.preventDefault();
+            if (!isValid) return;
+
+            // Gather form data
+            const form = event.target;
+            const formData = new FormData(form);
+            const data = Object.fromEntries(formData.entries());
+
+            // Remove confirmPassword before sending to server
+            delete data.confirmPassword;
+
+            try {
+                const res = await fetch('/register', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+                const result = await res.json();
+                if (res.ok && result.redirectUrl) {
+                    window.location.href = result.redirectUrl;
+                } else {
+                    document.getElementById('serverError').textContent = result.error || 'Registration failed';
+                    document.getElementById('serverError').style.display = 'block';
+                }
+            } catch (err) {
+                document.getElementById('serverError').textContent = 'Network error';
+                document.getElementById('serverError').style.display = 'block';
             }
         });
         
         function registerWithGoogle() {
-            alert("login successfully--");
             console.log('Register with Google clicked');
+            // Implement Google OAuth here if needed
         }
     </script>
 </body>

@@ -8,6 +8,7 @@ const WorkerBooking = require("../models/workerBooking");
 const Notification = require("../models/notification");
 const formidable = require("formidable");
 const fs = require("fs");
+// bcrypt removed; plain-text password comparisons are used per requirement
 
 // Middleware to check if user is authenticated
 exports.isAuthenticated = (req, res, next) => {
@@ -543,8 +544,8 @@ exports.deleteWorkerAccount = async (req, res) => {
         .json({ error: "Cannot delete account: You are currently working" });
     }
 
-    // Verify password (plain text comparison)
-    if (password !== worker.password) {
+    // Plain-text password comparison per request
+    if (worker.password !== password) {
       return res.status(401).json({ error: "Invalid password" });
     }
 
@@ -1088,14 +1089,13 @@ exports.updateWorkerSettings = async (req, res) => {
 
     // Handle password change if provided
     if (newPassword) {
-      // Verify current password - you may want to use bcrypt compare here if passwords are hashed
-      if (worker.password !== currentPassword) {
+      // Plain-text comparison
+      if (currentPassword !== worker.password) {
         return res
           .status(400)
           .json({ success: false, error: "Current password is incorrect" });
       }
-
-      worker.password = newPassword; // Note: In a real app, you should hash this password
+      worker.password = newPassword;
     }
 
     // Save the updated worker
@@ -1106,4 +1106,24 @@ exports.updateWorkerSettings = async (req, res) => {
     console.error("Error updating worker settings:", error);
     res.status(500).json({ success: false, error: "Internal server error" });
   }
+};
+
+exports.login = async (req, res) => {
+  const { email, password, userType } = req.body;
+  let user;
+  if (userType === "worker") {
+    user = await Worker.findOne({ email }).select("+password");
+  } else if (userType === "tenant") {
+    user = await Tenant.findOne({ email }).select("+password");
+  } else if (userType === "owner") {
+    user = await Owner.findOne({ email }).select("+password");
+  }
+  if (!user) {
+    return res.status(401).render("pages/login", { error: "Account not found" });
+  }
+  // Plain-text comparison
+  if (user.password !== password) {
+    return res.status(401).render("pages/login", { error: "Incorrect password" });
+  }
+  // ...set session and redirect...
 };

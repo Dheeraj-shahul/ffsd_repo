@@ -11,6 +11,7 @@ const RentalHistory = require("../models/rentalhistory");
 const Notification = require("../models/notification");
 const WorkerBooking = require("../models/workerBooking");
 const UnrentRequest = require("../models/unrentRequest");
+// bcrypt removed; plain-text password comparisons are used per requirement
 
 // Dashboard Controller
 // Dashboard Controller
@@ -1301,5 +1302,21 @@ exports.requestUnrentProperty = async (req, res) => {
       success: false,
       message: "Server error: " + error.message,
     });
+  }
+};
+
+exports.login = async (req, res) => {
+  const { email, password } = req.body;
+  try {
+    const tenant = await Tenant.findOne({ email }).select("+password");
+    if (!tenant) return res.status(401).render("pages/login", { error: "Account not found" });
+    // Plain-text comparison
+    if (tenant.password !== password) {
+      return res.status(401).render("pages/login", { error: "Incorrect password" });
+    }
+    req.session.user = tenant.toObject();
+    res.redirect("/tenants/dashboard");
+  } catch (err) {
+    res.status(500).render("pages/login", { error: "Server error" });
   }
 };
