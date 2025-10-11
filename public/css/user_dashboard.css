@@ -1140,3 +1140,32 @@ body {
   opacity: 0.6;
   transform: none;
 }
+
+  /* Star Rating Styles */
+  .star-rating {
+    margin: 15px 0;
+  }
+  
+  #star-rating {
+    display: inline-flex;
+    gap: 5px;
+    cursor: pointer;
+  }
+  
+  #star-rating .star {
+    font-size: 24px;
+    color: #ffd700;
+    transition: transform 0.2s ease;
+  }
+  
+  #star-rating .star:hover {
+    transform: scale(1.1);
+  }
+  
+  #star-rating .star.active i::before {
+    content: "\f005"; /* Solid star */
+  }
+  
+  #star-rating .star:not(.active) i::before {
+    content: "\f005"; /* Regular star - will show as hollow with far class */
+  }
