@@ -215,6 +215,49 @@
       color: #6c757d;
       font-size: 14px;
     }
+
+    /* Modal styles */
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.5);
+      z-index: 1000;
+      justify-content: center;
+      align-items: center;
+    }
+    
+    .modal-content {
+      background: white;
+      padding: 20px;
+      border-radius: 8px;
+      max-width: 600px;
+      width: 90%;
+      max-height: 80vh;
+      overflow-y: auto;
+      position: relative;
+    }
+    
+    .modal-content h3 {
+      margin-bottom: 15px;
+    }
+    
+    .modal-content p {
+      margin: 10px 0;
+      line-height: 1.5;
+    }
+    
+    .close-modal {
+      position: absolute;
+      top: 10px;
+      right: 15px;
+      font-size: 20px;
+      cursor: pointer;
+      color: #333;
+    }
   </style>
 </head>
 <body>
@@ -229,6 +272,7 @@
     <a href="#payments">Payments</a>
     <a href="#notifications">Notifications</a>
     <a href="#maintenance-requests">Maintenance Requests</a>
+    <a href="#messages">Messages</a>
     <a href="#reports">Reports</a>
   </nav>
 
@@ -252,7 +296,6 @@
         { title: 'Active Properties', value: stats.propertiesActive },
         { title: 'Pending Properties', value: stats.propertiesPending },
         { title: 'Available Workers', value: stats.workersAvailable },
-       
       ].forEach(stat => { %>
         <div class="stat-card">
           <h3><%= stat.title %></h3>
@@ -316,7 +359,6 @@
                   <%= p.isVerified ? 'Unverify' : 'Verify' %>
                 </button>
                 <button class="danger" onclick="deleteProperty('<%= p._id %>')">Delete</button>
-               
               </div>
             </td>
           </tr>
@@ -419,7 +461,6 @@
             <td>
               <div class="action-buttons">
                 <a href="/admin/booking/<%= b.id %>">View</a>
-                
               </div>
             </td>
           </tr>
@@ -439,7 +480,6 @@
           <th style="width: 10%;">Amount</th>
           <th style="width: 10%;">Status</th>
           <th style="width: 10%;">Date</th>
-          
           <th style="width: 10%;">Method</th>
           <th style="width: 10%;">Transaction</th>
           <th style="width: 20%;">Actions</th>
@@ -453,7 +493,6 @@
             <td>₹<%= p.amount?.toFixed(2) %></td>
             <td><%= p.status %></td>
             <td><%= p.paymentDate ? new Date(p.paymentDate).toLocaleDateString() : 'N/A' %></td>
-            <!-- <td><a href="/admin/booking/<%= p.bookingId %>"><%= p.bookingId || 'N/A' %></a></td> -->
             <td><%= p.paymentMethod || 'N/A' %></td>
             <td><%= p.transactionId || 'N/A' %></td>
             <td>
@@ -480,7 +519,6 @@
         <tr>
           <th style="width: 8%;">ID</th>
           <th style="width: 10%;">Type</th>
-          
           <th style="width: 10%;">Date</th>
           <th style="width: 10%;">Status</th>
           <th style="width: 30%;">Actions</th>
@@ -491,13 +529,11 @@
           <tr>
             <td><%= n.id %></td>
             <td><%= n.type %></td>
-           
             <td><%= n.createdDate ? new Date(n.createdDate).toLocaleDateString() : 'N/A' %></td>
             <td><%= n.status %></td>
             <td>
               <div class="action-buttons">
                 <a href="/admin/notification/<%= n.id %>">View</a>
-                <!-- <button class="success" onclick="completeTask('<%= n.id %>')">Complete</button> -->
               </div>
             </td>
           </tr>
@@ -516,7 +552,6 @@
           <th style="width: 10%;">Issue Type</th>
           <th style="width: 10%;">Property</th>
           <th style="width: 10%;">Tenant</th>
-          
           <th style="width: 10%;">Location</th>
           <th style="width: 10%;">Date Reported</th>
           <th style="width: 10%;">Status</th>
@@ -537,15 +572,12 @@
                   None
                 <% } %>
               </td>
-              
-            
               <td><%= m.location %></td>
               <td><%= m.dateReported ? new Date(m.dateReported).toLocaleDateString() : 'N/A' %></td>
               <td><%= m.status %></td>
               <td>
                 <div class="action-buttons">
                   <a href="/admin/maintenance/<%= m._id %>">View</a>
-                  <!-- <button class="success" onclick="completeMaintenance('<%= m._id %>')">Complete</button> -->
                 </div>
               </td>
             </tr>
@@ -559,213 +591,224 @@
     </table>
   </section>
 
- <!-- Reports and Analytics -->
-<section id="reports" class="reports">
-  <h2>Reports and Analytics</h2>
-  <div class="charts">
-    <% const charts = [
-      { 
-        id: 'revenueChart', 
-        title: 'Monthly Revenue', 
-        type: 'line', 
-        labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
-        data: Array(12).fill(0).map((_, i) => stats.monthlyRevenue?.[i] || 0),
-        color: '#007bff',
-        yLabel: 'Revenue (₹)'
-      },
-      { 
-        id: 'userGrowthChart', 
-        title: 'User Growth', 
-        type: 'bar', 
-        labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
-        data: Array(12).fill(0).map((_, i) => stats.userGrowth?.[i] || 0),
-        color: '#28a745',
-        yLabel: 'New Users'
-      },
-      { 
-        id: 'bookingStatusChart', 
-        title: 'Booking Status', 
-        type: 'pie', 
-        labels: ['Confirmed', 'Pending', 'Cancelled', 'Completed'],
-        data: [
-          stats.bookingStatusDistribution?.confirmed || 0,
-          stats.bookingStatusDistribution?.pending || 0,
-          stats.bookingStatusDistribution?.cancelled || 0,
-          stats.bookingStatusDistribution?.completed || 0
-        ],
-        color: ['#007bff', '#ffc107', '#dc3545', '#28a745']
-      },
-      { 
-        id: 'propertyPerformanceChart', 
-        title: 'Top Performing Properties', 
-        type: 'horizontalBar', 
-        labels: stats.topProperties?.map(p => p.name) || ['Property A', 'Property B', 'Property C'],
-        data: stats.topProperties?.map(p => p.bookings) || [0, 0, 0],
-        color: '#17a2b8',
-        xLabel: 'Number of Bookings'
-      },
-      { 
-        id: 'revenueBySourceChart', 
-        title: 'Revenue by Source', 
-        type: 'doughnut', 
-        labels: ['Rentals', 'Services', 'Maintenance', 'Other'],
-        data: [
-          stats.revenueBySource?.rentals || 0,
-          stats.revenueBySource?.services || 0,
-          stats.revenueBySource?.maintenance || 0,
-          stats.revenueBySource?.other || 0
-        ],
-        color: ['#007bff', '#28a745', '#ffc107', '#6c757d']
-      },
-      { 
-        id: 'occupancyChart', 
-        title: 'Occupancy Rate', 
-        type: 'line', 
-        labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
-        data: Array(12).fill(0).map((_, i) => stats.occupancyRate?.[i] || 0),
-        color: '#6f42c1',
-        yLabel: 'Occupancy %'
-      }
-    ]; %>
-    
-    <% charts.forEach(chart => { %>
-      <div class="chart-container">
-        <h3><%= chart.title %></h3>
-        <canvas id="<%= chart.id %>" height="300"></canvas>
-      </div>
-    <% }); %>
-  </div>
+  <!-- Previous sections unchanged -->
+
+<!-- Messages (Contact Us Submissions) -->
+<section id="messages" class="messages">
+  <h2>Contact Us Messages</h2>
+  <table>
+    <thead>
+      <tr>
+        <th style="width: 10%;">ID</th>
+        <th style="width: 20%;">Name</th>
+        <th style="width: 20%;">Email</th>
+        <th style="width: 15%;">Phone</th>
+        <th style="width: 15%;">Subject</th>
+        <th style="width: 20%;">Actions</th>
+      </tr>
+    </thead>
+    <tbody id="messagesTableBody">
+      <% if (contactSubmissions && Array.isArray(contactSubmissions)) { %>
+        <% contactSubmissions.forEach(s => { %>
+          <tr>
+            <td><%= s.id %></td>
+            <td><%= s.name %></td>
+            <td><%= s.email %></td>
+            <td><%= s.phone || 'N/A' %></td>
+            <td><%= s.subject %></td>
+            <td>
+              <div class="action-buttons">
+                <a href="/admin/message/<%= s.id %>" >View</a>
+              </div>
+            </td>
+          </tr>
+        <% }) %>
+      <% } else { %>
+        <tr>
+          <td colspan="6" class="no-data">No messages available</td>
+        </tr>
+      <% } %>
+    </tbody>
+  </table>
 </section>
 
-<!-- Chart.js Script -->
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script>
-  document.addEventListener('DOMContentLoaded', function() {
-    // Initialize all charts
-    <% charts.forEach(chart => { %>
-      initChart(
-        '<%= chart.id %>', 
-        '<%= chart.type %>', 
-        <%= JSON.stringify(chart.labels) %>, 
-        <%= JSON.stringify(chart.data) %>, 
-        '<%= chart.title %>',
-        <%= JSON.stringify(chart.color) %>,
-        '<%= chart.yLabel || "" %>',
-        '<%= chart.xLabel || "" %>'
-      );
-    <% }); %>
-  });
+<!-- Reports and Analytics section unchanged -->
 
-  function initChart(canvasId, type, labels, data, title, colors, yLabel, xLabel) {
-    const ctx = document.getElementById(canvasId).getContext('2d');
-    
-    const backgroundColors = Array.isArray(colors) ? 
-      colors : 
-      Array(data.length).fill(colors);
-    
-    const chartData = {
-      labels: labels,
-      datasets: [{
-        label: title,
-        data: data,
-        backgroundColor: backgroundColors,
-        borderColor: type === 'line' ? backgroundColors : undefined,
-        borderWidth: type === 'line' ? 3 : 1,
-        fill: type === 'line',
-        tension: type === 'line' ? 0.4 : 0
-      }]
-    };
-    
-    const config = {
-      type: type,
-      data: chartData,
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: {
-          legend: {
-            position: type === 'pie' || type === 'doughnut' ? 'right' : 'top',
-          },
-          title: {
-            display: true,
-            text: title,
-            font: {
-              size: 16
-            }
-          },
-          tooltip: {
-            callbacks: {
-              label: function(context) {
-                let label = context.dataset.label || '';
-                if (label) {
-                  label += ': ';
-                }
-                if (yLabel.includes('Revenue') || yLabel.includes('₹')) {
-                  label += '₹' + context.raw.toLocaleString();
-                } else {
+  <!-- Reports and Analytics -->
+  <section id="reports" class="reports">
+    <h2>Reports and Analytics</h2>
+    <div class="charts">
+      <% const charts = [
+        { 
+          id: 'bookingStatusChart', 
+          title: 'Booking Status', 
+          type: 'pie', 
+          labels: ['Active', 'Pending', 'Cancelled'],
+          data: [
+            stats.bookingStatusDistribution?.active || 0,
+            stats.bookingStatusDistribution?.pending || 0,
+            stats.bookingStatusDistribution?.cancelled || 0
+          ],
+          color: ['#007bff', '#ffc107', '#dc3545']
+        }
+      ]; %>
+      
+      <% charts.forEach(chart => { %>
+        <div class="chart-container">
+          <h3><%= chart.title %></h3>
+          <canvas id="<%= chart.id %>" height="300"></canvas>
+        </div>
+      <% }); %>
+    </div>
+  </section>
+
+  <!-- Chart.js Script -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      // Initialize all charts
+      <% charts.forEach(chart => { %>
+        initChart(
+          '<%= chart.id %>', 
+          '<%= chart.type %>', 
+          <%= JSON.stringify(chart.labels) %>, 
+          <%= JSON.stringify(chart.data) %>, 
+          '<%= chart.title %>',
+          <%= JSON.stringify(chart.color) %>,
+          '<%= chart.yLabel || "" %>',
+          '<%= chart.xLabel || "" %>'
+        );
+      <% }); %>
+
+      // Fetch contact submissions
+      fetch('/api/contact-submissions')
+        .then(response => response.json())
+        .then(data => {
+          const tableBody = document.getElementById('messagesTableBody');
+          tableBody.innerHTML = '';
+          if (data.length > 0) {
+            data.forEach(submission => {
+              const row = `
+                <tr>
+                  <td>${submission.id}</td>
+                  <td>${submission.name}</td>
+                  <td>${submission.email}</td>
+                  <td>${submission.phone || 'N/A'}</td>
+                  <td>${submission.subject}</td>
+                  <td>
+                    <div class="action-buttons">
+                      <button class="success" onclick="viewMessage('${submission.id}')">View</button>
+                    </div>
+                  </td>
+                </tr>
+              `;
+              tableBody.innerHTML += row;
+            });
+          } else {
+            tableBody.innerHTML = '<tr><td colspan="6" class="no-data">No messages available</td></tr>';
+          }
+        })
+        .catch(error => {
+          console.error('Error fetching contact submissions:', error);
+          document.getElementById('messagesTableBody').innerHTML = 
+            '<tr><td colspan="6" class="no-data">Error loading messages</td></tr>';
+        });
+    });
+
+    function initChart(canvasId, type, labels, data, title, colors, yLabel, xLabel) {
+      const ctx = document.getElementById(canvasId).getContext('2d');
+      
+      const backgroundColors = Array.isArray(colors) ? 
+        colors : 
+        Array(data.length).fill(colors);
+      
+      const chartData = {
+        labels: labels,
+        datasets: [{
+          label: title,
+          data: data,
+          backgroundColor: backgroundColors,
+          borderColor: type === 'line' ? backgroundColors : undefined,
+          borderWidth: type === 'line' ? 3 : 1,
+          fill: type === 'line',
+          tension: type === 'line' ? 0.4 : 0
+        }]
+      };
+      
+      const config = {
+        type: type,
+        data: chartData,
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              position: type === 'pie' || type === 'doughnut' ? 'right' : 'top',
+            },
+            title: {
+              display: true,
+              text: title,
+              font: {
+                size: 16
+              }
+            },
+            tooltip: {
+              callbacks: {
+                label: function(context) {
+                  let label = context.dataset.label || '';
+                  if (label) {
+                    label += ': ';
+                  }
                   label += context.raw;
+                  return label;
                 }
-                return label;
               }
             }
-          }
-        },
-        scales: type !== 'pie' && type !== 'doughnut' ? {
-          y: {
-            beginAtZero: true,
-            title: {
-              display: !!yLabel,
-              text: yLabel
-            }
           },
-          x: {
-            title: {
-              display: !!xLabel,
-              text: xLabel
+          scales: type !== 'pie' && type !== 'doughnut' ? {
+            y: {
+              beginAtZero: true,
+              title: {
+                display: !!yLabel,
+                text: yLabel
+              }
+            },
+            x: {
+              title: {
+                display: !!xLabel,
+                text: xLabel
+              }
             }
-          }
-        } : undefined
-      }
-    };
-    
-    new Chart(ctx, config);
-  }
-</script>
-
-<style>
-  .reports {
-    padding: 20px;
-    background: #f8f9fa;
-    border-radius: 8px;
-    margin-bottom: 30px;
-  }
-  
-  .charts {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
-    gap: 20px;
-    margin-top: 20px;
-  }
-  
-  .chart-container {
-    background: white;
-    padding: 15px;
-    border-radius: 8px;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-  }
-  
-  .chart-container h3 {
-    margin-top: 0;
-    margin-bottom: 15px;
-    color: #343a40;
-  }
-  
-  @media (max-width: 768px) {
-    .charts {
-      grid-template-columns: 1fr;
+          } : undefined
+        }
+      };
+      
+      new Chart(ctx, config);
     }
-  }
-</style>
+
+    function viewMessage(id) {
+      fetch(`/api/contact-submission/${id}`)
+        .then(response => response.json())
+        .then(data => {
+          document.getElementById('modalId').textContent = data.id;
+          document.getElementById('modalName').textContent = data.name;
+          document.getElementById('modalEmail').textContent = data.email;
+          document.getElementById('modalPhone').textContent = data.phone || 'N/A';
+          document.getElementById('modalSubject').textContent = data.subject;
+          document.getElementById('modalMessage').textContent = data.message;
+          document.getElementById('modalSubmittedAt').textContent = data.submittedAt;
+          document.getElementById('messageModal').style.display = 'flex';
+        })
+        .catch(error => {
+          console.error('Error fetching message:', error);
+          alert('Error loading message details');
+        });
+    }
+
+    function closeModal() {
+      document.getElementById('messageModal').style.display = 'none';
+    }
+  </script>
 </body>
 <script src="js/admin.js"></script>
 </html>

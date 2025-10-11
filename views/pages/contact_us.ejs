@@ -176,7 +176,12 @@
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
     />
   </head>
+
   <body>
+    <%- include('../partials/header') %>
+    <button class="filter-toggle-btn" onclick="toggleFilters()">
+      ☰ Filters
+    </button>
     <div class="whole_container">
       <div class="container">
         <div class="contact-section">
@@ -245,12 +250,12 @@
 
     <!-- Success/Error Message Modal -->
     <div id="statusModal" class="modal">
-        <div class="modal-content">
-            <span class="close-button">&times;</span>
-            <p id="modalMessage"></p>
-        </div>
+      <div class="modal-content">
+        <span class="close-button">&times;</span>
+        <p id="modalMessage"></p>
+      </div>
     </div>
-    
+
     <script>
       document
         .getElementById("contactForm")
@@ -274,7 +279,8 @@
           // Validate phone number (must be 10 digits)
           const phoneRegex = /^\d{10}$/;
           if (phone && !phoneRegex.test(phone)) {
-            modalMessage.textContent = "Please enter a valid 10-digit phone number.";
+            modalMessage.textContent =
+              "Please enter a valid 10-digit phone number.";
             modal.style.display = "flex";
             return;
           }
@@ -285,44 +291,48 @@
             email: email,
             phone: phone,
             subject: document.getElementById("subject").value,
-            message: document.getElementById("message").value
+            message: document.getElementById("message").value,
           };
-          
+
           modalMessage.textContent = "Submitting your message...";
           modal.style.display = "flex";
 
           try {
-              const response = await fetch('/submit-form', {
-                  method: 'POST',
-                  headers: {
-                      'Content-Type': 'application/json'
-                  },
-                  body: JSON.stringify(formData)
-              });
+            const response = await fetch("/submit-form", {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify(formData),
+            });
 
-              const result = await response.json();
+            const result = await response.json();
 
-              if (response.ok) {
-                  modalMessage.textContent = "Thank you for your message! We will get back to you shortly.";
-                  e.target.reset();
-              } else {
-                  modalMessage.textContent = `Error: ${result.error || 'Failed to submit form.'}`;
-              }
+            if (response.ok) {
+              modalMessage.textContent =
+                "Thank you for your message! We will get back to you shortly.";
+              e.target.reset();
+            } else {
+              modalMessage.textContent = `Error: ${
+                result.error || "Failed to submit form."
+              }`;
+            }
           } catch (error) {
-              modalMessage.textContent = "Network error. Please ensure the backend server is running.";
-              console.error('Fetch error:', error);
+            modalMessage.textContent =
+              "Network error. Please ensure the backend server is running.";
+            console.error("Fetch error:", error);
           }
-          
+
           // Close the modal when the user clicks on 'x'
-          closeButton.onclick = function() {
-              modal.style.display = "none";
-          }
+          closeButton.onclick = function () {
+            modal.style.display = "none";
+          };
           // Close the modal when the user clicks anywhere outside of the modal
-          window.onclick = function(event) {
-              if (event.target == modal) {
-                  modal.style.display = "none";
-              }
-          }
+          window.onclick = function (event) {
+            if (event.target == modal) {
+              modal.style.display = "none";
+            }
+          };
         });
     </script>
   </body>

@@ -12,7 +12,7 @@ const Booking = require("./models/booking");
 const Payment = require("./models/payment");
 const Notification = require("./models/notification");
 const Setting = require("./models/setting");
-const Contact = require('./models/contactus'); // new Contact model
+const Contact = require("./models/contactus"); // new Contact model
 const Complaint = require("./models/complaint");
 const Rating = require("./models/rating");
 const RentalHistory = require("./models/rentalhistory");
@@ -27,9 +27,10 @@ const ownerRoutes = require("./routes/owner");
 const bookingRoutes = require("./routes/bookingRoutes");
 
 // Admin Routes
-const adminRoutes=require('./routes/admin')
-const analyticsRoutes = require('./routes/analytics');
-
+const adminRoutes = require("./routes/admin");
+const analyticsRoutes = require("./routes/analytics");
+// In app.js, add this route after the existing admin route
+const adminContactUsController = require("./controllers/adminContactUsController");
 
 require("dns").setDefaultResultOrder("ipv4first"); // Force IPv4
 
@@ -82,9 +83,9 @@ app.use("/", ownerRoutes);
 app.use("/", bookingRoutes);
 
 //admin routes
-app.use('/admin',adminRoutes);
+app.use("/admin", adminRoutes);
 
-app.use('/api', analyticsRoutes);
+app.use("/api", analyticsRoutes);
 
 // Error handling middleware
 app.use((err, req, res, next) => {
@@ -151,11 +152,37 @@ app.post("/register", async (req, res) => {
 
     let newUser;
     if (userType === "tenant") {
-      newUser = new Tenant({ firstName, lastName, email, phone, location, password });
+      newUser = new Tenant({
+        firstName,
+        lastName,
+        email,
+        phone,
+        location,
+        password,
+      });
     } else if (userType === "worker") {
-      newUser = new Worker({ firstName, lastName, email, phone, location, serviceType, experience: Number(experience) || null, password });
+      newUser = new Worker({
+        firstName,
+        lastName,
+        email,
+        phone,
+        location,
+        serviceType,
+        experience: Number(experience) || null,
+        password,
+      });
     } else if (userType === "owner") {
-      newUser = new Owner({ firstName, lastName, email, phone, location, numProperties: Number(numProperties) || null, password, accountNo, upiid });
+      newUser = new Owner({
+        firstName,
+        lastName,
+        email,
+        phone,
+        location,
+        numProperties: Number(numProperties) || null,
+        password,
+        accountNo,
+        upiid,
+      });
     } else {
       return res.status(400).json({ error: "Invalid user type" });
     }
@@ -163,7 +190,9 @@ app.post("/register", async (req, res) => {
     await newUser.save();
     return res.status(200).json({ redirectUrl: "/login" });
   } catch (err) {
-    return res.status(500).json({ error: `Registration failed: ${err.message}` });
+    return res
+      .status(500)
+      .json({ error: `Registration failed: ${err.message}` });
   }
 });
 
@@ -291,48 +320,43 @@ app.get("/logout", (req, res) => {
 //   res.render("pages/worker_dashboard", { user });
 // });
 
-app.get('/', async (req, res) => {
+app.get("/", async (req, res) => {
   try {
     // Fetch properties for Popular Listings
     // Popular Listings (show only not rented, verified, and marked popular)
-const propertiesData = await Property.find({
-  isRented: false,
-  isVerified: true,
-  is_popular: true
-})
-.select("_id location subtype price images")
-.limit(10)
-.lean();
-
-
+    const propertiesData = await Property.find({
+      isRented: false,
+      isVerified: true,
+      is_popular: true,
+    })
+      .select("_id location subtype price images")
+      .limit(10)
+      .lean();
 
     // Slider Container (show only not rented, verified properties)
-const sliderPropertiesData = await Property.find({
-  isRented: false,
-  isVerified: true
-})
-.select("name description images _id")
-.limit(10)
-.lean();
-
-
+    const sliderPropertiesData = await Property.find({
+      isRented: false,
+      isVerified: true,
+    })
+      .select("name description images _id")
+      .limit(10)
+      .lean();
 
     // Render the index.ejs template with fetched data
-    res.render('pages/index', {
+    res.render("pages/index", {
       propertiesData,
-      sliderPropertiesData
+      sliderPropertiesData,
     });
   } catch (error) {
-    console.error('Error fetching properties:', error);
+    console.error("Error fetching properties:", error);
     // Render with empty arrays and an error message if query fails
-    res.render('pages/index', {
+    res.render("pages/index", {
       propertiesData: [],
       sliderPropertiesData: [],
-      error: 'Failed to load properties'
+      error: "Failed to load properties",
     });
   }
 });
-
 
 // Route to render search.ejs
 // Route to render search.ejs
@@ -416,12 +440,10 @@ app.get("/property", async (req, res) => {
     res.render("pages/propertydetails", { property });
   } catch (err) {
     console.error("Error fetching property:", err);
-    res
-      .status(500)
-      .render("pages/propertydetails", {
-        property: null,
-        error: "Server Error",
-      });
+    res.status(500).render("pages/propertydetails", {
+      property: null,
+      error: "Server Error",
+    });
   }
 });
 
@@ -442,33 +464,38 @@ app.get("/contact_us", (req, res) => {
   res.render("pages/contact_us");
 });
 
-
 // POST route to handle contact form submission
-app.post('/submit-form', async (req, res) => {
+app.post("/submit-form", async (req, res) => {
   try {
     const { name, email, phone, subject, message } = req.body;
 
     // Basic validation
     if (!name || !email || !subject || !message) {
-      return res.status(400).json({ error: 'Name, email, subject, and message are required' });
+      return res
+        .status(400)
+        .json({ error: "Name, email, subject, and message are required" });
     }
 
     // Validate email (must be a Gmail address)
     const emailRegex = /^[a-zA-Z0-9._%+-]+@gmail\.com$/;
     if (!emailRegex.test(email)) {
-      return res.status(400).json({ error: 'Please provide a valid Gmail address' });
+      return res
+        .status(400)
+        .json({ error: "Please provide a valid Gmail address" });
     }
 
     // Validate phone number if provided (must be 10 digits)
     if (phone && !/^\d{10}$/.test(phone)) {
-      return res.status(400).json({ error: 'Please provide a valid 10-digit phone number' });
+      return res
+        .status(400)
+        .json({ error: "Please provide a valid 10-digit phone number" });
     }
 
     // Create new contact entry
     const contact = new Contact({
       name,
       email,
-      phone: phone || '',
+      phone: phone || "",
       subject,
       message,
     });
@@ -476,13 +503,12 @@ app.post('/submit-form', async (req, res) => {
     // Save to MongoDB
     await contact.save();
 
-    res.status(200).json({ message: 'Form submitted successfully' });
+    res.status(200).json({ message: "Form submitted successfully" });
   } catch (error) {
-    console.error('Error submitting form:', error);
-    res.status(500).json({ error: 'Server error, please try again later' });
+    console.error("Error submitting form:", error);
+    res.status(500).json({ error: "Server error, please try again later" });
   }
 });
-
 
 app.get("/about_us", (req, res) => {
   res.render("pages/about_us");
@@ -495,7 +521,6 @@ function isAuthenticate(req, res, next) {
   }
   res.redirect("/admin/login");
 }
-
 
 // Admin Login Routes
 app.get("/admin/login", (req, res) => {
@@ -519,10 +544,10 @@ app.post("/admin/login", async (req, res) => {
   }
 });
 
-// Admin Dashboard Route
+// In app.js, update the admin route
 app.get("/admin", isAuthenticate, async (req, res) => {
   try {
-    // Existing dashboard logic remains unchanged
+    // Existing dashboard logic
     const totalProperties = await Property.countDocuments();
     const totalRenters = await Tenant.countDocuments();
     const totalOwners = await Owner.countDocuments();
@@ -601,7 +626,6 @@ app.get("/admin", isAuthenticate, async (req, res) => {
       propertiesActive,
       propertiesPending,
       workersAvailable,
-      monthlyRevenue: revenueMonthly,
       userGrowth,
       bookingStatusDistribution,
     };
@@ -758,6 +782,15 @@ app.get("/admin", isAuthenticate, async (req, res) => {
         : "N/A";
     });
 
+    // Add contact submissions
+    const contactSubmissions = await Contact.find().lean();
+    contactSubmissions.forEach((s) => {
+      s.id = s._id.toString();
+      s.submittedAt = s.submittedAt
+        ? new Date(s.submittedAt).toLocaleString()
+        : "N/A";
+    });
+
     res.render("pages/admin1", {
       stats,
       properties,
@@ -766,9 +799,29 @@ app.get("/admin", isAuthenticate, async (req, res) => {
       payments,
       notifications,
       maintenanceRequests,
+      contactSubmissions,
     });
   } catch (err) {
     console.error("Error fetching dashboard data:", err);
+    res.status(500).send("Server Error");
+  }
+});
+
+
+
+app.get("/admin/message/:id", isAuthenticate, async (req, res) => {
+  try {
+    const submission = await Contact.findById(req.params.id).lean();
+    if (!submission) {
+      return res.status(404).send("Message not found");
+    }
+    submission.id = submission._id.toString();
+    submission.submittedAt = submission.submittedAt
+      ? new Date(submission.submittedAt).toLocaleString()
+      : "N/A";
+    res.render("admin/message-view", { submission });
+  } catch (err) {
+    console.error("Error fetching message details:", err);
     res.status(500).send("Server Error");
   }
 });
