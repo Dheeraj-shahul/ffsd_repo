@@ -7,7 +7,11 @@ const tenantSchema = new mongoose.Schema({
   email: { type: String, required: true, unique: true },
   phone: { type: String, required: true },
   location: { type: String, required: true },
-  password: { type: String, required: true },
+  password: {
+    type: String,
+    required: true,
+    select: false // Don't include password by default
+  },
   status: { type: String, enum: ['Active', 'Suspended'], default: "Active" },
   lastLogin: { type: Date },
   ownerId: { type: mongoose.Schema.Types.ObjectId, ref: "Owner", default: null },
@@ -23,7 +27,7 @@ const tenantSchema = new mongoose.Schema({
   smsNotifications: { type: Boolean, default: false },
   rentReminders: { type: Boolean, default: true },
   maintenanceUpdates: { type: Boolean, default: true },
-  newListings: { type: Boolean, default: false }
+  newListings: { type: Boolean, default: false },
 }, { timestamps: true });
 
 // Add indexes for performance
