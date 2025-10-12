@@ -1,41 +1,33 @@
 const mongoose = require("mongoose");
 
-const ownerSchema = new mongoose.Schema({
-  
-  userType: { type: String, default: "owner" },
+const workerSchema = new mongoose.Schema({
+  userType: { type: String, default: "worker" },
   firstName: String,
   lastName: String,
   email: String,
   phone: String,
   location: String,
-  numProperties: Number,
+  area: String,
+  serviceType: String, 
+  experience: Number,
+  price: Number, 
+  rateUnit: String,
+  availability: String,
+  description: String,
+  image: String,
   password: {
     type: String,
     required: true,
-    select: false // Don't include password by default
+    select: false
   },
-  accountNo: String,
-  upiid: String,
   status: { type: String, enum: ['Active', 'Suspended'], default: "Active" },
+  serviceStatus: { type: String, default: "Available" },
   lastLogin: Date,
-
-  // New fields
-  propertyIds: [{ type: mongoose.Schema.Types.ObjectId, ref: "Property" }],
-  tenantIds: [{ type: mongoose.Schema.Types.ObjectId, ref: "Tenant" }],
-  rentalId: { type: mongoose.Schema.Types.ObjectId, ref: "Rental" },
-  complaintIds: [{ type: mongoose.Schema.Types.ObjectId, ref: "Complaint" }],
-  maintenanceRequestIds: [{ type: mongoose.Schema.Types.ObjectId, ref: "MaintenanceRequest" }],
-  notificationIds: [{ type: mongoose.Schema.Types.ObjectId, ref: "Notification" }],
-  rentalAgreementIds: [{ type: mongoose.Schema.Types.ObjectId, ref: "RentalAgreement" }],
-
-  notifications: {
-    email: { type: Boolean, default: true },
-    sms: { type: Boolean, default: true },
-    payment: { type: Boolean, default: true },
-    complaint: { type: Boolean, default: true },
-    maintenance: { type: Boolean, default: true }
-  },
-
+  bookingIds: [{ type: mongoose.Schema.Types.ObjectId, ref: "Booking" }],
+  clientIds: [{ type: mongoose.Schema.Types.ObjectId, ref: "Tenant" }],
+  notificationIds: [{ type: mongoose.Schema.Types.ObjectId, ref: "Notification" }], // ADD THIS
+  ratingId: { type: mongoose.Schema.Types.ObjectId, ref: "Rating" },
+  isBooked: { type: Boolean, default: false },
 }, { timestamps: true });
 
-module.exports = mongoose.model("Owner", ownerSchema);
+module.exports = mongoose.model("Worker", workerSchema);
