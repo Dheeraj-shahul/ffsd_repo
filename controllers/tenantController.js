@@ -105,10 +105,28 @@ exports.getDashboard = async (req, res) => {
     }).sort({ createdDate: -1 });
 
     // Fetch worker payments for this tenant
+    // Fetch worker payments for this tenant
     const WorkerPayment = require("../models/workerPayment");
-    const workerPayments = await WorkerPayment.find({
+    const workerPaymentsRaw = await WorkerPayment.find({
       tenantId: userId,
-    }).sort({ paymentDate: -1 });
+    })
+      .populate("workerId") // Populate the worker details
+      .sort({ paymentDate: -1 });
+
+    // Map worker payments to include workerName and serviceType
+    const workerPayments = workerPaymentsRaw.map((payment) => ({
+      _id: payment._id,
+      paymentDate: payment.paymentDate,
+      workerName: payment.workerId
+        ? `${payment.workerId.firstName} ${payment.workerId.lastName}`
+        : "N/A",
+      serviceType: payment.workerId ? payment.workerId.serviceType : "N/A",
+      amount: payment.amount,
+      paymentMethod: payment.paymentMethod,
+      status: payment.status,
+      receiptUrl: payment.receiptUrl,
+      transactionId: payment.transactionId,
+    }));
 
     res.render("pages/tenant_dashboard", {
       user: tenant,
@@ -1290,10 +1308,15 @@ exports.login = async (req, res) => {
   const { email, password } = req.body;
   try {
     const tenant = await Tenant.findOne({ email }).select("+password");
-    if (!tenant) return res.status(401).render("pages/login", { error: "Account not found" });
+    if (!tenant)
+      return res
+        .status(401)
+        .render("pages/login", { error: "Account not found" });
     // Plain-text comparison
     if (tenant.password !== password) {
-      return res.status(401).render("pages/login", { error: "Incorrect password" });
+      return res
+        .status(401)
+        .render("pages/login", { error: "Incorrect password" });
     }
     req.session.user = tenant.toObject();
     res.redirect("/tenants/dashboard");

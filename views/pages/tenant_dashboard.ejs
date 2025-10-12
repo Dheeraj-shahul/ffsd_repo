@@ -516,7 +516,7 @@
               <button class="pay-worker-btn" onclick="showWorkerPaymentPopup(this)" <%= worker.paymentStatus === 'paid' ? 'disabled' : '' %>>
                 <%= worker.paymentStatus === 'paid' ? 'Paid' : 'Pay Worker' %>
               </button>
-              <button class="book-button" onclick="viewWorkerProfile(this)">View Profile</button>
+              <!-- <button class="book-button" onclick="viewWorkerProfile(this)">View Profile</button> -->
               <button class="debook-worker-btn" style="background-color: red; color: white;" onclick="debookWorker('<%= worker._id %>')">Debook</button>
             </div>
           </div>

@@ -4,7 +4,7 @@
 
 ### SPOC: Syed Dheeraj Shahul
 
-**Email:** [your email here]  
+**Email:** dheerajshahul.s23@iiits.in 
 **Roll No:** S20230010235
 
 ---
@@ -22,23 +22,25 @@ The system allows users to register, list properties or services, make rental re
 
 | Member Name             | Role                                | Major Contributions                                                                                           |
 | ----------------------- | ----------------------------------- | ------------------------------------------------------------------------------------------------------------- |
-| **Syed Dheeraj Shahul** | Frontend & Backend Developer        | Developed Tenant, Worker, and Owner dashboards; implemented property management and unrenting functionalities |
-| **D. Revanth Kumar**    | Backend & Frontend Developer        | Integrated admin panel with all models; implemented property listing and worker de-booking modules            |
-| **A. Sai Satish**       | Frontend Developer                  | Implemented authentication (login & registration) and request handling system                                 |
-| **B. Vignesh**          | Frontend Developer & UI/UX Designer | Integrated frontend logic with backend APIs; designed UI/UX components                                        |
-| **Ganesh Koti Reddy**   | Frontend Developer & QA Engineer    | Developed service listings page; handled quality assurance and bug fixes                                      |
+| **Syed Dheeraj Shahul** | Frontend & Backend Developer        | Developed Tenant, Worker, and Owner dashboards; implemented payment and notification system ;  implemented property management on user dashboard (unrenting modules) |
+| **D. Revanth Kumar**    | Backend & Frontend Developer        | Integrated admin panel with all models; implemented property details page with filters and worker de-booking modules            |
+| **A. Sai Satish**       | Frontend Developer                  | Implemented authentication (login & registration); implemented domestic services showcase page with filters and booking                                  |
+| **B. Vignesh**          | Frontend Developer & UI/UX Designer | Developed property registration page with data storage and dynamic unified header navigation bar ; designed UI/UX components                                        |
+| **Ganesh Koti Reddy**   | Frontend Developer & QA Engineer    | Developed my services module  in worker dashboard ; handled quality assurance and bug fixes                                      |
 
 ---
 
 ## ⚙️ Features
 
-- 🔐 **Authentication System** – Secure registration and login for all users
-- 🏡 **Property Management** – Owners can list, update, and unrent properties
-- 👷 **Worker Dashboard** – Manage service listings, availability, and bookings
-- 👤 **Tenant Dashboard** – Search, view, and book properties and services
+- 🔐 **Authentication System** – Secure registration and login for all users including forgot password reset mechanism 
+- 🏡 **Owner Dashboard** – Owners can list, update, unrent properties and manage their earnings
+- 👷 **Worker Dashboard** – Manage service listings, availability, bookings and earnings
+- 👤 **Tenant Dashboard** – Search, view, book and manage properties and domestic worker services through interactive realtime dashboard.
+- 💵 **Online Payment Model** -  Seamless integration of online rent payments and worker payments.
+- 🤝 **Grivence resolvement system** - Maintainence  and complaints grivence system and the Realtime updates of the current status of the grevince from owner side.
 - 🧰 **Admin Panel** – Monitor users, properties, and service requests across the platform
-- 💬 **Contact Us Page** – For user inquiries and support
-- 📊 **Database Tracking** – Admin can view real-time data and logs
+- 💬 **Contact Us Page** – For user inquiries , problem resolvent and support
+- 📊 **Database Tracking** – Admin can view real-time data and log
 
 ---
 
