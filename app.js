@@ -255,9 +255,12 @@ app.get("/login", (req, res) => {
 });
 
 // Login Route
+// Login Route
 app.post("/login", async (req, res) => {
   const { userType, email, password } = req.body;
+
   try {
+    // Check required fields
     if (!userType || !email || !password) {
       return res.status(400).json({ error: "Missing required fields" });
     }
@@ -265,6 +268,7 @@ app.post("/login", async (req, res) => {
     let user;
     let Model;
 
+    // Determine user model based on userType
     if (userType === "tenant") {
       Model = Tenant;
     } else if (userType === "owner") {
@@ -275,6 +279,7 @@ app.post("/login", async (req, res) => {
       return res.status(400).json({ error: "Invalid user type" });
     }
 
+    // Fetch user from database including password
     user = await Model.findOne({ email }).select("+password");
 
     if (!user) {
@@ -282,15 +287,21 @@ app.post("/login", async (req, res) => {
     }
 
     if (!user.password) {
-      return res
-        .status(401)
-        .json({ error: "Password not set for this account" });
+      return res.status(401).json({ error: "Password not set for this account" });
     }
 
     if (user.password !== password) {
       return res.status(401).json({ error: "Incorrect password" });
     }
 
+    // Suspended account check
+    if (user.status === "Suspended") {
+      return res
+        .status(403)
+        .json({ error: "Your account is suspended temporarily" });
+    }
+
+    // Set session
     req.session.user = {
       _id: user._id.toString(),
       userType,
@@ -306,12 +317,14 @@ app.post("/login", async (req, res) => {
       newListings: user.newListings || false,
     };
 
+    // Success response with redirect URL
     return res.json({ success: true, redirectUrl: getDashboardUrl(userType) });
   } catch (err) {
     console.error("Login error:", err);
     return res.status(500).json({ error: "Server error" });
   }
 });
+
 
 // Registration Route
 app.post("/register", async (req, res) => {
