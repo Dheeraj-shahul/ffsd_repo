@@ -126,7 +126,7 @@ exports.getOwnerDashboard = async (req, res) => {
     tenantsForRequests.forEach((tenant) => {
       tenantMap.set(
         tenant._id.toString(),
-        `${tenant.firstName} ${tenant.lastName}`
+        ${tenant.firstName} ${tenant.lastName}
       );
     });
     // Fetch properties
@@ -324,7 +324,8 @@ exports.updateMaintenanceRequestStatus = async (req, res) => {
     // Update status
     maintenanceRequest.status = status;
     await maintenanceRequest.save();
-
+    
+    // Optionally, create a notification for the tenant
     return res.status(200).json({
       success: true,
       message: "Maintenance request status updated successfully",
@@ -340,6 +341,7 @@ exports.updateMaintenanceRequestStatus = async (req, res) => {
   }
 };
 
+// Delete owner account if no tenants and no rented properties
 exports.deleteOwnerAccount = async (req, res) => {
   try {
     const ownerId = req.session.user?._id;
@@ -366,7 +368,8 @@ exports.deleteOwnerAccount = async (req, res) => {
         .status(400)
         .json({ success: false, message: "Password is required" });
     }
-
+    
+    // if password does not match with owner's password
     if (password !== owner.password) {
       return res
         .status(400)
@@ -377,6 +380,8 @@ exports.deleteOwnerAccount = async (req, res) => {
     const tenants = await Tenant.find({
       ownerId: new mongoose.Types.ObjectId(ownerId),
     });
+
+    // If there are tenants, prevent deletion
     if (tenants.length > 0) {
       return res.status(400).json({
         success: false,
@@ -393,6 +398,8 @@ exports.deleteOwnerAccount = async (req, res) => {
     const hasRentedProperties = properties.some(
       (property) => property.isRented
     );
+
+    // If any property is rented, prevent deletion
     if (hasRentedProperties) {
       return res.status(400).json({
         success: false,
@@ -539,6 +546,7 @@ exports.updateOwnerSettings = async (req, res) => {
   }
 };
 
+// Approve or reject unrent property request
 exports.approveUnrentProperty = async (req, res) => {
   try {
     const { unrentRequestId, action } = req.body;
@@ -656,6 +664,7 @@ exports.approveUnrentProperty = async (req, res) => {
   }
 };
 
+// Owner login
 exports.login = async (req, res) => {
   const { email, password } = req.body;
   try {
