@@ -165,7 +165,7 @@ ffsd_repo/
 
 ## 📸 Demo
 
-🔗 **Demo Link:** [https://ffsd-repo-indol.vercel.app/]
+🔗 
 
 ---
 

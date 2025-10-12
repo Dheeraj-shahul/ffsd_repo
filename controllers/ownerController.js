@@ -123,10 +123,11 @@ exports.getOwnerDashboard = async (req, res) => {
     })
       .select("firstName lastName")
       .lean();
+
     tenantsForRequests.forEach((tenant) => {
       tenantMap.set(
         tenant._id.toString(),
-        ${tenant.firstName} ${tenant.lastName}
+        `${tenant.firstName} ${tenant.lastName}` // Added backticks for template literal
       );
     });
     // Fetch properties
@@ -324,7 +325,7 @@ exports.updateMaintenanceRequestStatus = async (req, res) => {
     // Update status
     maintenanceRequest.status = status;
     await maintenanceRequest.save();
-    
+
     // Optionally, create a notification for the tenant
     return res.status(200).json({
       success: true,
@@ -368,7 +369,7 @@ exports.deleteOwnerAccount = async (req, res) => {
         .status(400)
         .json({ success: false, message: "Password is required" });
     }
-    
+
     // if password does not match with owner's password
     if (password !== owner.password) {
       return res
@@ -669,10 +670,15 @@ exports.login = async (req, res) => {
   const { email, password } = req.body;
   try {
     const owner = await Owner.findOne({ email }).select("+password");
-    if (!owner) return res.status(401).render("pages/login", { error: "Account not found" });
+    if (!owner)
+      return res
+        .status(401)
+        .render("pages/login", { error: "Account not found" });
     // Plain-text comparison
     if (owner.password !== password) {
-      return res.status(401).render("pages/login", { error: "Incorrect password" });
+      return res
+        .status(401)
+        .render("pages/login", { error: "Incorrect password" });
     }
     // Set session and redirect as needed
     req.session.user = owner.toObject();
