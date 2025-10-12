@@ -409,8 +409,8 @@
             </div>
           </div>
         </div>
-         
-       <!-- Delete Account Overlay -->
+
+        <!-- Delete Account Overlay -->
         <div id="deleteAccountOverlay" class="popup-overlay">
           <div class="popup-container">
             <h4 class="popup-title">Delete Account?</h4>
@@ -829,800 +829,798 @@
     </div>
 
     <script>
-      // Handle delete account button click
-document.getElementById("deleteAccountBtn")?.addEventListener("click", function () {
-  const deleteAccountOverlay = document.getElementById("deleteAccountOverlay");
-  document.getElementById("deleteAccountPassword").value = ""; // Clear password input
-  document.getElementById("deleteAccountPasswordError").textContent = ""; // Clear error message
-  deleteAccountOverlay.style.display = "flex";
-});
+            // Handle delete account button click
+      document.getElementById("deleteAccountBtn")?.addEventListener("click", function () {
+        const deleteAccountOverlay = document.getElementById("deleteAccountOverlay");
+        document.getElementById("deleteAccountPassword").value = ""; // Clear password input
+        document.getElementById("deleteAccountPasswordError").textContent = ""; // Clear error message
+        deleteAccountOverlay.style.display = "flex";
+      });
 
-// Handle delete account confirmation
-document.getElementById("confirmDeleteAccount")?.addEventListener("click", function () {
-  const password = document.getElementById("deleteAccountPassword").value;
-  const errorElement = document.getElementById("deleteAccountPasswordError");
+      // Handle delete account confirmation
+      document.getElementById("confirmDeleteAccount")?.addEventListener("click", function () {
+        const password = document.getElementById("deleteAccountPassword").value;
+        const errorElement = document.getElementById("deleteAccountPasswordError");
 
-  // Clear previous error
-  if (!password) {
-    errorElement.textContent = "Please enter your password";
-    alert("Please enter your password");
-    return;
-  }
-
-  // Send DELETE request to server
-  fetch("/owner/delete-account", {
-    method: "DELETE",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    credentials: "include",
-    body: JSON.stringify({ password }),
-  })
-    .then((response) => {
-      console.log("Response status:", response.status); // Log status
-      return response.json();
-    })
-    .then((data) => {
-      console.log("Server response:", data); // Log full response
-      if (data.success) {
-        alert("Account deleted successfully!");
-        window.location.href = "/login";
-      } else {
-        errorElement.textContent = data.message || "Failed to delete account";
-        // Show alert for specific error cases
-        if (data.message === "Cannot delete account because there are associated tenants") {
-          alert("Cannot delete your account because you have associated tenants. Please resolve tenant agreements before deleting your account.");
-        } else if (data.message === "Cannot delete account because one or more properties are currently rented") {
-          alert("Cannot delete your account because one or more properties are currently rented. Please ensure all properties are vacant before deleting your account.");
-        } else {
-          alert(data.message || "Failed to delete account");
-        }
-      }
-    })
-    .catch((error) => {
-      console.error("Fetch error:", error);
-      errorElement.textContent = "An error occurred while deleting the account";
-      alert("An error occurred while deleting the account. Please try again.");
-    });
-});
-// Cancel delete account action
-document.getElementById("cancelDeleteAccount")?.addEventListener("click", function () {
-  document.getElementById("deleteAccountOverlay").style.display = "none";
-  document.getElementById("deleteAccountPassword").value = ""; // Clear password input
-  document.getElementById("deleteAccountPasswordError").textContent = ""; // Clear error
-});
-
-// Close delete account overlay when clicking outside
-window.addEventListener("click", function (event) {
-  const deleteAccountOverlay = document.getElementById("deleteAccountOverlay");
-  if (event.target === deleteAccountOverlay) {
-    deleteAccountOverlay.style.display = "none";
-    document.getElementById("deleteAccountPassword").value = ""; // Clear password input
-    document.getElementById("deleteAccountPasswordError").textContent = ""; // Clear error
-  }
-});
-
-
-      // Function to refresh notifications section
-      function refreshNotifications() {
-        fetch("/api/owner/notifications", {
-          method: "GET",
-          headers: { "Content-Type": "application/json" },
-          credentials: "include",
-        })
-          .then((response) => {
-            if (!response.ok) {
-              throw new Error("Failed to fetch notifications");
-            }
-            return response.json();
-          })
-          .then((data) => {
-            const notificationContainer = document.querySelector(
-              ".notification-container"
-            );
-            notificationContainer.innerHTML = ""; // Clear existing notifications
-            if (data.notifications && data.notifications.length > 0) {
-              data.notifications.forEach((notification) => {
-                const notificationCard = document.createElement("div");
-                notificationCard.className = "notification-card";
-                notificationCard.setAttribute(
-                  "data-notification-id",
-                  notification._id
-                );
-                notificationCard.setAttribute(
-                  "data-notification-id",
-                  notification._id || ""
-                );
-                notificationCard.setAttribute(
-                  "data-property-id",
-                  notification.propertyId || ""
-                );
-                notificationCard.setAttribute(
-                  "data-tenant-id",
-                  notification.tenantId || ""
-                );
-                notificationCard.innerHTML = `
-            <div class="notification-header">
-              <h4>${notification.type || "Booking Request"}</h4>
-              <span class="notification-status ${(
-                notification.status || "pending"
-              ).toLowerCase()}">
-                ${notification.status || "Pending"}
-              </span>
-            </div>
-            <div class="notification-details">
-              <p><strong>Message:</strong> ${notification.message || "N/A"}</p>
-              <p><strong>Recipient:</strong> ${
-                notification.recipientName || "N/A"
-              }</p>
-              <p><strong>Property:</strong> ${
-                notification.propertyName || "N/A"
-              }</p>
-              <p><strong>Date:</strong> ${
-                notification.createdDate
-                  ? new Date(notification.createdDate).toLocaleDateString()
-                  : "N/A"
-              }</p>
-            </div>
-            ${
-              notification.status === "Pending"
-                ? `
-                  <div class="notification-actions">
-                    <button class="action-button approve-button" onclick="handleNotificationAction('${notification._id}', 'approve')">
-                      Approve
-                    </button>
-                    <button class="action-button reject-button" onclick="handleNotificationAction('${notification._id}', 'reject')">
-                      Reject
-                    </button>
-                  </div>`
-                : ""
-            }
-          `;
-                notificationContainer.appendChild(notificationCard);
-              });
-            } else {
-              notificationContainer.innerHTML =
-                "<p>No notifications available.</p>";
-            }
-          })
-          .catch((error) => {
-            console.error("Error refreshing notifications:", error);
-          });
-      }
-      let propertyToDelete = null;
-      function showDeleteConfirmation(propertyId, isRented) {
-        // Check if the property is currently rented
-        if (isRented) {
-          alert("Cannot delete this property because it is currently rented.");
+        // Clear previous error
+        if (!password) {
+          errorElement.textContent = "Please enter your password";
+          alert("Please enter your password");
           return;
         }
 
-        // Set the property ID for deletion
-        propertyToDelete = propertyId;
-
-        // Show the confirmation dialog
-        const deleteOverlay = document.getElementById("deletePropertyOverlay");
-        deleteOverlay.style.display = "flex";
-      }
-
-      // Set up delete property event listeners
-      document.addEventListener("DOMContentLoaded", function () {
-        const deleteOverlay = document.getElementById("deletePropertyOverlay");
-        const cancelDeleteBtn = document.getElementById("cancelDeleteProperty");
-        const confirmDeleteBtn = document.getElementById(
-          "confirmDeleteProperty"
-        );
-
-        // Cancel delete action
-        cancelDeleteBtn.addEventListener("click", function () {
-          deleteOverlay.style.display = "none";
-          propertyToDelete = null;
-        });
-
-        // Confirm delete action
-        confirmDeleteBtn.addEventListener("click", function () {
-          if (propertyToDelete) {
-            // Send delete request to the server
-            deleteProperty(propertyToDelete);
-          }
-        });
-
-        // Close the overlay when clicking outside
-        window.addEventListener("click", function (event) {
-          if (event.target === deleteOverlay) {
-            deleteOverlay.style.display = "none";
-            propertyToDelete = null;
-          }
-        });
-      });
-
-      // Function to send delete request to the server
-      function deleteProperty(propertyId) {
-        fetch(/api/property/${propertyId}, {
+        // Send DELETE request to server
+        fetch("/owner/delete-account", {
           method: "DELETE",
           headers: {
             "Content-Type": "application/json",
           },
+          credentials: "include",
+          body: JSON.stringify({ password }),
         })
-          .then((response) => response.json())
+          .then((response) => {
+            console.log("Response status:", response.status); // Log status
+            return response.json();
+          })
           .then((data) => {
+            console.log("Server response:", data); // Log full response
             if (data.success) {
-              // Hide the overlay
-              document.getElementById("deletePropertyOverlay").style.display =
-                "none";
-
-              // Remove the property card from the DOM
-              const propertyCard = document.querySelector(
-                [data-property-id="${propertyId}"]
-              );
-              if (propertyCard) {
-                propertyCard.remove();
-              }
-
-              // Show success message
-              alert("Property successfully deleted!");
+              alert("Account deleted successfully!");
+              window.location.href = "/login";
             } else {
-              alert("Failed to delete property: " + data.message);
+              errorElement.textContent = data.message || "Failed to delete account";
+              // Show alert for specific error cases
+              if (data.message === "Cannot delete account because there are associated tenants") {
+                alert("Cannot delete your account because you have associated tenants. Please resolve tenant agreements before deleting your account.");
+              } else if (data.message === "Cannot delete account because one or more properties are currently rented") {
+                alert("Cannot delete your account because one or more properties are currently rented. Please ensure all properties are vacant before deleting your account.");
+              } else {
+                alert(data.message || "Failed to delete account");
+              }
             }
           })
           .catch((error) => {
-            console.error("Error deleting property:", error);
-            alert("An error occurred while deleting the property.");
+            console.error("Fetch error:", error);
+            errorElement.textContent = "An error occurred while deleting the account";
+            alert("An error occurred while deleting the account. Please try again.");
           });
-      }
-
-      // Function to handle notification actions
-      function showSection(sectionId) {
-        const sections = document.querySelectorAll(".section");
-        sections.forEach((section) => {
-          section.classList.remove("active");
-        });
-        const activeSection = document.getElementById(sectionId);
-        if (activeSection) {
-          activeSection.classList.add("active");
-        }
-        if (window.innerWidth <= 768) {
-          document.querySelector(".sidebar").classList.remove("active");
-          document.querySelector(".menu-toggle").innerHTML =
-            "<strong>></strong>";
-        }
-      }
-
-      function toggleMenu() {
-        const sidebar = document.querySelector(".sidebar");
-        const menuButton = document.querySelector(".menu-toggle");
-        sidebar.classList.toggle("active");
-        if (sidebar.classList.contains("active")) {
-          menuButton.innerHTML = "<strong><</strong>";
-        } else {
-          menuButton.innerHTML = "<strong>></strong>";
-        }
-      }
-
-      function toggleNav() {
-        const navMenu = document.getElementById("nav-menu");
-        const overlay = document.getElementById("overlay");
-        if (navMenu.classList.contains("active")) {
-          navMenu.classList.remove("active");
-          overlay.classList.remove("active");
-        } else {
-          navMenu.classList.add("active");
-          overlay.classList.add("active");
-        }
-      }
-
-      document
-        .getElementById("overlay")
-        ?.addEventListener("click", function () {
-          const navMenu = document.getElementById("nav-menu");
-          navMenu.classList.remove("active");
-          this.classList.remove("active");
-        });
-
-      const contactButtons = document.querySelectorAll(
-        ".contact_tenant_button"
-      );
-      contactButtons.forEach((button) => {
-        button.addEventListener("click", function () {
-          const tenantDetails = this.closest(".tentant_details");
-          if (tenantDetails) {
-            const phoneElement =
-              tenantDetails.querySelector("ul li:nth-child(3)");
-            if (phoneElement) {
-              const phoneText = phoneElement.textContent;
-              const phoneNumber = phoneText.replace(/[^0-9]/g, "");
-              if (phoneNumber) {
-                window.location.href = "tel:" + phoneNumber;
-              } else {
-                console.error("Could not extract a valid phone number");
-                alert("Could not find a valid phone number for this tenant");
-              }
-            } else {
-              console.error("Phone number element not found");
-              alert("Could not find contact information for this tenant");
-            }
-          }
-        });
+      });
+      // Cancel delete account action
+      document.getElementById("cancelDeleteAccount")?.addEventListener("click", function () {
+        document.getElementById("deleteAccountOverlay").style.display = "none";
+        document.getElementById("deleteAccountPassword").value = ""; // Clear password input
+        document.getElementById("deleteAccountPasswordError").textContent = ""; // Clear error
       });
 
-      document.addEventListener("DOMContentLoaded", function () {
-        const requestCards = document.querySelectorAll(".request-card");
-        const statusUpdateOverlay = document.getElementById(
-          "statusUpdateOverlay"
-        );
-        const markResolvedOverlay = document.getElementById(
-          "markResolvedOverlay"
-        );
-        const deletePropertyOverlay = document.getElementById(
-          "deletePropertyOverlay"
-        );
-        const confirmUpdateStatusBtn = document.getElementById(
-          "confirmUpdateStatus"
-        );
-        const confirmMarkResolvedBtn = document.getElementById(
-          "confirmMarkResolved"
-        );
-        const cancelUpdateStatusBtn =
-          document.getElementById("cancelUpdateStatus");
-        const cancelMarkResolvedBtn =
-          document.getElementById("cancelMarkResolved");
-        const confirmDeletePropertyBtn = document.getElementById(
-          "confirmDeleteProperty"
-        );
-        const cancelDeletePropertyBtn = document.getElementById(
-          "cancelDeleteProperty"
-        );
-        let currentStatusElement = null;
-        let currentPropertyId = null;
+      // Close delete account overlay when clicking outside
+      window.addEventListener("click", function (event) {
+        const deleteAccountOverlay = document.getElementById("deleteAccountOverlay");
+        if (event.target === deleteAccountOverlay) {
+          deleteAccountOverlay.style.display = "none";
+          document.getElementById("deleteAccountPassword").value = ""; // Clear password input
+          document.getElementById("deleteAccountPasswordError").textContent = ""; // Clear error
+        }
+      });
 
-        requestCards.forEach((card) => {
-          const statusElement = card.querySelector(".request-status");
-          const buttons = card.querySelectorAll(".request-actions button");
 
-          buttons[0].addEventListener("click", function () {
-            currentStatusElement = statusElement;
-            const currentStatus = statusElement.textContent.toLowerCase();
-            document
-              .querySelectorAll('input[name="status"]')
-              .forEach((radio) => {
-                radio.checked = false;
-              });
-            if (currentStatus === "pending") {
-              document.getElementById("status-pending").checked = true;
-            } else if (currentStatus === "in progress") {
-              document.getElementById("status-inprogress").checked = true;
-            } else if (currentStatus === "resolved") {
-              document.getElementById("status-resolved").checked = true;
+            // Function to refresh notifications section
+            function refreshNotifications() {
+              fetch("/api/owner/notifications", {
+                method: "GET",
+                headers: { "Content-Type": "application/json" },
+                credentials: "include",
+              })
+                .then((response) => {
+                  if (!response.ok) {
+                    throw new Error("Failed to fetch notifications");
+                  }
+                  return response.json();
+                })
+                .then((data) => {
+                  const notificationContainer = document.querySelector(
+                    ".notification-container"
+                  );
+                  notificationContainer.innerHTML = ""; // Clear existing notifications
+                  if (data.notifications && data.notifications.length > 0) {
+                    data.notifications.forEach((notification) => {
+                      const notificationCard = document.createElement("div");
+                      notificationCard.className = "notification-card";
+                      notificationCard.setAttribute(
+                        "data-notification-id",
+                        notification._id
+                      );
+                      notificationCard.setAttribute(
+                        "data-notification-id",
+                        notification._id || ""
+                      );
+                      notificationCard.setAttribute(
+                        "data-property-id",
+                        notification.propertyId || ""
+                      );
+                      notificationCard.setAttribute(
+                        "data-tenant-id",
+                        notification.tenantId || ""
+                      );
+                      notificationCard.innerHTML = `
+                  <div class="notification-header">
+                    <h4>${notification.type || "Booking Request"}</h4>
+                    <span class="notification-status ${(
+                      notification.status || "pending"
+                    ).toLowerCase()}">
+                      ${notification.status || "Pending"}
+                    </span>
+                  </div>
+                  <div class="notification-details">
+                    <p><strong>Message:</strong> ${notification.message || "N/A"}</p>
+                    <p><strong>Recipient:</strong> ${
+                      notification.recipientName || "N/A"
+                    }</p>
+                    <p><strong>Property:</strong> ${
+                      notification.propertyName || "N/A"
+                    }</p>
+                    <p><strong>Date:</strong> ${
+                      notification.createdDate
+                        ? new Date(notification.createdDate).toLocaleDateString()
+                        : "N/A"
+                    }</p>
+                  </div>
+                  ${
+                    notification.status === "Pending"
+                      ? `
+                        <div class="notification-actions">
+                          <button class="action-button approve-button" onclick="handleNotificationAction('${notification._id}', 'approve')">
+                            Approve
+                          </button>
+                          <button class="action-button reject-button" onclick="handleNotificationAction('${notification._id}', 'reject')">
+                            Reject
+                          </button>
+                        </div>`
+                      : ""
+                  }
+                `;
+                      notificationContainer.appendChild(notificationCard);
+                    });
+                  } else {
+                    notificationContainer.innerHTML =
+                      "<p>No notifications available.</p>";
+                  }
+                })
+                .catch((error) => {
+                  console.error("Error refreshing notifications:", error);
+                });
             }
-            statusUpdateOverlay.style.display = "flex";
-          });
+            let propertyToDelete = null;
+            function showDeleteConfirmation(propertyId, isRented) {
+              // Check if the property is currently rented
+              if (isRented) {
+                alert("Cannot delete this property because it is currently rented.");
+                return;
+              }
 
-          buttons[1].addEventListener("click", function () {
-            currentStatusElement = statusElement;
-            markResolvedOverlay.style.display = "flex";
-          });
-        });
+              // Set the property ID for deletion
+              propertyToDelete = propertyId;
 
-        confirmUpdateStatusBtn.addEventListener("click", function () {
-          const selectedRadio = document.querySelector(
-            'input[name="status"]:checked'
-          );
-          if (selectedRadio && currentStatusElement) {
-            const newStatus = selectedRadio.value;
-            updateRequestStatus(currentStatusElement, newStatus);
-          }
-          statusUpdateOverlay.style.display = "none";
-        });
+              // Show the confirmation dialog
+              const deleteOverlay = document.getElementById("deletePropertyOverlay");
+              deleteOverlay.style.display = "flex";
+            }
 
-        confirmMarkResolvedBtn.addEventListener("click", function () {
-          if (currentStatusElement) {
-            updateRequestStatus(currentStatusElement, "resolved");
-          }
-          markResolvedOverlay.style.display = "none";
-        });
+            // Set up delete property event listeners
+            document.addEventListener("DOMContentLoaded", function () {
+              const deleteOverlay = document.getElementById("deletePropertyOverlay");
+              const cancelDeleteBtn = document.getElementById("cancelDeleteProperty");
+              const confirmDeleteBtn = document.getElementById(
+                "confirmDeleteProperty"
+              );
 
-        cancelUpdateStatusBtn.addEventListener("click", function () {
-          statusUpdateOverlay.style.display = "none";
-        });
+              // Cancel delete action
+              cancelDeleteBtn.addEventListener("click", function () {
+                deleteOverlay.style.display = "none";
+                propertyToDelete = null;
+              });
 
-        cancelMarkResolvedBtn.addEventListener("click", function () {
-          markResolvedOverlay.style.display = "none";
-        });
+              // Confirm delete action
+              confirmDeleteBtn.addEventListener("click", function () {
+                if (propertyToDelete) {
+                  // Send delete request to the server
+                  deleteProperty(propertyToDelete);
+                }
+              });
 
-        function updateRequestStatus(statusElement, newStatus) {
-          // Get the request ID from the closest request-card parent
-          const requestCard = statusElement.closest(".request-card");
-          if (!requestCard) {
-            console.error("Could not find parent request card");
-            alert("Error: Could not locate request information");
-            return;
-          }
+              // Close the overlay when clicking outside
+              window.addEventListener("click", function (event) {
+                if (event.target === deleteOverlay) {
+                  deleteOverlay.style.display = "none";
+                  propertyToDelete = null;
+                }
+              });
+            });
 
-          // Extract the request ID from the request card
-          // You'll need to add a data attribute to your request cards in the EJS template
-          const requestId = requestCard.getAttribute("data-request-id");
-          if (!requestId) {
-            console.error("Request ID not found");
-            alert("Error: Request ID not found");
-            return;
-          }
+            // Function to send delete request to the server
+            function deleteProperty(propertyId) {
+              fetch(`/api/property/${propertyId}`, {
+                method: "DELETE",
+                headers: {
+                  "Content-Type": "application/json",
+                },
+              })
+                .then((response) => response.json())
+                .then((data) => {
+                  if (data.success) {
+                    // Hide the overlay
+                    document.getElementById("deletePropertyOverlay").style.display =
+                      "none";
 
-          // Format the status value for the API
-          let formattedStatus;
-          switch (newStatus) {
-            case "pending":
-              formattedStatus = "Pending";
-              break;
-            case "in-progress":
-              formattedStatus = "In Progress";
-              break;
-            case "resolved":
-              formattedStatus = "Resolved";
-              break;
-            default:
-              formattedStatus = newStatus;
-          }
+                    // Remove the property card from the DOM
+                    const propertyCard = document.querySelector(
+                      `[data-property-id="${propertyId}"]`
+                    );
+                    if (propertyCard) {
+                      propertyCard.remove();
+                    }
 
-          // Send API request to update status
-          fetch("/maintenance-request/status", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-              requestId: requestId,
-              status: formattedStatus,
-            }),
-          })
-            .then((response) => response.json())
-            .then((data) => {
-              if (data.success) {
-                // Update UI only after successful API response
-                statusElement.classList.remove(
-                  "pending",
-                  "in-progress",
-                  "resolved"
+                    // Show success message
+                    alert("Property successfully deleted!");
+                  } else {
+                    alert("Failed to delete property: " + data.message);
+                  }
+                })
+                .catch((error) => {
+                  console.error("Error deleting property:", error);
+                  alert("An error occurred while deleting the property.");
+                });
+            }
+
+            // Function to handle notification actions
+            function showSection(sectionId) {
+              const sections = document.querySelectorAll(".section");
+              sections.forEach((section) => {
+                section.classList.remove("active");
+              });
+              const activeSection = document.getElementById(sectionId);
+              if (activeSection) {
+                activeSection.classList.add("active");
+              }
+              if (window.innerWidth <= 768) {
+                document.querySelector(".sidebar").classList.remove("active");
+                document.querySelector(".menu-toggle").innerHTML =
+                  "<strong>></strong>";
+              }
+            }
+
+            function toggleMenu() {
+              const sidebar = document.querySelector(".sidebar");
+              const menuButton = document.querySelector(".menu-toggle");
+              sidebar.classList.toggle("active");
+              if (sidebar.classList.contains("active")) {
+                menuButton.innerHTML = "<strong><</strong>";
+              } else {
+                menuButton.innerHTML = "<strong>></strong>";
+              }
+            }
+
+            function toggleNav() {
+              const navMenu = document.getElementById("nav-menu");
+              const overlay = document.getElementById("overlay");
+              if (navMenu.classList.contains("active")) {
+                navMenu.classList.remove("active");
+                overlay.classList.remove("active");
+              } else {
+                navMenu.classList.add("active");
+                overlay.classList.add("active");
+              }
+            }
+
+            document
+              .getElementById("overlay")
+              ?.addEventListener("click", function () {
+                const navMenu = document.getElementById("nav-menu");
+                navMenu.classList.remove("active");
+                this.classList.remove("active");
+              });
+
+            const contactButtons = document.querySelectorAll(
+              ".contact_tenant_button"
+            );
+            contactButtons.forEach((button) => {
+              button.addEventListener("click", function () {
+                const tenantDetails = this.closest(".tentant_details");
+                if (tenantDetails) {
+                  const phoneElement =
+                    tenantDetails.querySelector("ul li:nth-child(3)");
+                  if (phoneElement) {
+                    const phoneText = phoneElement.textContent;
+                    const phoneNumber = phoneText.replace(/[^0-9]/g, "");
+                    if (phoneNumber) {
+                      window.location.href = "tel:" + phoneNumber;
+                    } else {
+                      console.error("Could not extract a valid phone number");
+                      alert("Could not find a valid phone number for this tenant");
+                    }
+                  } else {
+                    console.error("Phone number element not found");
+                    alert("Could not find contact information for this tenant");
+                  }
+                }
+              });
+            });
+
+            document.addEventListener("DOMContentLoaded", function () {
+              const requestCards = document.querySelectorAll(".request-card");
+              const statusUpdateOverlay = document.getElementById(
+                "statusUpdateOverlay"
+              );
+              const markResolvedOverlay = document.getElementById(
+                "markResolvedOverlay"
+              );
+              const deletePropertyOverlay = document.getElementById(
+                "deletePropertyOverlay"
+              );
+              const confirmUpdateStatusBtn = document.getElementById(
+                "confirmUpdateStatus"
+              );
+              const confirmMarkResolvedBtn = document.getElementById(
+                "confirmMarkResolved"
+              );
+              const cancelUpdateStatusBtn =
+                document.getElementById("cancelUpdateStatus");
+              const cancelMarkResolvedBtn =
+                document.getElementById("cancelMarkResolved");
+              const confirmDeletePropertyBtn = document.getElementById(
+                "confirmDeleteProperty"
+              );
+              const cancelDeletePropertyBtn = document.getElementById(
+                "cancelDeleteProperty"
+              );
+              let currentStatusElement = null;
+              let currentPropertyId = null;
+
+              requestCards.forEach((card) => {
+                const statusElement = card.querySelector(".request-status");
+                const buttons = card.querySelectorAll(".request-actions button");
+
+                buttons[0].addEventListener("click", function () {
+                  currentStatusElement = statusElement;
+                  const currentStatus = statusElement.textContent.toLowerCase();
+                  document
+                    .querySelectorAll('input[name="status"]')
+                    .forEach((radio) => {
+                      radio.checked = false;
+                    });
+                  if (currentStatus === "pending") {
+                    document.getElementById("status-pending").checked = true;
+                  } else if (currentStatus === "in progress") {
+                    document.getElementById("status-inprogress").checked = true;
+                  } else if (currentStatus === "resolved") {
+                    document.getElementById("status-resolved").checked = true;
+                  }
+                  statusUpdateOverlay.style.display = "flex";
+                });
+
+                buttons[1].addEventListener("click", function () {
+                  currentStatusElement = statusElement;
+                  markResolvedOverlay.style.display = "flex";
+                });
+              });
+
+              confirmUpdateStatusBtn.addEventListener("click", function () {
+                const selectedRadio = document.querySelector(
+                  'input[name="status"]:checked'
                 );
+                if (selectedRadio && currentStatusElement) {
+                  const newStatus = selectedRadio.value;
+                  updateRequestStatus(currentStatusElement, newStatus);
+                }
+                statusUpdateOverlay.style.display = "none";
+              });
+
+              confirmMarkResolvedBtn.addEventListener("click", function () {
+                if (currentStatusElement) {
+                  updateRequestStatus(currentStatusElement, "resolved");
+                }
+                markResolvedOverlay.style.display = "none";
+              });
+
+              cancelUpdateStatusBtn.addEventListener("click", function () {
+                statusUpdateOverlay.style.display = "none";
+              });
+
+              cancelMarkResolvedBtn.addEventListener("click", function () {
+                markResolvedOverlay.style.display = "none";
+              });
+
+              function updateRequestStatus(statusElement, newStatus) {
+                // Get the request ID from the closest request-card parent
+                const requestCard = statusElement.closest(".request-card");
+                if (!requestCard) {
+                  console.error("Could not find parent request card");
+                  alert("Error: Could not locate request information");
+                  return;
+                }
+
+                // Extract the request ID from the request card
+                // You'll need to add a data attribute to your request cards in the EJS template
+                const requestId = requestCard.getAttribute("data-request-id");
+                if (!requestId) {
+                  console.error("Request ID not found");
+                  alert("Error: Request ID not found");
+                  return;
+                }
+
+                // Format the status value for the API
+                let formattedStatus;
                 switch (newStatus) {
                   case "pending":
-                    statusElement.textContent = "Pending";
-                    statusElement.classList.add("pending");
+                    formattedStatus = "Pending";
                     break;
                   case "in-progress":
-                    statusElement.textContent = "In Progress";
-                    statusElement.classList.add("in-progress");
+                    formattedStatus = "In Progress";
                     break;
                   case "resolved":
-                    statusElement.textContent = "Resolved";
-                    statusElement.classList.add("resolved");
+                    formattedStatus = "Resolved";
                     break;
+                  default:
+                    formattedStatus = newStatus;
                 }
-                // Optional: Show success message
-                console.log("Status updated successfully");
-              } else {
-                alert(
-                  "Failed to update status: " +
-                    (data.message || "Unknown error")
-                );
+
+                // Send API request to update status
+                fetch("/maintenance-request/status", {
+                  method: "POST",
+                  headers: {
+                    "Content-Type": "application/json",
+                  },
+                  body: JSON.stringify({
+                    requestId: requestId,
+                    status: formattedStatus,
+                  }),
+                })
+                  .then((response) => response.json())
+                  .then((data) => {
+                    if (data.success) {
+                      // Update UI only after successful API response
+                      statusElement.classList.remove(
+                        "pending",
+                        "in-progress",
+                        "resolved"
+                      );
+                      switch (newStatus) {
+                        case "pending":
+                          statusElement.textContent = "Pending";
+                          statusElement.classList.add("pending");
+                          break;
+                        case "in-progress":
+                          statusElement.textContent = "In Progress";
+                          statusElement.classList.add("in-progress");
+                          break;
+                        case "resolved":
+                          statusElement.textContent = "Resolved";
+                          statusElement.classList.add("resolved");
+                          break;
+                      }
+                      // Optional: Show success message
+                      console.log("Status updated successfully");
+                    } else {
+                      alert(
+                        "Failed to update status: " +
+                          (data.message || "Unknown error")
+                      );
+                    }
+                  })
+                  .catch((error) => {
+                    console.error(
+                      "Error updating maintenance request status:",
+                      error
+                    );
+                    alert(
+                      "An error occurred while updating the status. Please try again."
+                    );
+                  });
               }
-            })
-            .catch((error) => {
-              console.error(
-                "Error updating maintenance request status:",
-                error
-              );
-              alert(
-                "An error occurred while updating the status. Please try again."
-              );
+
+              window.addEventListener("click", function (event) {
+                if (event.target === statusUpdateOverlay) {
+                  statusUpdateOverlay.style.display = "none";
+                }
+                if (event.target === markResolvedOverlay) {
+                  markResolvedOverlay.style.display = "none";
+                }
+                if (event.target === deletePropertyOverlay) {
+                  deletePropertyOverlay.style.display = "none";
+                  currentPropertyId = null;
+                }
+              });
             });
-        }
 
-        window.addEventListener("click", function (event) {
-          if (event.target === statusUpdateOverlay) {
-            statusUpdateOverlay.style.display = "none";
-          }
-          if (event.target === markResolvedOverlay) {
-            markResolvedOverlay.style.display = "none";
-          }
-          if (event.target === deletePropertyOverlay) {
-            deletePropertyOverlay.style.display = "none";
-            currentPropertyId = null;
-          }
-        });
-      });
+            document
+              .getElementById("settingsForm")
+              ?.addEventListener("submit", function (e) {
+                e.preventDefault();
 
-      document
-        .getElementById("settingsForm")
-        ?.addEventListener("submit", function (e) {
-          e.preventDefault();
+                // Collect form data
+                const formData = {
+                  firstName: document.getElementById("settingsFirstName").value,
+                  lastName: document.getElementById("settingsLastName").value,
+                  email: document.getElementById("settingsEmail").value,
+                  phone: document.getElementById("settingsPhone").value,
+                  location: document.getElementById("settingsLocation").value,
+                  accountNo: document.getElementById("settingsPaymentInfo").value,
+                  upiid: document.getElementById("settingsUPI").value,
+                  numProperties: document.getElementById("settingsNumProperties")
+                    .value,
+                  emailNotifications: document
+                    .getElementById("emailNotifications")
+                    .checked.toString(),
+                  smsNotifications: document
+                    .getElementById("smsNotifications")
+                    .checked.toString(),
+                  paymentReminders: document
+                    .getElementById("paymentReminders")
+                    .checked.toString(),
+                  complaintAlerts: document
+                    .getElementById("complaintAlerts")
+                    .checked.toString(),
+                  maintenanceAlerts: document
+                    .getElementById("maintenanceAlerts")
+                    .checked.toString(),
+                  currentPassword: document.getElementById("settingsCurrentPassword")
+                    .value,
+                  newPassword: document.getElementById("settingsNewPassword").value,
+                  confirmPassword: document.getElementById("settingsConfirmPassword")
+                    .value,
+                };
 
-          // Collect form data
-          const formData = {
-            firstName: document.getElementById("settingsFirstName").value,
-            lastName: document.getElementById("settingsLastName").value,
-            email: document.getElementById("settingsEmail").value,
-            phone: document.getElementById("settingsPhone").value,
-            location: document.getElementById("settingsLocation").value,
-            accountNo: document.getElementById("settingsPaymentInfo").value,
-            upiid: document.getElementById("settingsUPI").value,
-            numProperties: document.getElementById("settingsNumProperties")
-              .value,
-            emailNotifications: document
-              .getElementById("emailNotifications")
-              .checked.toString(),
-            smsNotifications: document
-              .getElementById("smsNotifications")
-              .checked.toString(),
-            paymentReminders: document
-              .getElementById("paymentReminders")
-              .checked.toString(),
-            complaintAlerts: document
-              .getElementById("complaintAlerts")
-              .checked.toString(),
-            maintenanceAlerts: document
-              .getElementById("maintenanceAlerts")
-              .checked.toString(),
-            currentPassword: document.getElementById("settingsCurrentPassword")
-              .value,
-            newPassword: document.getElementById("settingsNewPassword").value,
-            confirmPassword: document.getElementById("settingsConfirmPassword")
-              .value,
-          };
+                // Basic client-side validation
+                if (!formData.firstName) {
+                  document.getElementById("settingsFirstNameError").textContent =
+                    "First name is required";
+                  return;
+                } else {
+                  document.getElementById("settingsFirstNameError").textContent = "";
+                }
 
-          // Basic client-side validation
-          if (!formData.firstName) {
-            document.getElementById("settingsFirstNameError").textContent =
-              "First name is required";
-            return;
-          } else {
-            document.getElementById("settingsFirstNameError").textContent = "";
-          }
+                if (!formData.email) {
+                  document.getElementById("settingsEmailError").textContent =
+                    "Email is required";
+                  return;
+                } else {
+                  document.getElementById("settingsEmailError").textContent = "";
+                }
 
-          if (!formData.email) {
-            document.getElementById("settingsEmailError").textContent =
-              "Email is required";
-            return;
-          } else {
-            document.getElementById("settingsEmailError").textContent = "";
-          }
+                // Send data to the backend
+                fetch("/api/owner/update-settings", {
+                  method: "POST",
+                  headers: {
+                    "Content-Type": "application/json",
+                  },
+                  credentials: "include",
+                  body: JSON.stringify(formData),
+                })
+                  .then((response) => response.json())
+                  .then((data) => {
+                    if (data.success) {
+                      // Show success message
+                      document.getElementById(
+                        "settingsSuccessMessage"
+                      ).style.display = "block";
+                      setTimeout(() => {
+                        document.getElementById(
+                          "settingsSuccessMessage"
+                        ).style.display = "none";
+                      }, 3000);
 
-          // Send data to the backend
-          fetch("/api/owner/update-settings", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            credentials: "include",
-            body: JSON.stringify(formData),
-          })
-            .then((response) => response.json())
-            .then((data) => {
-              if (data.success) {
-                // Show success message
-                document.getElementById(
-                  "settingsSuccessMessage"
-                ).style.display = "block";
-                setTimeout(() => {
-                  document.getElementById(
-                    "settingsSuccessMessage"
-                  ).style.display = "none";
-                }, 3000);
-
-                // Update the displayed name in the sidebar
-                document.getElementById(
-                  "house_owner_name"
-                ).textContent = Hey, ${formData.firstName} ${formData.lastName};
-              } else {
-                // Show error message
-                alert(data.message || "Failed to update settings");
-              }
-            })
-            .catch((error) => {
-              console.error("Error updating settings:", error);
-              alert("successfully updated!");
-            });
-        });
-
-      document
-        .getElementById("cancelSettingsBtn")
-        ?.addEventListener("click", function () {
-          document.getElementById("settingsForm").reset();
-        });
-
-      // Handle notification actions (approve/reject)
-      function handleUnrentRequestAction(unrentRequestId, action) {
-        if (!unrentRequestId || !action) {
-          alert("Missing required information for unrent request");
-          return;
-        }
-        fetch("/api/owner/approve-unrent-property", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          credentials: "include",
-          body: JSON.stringify({
-            unrentRequestId,
-            action,
-          }),
-        })
-          .then((response) => {
-            if (!response.ok) {
-              return response.json().then((errorData) => {
-                throw new Error(
-                  errorData.message || HTTP error! Status: ${response.status}
-                );
+                      // Update the displayed name in the sidebar
+                      document.getElementById(
+                        "house_owner_name"
+                      ).textContent = "Hey, " + formData.firstName + " " + formData.lastName;
+                    } else {
+                      // Show error message
+                      alert(data.message || "Failed to update settings");
+                    }
+                  })
+                  .catch((error) => {
+                    console.error("Error updating settings:", error);
+                    alert("successfully updated!");
+                  });
               });
-            }
-            return response.json();
-          })
-          .then((data) => {
-            if (data.success) {
-              alert("Property unrented request processed successfully");
-              refreshDashboardData();
-            } else {
-              alert(data.message || "Failed to process unrent request");
-            }
-          })
-          .catch((error) => {
-            console.error("Error processing unrent request:", error);
-            alert(Failed to process the request: ${error.message});
-          });
-      }
 
-      function handleRegularNotification(notificationCard, action) {
-        const notificationId = notificationCard.dataset.notificationId;
-
-        fetch("/notifications/action", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          credentials: "include",
-          body: JSON.stringify({ notificationId, action }),
-        })
-          .then((response) => {
-            if (!response.ok) {
-              return response.json().then((errorData) => {
-                throw new Error(
-                  errorData.message || HTTP error! Status: ${response.status}
-                );
+            document
+              .getElementById("cancelSettingsBtn")
+              ?.addEventListener("click", function () {
+                document.getElementById("settingsForm").reset();
               });
-            }
-            return response.json();
-          })
-          .then((data) => {
-            if (data.success) {
-              updateNotificationUI(notificationCard, action);
-              alert(
-                `Notification ${
-                  action === "approve" ? "approved" : "rejected"
-                } successfully!`
-              );
-              refreshNotifications();
-            } else {
-              alert(
-                `Failed to ${action} notification: ${
-                  data.message || "Unknown error"
-                }`
-              );
-            }
-          })
-          .catch((error) => {
-            console.error("Error handling notification action:", error);
-            alert(Failed to process the request: ${error.message});
-          });
-      }
 
-      function updateNotificationUI(notificationCard, action) {
-        const statusElement = notificationCard.querySelector(
-          ".notification-status"
-        );
-        statusElement.textContent =
-          action === "approve" ? "Approved" : "Rejected";
-        statusElement.classList.remove("pending");
-        statusElement.classList.add(
-          action === "approve" ? "approved" : "rejected"
-        );
-
-        const actions = notificationCard.querySelector(".notification-actions");
-        if (actions) {
-          actions.remove();
-        }
-      }
-
-      function refreshDashboardData() {
-        // Refresh properties section
-        fetch("/owner/properties")
-          .then((response) => response.json())
-          .then((data) => {
-            if (data.success) {
-              const propertiesContainer =
-                document.getElementById("prop_container");
-              // Update properties HTML
-              if (propertiesContainer) {
-                // Update properties display
+            // Handle notification actions (approve/reject)
+            function handleUnrentRequestAction(unrentRequestId, action) {
+              if (!unrentRequestId || !action) {
+                alert("Missing required information for unrent request");
+                return;
               }
+              fetch("/api/owner/approve-unrent-property", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                credentials: "include",
+                body: JSON.stringify({
+                  unrentRequestId,
+                  action,
+                }),
+              })
+                .then((response) => {
+                  if (!response.ok) {
+                    return response.json().then((errorData) => {
+                      throw new Error(
+                        errorData.message || "HTTP error! Status: " + response.status
+                      );
+                    });
+                  }
+                  return response.json();
+                })
+                .then((data) => {
+                  if (data.success) {
+                    alert("Property unrented request processed successfully");
+                    refreshDashboardData();
+                  } else {
+                    alert(data.message || "Failed to process unrent request");
+                  }
+                })
+                .catch((error) => {
+                  console.error("Error processing unrent request:", error);
+                  alert("Failed to process the request: " + error.message);
+                });
             }
-          })
-          .catch((error) =>
-            console.error("Error refreshing properties:", error)
-          );
 
-        // Refresh tenants section
-        fetch("/owner/tenants")
-          .then((response) => response.json())
-          .then((data) => {
-            if (data.success) {
-              const tenantsContainer = document.querySelector(".messages");
-              // Update tenants HTML
-              if (tenantsContainer) {
-                // Update tenants display
-              }
+            function handleRegularNotification(notificationCard, action) {
+              const notificationId = notificationCard.dataset.notificationId;
+
+              fetch("/notifications/action", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                credentials: "include",
+                body: JSON.stringify({ notificationId, action }),
+              })
+                .then((response) => {
+                  if (!response.ok) {
+                    return response.json().then((errorData) => {
+                      throw new Error(
+                        errorData.message || "HTTP error! Status: " + response.status
+                      );
+                    });
+                  }
+                  return response.json();
+                })
+                .then((data) => {
+                  if (data.success) {
+                    updateNotificationUI(notificationCard, action);
+                    alert(
+                      `Notification ${
+                        action === "approve" ? "approved" : "rejected"
+                      } successfully!`
+                    );
+                    refreshNotifications();
+                  } else {
+                    alert(
+                      `Failed to ${action} notification: ${
+                        data.message || "Unknown error"
+                      }`
+                    );
+                  }
+                })
+                .catch((error) => {
+                  console.error("Error handling notification action:", error);
+                  alert(`Failed to process the request: ${error.message}`);
+                });
             }
-          })
-          .catch((error) => console.error("Error refreshing tenants:", error));
 
-        // Refresh notifications
-        refreshNotifications();
-      }
-
-      function handleNotificationAction(notificationId, action) {
-        fetch("/notifications/action", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          credentials: "include", // Ensure cookies/session are sent
-          body: JSON.stringify({ notificationId, action }),
-        })
-          .then((response) => {
-            // Check if response is ok (status in the range 200-299)
-            if (!response.ok) {
-              return response.json().then((errorData) => {
-                throw new Error(
-                  errorData.message || HTTP error! Status: ${response.status}
-                );
-              });
-            }
-            return response.json();
-          })
-          .then((data) => {
-            if (data.success) {
-              const notificationCard = document.querySelector(
-                .notification-card[data-notification-id="${notificationId}"]
-              );
+            function updateNotificationUI(notificationCard, action) {
               const statusElement = notificationCard.querySelector(
                 ".notification-status"
               );
-              // Update status text and class
               statusElement.textContent =
                 action === "approve" ? "Approved" : "Rejected";
               statusElement.classList.remove("pending");
               statusElement.classList.add(
                 action === "approve" ? "approved" : "rejected"
               );
-              // Remove action buttons
-              const actions = notificationCard.querySelector(
-                ".notification-actions"
-              );
+
+              const actions = notificationCard.querySelector(".notification-actions");
               if (actions) {
                 actions.remove();
               }
-              // Show success message
-              alert(
-                `Notification ${
-                  action === "approve" ? "approved" : "rejected"
-                } successfully!`
-              );
-              refreshNotifications();
-            } else {
-              alert(
-                `Failed to ${action} notification: ${
-                  data.message || "Unknown error"
-                }`
-              );
             }
-          })
-          .catch((error) => {
-            console.error("Error handling notification action:", error);
-            alert(Failed to process the request: ${error.message});
-          });
-      }
+
+            function refreshDashboardData() {
+              // Refresh properties section
+              fetch("/owner/properties")
+                .then((response) => response.json())
+                .then((data) => {
+                  if (data.success) {
+                    const propertiesContainer =
+                      document.getElementById("prop_container");
+                    // Update properties HTML
+                    if (propertiesContainer) {
+                      // Update properties display
+                    }
+                  }
+                })
+                .catch((error) =>
+                  console.error("Error refreshing properties:", error)
+                );
+
+              // Refresh tenants section
+              fetch("/owner/tenants")
+                .then((response) => response.json())
+                .then((data) => {
+                  if (data.success) {
+                    const tenantsContainer = document.querySelector(".messages");
+                    // Update tenants HTML
+                    if (tenantsContainer) {
+                      // Update tenants display
+                    }
+                  }
+                })
+                .catch((error) => console.error("Error refreshing tenants:", error));
+
+              // Refresh notifications
+              refreshNotifications();
+            }
+
+            function handleNotificationAction(notificationId, action) {
+              fetch("/notifications/action", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                credentials: "include", // Ensure cookies/session are sent
+                body: JSON.stringify({ notificationId, action }),
+              })
+                .then((response) => {
+                  // Check if response is ok (status in the range 200-299)
+                  if (!response.ok) {
+                    return response.json().then((errorData) => {
+                      throw new Error(
+                        errorData.message || `HTTP error! Status: ${response.status}`
+                      );
+                    });
+                  }
+                  return response.json();
+                })
+                .then((data) => {
+                  if (data.success) {
+                    const notificationCard = document.querySelector(`.notification-card[data-notification-id="${notificationId}"]`);
+                    const statusElement = notificationCard.querySelector(
+                      ".notification-status"
+                    );
+                    // Update status text and class
+                    statusElement.textContent =
+                      action === "approve" ? "Approved" : "Rejected";
+                    statusElement.classList.remove("pending");
+                    statusElement.classList.add(
+                      action === "approve" ? "approved" : "rejected"
+                    );
+                    // Remove action buttons
+                    const actions = notificationCard.querySelector(
+                      ".notification-actions"
+                    );
+                    if (actions) {
+                      actions.remove();
+                    }
+                    // Show success message
+                    alert(
+                      `Notification ${
+                        action === "approve" ? "approved" : "rejected"
+                      } successfully!`
+                    );
+                    refreshNotifications();
+                  } else {
+                    alert(
+                      `Failed to ${action} notification: ${
+                        data.message || "Unknown error"
+                      }`
+                    );
+                  }
+                })
+                .catch((error) => {
+                  console.error("Error handling notification action:", error);
+                  alert(`Failed to process the request: ${error.message}`);
+                });
+            }
     </script>
   </body>
 </html>
