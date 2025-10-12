@@ -2,8 +2,6 @@ const express = require("express");
 const mongoose = require("mongoose");
 const path = require("path");
 const session = require("express-session");
-const nodemailer = require("nodemailer");
-const bcrypt = require("bcryptjs");
 const rateLimit = require("express-rate-limit");
 require("dotenv").config();
 
@@ -15,20 +13,26 @@ const Booking = require("./models/booking");
 const Payment = require("./models/payment");
 const Notification = require("./models/notification");
 const Setting = require("./models/setting");
-const Contact = require('./models/contactus'); // new Contact model
+const Contact = require("./models/contactus"); // new Contact model
 const Complaint = require("./models/complaint");
 const Rating = require("./models/rating");
 const RentalHistory = require("./models/rentalhistory");
 const MaintenanceRequest = require("./models/MaintenanceRequest");
 const Admin = require("./models/admin");
 
+const WorkerPayment = require("./models/workerPayment");
+
 const propertyRoutes = require("./routes/property");
 const workerRoutes = require("./routes/workers");
 const TenantRoutes = require("./routes/tenant");
 const ownerRoutes = require("./routes/owner");
 const bookingRoutes = require("./routes/bookingRoutes");
+
+// Admin Routes
 const adminRoutes = require("./routes/admin");
 const analyticsRoutes = require("./routes/analytics");
+// In app.js, add this route after the existing admin route
+const adminContactUsController = require("./controllers/adminContactUsController");
 
 require("dns").setDefaultResultOrder("ipv4first");
 
@@ -66,24 +70,8 @@ app.use((req, res, next) => {
   next();
 });
 
-// Validate email configuration
-if (!process.env.GMAIL_USER || !process.env.GMAIL_PASS) {
-  console.error('Email configuration missing. Please check your .env file.');
-  console.error('GMAIL_USER and GMAIL_PASS must be set for password reset functionality.');
-  console.error('See README.md for setup instructions.');
-}
-
-// Import email utilities
-const { sendOTPEmail, verifyEmailConfig } = require('./utils/emailUtils');
-
-// Verify email configuration on startup
-verifyEmailConfig().then(isValid => {
-  if (isValid) {
-    console.log('✅ Email system is ready');
-  } else {
-    console.error('⚠️ Email system is not properly configured');
-  }
-});
+// In-memory OTP store: { email -> { otp, expires } }
+const otpStore = new Map();
 
 // Rate limiter for /forgot-password
 const forgotPasswordLimiter = rateLimit({
@@ -105,6 +93,11 @@ app.use("/", ownerRoutes);
 app.use("/", bookingRoutes);
 app.use("/admin", adminRoutes);
 app.use("/api", analyticsRoutes);
+
+// Forgot Password Page
+app.get("/forgot-password", (req, res) => {
+  res.render("pages/forgot_password", { error: req.query.error || "" });
+});
 
 // Dashboard Route
 app.get("/dashboard", isAuthenticated, (req, res) => {
@@ -129,116 +122,60 @@ app.post("/forgot-password", forgotPasswordLimiter, async (req, res) => {
   const { email } = req.body;
 
   try {
-    console.log('Forgot password request for:', email);
-    
-    // Try to find user in each model
     let user = null;
     let userModel = null;
-    
+
     const tenant = await Tenant.findOne({ email });
     const owner = await Owner.findOne({ email });
     const worker = await Worker.findOne({ email });
-    
+
     if (tenant) {
       user = tenant;
-      userModel = 'tenant';
+      userModel = "tenant";
     } else if (owner) {
       user = owner;
-      userModel = 'owner';
+      userModel = "owner";
     } else if (worker) {
       user = worker;
-      userModel = 'worker';
+      userModel = "worker";
     }
 
     if (!user) {
-      console.log('Email not found:', email);
       return res.json({ success: false, error: "Email not found" });
     }
 
     const otp = generateOtp();
-    const otpExpires = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
+    const otpExpires = Date.now() + 10 * 60 * 1000; // 10 minutes
 
-    console.log('Generated OTP for user:', {
-      email,
-      userModel,
-      otpLength: otp.length,
-      expires: otpExpires
-    });
+    otpStore.set(email, { otp, expires: otpExpires });
 
-    // Save OTP to user record first
-    user.otp = otp;
-    user.otpExpires = otpExpires;
-    await user.save();
+    setTimeout(() => {
+      const entry = otpStore.get(email);
+      if (entry && entry.expires <= Date.now()) otpStore.delete(email);
+    }, 11 * 60 * 1000);
 
-    // Send OTP email using the new utility
-    const emailSent = await sendOTPEmail(email, otp);
-    
-    if (!emailSent) {
-      // If email fails, remove the OTP from user record
-      user.otp = null;
-      user.otpExpires = null;
-      await user.save();
-      return res.json({ success: false, error: "Failed to send OTP. Please try again." });
-    }
-
-    return res.json({ success: true, message: "OTP sent to your email" });
+    return res.json({ success: true, message: "OTP generated", otp });
   } catch (err) {
     console.error("Error in forgot password flow:", err);
-    return res.json({ success: false, error: "Server error. Please try again later." });
+    return res.json({
+      success: false,
+      error: "Server error. Please try again later.",
+    });
   }
 });
 
 // Verify OTP
 app.post("/verify-otp", async (req, res) => {
   const { email, otp } = req.body;
-
   try {
-    console.log('Verifying OTP for:', email);
-
-    // Find user in each model
-    let user = null;
-    let userModel = null;
-    
-    const tenant = await Tenant.findOne({ email });
-    const owner = await Owner.findOne({ email });
-    const worker = await Worker.findOne({ email });
-    
-    if (tenant) {
-      user = tenant;
-      userModel = 'tenant';
-    } else if (owner) {
-      user = owner;
-      userModel = 'owner';
-    } else if (worker) {
-      user = worker;
-      userModel = 'worker';
-    }
-
-    if (!user) {
-      console.log('User not found for OTP verification:', email);
-      return res.json({ success: false, error: "User not found" });
-    }
-
-    console.log('OTP verification attempt:', {
-      email,
-      userModel,
-      hasOtp: !!user.otp,
-      otpMatches: user.otp === otp,
-      otpExpired: user.otpExpires < Date.now()
-    });
-
-    if (!user.otp) {
-      return res.json({ success: false, error: "No OTP requested" });
-    }
-
-    if (user.otp !== otp) {
-      return res.json({ success: false, error: "Invalid OTP" });
-    }
-
-    if (user.otpExpires < Date.now()) {
+    const entry = otpStore.get(email);
+    if (!entry) return res.json({ success: false, error: "No OTP requested" });
+    if (Date.now() > entry.expires) {
+      otpStore.delete(email);
       return res.json({ success: false, error: "OTP has expired" });
     }
-
+    if (entry.otp !== String(otp))
+      return res.json({ success: false, error: "Invalid OTP" });
     return res.json({ success: true, message: "OTP verified" });
   } catch (err) {
     console.error("Error verifying OTP:", err);
@@ -251,65 +188,50 @@ app.post("/reset-password", async (req, res) => {
   const { email, password } = req.body;
 
   try {
-    console.log('Password reset attempt for:', email);
-
     if (!password || password.length < 8) {
-      return res.json({ 
-        success: false, 
-        error: "Password must be at least 8 characters long" 
+      return res.json({
+        success: false,
+        error: "Password must be at least 8 characters long",
       });
     }
 
-    // Find user in each model
     let user = null;
     let userModel = null;
-    
-    const tenant = await Tenant.findOne({ email }).select('+password');
-    const owner = await Owner.findOne({ email }).select('+password');
-    const worker = await Worker.findOne({ email }).select('+password');
-    
+
+    const tenant = await Tenant.findOne({ email }).select("+password");
+    const owner = await Owner.findOne({ email }).select("+password");
+    const worker = await Worker.findOne({ email }).select("+password");
+
     if (tenant) {
       user = tenant;
-      userModel = 'tenant';
+      userModel = "tenant";
     } else if (owner) {
       user = owner;
-      userModel = 'owner';
+      userModel = "owner";
     } else if (worker) {
       user = worker;
-      userModel = 'worker';
+      userModel = "worker";
     }
 
     if (!user) {
-      console.log('User not found for password reset:', email);
       return res.json({ success: false, error: "User not found" });
     }
 
-    console.log('Reset password verification:', {
-      email,
-      userModel,
-      hasOtp: !!user.otp,
-      otpExpired: user.otpExpires < Date.now()
-    });
-
-    if (!user.otp) {
+    const entry = otpStore.get(email);
+    if (!entry) {
       return res.json({ success: false, error: "Please verify OTP first" });
     }
-
-    if (user.otpExpires < Date.now()) {
-      return res.json({ success: false, error: "OTP has expired, please request a new one" });
+    if (Date.now() > entry.expires) {
+      otpStore.delete(email);
+      return res.json({
+        success: false,
+        error: "OTP has expired, please request a new one",
+      });
     }
 
-    // Hash the new password
-    const hashedPassword = await bcrypt.hash(password, 10);
-    user.password = hashedPassword;
-    user.otp = null;
-    user.otpExpires = null;
+    user.password = password;
     await user.save();
-
-    console.log('Password reset successful:', {
-      email,
-      userModel
-    });
+    otpStore.delete(email);
 
     return res.json({ success: true, message: "Password reset successful" });
   } catch (err) {
@@ -333,24 +255,20 @@ app.get("/login", (req, res) => {
 });
 
 // Login Route
+// Login Route
 app.post("/login", async (req, res) => {
   const { userType, email, password } = req.body;
-  try {
-    console.log('Login - Received request:', {
-      userType,
-      email,
-      hasPassword: !!password,
-      passwordLength: password ? password.length : 0
-    });
 
+  try {
+    // Check required fields
     if (!userType || !email || !password) {
       return res.status(400).json({ error: "Missing required fields" });
     }
 
     let user;
     let Model;
-    
-    // Determine which model to use
+
+    // Determine user model based on userType
     if (userType === "tenant") {
       Model = Tenant;
     } else if (userType === "owner") {
@@ -361,66 +279,29 @@ app.post("/login", async (req, res) => {
       return res.status(400).json({ error: "Invalid user type" });
     }
 
-    // Find user and explicitly select password
-    user = await Model.findOne({ email }).select('+password');
-    
-    console.log('Login - Database query result:', {
-      found: !!user,
-      userType,
-      email,
-      hasPasswordField: user ? !!user.password : false,
-      passwordFieldLength: user && user.password ? user.password.length : 0
-    });
+    // Fetch user from database including password
+    user = await Model.findOne({ email }).select("+password");
 
     if (!user) {
       return res.status(404).json({ error: "Create an account first" });
     }
 
     if (!user.password) {
-      console.log('Login - No password hash found in database');
       return res.status(401).json({ error: "Password not set for this account" });
     }
 
-    if (!user) {
-      return res.status(404).json({ error: "Create an account first" });
+    if (user.password !== password) {
+      return res.status(401).json({ error: "Incorrect password" });
     }
 
-    // Use bcrypt to compare password
-    try {
-      console.log('Login - Before password comparison:', {
-        providedPasswordLength: password.length,
-        storedHashLength: user.password.length,
-        storedHashStartsWith: user.password.substring(0, 7) // Show just the beginning of the hash
-      });
-
-      // Verify the stored hash is in correct bcrypt format
-      if (!user.password.startsWith('$2')) {
-        console.log('Login - Invalid hash format in database');
-        // Re-hash the password if it's not in bcrypt format
-        user.password = await bcrypt.hash(user.password, 10);
-        await user.save();
-      }
-
-      const isMatch = await bcrypt.compare(password, user.password);
-      
-      console.log('Login - Password comparison complete:', {
-        isMatch,
-        email,
-        userType
-      });
-
-      if (!isMatch) {
-        return res.status(401).json({ error: "Incorrect password" });
-      }
-    } catch (error) {
-      console.error('Login - Password comparison error:', {
-        error: error.message,
-        email,
-        userType
-      });
-      return res.status(500).json({ error: "Error verifying password" });
+    // Suspended account check
+    if (user.status === "Suspended") {
+      return res
+        .status(403)
+        .json({ error: "Your account is suspended temporarily" });
     }
 
+    // Set session
     req.session.user = {
       _id: user._id.toString(),
       userType,
@@ -436,12 +317,14 @@ app.post("/login", async (req, res) => {
       newListings: user.newListings || false,
     };
 
+    // Success response with redirect URL
     return res.json({ success: true, redirectUrl: getDashboardUrl(userType) });
   } catch (err) {
     console.error("Login error:", err);
     return res.status(500).json({ error: "Server error" });
   }
 });
+
 
 // Registration Route
 app.post("/register", async (req, res) => {
@@ -456,25 +339,26 @@ app.post("/register", async (req, res) => {
     experience,
     numProperties,
     password,
-    accountNo,
-    upiid,
   } = req.body;
 
   try {
-    // Validate required fields
+    // Log received password for debugging
+    console.log("Received password:", JSON.stringify(password));
+
+    // Basic validation
     if (!userType || !firstName || !lastName || !email || !password) {
       return res.status(400).json({ error: "Missing required fields" });
     }
 
-    // Validate email format
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
       return res.status(400).json({ error: "Invalid email format" });
     }
 
-    // Validate password length
     if (password.length < 8) {
-      return res.status(400).json({ error: "Password must be at least 8 characters" });
+      return res
+        .status(400)
+        .json({ error: "Password must be at least 8 characters" });
     }
 
     // Check for existing user
@@ -487,24 +371,11 @@ app.post("/register", async (req, res) => {
       return res.status(400).json({ error: "Email already exists" });
     }
 
-    // Hash password
-    console.log('Registration - Before hashing:', {
-      email,
-      userType,
-      passwordLength: password.length
-    });
-    
-    const hashedPassword = await bcrypt.hash(password, 10);
-    
-    console.log('Registration - After hashing:', {
-      email,
-      userType,
-      hashedPasswordLength: hashedPassword.length
-    });
-    
+    // Use plain text password as requested
+    const plainPassword = password;
+
     let newUser;
 
-    // Create new user based on userType
     if (userType === "tenant") {
       newUser = new Tenant({
         firstName,
@@ -512,12 +383,14 @@ app.post("/register", async (req, res) => {
         email,
         phone,
         location,
-        password: hashedPassword,
+        password: plainPassword,
         userType: "tenant",
       });
     } else if (userType === "worker") {
       if (!serviceType || !experience) {
-        return res.status(400).json({ error: "Service type and experience required for workers" });
+        return res
+          .status(400)
+          .json({ error: "Service type and experience required for workers" });
       }
       newUser = new Worker({
         firstName,
@@ -527,12 +400,14 @@ app.post("/register", async (req, res) => {
         location,
         serviceType,
         experience: Number(experience) || 0,
-        password: hashedPassword,
+        password: plainPassword,
         userType: "worker",
       });
     } else if (userType === "owner") {
-      if (!numProperties || !accountNo || !upiid) {
-        return res.status(400).json({ error: "Number of properties, account number, and UPI ID required for owners" });
+      if (!numProperties || numProperties < 1) {
+        return res
+          .status(400)
+          .json({ error: "Number of properties required for owners" });
       }
       newUser = new Owner({
         firstName,
@@ -541,20 +416,35 @@ app.post("/register", async (req, res) => {
         phone,
         location,
         numProperties: Number(numProperties) || 0,
-        password: hashedPassword,
-        accountNo,
-        upiid,
+        password: plainPassword,
         userType: "owner",
+        notifications: {
+          email: true,
+          sms: false,
+          payment: true,
+          complaint: true,
+          maintenance: true,
+        },
       });
     } else {
       return res.status(400).json({ error: "Invalid user type" });
     }
 
+    // Log user data before saving
+    console.log("Saving user with password:", JSON.stringify(newUser.password));
     await newUser.save();
-    return res.json({ success: true, redirectUrl: "/login", message: "Registration successful" });
+    console.log("User saved successfully");
+
+    return res.json({
+      success: true,
+      redirectUrl: "/login",
+      message: "Registration successful",
+    });
   } catch (err) {
     console.error("Registration error:", err);
-    return res.status(500).json({ error: `Registration failed: ${err.message}` });
+    return res
+      .status(500)
+      .json({ error: `Registration failed: ${err.message}` });
   }
 });
 
@@ -580,9 +470,54 @@ app.get("/logout", (req, res) => {
   });
 });
 
-// Home Route
+// Static Routes
+app.get("/register", (req, res) => {
+  const data = {
+    error: null,
+    userType: req.query.userType || "tenant",
+    firstName: "",
+    lastName: "",
+    email: "",
+    phone: "",
+    location: "",
+    serviceType: "",
+    experience: "",
+    numProperties: "",
+    errors: {},
+    success: false,
+  };
+  res.render("pages/registration", data);
+});
+// Logout route
+app.get("/logout", (req, res) => {
+  req.session.destroy((err) => {
+    if (err) {
+      console.error("Session destroy error:", err);
+    }
+    res.redirect("/");
+  });
+});
+
+// app.get("/owner_dashboard", isAuthenticated, (req, res) => {
+//   const user = req.session.user;
+//   if (user.userType !== "owner") {
+//     return redirectToDashboard(req, res);
+//   }
+//   res.render("pages/owner_dashboard", { user });
+// });
+
+// app.get("/worker_dashboard", isAuthenticated, (req, res) => {
+//   const user = req.session.user;
+//   if (user.userType !== "worker") {
+//     return redirectToDashboard(req, res);
+//   }
+//   res.render("pages/worker_dashboard", { user });
+// });
+
 app.get("/", async (req, res) => {
   try {
+    // Fetch properties for Popular Listings
+    // Popular Listings (show only not rented, verified, and marked popular)
     const propertiesData = await Property.find({
       isRented: false,
       isVerified: true,
@@ -592,6 +527,7 @@ app.get("/", async (req, res) => {
       .limit(10)
       .lean();
 
+    // Slider Container (show only not rented, verified properties)
     const sliderPropertiesData = await Property.find({
       isRented: false,
       isVerified: true,
@@ -600,12 +536,14 @@ app.get("/", async (req, res) => {
       .limit(10)
       .lean();
 
+    // Render the index.ejs template with fetched data
     res.render("pages/index", {
       propertiesData,
       sliderPropertiesData,
     });
   } catch (error) {
     console.error("Error fetching properties:", error);
+    // Render with empty arrays and an error message if query fails
     res.render("pages/index", {
       propertiesData: [],
       sliderPropertiesData: [],
@@ -614,7 +552,8 @@ app.get("/", async (req, res) => {
   }
 });
 
-// Search Route
+// Route to render search.ejs
+// Route to render search.ejs
 app.get("/search", async (req, res) => {
   try {
     const {
@@ -688,35 +627,11 @@ app.get("/property", async (req, res) => {
     res.render("pages/propertydetails", { property });
   } catch (err) {
     console.error("Error fetching property:", err);
-    res
-      .status(500)
-      .render("pages/propertydetails", {
-        property: null,
-        error: "Server Error",
-      });
+    res.status(500).render("pages/propertydetails", {
+      property: null,
+      error: "Server Error",
+    });
   }
-});
-
-// Static Routes
-app.get("/register", (req, res) => {
-  const data = {
-    error: null,
-    userType: req.query.userType || 'tenant',
-    firstName: '',
-    lastName: '',
-    email: '',
-    phone: '',
-    location: '',
-    serviceType: '',
-    experience: '',
-    numProperties: '',
-    accountNo: '',
-    upiid: '',
-    errors: {},
-    success: false
-  };
-  console.log('Rendering registration with data:', data); // Debug log
-  res.render("pages/registration", data);
 });
 
 app.get("/worker_register", (req, res) => {
@@ -739,47 +654,46 @@ app.get("/contact_us", (req, res) => {
   res.render("pages/contact_us");
 });
 
-
 // POST route to handle contact form submission
-app.post('/submit-form', async (req, res) => {
+app.post("/submit-form", async (req, res) => {
   try {
     const { name, email, phone, subject, message } = req.body;
 
-    // Basic validation
     if (!name || !email || !subject || !message) {
-      return res.status(400).json({ error: 'Name, email, subject, and message are required' });
+      return res
+        .status(400)
+        .json({ error: "Name, email, subject, and message are required" });
     }
 
-    // Validate email (must be a Gmail address)
     const emailRegex = /^[a-zA-Z0-9._%+-]+@gmail\.com$/;
     if (!emailRegex.test(email)) {
-      return res.status(400).json({ error: 'Please provide a valid Gmail address' });
+      return res
+        .status(400)
+        .json({ error: "Please provide a valid Gmail address" });
     }
 
-    // Validate phone number if provided (must be 10 digits)
     if (phone && !/^\d{10}$/.test(phone)) {
-      return res.status(400).json({ error: 'Please provide a valid 10-digit phone number' });
+      return res
+        .status(400)
+        .json({ error: "Please provide a valid 10-digit phone number" });
     }
 
-    // Create new contact entry
     const contact = new Contact({
       name,
       email,
-      phone: phone || '',
+      phone: phone || "",
       subject,
       message,
     });
 
-    // Save to MongoDB
     await contact.save();
 
-    res.status(200).json({ message: 'Form submitted successfully' });
+    res.status(200).json({ message: "Form submitted successfully" });
   } catch (error) {
-    console.error('Error submitting form:', error);
-    res.status(500).json({ error: 'Server error, please try again later' });
+    console.error("Error submitting form:", error);
+    res.status(500).json({ error: "Server error, please try again later" });
   }
 });
-
 
 app.get("/about_us", (req, res) => {
   res.render("pages/about_us");
@@ -802,7 +716,7 @@ app.post("/admin/login", async (req, res) => {
   const { username, password } = req.body;
   try {
     const admin = await Admin.findOne({ username });
-    if (!admin || !(await bcrypt.compare(password, admin.password))) {
+    if (!admin || admin.password !== password) {
       return res.render("pages/adminlogin", {
         error: "Invalid username or password",
       });
@@ -815,9 +729,12 @@ app.post("/admin/login", async (req, res) => {
   }
 });
 
-// Admin Dashboard Route
+// In app.js, update the admin route
 app.get("/admin", isAuthenticate, async (req, res) => {
   try {
+    
+
+    // Existing dashboard logic remains unchanged
     const totalProperties = await Property.countDocuments();
     const totalRenters = await Tenant.countDocuments();
     const totalOwners = await Owner.countDocuments();
@@ -896,7 +813,6 @@ app.get("/admin", isAuthenticate, async (req, res) => {
       propertiesActive,
       propertiesPending,
       workersAvailable,
-      monthlyRevenue: revenueMonthly,
       userGrowth,
       bookingStatusDistribution,
     };
@@ -1053,6 +969,33 @@ app.get("/admin", isAuthenticate, async (req, res) => {
         : "N/A";
     });
 
+    // Add contact submissions
+    const contactSubmissions = await Contact.find().lean();
+    contactSubmissions.forEach((s) => {
+      s.id = s._id.toString();
+      s.submittedAt = s.submittedAt
+        ? new Date(s.submittedAt).toLocaleString()
+        : "N/A";
+    });
+
+    // Add workerPayments
+    const workerPayments = await WorkerPayment.find()
+      .populate("tenantId", "firstName lastName")
+      .populate("workerId", "firstName lastName")
+      .sort({ createdAt: -1 })
+      .lean();
+    workerPayments.forEach((p) => {
+      p.id = p._id.toString();
+      p.paidByName = p.tenantId
+        ? `${p.tenantId.firstName} ${p.tenantId.lastName}`
+        : p.userName || "N/A";
+      p.paidById = p.tenantId?._id;
+      p.receivedByName = p.workerId
+        ? `${p.workerId.firstName} ${p.workerId.lastName}`
+        : "N/A";
+      p.receivedById = p.workerId?._id;
+    });
+
     res.render("pages/admin1", {
       stats,
       properties,
@@ -1061,6 +1004,8 @@ app.get("/admin", isAuthenticate, async (req, res) => {
       payments,
       notifications,
       maintenanceRequests,
+      contactSubmissions,
+      workerPayments,
     });
   } catch (err) {
     console.error("Error fetching dashboard data:", err);
@@ -1068,26 +1013,23 @@ app.get("/admin", isAuthenticate, async (req, res) => {
   }
 });
 
-// Start server with error handling
-const startServer = (port) => {
+app.get("/admin/message/:id", isAuthenticate, async (req, res) => {
   try {
-    app.listen(port, () => {
-      console.log(`Server running at http://localhost:${port}`);
-      console.log('Email configuration:', {
-        user: process.env.GMAIL_USER ? 'Configured' : 'Missing',
-        pass: process.env.GMAIL_PASS ? 'Configured' : 'Missing'
-      });
-    }).on('error', (err) => {
-      if (err.code === 'EADDRINUSE') {
-        console.log(`Port ${port} is busy, trying ${port + 1}`);
-        startServer(port + 1);
-      } else {
-        console.error('Server error:', err);
-      }
-    });
+    const submission = await Contact.findById(req.params.id).lean();
+    if (!submission) {
+      return res.status(404).send("Message not found");
+    }
+    submission.id = submission._id.toString();
+    submission.submittedAt = submission.submittedAt
+      ? new Date(submission.submittedAt).toLocaleString()
+      : "N/A";
+    res.render("admin/message-view", { submission });
   } catch (err) {
-    console.error('Failed to start server:', err);
+    console.error("Error fetching message details:", err);
+    res.status(500).send("Server Error");
   }
-};
-
-startServer(PORT);
+});
+// Start server
+app.listen(PORT, () => {
+  console.log(`Server running at http://localhost:${PORT}`);
+});

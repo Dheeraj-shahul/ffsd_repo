@@ -1,0 +1,29 @@
+<link rel="stylesheet" href="/css/notification-view.css">
+
+<div class="notification-view">
+    <h2>Contact Message Details</h2>
+  
+    <div class="notification-details">
+        <div class="detail-group">
+          <h3>Message Information</h3>
+          <p><strong>ID:</strong> <%= submission._id %></p>
+          <p><strong>Subject:</strong> <%= submission.subject %></p>
+          <p><strong>Message:</strong> <%= submission.message %></p>
+          <p><strong>Submitted At:</strong> <%= new Date(submission.submittedAt).toLocaleString() %></p>
+        </div>
+      
+        <div class="detail-group">
+          <h3>Sender Information</h3>
+          <p><strong>Name:</strong> <%= submission.name %></p>
+          <p><strong>Email:</strong> <%= submission.email %></p>
+          <p><strong>Phone:</strong> <%= submission.phone || 'N/A' %></p>
+        </div>
+      
+        <div class="detail-group">
+          <h3>Actions</h3>
+          <div class="action-buttons">
+            <a href="/admin" class="btn">Back to Dashboard</a>
+          </div>
+        </div>
+      </div>
+</div>

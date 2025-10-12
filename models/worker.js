@@ -18,26 +18,16 @@ const workerSchema = new mongoose.Schema({
   password: {
     type: String,
     required: true,
-    select: false // Don't include password by default
-  },
-  otp: {
-    type: String,
-    default: null
-  },
-  otpExpires: {
-    type: Date,
-    default: null
+    select: false
   },
   status: { type: String, enum: ['Active', 'Suspended'], default: "Active" },
   serviceStatus: { type: String, default: "Available" },
   lastLogin: Date,
   bookingIds: [{ type: mongoose.Schema.Types.ObjectId, ref: "Booking" }],
   clientIds: [{ type: mongoose.Schema.Types.ObjectId, ref: "Tenant" }],
+  notificationIds: [{ type: mongoose.Schema.Types.ObjectId, ref: "Notification" }], // ADD THIS
   ratingId: { type: mongoose.Schema.Types.ObjectId, ref: "Rating" },
-  isBooked: { type: Boolean, default: false }, // New field to track if worker is booked
-  otp: { type: String }, // Store OTP
-  otpExpires: { type: Date }, // OTP expiry time
-  
+  isBooked: { type: Boolean, default: false },
 }, { timestamps: true });
 
 module.exports = mongoose.model("Worker", workerSchema);

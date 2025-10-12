@@ -6,6 +6,7 @@ const adminBookingController = require("../controllers/adminBookingController");
 const adminNotificationController = require("../controllers/adminNotificationController");
 const adminMaintenanceController = require("../controllers/adminMaintenanceController");
 const adminPaymentController = require("../controllers/adminPaymentController");
+const adminWorkerPaymentController = require("../controllers/adminWorkerPaymentController");
 
 // View routes
 router.get("/user/:id/:userType", adminUserController.getUserDetails);
@@ -57,4 +58,9 @@ router.post("/payment/:id/retry", adminPaymentController.retryPayment);
 
 // Payments list route (if not already existing)
 router.get("/payments", adminPaymentController.getAllPayments);
+
+// Worker Payments list route
+router.get("/worker-payments", adminWorkerPaymentController.getAllWorkerPayments);
+router.get("/worker-payment/:id", adminWorkerPaymentController.getWorkerPaymentDetails);
+
 module.exports = router;

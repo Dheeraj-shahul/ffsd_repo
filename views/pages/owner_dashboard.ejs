@@ -774,9 +774,8 @@
             <% if (notifications && Array.isArray(notifications)) { %> <%
             notifications.forEach(notification => { %>
             <div
-              class="notification-card <%= notification.read ? 'read' : 'unread' %>"
-              data-notification-id="<%= notification._id || '' %>"
-              data-unrent-request-id="<%= notification.unrentRequestId || '' %>"
+              class="notification-card"
+              data-notification-id="<%= notification._id %>"
             >
               <div class="notification-header">
                 <h4><%= notification.type || 'Booking Request' %></h4>
@@ -803,47 +802,22 @@
                   Date(notification.createdDate).toLocaleDateString() : 'N/A' %>
                 </p>
               </div>
-              <% if (notification.type === 'Unrent Request') { %>
-              <div class="unrent-details">
-                <p>
-                  <strong>Tenant:</strong> <%= notification.tenantName || 'N/A'
-                  %>
-                </p>
-                <p>
-                  <strong>Reason:</strong> <%= notification.unrentReason ||
-                  notification.reason || 'N/A' %>
-                </p>
-                <p>
-                  <strong>Rent Paid:</strong> <%= notification.rentPaid ? 'Yes'
-                  : 'No' %>
-                </p>
-              </div>
-              <% } %> <% if (notification.type === 'Unrent Request') { %> <% if
-              (notification.status === 'Pending' &&
-              notification.unrentRequestId) { %>
+              <% if (notification.status === 'Pending') { %>
               <div class="notification-actions">
                 <button
                   class="action-button approve-button"
-                  onclick="handleUnrentRequestAction('<%= notification.unrentRequestId %>', 'approve')"
+                  onclick="handleNotificationAction('<%= notification._id %>', 'approve')"
                 >
                   Approve
                 </button>
                 <button
                   class="action-button reject-button"
-                  onclick="handleUnrentRequestAction('<%= notification.unrentRequestId %>', 'reject')"
+                  onclick="handleNotificationAction('<%= notification._id %>', 'reject')"
                 >
                   Reject
                 </button>
               </div>
-              <% } else if (notification.status === 'Pending' &&
-              !notification.unrentRequestId) { %>
-              <div
-                class="notification-warning"
-                style="color: red; font-weight: bold; margin-top: 10px"
-              >
-                Cannot approve/reject: Unrent request information missing.
-              </div>
-              <% } %> <% } %>
+              <% } %>
             </div>
             <% }) %> <% } else { %>
             <p>No notifications available.</p>
@@ -854,78 +828,79 @@
     </div>
 
     <script>
-      document
-        .getElementById("deleteAccountBtn")
-        ?.addEventListener("click", function () {
-          const deleteAccountOverlay = document.getElementById(
-            "deleteAccountOverlay"
-          );
-          document.getElementById("deleteAccountPassword").value = ""; // Clear password input
-          document.getElementById("deleteAccountPasswordError").textContent =
-            ""; // Clear error message
-          deleteAccountOverlay.style.display = "flex";
-        });
+      // Handle delete account button click
+document.getElementById("deleteAccountBtn")?.addEventListener("click", function () {
+  const deleteAccountOverlay = document.getElementById("deleteAccountOverlay");
+  document.getElementById("deleteAccountPassword").value = ""; // Clear password input
+  document.getElementById("deleteAccountPasswordError").textContent = ""; // Clear error message
+  deleteAccountOverlay.style.display = "flex";
+});
 
-      // Handle delete account confirmation
-      document
-        .getElementById("confirmDeleteAccount")
-        ?.addEventListener("click", function () {
-          const password = document.getElementById(
-            "deleteAccountPassword"
-          ).value;
-          const errorElement = document.getElementById(
-            "deleteAccountPasswordError"
-          );
+// Handle delete account confirmation
+// Handle delete account confirmation
+document.getElementById("confirmDeleteAccount")?.addEventListener("click", function () {
+  const password = document.getElementById("deleteAccountPassword").value;
+  const errorElement = document.getElementById("deleteAccountPasswordError");
 
-          if (!password) {
-            errorElement.textContent = "Please enter your password";
-            return;
-          }
+  if (!password) {
+    errorElement.textContent = "Please enter your password";
+    alert("Please enter your password");
+    return;
+  }
 
-          // Send delete account request to the server
-          fetch("/api/owner/delete-account", {
-            method: "DELETE",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            credentials: "include",
-            body: JSON.stringify({ password }),
-          })
-            .then((response) => response.json())
-            .then((data) => {
-              if (data.success) {
-                // Redirect to login or home page after successful deletion
-                alert("Account deleted successfully!");
-                window.location.href = "/login";
-              } else {
-                errorElement.textContent =
-                  data.message || "Failed to delete account";
-              }
-            })
-            .catch((error) => {
-              console.error("Error deleting account:", error);
-              errorElement.textContent =
-                "An error occurred while deleting the account";
-            });
-        });
-
-      // Cancel delete account action
-      document
-        .getElementById("cancelDeleteAccount")
-        ?.addEventListener("click", function () {
-          document.getElementById("deleteAccountOverlay").style.display =
-            "none";
-        });
-
-      // Close delete account overlay when clicking outside
-      window.addEventListener("click", function (event) {
-        const deleteAccountOverlay = document.getElementById(
-          "deleteAccountOverlay"
-        );
-        if (event.target === deleteAccountOverlay) {
-          deleteAccountOverlay.style.display = "none";
+  fetch("/owner/delete-account", {
+    method: "DELETE",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    credentials: "include",
+    body: JSON.stringify({ password }),
+  })
+    .then((response) => {
+      console.log("Response status:", response.status); // Log status
+      return response.json();
+    })
+    .then((data) => {
+      console.log("Server response:", data); // Log full response
+      if (data.success) {
+        alert("Account deleted successfully!");
+        window.location.href = "/login";
+      } else {
+        errorElement.textContent = data.message || "Failed to delete account";
+        // Show alert for specific error cases
+        if (data.message === "Cannot delete account because there are associated tenants") {
+          alert("Cannot delete your account because you have associated tenants. Please resolve tenant agreements before deleting your account.");
+        } else if (data.message === "Cannot delete account because one or more properties are currently rented") {
+          alert("Cannot delete your account because one or more properties are currently rented. Please ensure all properties are vacant before deleting your account.");
+        } else {
+          alert(data.message || "Failed to delete account");
         }
-      });
+      }
+    })
+    .catch((error) => {
+      console.error("Fetch error:", error);
+      errorElement.textContent = "An error occurred while deleting the account";
+      alert("An error occurred while deleting the account. Please try again.");
+    });
+});
+// Cancel delete account action
+document.getElementById("cancelDeleteAccount")?.addEventListener("click", function () {
+  document.getElementById("deleteAccountOverlay").style.display = "none";
+  document.getElementById("deleteAccountPassword").value = ""; // Clear password input
+  document.getElementById("deleteAccountPasswordError").textContent = ""; // Clear error
+});
+
+// Close delete account overlay when clicking outside
+window.addEventListener("click", function (event) {
+  const deleteAccountOverlay = document.getElementById("deleteAccountOverlay");
+  if (event.target === deleteAccountOverlay) {
+    deleteAccountOverlay.style.display = "none";
+    document.getElementById("deleteAccountPassword").value = ""; // Clear password input
+    document.getElementById("deleteAccountPasswordError").textContent = ""; // Clear error
+  }
+});
+
+
       // Function to refresh notifications section
       function refreshNotifications() {
         fetch("/api/owner/notifications", {
@@ -1582,6 +1557,67 @@
 
         // Refresh notifications
         refreshNotifications();
+      }
+
+      function handleNotificationAction(notificationId, action) {
+        fetch("/notifications/action", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          credentials: "include", // Ensure cookies/session are sent
+          body: JSON.stringify({ notificationId, action }),
+        })
+          .then((response) => {
+            // Check if response is ok (status in the range 200-299)
+            if (!response.ok) {
+              return response.json().then((errorData) => {
+                throw new Error(
+                  errorData.message || `HTTP error! Status: ${response.status}`
+                );
+              });
+            }
+            return response.json();
+          })
+          .then((data) => {
+            if (data.success) {
+              const notificationCard = document.querySelector(
+                `.notification-card[data-notification-id="${notificationId}"]`
+              );
+              const statusElement = notificationCard.querySelector(
+                ".notification-status"
+              );
+              // Update status text and class
+              statusElement.textContent =
+                action === "approve" ? "Approved" : "Rejected";
+              statusElement.classList.remove("pending");
+              statusElement.classList.add(
+                action === "approve" ? "approved" : "rejected"
+              );
+              // Remove action buttons
+              const actions = notificationCard.querySelector(
+                ".notification-actions"
+              );
+              if (actions) {
+                actions.remove();
+              }
+              // Show success message
+              alert(
+                `Notification ${
+                  action === "approve" ? "approved" : "rejected"
+                } successfully!`
+              );
+              refreshNotifications();
+            } else {
+              alert(
+                `Failed to ${action} notification: ${
+                  data.message || "Unknown error"
+                }`
+              );
+            }
+          })
+          .catch((error) => {
+            console.error("Error handling notification action:", error);
+            alert(`Failed to process the request: ${error.message}`);
+          });
       }
     </script>
   </body>

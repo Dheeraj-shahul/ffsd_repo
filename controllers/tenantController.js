@@ -11,8 +11,9 @@ const RentalHistory = require("../models/rentalhistory");
 const Notification = require("../models/notification");
 const WorkerBooking = require("../models/workerBooking");
 const UnrentRequest = require("../models/unrentRequest");
-const bcrypt = require("bcryptjs");
+// bcrypt removed; plain-text password comparisons are used per requirement
 
+// Dashboard Controller
 // Dashboard Controller
 // Dashboard Controller
 exports.getDashboard = async (req, res) => {
@@ -44,35 +45,18 @@ exports.getDashboard = async (req, res) => {
         .json({ success: false, message: "Tenant not found" });
     }
 
-    // Fetch approved bookings for this tenant
-    const approvedBookings = await WorkerBooking.find({
-      tenantId: userId,
-      status: "Approved",
-    });
-
-    console.log(
-      `Found ${approvedBookings.length} approved bookings for tenant ID: ${userId}`
-    );
-
-    // Extract worker IDs from approved bookings
-    const workerIds = approvedBookings.map((booking) => booking.workerId);
-
-    // Fetch worker details for these IDs
+    // CORRECTED: Fetch workers directly from tenant's domesticWorkerId array
     let domesticWorkers = [];
-    if (workerIds.length > 0) {
+    if (tenant.domesticWorkerId && tenant.domesticWorkerId.length > 0) {
       domesticWorkers = await Worker.find({
-        _id: { $in: workerIds },
+        _id: { $in: tenant.domesticWorkerId },
       }).populate("ratingId");
 
       console.log(
-        `Fetched ${domesticWorkers.length} domestic workers from approved bookings`
+        `Fetched ${domesticWorkers.length} domestic workers from tenant's domesticWorkerId`
       );
     } else {
-      // If no approved bookings, show all available workers
-      domesticWorkers = await Worker.find({}).populate("ratingId");
-      console.log(
-        `No approved bookings found. Showing all available workers: ${domesticWorkers.length}`
-      );
+      console.log("No domestic workers assigned to this tenant");
     }
 
     const currentProperty = await Property.findOne({ tenantId: userId });
@@ -107,11 +91,6 @@ exports.getDashboard = async (req, res) => {
       dateSubmitted: -1,
     });
 
-    // For backward compatibility
-    const workers = await Worker.find({ clientIds: userId }).populate(
-      "ratingId"
-    );
-
     const rentalHistory = await RentalHistory.findOne({ tenantId: userId });
 
     const ratings = await Rating.find({
@@ -126,9 +105,9 @@ exports.getDashboard = async (req, res) => {
     }).sort({ createdDate: -1 });
 
     // Fetch worker payments for this tenant
-    const workerPayments = await Payment.find({
+    const WorkerPayment = require("../models/workerPayment");
+    const workerPayments = await WorkerPayment.find({
       tenantId: userId,
-      type: "Worker",
     }).sort({ paymentDate: -1 });
 
     res.render("pages/tenant_dashboard", {
@@ -140,16 +119,18 @@ exports.getDashboard = async (req, res) => {
       activeMaintenanceRequests,
       completedMaintenanceRequests,
       complaints,
-      workers: domesticWorkers, // Use the workers from approved bookings
+      workers: domesticWorkers, // Use workers from domesticWorkerId
       rentalHistory: rentalHistory ? rentalHistory.propertyIds : [],
       ratings,
       notifications: notifications.map((n) => ({
         _id: n._id,
+        type: n.type,
         message: n.message,
         workerName: n.workerName,
         propertyName: n.propertyName,
         createdDate: n.createdDate || new Date(),
         status: n.status,
+        read: n.read,
       })),
       workerPayments,
     });
@@ -1309,14 +1290,11 @@ exports.login = async (req, res) => {
   const { email, password } = req.body;
   try {
     const tenant = await Tenant.findOne({ email }).select("+password");
-    if (!tenant) {
-      return res.status(401).render("pages/login", { error: "Account not found" });
-    }
-    const isMatch = await bcrypt.compare(password, tenant.password);
-    if (!isMatch) {
+    if (!tenant) return res.status(401).render("pages/login", { error: "Account not found" });
+    // Plain-text comparison
+    if (tenant.password !== password) {
       return res.status(401).render("pages/login", { error: "Incorrect password" });
     }
-    // Set session and redirect as needed
     req.session.user = tenant.toObject();
     res.redirect("/tenants/dashboard");
   } catch (err) {

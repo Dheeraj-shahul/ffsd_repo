@@ -1110,3 +1110,62 @@ body {
 .mark-read-button:hover {
   background-color: #45a049;
 }
+
+
+.debook-worker-btn {
+  background-color: #dc3545;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: all 0.3s ease;
+  margin-left: 5px;
+}
+
+.debook-worker-btn:hover {
+  background-color: #c82333;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(220, 53, 69, 0.3);
+}
+
+.debook-worker-btn:active {
+  transform: translateY(0);
+}
+
+.debook-worker-btn:disabled {
+  background-color: #6c757d;
+  cursor: not-allowed;
+  opacity: 0.6;
+  transform: none;
+}
+
+  /* Star Rating Styles */
+  .star-rating {
+    margin: 15px 0;
+  }
+  
+  #star-rating {
+    display: inline-flex;
+    gap: 5px;
+    cursor: pointer;
+  }
+  
+  #star-rating .star {
+    font-size: 24px;
+    color: #ffd700;
+    transition: transform 0.2s ease;
+  }
+  
+  #star-rating .star:hover {
+    transform: scale(1.1);
+  }
+  
+  #star-rating .star.active i::before {
+    content: "\f005"; /* Solid star */
+  }
+  
+  #star-rating .star:not(.active) i::before {
+    content: "\f005"; /* Regular star - will show as hollow with far class */
+  }

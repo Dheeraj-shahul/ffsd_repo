@@ -34,6 +34,7 @@
           <li onclick="showSection('earnings')"><i class="fa-solid fa-hand-holding-dollar"></i> Earnings</a></li>
           <li onclick="showSection('reviews')"><i class="fa-solid fa-star-half-stroke"></i> Reviews & Ratings</a></li>
           <li onclick="showSection('settings')"><i class="fa-solid fa-gears"></i> Settings</a></li>
+          <li onclick="showSection('notifications')"><i class="fa-solid fa-bell"></i>Notifications</li>
         </ul>
       </div>
 
@@ -100,20 +101,38 @@
 
         <!-- Clients Section -->
         <div id="clients" class="section">
-          <h3>My Clients</h3>
-          <div class="messages">
-            <% clients.forEach(client => { %>
-              <div class="tentant_details">
-                <ul>
-                  <li><strong><%= client.firstName %> <%= client.lastName %></strong></li>
-                  <li><strong>Service: </strong><a href="#"> <%= client.services.join(', ') %></a></li>
-                  <li><strong>Contact: </strong><%= client.phone %></li>
-                </ul>
-                <button class="msg_button" onclick="viewMessages('<%= client._id %>')">View Messages</button>
-              </div>
-            <% }) %>
-          </div>
+  <h3>My Clients</h3>
+  
+  <% if (clients && clients.length > 0) { %>
+    <div class="messages">
+      <% clients.forEach(client => { %>
+        <div class="tentant_details" data-client-id="<%= client._id %>">
+          <ul>
+            <li><strong><%= client.firstName %> <%= client.lastName %></strong></li>
+            <li>
+              <strong>Services: </strong>
+              <% if (client.services && client.services.length > 0) { %>
+                <%= client.services.join(', ') %>
+              <% } else { %>
+                No services specified
+              <% } %>
+            </li>
+            <li><strong>Contact: </strong><%= client.phone || 'N/A' %></li>
+            <li><strong>Email: </strong><%= client.email || 'N/A' %></li>
+            <% if (client.bookingDate) { %>
+              <li><strong>Booked Since: </strong><%= new Date(client.bookingDate).toLocaleDateString() %></li>
+            <% } %>
+          </ul>
         </div>
+      <% }) %>
+    </div>
+  <% } else { %>
+    <div class="no-clients-message">
+      <p>You currently have no active clients.</p>
+      <p>When tenants book your services and you approve them, they will appear here.</p>
+    </div>
+  <% } %>
+</div>
 
         <div id="earnings" class="section">
           <h3>My Earnings</h3>
@@ -165,6 +184,52 @@
           </div>
           <button class="report-button">View All Reviews</button>
         </div>
+
+        <div id="notifications" class="section">
+  <h3>Notifications</h3>
+  <div class="notification-container">
+    <% if (notifications && Array.isArray(notifications) && notifications.length > 0) { %>
+      <% notifications.forEach(notification => { %>
+        <div class="notification-card <%= notification.read ? 'read' : 'unread' %>" 
+             data-notification-id="<%= notification._id %>">
+          
+          <% if (notification.type === 'Debooking') { %>
+            <div class="notification-header debooking">
+              <i class="fa-solid fa-user-xmark"></i>
+              <strong>Debooking Notice</strong>
+            </div>
+          <% } else if (notification.type === 'Booking Update') { %>
+            <div class="notification-header booking-update">
+              <i class="fa-solid fa-calendar-check"></i>
+              <strong>Booking Update</strong>
+            </div>
+          <% } else { %>
+            <div class="notification-header general">
+              <i class="fa-solid fa-bell"></i>
+              <strong><%= notification.type || 'Notification' %></strong>
+            </div>
+          <% } %>
+          
+          <p><strong>Message:</strong> <%= notification.message %></p>
+          
+          <% if (notification.tenantName) { %>
+            <p><strong>From:</strong> <%= notification.tenantName %></p>
+          <% } %>
+          
+          <p><strong>Date:</strong> <%= new Date(notification.createdDate).toLocaleString() %></p>
+          
+          <p><strong>Status:</strong> 
+            <span class="notification-status <%= notification.status ? notification.status.toLowerCase() : 'info' %>">
+              <%= notification.status || 'Info' %>
+            </span>
+          </p>
+        </div>
+      <% }) %>
+    <% } else { %>
+      <p class="no-notifications">No notifications available.</p>
+    <% } %>
+  </div>
+</div>
 
         <div id="settings" class="section">
           <h3>Account Settings</h3>
@@ -663,6 +728,36 @@ document.getElementById('settingsForm').addEventListener('submit', function(e) {
             alert('Error checking booking status: ' + error.message);
           });
       }
+
+      function markNotificationAsRead(notificationId) {
+  fetch('/api/workers/notifications/read', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({ notificationId })
+  })
+  .then(response => response.json())
+  .then(data => {
+    if (data.success) {
+      const notificationCard = document.querySelector(`.notification-card[data-notification-id="${notificationId}"]`);
+      if (notificationCard) {
+        notificationCard.classList.remove('unread');
+        notificationCard.classList.add('read');
+        const markButton = notificationCard.querySelector('.mark-read-button');
+        if (markButton) markButton.remove();
+        const readStatus = notificationCard.querySelector('p:last-of-type');
+        if (readStatus) readStatus.innerHTML = '<strong>Read:</strong> Read';
+      }
+      alert('Notification marked as read');
+    } else {
+      alert('Error marking notification as read: ' + data.error);
+    }
+  })
+  .catch(error => {
+    alert('Error marking notification as read: ' + error.message);
+  });
+}
     </script>
   </body>
 </html>

@@ -413,163 +413,153 @@
           </div>
         </div>
 
-        <!-- Domestic Workers Booking -->
-        <div id="movers" class="section">
-        <!-- Worker Payment Popup -->
-<div id="worker-payment-popup" class="popup-container" style="display: none;">
-  <div class="popup-content">
-    <span class="close-btn" onclick="closeWorkerPaymentPopup()">×</span>
-    <h3>Pay Worker</h3>
-    <form id="worker-payment-form">
-      <div class="form-group">
-        <label for="worker-name">Worker Name:</label>
-        <input type="text" id="worker-name" readonly />
-        <input type="hidden" id="worker-id" />
-      </div>
-      
-      <div class="form-group">
-        <label for="service-type">Service Type:</label>
-        <input type="text" id="service-type" readonly />
-      </div>
-      
-      <div class="form-group">
-        <label for="payment-amount">Payment Amount (₹):</label>
-        <input type="number" id="payment-amount" readonly />
-      </div>
-      
-      <div class="form-group">
-        <label for="payment-period">Payment Period:</label>
-        <select id="payment-period" required>
-          <option value="">Select Payment Period</option>
-          <option value="daily">Daily</option>
-          <option value="weekly">Weekly</option>
-          <option value="monthly">Monthly</option>
-        </select>
-      </div>
-      
-      <div class="form-group">
-        <label for="work-date">Work Date/Period:</label>
-        <input type="date" id="work-date" required />
-      </div>
-      
-      <div class="form-group">
-        <label for="worker-payment-method">Payment Method:</label>
-        <select id="worker-payment-method" required>
-          <option value="">Select Payment Method</option>
-          <option value="Cash">Cash</option>
-          <option value="UPI">UPI</option>
-          <option value="Bank Transfer">Bank Transfer</option>
-          <option value="Digital Wallet">Digital Wallet</option>
-        </select>
-      </div>
-      
-      <div class="form-group">
-        <label for="worker-transaction-id">Transaction ID (if applicable):</label>
-        <input type="text" id="worker-transaction-id" placeholder="Enter transaction ID for digital payments" />
-      </div>
-      
-      <div class="form-group">
-        <label for="payment-notes">Notes (optional):</label>
-        <textarea id="payment-notes" rows="3" placeholder="Additional notes about this payment"></textarea>
-      </div>
-      
-      <div class="form-group">
-        <button type="submit" class="submit-btn">Submit Payment</button>
-      </div>
-    </form>
-  </div>
-</div>
-          <h3>Domestic Worker Services</h3>
-          <p>Book verified domestic workers nearby to complete your daily chores.</p>
-          <div class="service-categories">
-            <div class="service-category">
-              <h4>Cleaning Services</h4>
-              <p>Professional house cleaning</p>
-              <button class="book-button" onclick="location.href='/workerDetails?service=cleaning'">Find Cleaners</button>
-            </div>
-            <div class="service-category">
-              <h4>Cooking Services</h4>
-              <p>Skilled cooks for daily meals</p>
-              <button class="book-button" onclick="location.href='/workerDetails?service=cooking'">Find Cooks</button>
-            </div>
-            <div class="service-category">
-              <h4>Laundry Services</h4>
-              <p>Washing and ironing services</p>
-              <button class="book-button" onclick="location.href='/workerDetails?service=laundry'">Find Help</button>
-            </div>
-          </div>
-          <h4>Your Current Service Providers</h4>
-         <!-- Replace the existing worker cards section with this enhanced version -->
-<div class="worker-cards">
-  <% if (workers && workers.length > 0) { %>
-    <% workers.forEach((worker, index) => { %>
-      <div class="worker-card" data-worker-id="<%= worker._id || `worker_${index}` %>">
-        <img src="<%= worker.image || '/resources/default-worker.jpg' %>" alt="Worker Photo" />
-        <div class="worker-details">
-          <h5 class="worker-name"><%= worker.firstName %> <%= worker.lastName %></h5>
-          <p><strong>Service:</strong> <span class="worker-service"><%= worker.serviceType || 'N/A' %></span></p>
-          <p><strong>Schedule:</strong> <span class="worker-schedule"><%= worker.availability || 'N/A' %></span></p>
-          <p><strong>Fee:</strong> ₹<span class="worker-fee"><%= worker.price || 'N/A' %></span> <span class="worker-rate-unit"><%= worker.rateUnit ? '/' + worker.rateUnit : '' %></span></p>
-          <p><strong>Experience:</strong> <span class="worker-experience"><%= worker.experience ? worker.experience + ' years' : 'N/A' %></span></p>
-          <p><strong>Phone:</strong> <span class="worker-phone"><%= worker.phone || 'N/A' %></span></p>
-          
-          <div class="rating">
-            <% if (worker.ratingId && worker.ratingId.average) { %>
-              <span class="worker-rating"><%= '⭐'.repeat(Math.round(worker.ratingId.average)) %> <%= worker.ratingId.average.toFixed(1) %></span>
-            <% } else { %>
-              <span class="worker-rating">No ratings yet</span>
-            <% } %>
-          </div>
-          
-          <!-- Enhanced Payment Section -->
-          <div class="worker-payment-section">
-            <h6>Payment Status</h6>
-            <p>Last Payment: <span class="last-payment-date"><%= worker.lastPaymentDate ? new Date(worker.lastPaymentDate).toLocaleDateString() : 'Never' %></span></p>
-            <p>Status: <span class="payment-status <%= worker.paymentStatus === 'paid' ? 'status-paid' : 'status-pending' %>"><%= worker.paymentStatus === 'paid' ? 'Paid' : 'Pending' %></span></p>
-            <button class="pay-worker-btn" onclick="showWorkerPaymentPopup(this)" <%= worker.paymentStatus === 'paid' ? 'disabled' : '' %>>
-              <%= worker.paymentStatus === 'paid' ? 'Paid' : 'Pay Worker' %>
-            </button>
-            <button class="book-button" onclick="viewWorkerProfile(this)">View Profile</button>
-          </div>
+       <!-- Domestic Workers Booking -->
+<div id="movers" class="section">
+  <!-- Worker Payment Popup -->
+  <div id="worker-payment-popup" class="popup-container" style="display: none;">
+    <div class="popup-content">
+      <span class="close-btn" onclick="closeWorkerPaymentPopup()">×</span>
+      <h3>Pay Worker</h3>
+      <form id="worker-payment-form">
+        <div class="form-group">
+          <label for="worker-name">Worker Name:</label>
+          <input type="text" id="worker-name" readonly />
+          <input type="hidden" id="worker-id" />
         </div>
-      </div>
-    <% }); %>
-  <% } else { %>
-    <div class="no-workers-message">
-      <p>You don't have any domestic workers assigned yet. Browse the services above to find help.</p>
+        
+        <div class="form-group">
+          <label for="service-type">Service Type:</label>
+          <input type="text" id="service-type" readonly />
+        </div>
+        
+        <div class="form-group">
+          <label for="payment-amount">Payment Amount (₹):</label>
+          <input type="number" id="payment-amount" readonly />
+        </div>
+        
+        <div class="form-group">
+          <label for="payment-date">Payment Date:</label>
+          <input type="date" id="payment-date" required />
+        </div>
+        
+        <div class="form-group">
+          <label for="worker-payment-method">Payment Method:</label>
+          <select id="worker-payment-method" required>
+            <option value="">Select Payment Method</option>
+            <option value="UPI">UPI</option>
+            <option value="Bank Transfer">Bank Transfer</option>
+            <option value="Digital Wallet">Digital Wallet</option>
+          </select>
+        </div>
+        
+        <div class="form-group">
+          <label for="worker-transaction-id">Transaction ID (if applicable):</label>
+          <input type="text" id="worker-transaction-id" placeholder="Enter transaction ID for digital payments" />
+        </div>
+        
+        <div class="form-group">
+          <label for="payment-notes">Notes (optional):</label>
+          <textarea id="payment-notes" rows="3" placeholder="Additional notes about this payment"></textarea>
+        </div>
+        
+        <div class="form-group">
+          <button type="submit" class="submit-btn">Submit Payment</button>
+        </div>
+      </form>
     </div>
-  <% } %>
-</div>
-<h4>Worker Payment History</h4>
-<table class="payment-history-table">
-  <thead>
-    <tr>
-      <th>Date</th>
-      <th>Worker</th>
-      <th>Service</th>
-      <th>Amount</th>
-      <th>Payment Method</th>
-      <th>Status</th>
-      <th>Receipt</th>
-    </tr>
-  </thead>
-  <tbody id="worker-payment-history-body">
-    <% (workerPayments || []).forEach(payment => { %>
-      <tr>
-        <td><%= payment.paymentDate ? new Date(payment.paymentDate).toLocaleDateString() : 'N/A' %></td>
-        <td><%= payment.workerName || 'N/A' %></td>
-        <td><%= payment.serviceType || 'N/A' %></td>
-        <td>₹<%= payment.amount || 'N/A' %></td>
-        <td><%= payment.paymentMethod || 'N/A' %></td>
-        <td class="<%= payment.status ? payment.status.toLowerCase() : 'completed' %>">
-          <%= payment.status || 'Completed' %>
-        </td>
-        <td><a href="<%= payment.receiptUrl || '#' %>">View</a></td>
-      </tr>
-    <% }); %>
-  </tbody>
-</table>
+  </div>
+  <h3>Domestic Worker Services</h3>
+  <p>Book verified domestic workers nearby to complete your daily chores.</p>
+  <div class="service-categories">
+    <div class="service-category">
+      <h4>Cleaning Services</h4>
+      <p>Professional house cleaning</p>
+      <button class="book-button" onclick="location.href='/workerDetails?service=cleaning'">Find Cleaners</button>
+    </div>
+    <div class="service-category">
+      <h4>Cooking Services</h4>
+      <p>Skilled cooks for daily meals</p>
+      <button class="book-button" onclick="location.href='/workerDetails?service=cooking'">Find Cooks</button>
+    </div>
+    <div class="service-category">
+      <h4>Laundry Services</h4>
+      <p>Washing and ironing services</p>
+      <button class="book-button" onclick="location.href='/workerDetails?service=laundry'">Find Help</button>
+    </div>
+  </div>
+  <h4>Your Current Service Providers</h4>
+  <div class="worker-cards">
+    <% if (workers && workers.length > 0) { %>
+      <% workers.forEach((worker, index) => { %>
+        <div class="worker-card" data-worker-id="<%= worker._id || `worker_${index}` %>">
+          <img src="<%= worker.image || '/resources/default-worker.jpg' %>" alt="Worker Photo" />
+          <div class="worker-details">
+            <h5 class="worker-name"><%= worker.firstName %> <%= worker.lastName %></h5>
+            <p><strong>Service:</strong> <span class="worker-service"><%= worker.serviceType || 'N/A' %></span></p>
+            <p><strong>Schedule:</strong> <span class="worker-schedule"><%= worker.availability || 'N/A' %></span></p>
+            <p><strong>Fee:</strong> ₹<span class="worker-fee"><%= worker.price || 'N/A' %></span> <span class="worker-rate-unit"><%= worker.rateUnit ? '/' + worker.rateUnit : '' %></span></p>
+            <p><strong>Experience:</strong> <span class="worker-experience"><%= worker.experience ? worker.experience + ' years' : 'N/A' %></span></p>
+            <p><strong>Phone:</strong> <span class="worker-phone"><%= worker.phone || 'N/A' %></span></p>
+            
+            <div class="rating">
+              <% if (worker.ratingId && worker.ratingId.average) { %>
+                <span class="worker-rating"><%= '⭐'.repeat(Math.round(worker.ratingId.average)) %> <%= worker.ratingId.average.toFixed(1) %></span>
+              <% } else { %>
+                <span class="worker-rating">No ratings yet</span>
+              <% } %>
+            </div>
+            
+            <div class="worker-payment-section">
+              <h6>Payment</h6>
+              <!-- <p>Last Payment: <span class="last-payment-date"><%= worker.lastPaymentDate ? new Date(worker.lastPaymentDate).toLocaleDateString() : 'Never' %></span></p> -->
+              <!-- <p>Status: <span class="payment-status <%= worker.paymentStatus === 'paid' ? 'status-paid' : 'status-pending' %>"><%= worker.paymentStatus === 'paid' ? 'Paid' : 'Pending' %></span></p> -->
+              <button class="pay-worker-btn" onclick="showWorkerPaymentPopup(this)" <%= worker.paymentStatus === 'paid' ? 'disabled' : '' %>>
+                <%= worker.paymentStatus === 'paid' ? 'Paid' : 'Pay Worker' %>
+              </button>
+              <button class="book-button" onclick="viewWorkerProfile(this)">View Profile</button>
+              <button class="debook-worker-btn" style="background-color: red; color: white;" onclick="debookWorker('<%= worker._id %>')">Debook</button>
+            </div>
+          </div>
         </div>
+      <% }); %>
+    <% } else { %>
+      <div class="no-workers-message">
+        <p>You don't have any domestic workers assigned yet. Browse the services above to find help.</p>
+      </div>
+    <% } %>
+  </div>
+  <h4>Worker Payment History</h4>
+  <table class="payment-history-table">
+    <thead>
+      <tr>
+        <th>Date</th>
+        <th>Worker</th>
+        <th>Service</th>
+        <th>Amount</th>
+        <th>Payment Method</th>
+        <th>Status</th>
+        <th>Receipt</th>
+      </tr>
+    </thead>
+    <tbody id="worker-payment-history-body">
+      <% (workerPayments || []).forEach(payment => { %>
+        <tr>
+          <td><%= payment.paymentDate ? new Date(payment.paymentDate).toLocaleDateString() : 'N/A' %></td>
+          <td><%= payment.workerName || 'N/A' %></td>
+          <td><%= payment.serviceType || 'N/A' %></td>
+          <td>₹<%= payment.amount || 'N/A' %></td>
+          <td><%= payment.paymentMethod || 'N/A' %></td>
+          <td class="<%= payment.status ? payment.status.toLowerCase() : 'completed' %>">
+            <%= payment.status || 'Completed' %>
+          </td>
+          <td><a href="<%= payment.receiptUrl || '#' %>">View</a></td>
+        </tr>
+      <% }); %>
+    </tbody>
+  </table>
+</div>
+
+
 
         <!-- Notifications Section -->
         <div id="notifications" class="section">
@@ -644,15 +634,16 @@
           <div class="review-form">
             <h5>Review Your Current Property</h5>
             <div class="star-rating">
-              <span>Rate your experience: </span>
-              <div
-                class="stars"
-                id="star-rating"
-                data-property-id="<%= currentProperty._id %>"
-              >
-                <span>⭐</span><span>⭐</span><span>⭐</span><span>⭐</span><span>⭐</span>
-              </div>
-            </div>
+             <span>Rate your experience: </span>
+             <div class="stars" id="star-rating" data-property-id="<%= currentProperty._id %>">
+               <span class="star" data-rating="1"><i class="far fa-star"></i></span>
+               <span class="star" data-rating="2"><i class="far fa-star"></i></span>
+               <span class="star" data-rating="3"><i class="far fa-star"></i></span>
+               <span class="star" data-rating="4"><i class="far fa-star"></i></span>
+               <span class="star" data-rating="5"><i class="far fa-star"></i></span>
+             </div>
+           </div>
+
             <textarea
               rows="4"
               placeholder="Share your experience living here..."
@@ -775,6 +766,52 @@
     </div>
 
     <script>
+
+      function debookWorker(workerId) {
+  if (!workerId) {
+    showNotification('Invalid worker ID', 'error');
+    return;
+  }
+
+  if (confirm('Are you sure you want to debook this worker? Please ensure you have completed this month\'s payment before proceeding.')) {
+    const button = event.target;
+    const originalText = button.textContent;
+    
+    button.disabled = true;
+    button.textContent = 'Debooking...';
+    
+    fetch(`/api/workers/debook/${workerId}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    })
+    .then(response => response.json())
+    .then(data => {
+      if (data.success) {
+        showNotification(data.message || 'Worker debooked successfully', 'success');
+        setTimeout(() => {
+          window.location.reload();
+        }, 1500);
+      } else if (data.error === 'Payment pending for this month' || data.message === 'Please complete this month\'s payment before debooking the worker.') {
+        showNotification('Payment Required: Please complete this month\'s payment before debooking the worker.', 'error');
+        button.disabled = false;
+        button.textContent = originalText;
+      } else {
+        showNotification('Error: ' + (data.error || data.message || 'Unknown error occurred'), 'error');
+        button.disabled = false;
+        button.textContent = originalText;
+      }
+    })
+    .catch(error => {
+      console.error('Debooking error:', error);
+      showNotification('Network error: ' + error.message, 'error');
+      button.disabled = false;
+      button.textContent = originalText;
+    });
+  }
+}
+
       function showDeleteAccountPopup() {
   const popup = document.getElementById("delete-account-popup");
   if (popup) {
@@ -1184,7 +1221,7 @@ if (deleteAccountForm) {
             const reviewText = document.getElementById("review-text");
             if (!starRating || !reviewText) return;
             const propertyId = starRating.dataset.propertyId;
-            const rating = document.querySelectorAll("#star-rating span.active").length;
+            const rating = selectedRating;
             const review = reviewText.value;
 
             if (!rating) {
@@ -1205,7 +1242,8 @@ if (deleteAccountForm) {
                 showNotification(result.message, "success");
                 addNewReview(result.rating);
                 reviewText.value = "";
-                document.querySelectorAll("#star-rating span").forEach(s => s.classList.remove("active"));
+                selectedRating = 0;
+                updateStarDisplay(0, true);
               } else {
                 showNotification(result.message || "Error submitting review", "error");
               }
@@ -1417,14 +1455,43 @@ if (deleteAccountForm) {
           }
         });
 
-        const stars = document.querySelectorAll("#star-rating span");
-        stars.forEach((star, index) => {
-          star.addEventListener("click", () => {
-            stars.forEach((s, i) => {
-              s.classList.toggle("active", i <= index);
-            });
-          });
-        });
+       const stars = document.querySelectorAll("#star-rating .star");
+let selectedRating = 0;
+
+stars.forEach((star, index) => {
+  star.addEventListener("mouseenter", () => {
+    updateStarDisplay(index + 1, false);
+  });
+  
+  star.addEventListener("click", () => {
+    selectedRating = index + 1;
+    updateStarDisplay(selectedRating, true);
+    stars.forEach((s, i) => {
+      s.classList.toggle("active", i <= index);
+    });
+  });
+});
+
+document.getElementById("star-rating").addEventListener("mouseleave", () => {
+  updateStarDisplay(selectedRating, true);
+});
+
+function updateStarDisplay(rating, isPermanent) {
+  stars.forEach((star, index) => {
+    const icon = star.querySelector("i");
+    if (index < rating) {
+      icon.className = "fas fa-star";
+      if (isPermanent) {
+        star.classList.add("active");
+      }
+    } else {
+      icon.className = "far fa-star";
+      if (isPermanent) {
+        star.classList.remove("active");
+      }
+    }
+  });
+}
 
         if (window.location.hash === '#settings') {
           showSection('settings');
@@ -1442,62 +1509,66 @@ if (deleteAccountForm) {
 
 // Worker Payment Form Handler
 const workerPaymentForm = document.getElementById('worker-payment-form');
-if (workerPaymentForm) {
-  workerPaymentForm.addEventListener('submit', async function(event) {
-    event.preventDefault();
-    
-    const workerId = document.getElementById('worker-id')?.value;
-    const workerName = document.getElementById('worker-name')?.value;
-    const serviceType = document.getElementById('service-type')?.value;
-    const amount = document.getElementById('payment-amount')?.value;
-    const paymentPeriod = document.getElementById('payment-period')?.value;
-    const workDate = document.getElementById('work-date')?.value;
-    const paymentMethod = document.getElementById('worker-payment-method')?.value;
-    const transactionId = document.getElementById('worker-transaction-id')?.value;
-    const notes = document.getElementById('payment-notes')?.value;
-    
-    if (!workerId || !amount || !paymentPeriod || !workDate || !paymentMethod) {
-      showNotification('Please fill in all required fields', 'error');
-      return;
-    }
-    
-    const paymentData = {
-      workerId,
-      workerName,
-      serviceType,
-      amount: parseFloat(amount),
-      paymentPeriod,
-      workDate,
-      paymentMethod,
-      transactionId,
-      notes
-    };
-    
-    console.log('Submitting worker payment:', paymentData);
-    try {
-      const response = await fetch('/tenant/worker-payment', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(paymentData)
-      });
+  if (workerPaymentForm) {
+    workerPaymentForm.addEventListener('submit', async function(event) {
+      event.preventDefault();
       
-      const result = await response.json();
-      console.log('Worker payment response:', result);
+      const workerId = document.getElementById('worker-id')?.value;
+      const workerName = document.getElementById('worker-name')?.value;
+      const serviceType = document.getElementById('service-type')?.value;
+      const amount = document.getElementById('payment-amount')?.value;
+      const paymentDate = document.getElementById('payment-date')?.value;
+      const paymentMethod = document.getElementById('worker-payment-method')?.value;
+      const transactionId = document.getElementById('worker-transaction-id')?.value || 'N/A';
+      const notes = document.getElementById('payment-notes')?.value || '';
       
-      if (result.success) {
-        showNotification(result.message || 'Payment processed successfully', 'success');
-        addWorkerPaymentToHistory(result.payment);
-        updateWorkerPaymentStatus(paymentData.workerId, 'paid');
-        closeWorkerPaymentPopup();
-      } else {
-        showNotification(result.message || 'Error processing payment', 'error');
+      // Validate ONLY the required fields that exist in the form
+      if (!workerId || !amount || !paymentDate || !paymentMethod) {
+        showNotification('Please fill in all required fields', 'error');
+        return;
       }
-    } catch (error) {
-      console.error('Worker payment error:', error);
-      showNotification('Failed to process payment. Please try again.', 'error');
-    }
-  });
-}
+      
+      const paymentData = {
+        workerId,
+        workerName,
+        serviceType,
+        amount: parseFloat(amount),
+        paymentDate,
+        paymentMethod,
+        transactionId,
+        notes
+      };
+      
+      console.log('Submitting worker payment:', paymentData);
+      try {
+        const response = await fetch('/tenant/worker-payment', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(paymentData)
+        });
+        
+        const result = await response.json();
+        console.log('Worker payment response:', result);
+        
+        if (result.success) {
+          showNotification(result.message || 'Payment processed successfully', 'success');
+          addWorkerPaymentToHistory(result.payment);
+          updateWorkerPaymentStatus(paymentData.workerId, 'paid');
+          closeWorkerPaymentPopup();
+          // Reload to refresh worker card
+          setTimeout(() => {
+            window.location.reload();
+          }, 1500);
+        } else {
+          showNotification(result.message || 'Error processing payment', 'error');
+        }
+      } catch (error) {
+        console.error('Worker payment error:', error);
+        showNotification('Failed to process payment. Please try again.', 'error');
+      }
+    });
+  }
+});
 
 // Worker Payment Popup Event Listeners
 const workerPaymentPopup = document.getElementById('worker-payment-popup');
@@ -1519,7 +1590,7 @@ workerCards.forEach((card, index) => {
 });
 
 
-      });
+
       // Worker Payment Functions - Add these to your existing JavaScript
 
 function showWorkerPaymentPopup(button) {
@@ -1535,11 +1606,15 @@ function showWorkerPaymentPopup(button) {
                    workerCard.querySelector('p:nth-child(4)')?.textContent.match(/₹(\d+)/)?.[1] || '';
   const workerId = workerCard.dataset.workerId || button.dataset.workerId;
   
-  // Populate the popup form
+  // Populate the popup form with ONLY the fields that exist
   document.getElementById('worker-name').value = workerName;
   document.getElementById('worker-id').value = workerId;
   document.getElementById('service-type').value = serviceType;
   document.getElementById('payment-amount').value = workerFee;
+  
+  // Set today's date automatically
+  const today = new Date().toISOString().split('T')[0];
+  document.getElementById('payment-date').value = today;
   
   // Show the popup
   const popup = document.getElementById('worker-payment-popup');
