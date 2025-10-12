@@ -270,6 +270,7 @@
     <a href="#user-management">Users</a>
     <a href="#service-bookings">Bookings</a>
     <a href="#payments">Payments</a>
+    <a href="#worker-payments">Worker Payments</a>
     <a href="#notifications">Notifications</a>
     <a href="#maintenance-requests">Maintenance Requests</a>
     <a href="#messages">Messages</a>
@@ -510,6 +511,53 @@
       </tbody>
     </table>
   </section>
+
+  <!-- Worker Payments -->
+<section id="worker-payments" class="worker-payments">
+  <h2>Worker Payments</h2>
+  <table>
+    <thead>
+      <tr>
+        <th style="width: 8%;">ID</th>
+        <th style="width: 10%;">Paid By</th>
+        <th style="width: 10%;">Received By</th>
+        <th style="width: 10%;">Amount</th>
+        <th style="width: 10%;">Status</th>
+        <th style="width: 10%;">Date</th>
+        <th style="width: 10%;">Method</th>
+        <th style="width: 10%;">Transaction</th>
+        <th style="width: 20%;">Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% workerPayments.forEach(p => { %>
+        <tr>
+          <td><%= p.id %></td>
+          <td>
+            <a href="/admin/user/<%= p.paidById %>/tenant">
+              <%= p.paidByName ? p.paidByName.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;') : 'N/A' %>
+            </a>
+          </td>
+          <td>
+            <a href="/admin/user/<%= p.receivedById %>/worker">
+              <%= p.receivedByName ? p.receivedByName.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;') : 'N/A' %>
+            </a>
+          </td>
+          <td>₹<%= p.amount ? p.amount.toFixed(2) : 'N/A' %></td>
+          <td><%= p.status || 'N/A' %></td>
+          <td><%= p.paymentDate ? new Date(p.paymentDate).toLocaleDateString() : 'N/A' %></td>
+          <td><%= p.paymentMethod ? p.paymentMethod.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;') : 'N/A' %></td>
+          <td><%= p.transactionId ? p.transactionId.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;') : 'N/A' %></td>
+          <td>
+            <div class="action-buttons">
+              <a href="/admin/worker-payment/<%= p.id %>">View</a>
+            </div>
+          </td>
+        </tr>
+      <% }) %>
+    </tbody>
+  </table>
+</section>
 
   <!-- Notifications -->
   <section id="notifications" class="notifications">

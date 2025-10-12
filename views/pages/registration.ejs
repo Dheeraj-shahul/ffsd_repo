@@ -13,29 +13,29 @@
             padding: 0;
         }
 
-    body {
-        font-family: 'Poppins', sans-serif;
-        display: flex;
-        align-items: flex-start; 
-        justify-content: center;
-        margin: 0;
-        background-image: url('/images/login.jpg');
-        background-size: cover;
-        background-position: center;
-        background-repeat: no-repeat;
-        min-height: 100vh; 
-        padding: 40px 20px;
-        overflow-y: auto; 
-    }
+        body {
+            font-family: 'Poppins', sans-serif;
+            display: flex;
+            align-items: flex-start; 
+            justify-content: center;
+            margin: 0;
+            background-image: url('/images/login.jpg');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            min-height: 100vh; 
+            padding: 40px 20px;
+            overflow-y: auto; 
+        }
 
-    .container {
-        background-color: #333;
-        border-radius: 20px;
-        box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
-        width: 400px;
-        padding: 30px 50px;
-        margin: 20px 0; 
-    }
+        .container {
+            background-color: #333;
+            border-radius: 20px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+            width: 400px;
+            padding: 30px 50px;
+            margin: 20px 0; 
+        }
 
         .header {
             text-align: center;
@@ -285,11 +285,12 @@
                            min="0" 
                            placeholder="Years of experience"
                            value="<%= typeof experience !== 'undefined' ? experience : '' %>">
+                    <div id="experienceError" class="error"></div>
                 </div>
             </div>
             
             <!-- Homeowner-specific fields -->
-            <div id="homeownerFields" class="location-fields" style="display: <%= (typeof userType !== 'undefined' && userType === 'homeowner') ? 'block' : 'none' %>">
+            <div id="homeownerFields" class="location-fields" style="display: <%= (typeof userType !== 'undefined' && userType === 'owner') ? 'block' : 'none' %>">
                 <div class="form-group">
                     <label for="numProperties">Number of Properties</label>
                     <input type="number" 
@@ -298,6 +299,7 @@
                            min="1" 
                            placeholder="How many properties do you own?"
                            value="<%= typeof numProperties !== 'undefined' ? numProperties : '' %>">
+                    <div id="numPropertiesError" class="error"></div>
                 </div>
             </div>
             
@@ -345,12 +347,12 @@
             
             // Hide all specific fields first
             document.getElementById('workerFields').style.display = 'none';
-            document.getElementById('ownerFields').style.display = 'none';
+            document.getElementById('homeownerFields').style.display = 'none';
             
             // Show fields based on user type
             if (userType === 'worker') {
                 document.getElementById('workerFields').style.display = 'block';
-            }else if (userType === 'homeowner') {
+            } else if (userType === 'owner') {
                 document.getElementById('homeownerFields').style.display = 'block';
             }
         }
@@ -358,8 +360,6 @@
         // Run on page load to set initial state
         handleUserTypeChange();
         
-        document.getElementById('registerForm').addEventListener('submit', async function(event) {
-            event.preventDefault();
         document.getElementById('registerForm').addEventListener('submit', async function(event) {
             event.preventDefault();
             let isValid = true;
@@ -376,6 +376,12 @@
             const password = document.getElementById('password').value;
             const confirmPassword = document.getElementById('confirmPassword').value;
             const userType = document.getElementById('userType').value;
+            const serviceType = document.getElementById('serviceType')?.value || '';
+            const experience = document.getElementById('experience')?.value || '';
+            const numProperties = document.getElementById('numProperties')?.value || '';
+            
+            // Log password for debugging
+            console.log("Password entered:", JSON.stringify(password));
             
             // First Name validation
             if (!firstName) {
@@ -441,16 +447,6 @@
                     document.getElementById('numPropertiesError').classList.add('visible');
                     isValid = false;
                 }
-                if (!accountNo) {
-                    document.getElementById('accountNoError').textContent = 'Account number is required';
-                    document.getElementById('accountNoError').classList.add('visible');
-                    isValid = false;
-                }
-                if (!upiid) {
-                    document.getElementById('upiidError').textContent = 'UPI ID is required';
-                    document.getElementById('upiidError').classList.add('visible');
-                    isValid = false;
-                }
             }
             
             // Password validation
@@ -500,11 +496,11 @@
                     window.location.href = result.redirectUrl;
                 } else {
                     document.getElementById('serverError').textContent = result.error || 'Registration failed';
-                    document.getElementById('serverError').style.display = 'block';
+                    document.getElementById('serverError').classList.add('visible');
                 }
             } catch (err) {
                 document.getElementById('serverError').textContent = 'Network error';
-                document.getElementById('serverError').style.display = 'block';
+                document.getElementById('serverError').classList.add('visible');
             }
         });
         

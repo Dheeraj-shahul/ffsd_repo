@@ -510,9 +510,9 @@
             </div>
             
             <div class="worker-payment-section">
-              <h6>Payment Status</h6>
-              <p>Last Payment: <span class="last-payment-date"><%= worker.lastPaymentDate ? new Date(worker.lastPaymentDate).toLocaleDateString() : 'Never' %></span></p>
-              <p>Status: <span class="payment-status <%= worker.paymentStatus === 'paid' ? 'status-paid' : 'status-pending' %>"><%= worker.paymentStatus === 'paid' ? 'Paid' : 'Pending' %></span></p>
+              <!-- <p>Last Payment: <span class="last-payment-date"><%= worker.lastPaymentDate ? new Date(worker.lastPaymentDate).toLocaleDateString() : 'Never' %></span></p> -->
+              <!-- <p>Status: <span class="payment-status <%= worker.paymentStatus === 'paid' ? 'status-paid' : 'status-pending' %>"><%= worker.paymentStatus === 'paid' ? 'Paid' : 'Pending' %></span></p> -->
+
               <button class="pay-worker-btn" onclick="showWorkerPaymentPopup(this)" <%= worker.paymentStatus === 'paid' ? 'disabled' : '' %>>
                 <%= worker.paymentStatus === 'paid' ? 'Paid' : 'Pay Worker' %>
               </button>
@@ -635,14 +635,15 @@
             <h5>Review Your Current Property</h5>
             <div class="star-rating">
               <span>Rate your experience: </span>
-              <div
-                class="stars"
-                id="star-rating"
-                data-property-id="<%= currentProperty._id %>"
-              >
-                <span>⭐</span><span>⭐</span><span>⭐</span><span>⭐</span><span>⭐</span>
-              </div>
-            </div>
+             <div class="stars" id="star-rating" data-property-id="<%= currentProperty._id %>">
+               <span class="star" data-rating="1"><i class="far fa-star"></i></span>
+               <span class="star" data-rating="2"><i class="far fa-star"></i></span>
+               <span class="star" data-rating="3"><i class="far fa-star"></i></span>
+               <span class="star" data-rating="4"><i class="far fa-star"></i></span>
+               <span class="star" data-rating="5"><i class="far fa-star"></i></span>
+             </div>
+           </div>
+
             <textarea
               rows="4"
               placeholder="Share your experience living here..."
@@ -1220,7 +1221,7 @@ if (deleteAccountForm) {
             const reviewText = document.getElementById("review-text");
             if (!starRating || !reviewText) return;
             const propertyId = starRating.dataset.propertyId;
-            const rating = document.querySelectorAll("#star-rating span.active").length;
+            const rating=selectedRating;
             const review = reviewText.value;
 
             if (!rating) {
@@ -1241,7 +1242,8 @@ if (deleteAccountForm) {
                 showNotification(result.message, "success");
                 addNewReview(result.rating);
                 reviewText.value = "";
-                document.querySelectorAll("#star-rating span").forEach(s => s.classList.remove("active"));
+                selectedRating=0;
+                updateStarDisplay(0,true);
               } else {
                 showNotification(result.message || "Error submitting review", "error");
               }
@@ -1453,14 +1455,43 @@ if (deleteAccountForm) {
           }
         });
 
-        const stars = document.querySelectorAll("#star-rating span");
-        stars.forEach((star, index) => {
-          star.addEventListener("click", () => {
-            stars.forEach((s, i) => {
-              s.classList.toggle("active", i <= index);
-            });
-          });
-        });
+        const stars = document.querySelectorAll("#star-rating .star");
+let selectedRating = 0;
+
+stars.forEach((star, index) => {
+  star.addEventListener("mouseenter", () => {
+    updateStarDisplay(index + 1, false);
+  });
+  
+  star.addEventListener("click", () => {
+    selectedRating = index + 1;
+    updateStarDisplay(selectedRating, true);
+    stars.forEach((s, i) => {
+      s.classList.toggle("active", i <= index);
+    });
+  });
+});
+
+document.getElementById("star-rating").addEventListener("mouseleave", () => {
+  updateStarDisplay(selectedRating, true);
+});
+
+function updateStarDisplay(rating, isPermanent) {
+  stars.forEach((star, index) => {
+    const icon = star.querySelector("i");
+    if (index < rating) {
+      icon.className = "fas fa-star";
+      if (isPermanent) {
+        star.classList.add("active");
+      }
+    } else {
+      icon.className = "far fa-star";
+      if (isPermanent) {
+        star.classList.remove("active");
+      }
+    }
+  });
+}
 
         if (window.location.hash === '#settings') {
           showSection('settings');

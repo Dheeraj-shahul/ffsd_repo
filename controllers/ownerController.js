@@ -340,7 +340,6 @@ exports.updateMaintenanceRequestStatus = async (req, res) => {
   }
 };
 
-// Delete owner account
 exports.deleteOwnerAccount = async (req, res) => {
   try {
     const ownerId = req.session.user?._id;
@@ -353,19 +352,36 @@ exports.deleteOwnerAccount = async (req, res) => {
         .json({ success: false, message: "Unauthorized: Invalid user ID" });
     }
 
-    // Fetch owner
-    const owner = await Owner.findById(ownerId);
+    // Fetch owner with password
+    const owner = await Owner.findById(ownerId).select("+password");
     if (!owner) {
       return res
         .status(404)
         .json({ success: false, message: "Owner not found" });
     }
 
-    // Validate password (plain text comparison)
+    // Validate password (plain text comparison as requested)
+    if (!password) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Password is required" });
+    }
+
     if (password !== owner.password) {
       return res
         .status(400)
         .json({ success: false, message: "Incorrect password" });
+    }
+
+    // Check for associated tenants using ownerId in Tenant model
+    const tenants = await Tenant.find({
+      ownerId: new mongoose.Types.ObjectId(ownerId),
+    });
+    if (tenants.length > 0) {
+      return res.status(400).json({
+        success: false,
+        message: "Cannot delete account because there are associated tenants",
+      });
     }
 
     // Fetch properties by ownerId
@@ -399,12 +415,15 @@ exports.deleteOwnerAccount = async (req, res) => {
     req.session.destroy((err) => {
       if (err) {
         console.error("Error destroying session:", err);
+        return res.status(500).json({
+          success: false,
+          message: "Account deleted, but session could not be cleared",
+        });
       }
-    });
-
-    return res.status(200).json({
-      success: true,
-      message: "Account and associated properties deleted successfully",
+      return res.status(200).json({
+        success: true,
+        message: "Account and associated properties deleted successfully",
+      });
     });
   } catch (error) {
     console.error("Error deleting owner account:", error);
@@ -415,7 +434,6 @@ exports.deleteOwnerAccount = async (req, res) => {
     });
   }
 };
-
 // Update owner settings
 exports.updateOwnerSettings = async (req, res) => {
   try {

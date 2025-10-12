@@ -101,20 +101,38 @@
 
         <!-- Clients Section -->
         <div id="clients" class="section">
-          <h3>My Clients</h3>
-          <div class="messages">
-            <% clients.forEach(client => { %>
-              <div class="tentant_details">
-                <ul>
-                  <li><strong><%= client.firstName %> <%= client.lastName %></strong></li>
-                  <li><strong>Service: </strong><a href="#"> <%= client.services.join(', ') %></a></li>
-                  <li><strong>Contact: </strong><%= client.phone %></li>
-                </ul>
-                <button class="msg_button" onclick="viewMessages('<%= client._id %>')">View Messages</button>
-              </div>
-            <% }) %>
-          </div>
+  <h3>My Clients</h3>
+  
+  <% if (clients && clients.length > 0) { %>
+    <div class="messages">
+      <% clients.forEach(client => { %>
+        <div class="tentant_details" data-client-id="<%= client._id %>">
+          <ul>
+            <li><strong><%= client.firstName %> <%= client.lastName %></strong></li>
+            <li>
+              <strong>Services: </strong>
+              <% if (client.services && client.services.length > 0) { %>
+                <%= client.services.join(', ') %>
+              <% } else { %>
+                No services specified
+              <% } %>
+            </li>
+            <li><strong>Contact: </strong><%= client.phone || 'N/A' %></li>
+            <li><strong>Email: </strong><%= client.email || 'N/A' %></li>
+            <% if (client.bookingDate) { %>
+              <li><strong>Booked Since: </strong><%= new Date(client.bookingDate).toLocaleDateString() %></li>
+            <% } %>
+          </ul>
         </div>
+      <% }) %>
+    </div>
+  <% } else { %>
+    <div class="no-clients-message">
+      <p>You currently have no active clients.</p>
+      <p>When tenants book your services and you approve them, they will appear here.</p>
+    </div>
+  <% } %>
+</div>
 
         <div id="earnings" class="section">
           <h3>My Earnings</h3>

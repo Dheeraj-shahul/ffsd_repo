@@ -67,6 +67,7 @@ exports.renderWorkerDashboardSafer = async (req, res) => {
         ]
       : [];
 
+    // Fetch bookings
     const bookings = await WorkerBooking.find({ workerId: user._id })
       .populate("tenantId", "firstName lastName")
       .lean();
@@ -90,46 +91,50 @@ exports.renderWorkerDashboardSafer = async (req, res) => {
       status: booking.status || "Pending",
     }));
 
-    const approvedBookings = await WorkerBooking.find({
-      workerId: user._id,
-      status: "Approved",
-    }).select("tenantId");
-    
-    const tenantIdsFromBookings = approvedBookings
-      .map((b) => b.tenantId)
-      .filter((id) => id);
-
+    // ===== CRITICAL FIX: Fetch clients ONLY from worker.clientIds =====
     const clients = await Tenant.find({
-      _id: { $in: [...(user.clientIds || []), ...tenantIdsFromBookings] },
-    }).lean();
+      _id: { $in: user.clientIds }
+    })
+    .select('firstName lastName phone email')
+    .lean();
 
+    // Get services for each client from WorkerBooking
     const clientBookings = await WorkerBooking.find({
       workerId: user._id,
-      tenantId: { $in: clients.map((c) => c._id) },
+      tenantId: { $in: user.clientIds },
+      status: "Approved"
     })
-      .select("tenantId serviceType")
-      .lean();
+    .select("tenantId serviceType bookingDate")
+    .lean();
 
     const formattedClients = clients.map((client) => {
       const tenantBookings = clientBookings.filter(
         (b) => b.tenantId && b.tenantId.toString() === client._id.toString()
       );
-      const services = tenantBookings
-        .map((b) => b.serviceType)
-        .filter((s) => s) || [user.serviceType || "N/A"];
+      
+      const services = tenantBookings.length > 0
+        ? tenantBookings.map((b) => b.serviceType).filter((s) => s)
+        : [user.serviceType || "N/A"];
+      
+      const bookingDate = tenantBookings.length > 0 && tenantBookings[0].bookingDate
+        ? tenantBookings[0].bookingDate
+        : null;
+
       return {
         _id: client._id,
         firstName: client.firstName || "N/A",
         lastName: client.lastName || "",
         phone: client.phone || "N/A",
-        services,
+        email: client.email || "N/A",
+        services: [...new Set(services)], // Remove duplicates
+        bookingDate: bookingDate,
       };
     });
 
-    const WorkerPayment = require("../models/workerPayment");
+    // Fetch payments
     const payments = await WorkerPayment.find({
       workerId: new mongoose.Types.ObjectId(user._id),
-    });
+    }).lean();
     
     const transactions = payments.map((payment) => ({
       title: "Worker Payment",
@@ -153,6 +158,7 @@ exports.renderWorkerDashboardSafer = async (req, res) => {
       ),
     };
 
+    // Fetch reviews
     const reviews = user.ratingId || { average: 0, reviews: [] };
     const formattedReviews = {
       averageRating: reviews.average || 0,
@@ -166,7 +172,7 @@ exports.renderWorkerDashboardSafer = async (req, res) => {
       })) : [],
     };
 
-    // CORRECTED: Fetch notifications properly
+    // ===== CRITICAL FIX: Fetch notifications correctly =====
     const notifications = await Notification.find({ 
       recipient: user._id, 
       recipientType: "Worker" 
@@ -184,7 +190,11 @@ exports.renderWorkerDashboardSafer = async (req, res) => {
       read: notification.read || false,
     }));
 
-    console.log("Notifications fetched:", formattedNotifications.length); // Debug log
+    console.log("Worker Dashboard Data:");
+    console.log("- Worker ID:", user._id);
+    console.log("- Client IDs:", user.clientIds);
+    console.log("- Clients found:", formattedClients.length);
+    console.log("- Notifications:", formattedNotifications.length);
 
     res.render("pages/worker_dashboard", {
       user,
@@ -194,7 +204,7 @@ exports.renderWorkerDashboardSafer = async (req, res) => {
       earnings,
       transactions,
       reviews: formattedReviews,
-      notifications: formattedNotifications, // Pass formatted notifications
+      notifications: formattedNotifications,
       successMessage: req.session.successMessage,
     });
     
@@ -696,7 +706,11 @@ exports.updateWorkerBookingStatus = async (req, res) => {
 
     const updatedBooking = await WorkerBooking.findOneAndUpdate(
       { _id: bookingId, workerId: workerId },
-      { status: status },
+      { 
+        status: status,
+        ...(status === "Approved" && { approvedDate: new Date() }),
+        ...(status === "Declined" && { declinedDate: new Date() })
+      },
       { new: true, runValidators: true }
     );
 
@@ -715,6 +729,7 @@ exports.updateWorkerBookingStatus = async (req, res) => {
       }
 
       if (status === "Approved") {
+        // Initialize arrays if needed
         tenant.domesticWorkerId = Array.isArray(tenant.domesticWorkerId)
           ? tenant.domesticWorkerId
           : [];
@@ -723,27 +738,33 @@ exports.updateWorkerBookingStatus = async (req, res) => {
           : [];
 
         const workerIdStr = workerId.toString();
-        if (
-          !tenant.domesticWorkerId.some((id) => id.toString() === workerIdStr)
-        ) {
+        const tenantIdStr = tenant._id.toString();
+
+        // Add worker to tenant's domesticWorkerId if not already there
+        if (!tenant.domesticWorkerId.some((id) => id.toString() === workerIdStr)) {
           tenant.domesticWorkerId.push(workerId);
           await tenant.save();
         }
 
-        const tenantIdStr = tenant._id.toString();
+        // ===== CRITICAL: Add tenant to worker's clientIds =====
         if (!worker.clientIds.some((id) => id.toString() === tenantIdStr)) {
           worker.clientIds.push(tenant._id);
           worker.isBooked = true;
           await worker.save();
+          
+          console.log(`Added tenant ${tenantIdStr} to worker ${workerId} clientIds`);
+          console.log(`Worker clientIds after approval:`, worker.clientIds);
         }
 
         req.session.user = worker.toObject();
       }
 
+      // Send notification to tenant
       const message =
         status === "Approved"
           ? `Your booking for ${updatedBooking.serviceType} has been approved by ${worker.firstName} ${worker.lastName}.`
           : `Your booking for ${updatedBooking.serviceType} has been declined by ${worker.firstName} ${worker.lastName}.`;
+      
       await sendNotification(updatedBooking.tenantId, "Tenant", {
         message,
         bookingId: updatedBooking._id,
@@ -767,7 +788,7 @@ exports.updateWorkerBookingStatus = async (req, res) => {
   }
 };
 
-// Send notification
+// Helper function - sendNotification (keep as is)
 const sendNotification = async (recipientId, recipientType, data) => {
   try {
     let workerName = "";
@@ -893,7 +914,6 @@ exports.updateWorkerSettings = async (req, res) => {
 };
 
 
-// Debook worker - CORRECTED VERSION
 exports.debookWorker = async (req, res) => {
   try {
     if (!req.session.user || req.session.user.userType !== "tenant") {
@@ -915,30 +935,56 @@ exports.debookWorker = async (req, res) => {
       return res.status(404).json({ error: "Tenant not found" });
     }
 
+    // Check if worker is booked by this tenant
     if (!tenant.domesticWorkerId.some(id => id.toString() === workerId)) {
       return res.status(400).json({ error: "Worker is not booked by this tenant" });
     }
 
-    // Check if current month's payment is made
-    const now = new Date();
-    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
-    const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59, 999);
-
-    const WorkerPayment = require("../models/workerPayment");
-    const recentPayment = await WorkerPayment.findOne({
+    // Check if current billing cycle payment is made for monthly workers
+    const booking = await WorkerBooking.findOne({
       tenantId,
       workerId,
-      paymentDate: { $gte: startOfMonth, $lte: endOfMonth },
-      status: "Paid",
+      status: "Approved",
     });
 
-    // Only check for monthly workers
-    if (!recentPayment && worker.rateUnit === "monthly") {
-      return res.status(400).json({ 
-        error: "Payment pending for this month",
-        message: "Please complete this month's payment before debooking the worker." 
+    if (booking && worker.rateUnit === "monthly") {
+      const bookingDate = new Date(booking.bookingDate);
+      const now = new Date();
+      const dayOfMonth = bookingDate.getDate();
+      
+      let currentCycleStart, currentCycleEnd;
+      
+      if (now.getDate() >= dayOfMonth) {
+        currentCycleStart = new Date(now.getFullYear(), now.getMonth(), dayOfMonth);
+        currentCycleEnd = new Date(now.getFullYear(), now.getMonth() + 1, dayOfMonth - 1, 23, 59, 59, 999);
+      } else {
+        currentCycleStart = new Date(now.getFullYear(), now.getMonth() - 1, dayOfMonth);
+        currentCycleEnd = new Date(now.getFullYear(), now.getMonth(), dayOfMonth - 1, 23, 59, 59, 999);
+      }
+
+      const recentPayment = await WorkerPayment.findOne({
+        tenantId,
+        workerId,
+        paymentDate: { $gte: currentCycleStart, $lte: currentCycleEnd },
+        status: "Paid",
       });
+
+      if (!recentPayment) {
+        return res.status(400).json({ 
+          error: "Payment pending for current billing cycle",
+          message: "Please complete the current billing cycle payment before debooking the worker." 
+        });
+      }
     }
+
+    // ===== CRITICAL FIX: Remove tenant from worker's clientIds =====
+    worker.clientIds = worker.clientIds.filter(
+      id => id.toString() !== tenantId.toString()
+    );
+    
+    // Update worker's isBooked status based on remaining clients
+    worker.isBooked = worker.clientIds.length > 0;
+    await worker.save();
 
     // Remove worker from tenant's domesticWorkerId array
     tenant.domesticWorkerId = tenant.domesticWorkerId.filter(
@@ -946,22 +992,12 @@ exports.debookWorker = async (req, res) => {
     );
     await tenant.save();
 
-    // Remove tenant from worker's clientIds array
-    worker.clientIds = worker.clientIds.filter(
-      id => id.toString() !== tenantId
-    );
-    
-    // Update worker's isBooked status
-    worker.isBooked = worker.clientIds.length > 0;
-    await worker.save();
-
-    // Update booking status to "Declined"
-    const WorkerBooking = require("../models/workerBooking");
-    await WorkerBooking.findOneAndUpdate(
-      { tenantId, workerId, status: "Approved" },
-      { status: "Declined" },
-      { new: true }
-    );
+    // Delete or update WorkerBooking records
+    await WorkerBooking.deleteMany({ 
+      tenantId, 
+      workerId, 
+      status: "Approved" 
+    });
 
     // Send notification to worker
     const notification = new Notification({
@@ -969,7 +1005,7 @@ exports.debookWorker = async (req, res) => {
       message: `You have been debooked by ${tenant.firstName} ${tenant.lastName} for ${worker.serviceType}.`,
       recipient: workerId,
       recipientType: "Worker",
-      tenant: tenantId, // Store tenant ID
+      tenant: tenantId,
       tenantName: `${tenant.firstName} ${tenant.lastName}`,
       status: "Info",
       priority: "High",
@@ -979,10 +1015,13 @@ exports.debookWorker = async (req, res) => {
 
     const savedNotification = await notification.save();
 
-    // Add notification to worker's notificationIds
+    // Add notification to worker's notificationIds array
     await Worker.findByIdAndUpdate(workerId, {
       $push: { notificationIds: savedNotification._id },
     });
+
+    console.log(`Worker ${workerId} debooked successfully by tenant ${tenantId}`);
+    console.log(`Worker clientIds after debook:`, worker.clientIds);
 
     res.json({ 
       success: true, 
