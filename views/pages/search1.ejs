@@ -698,7 +698,7 @@
           });
 
           // Function to render properties
-          function renderProperties(props) {
+          async function renderProperties(props) {
               resultList.innerHTML = '';
               if (props.length === 0) {
                   resultList.innerHTML = '<li>No results found</li>';

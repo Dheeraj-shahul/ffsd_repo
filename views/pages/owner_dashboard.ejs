@@ -770,63 +770,97 @@
         </div>
 
         <div id="notifications" class="section">
-          <h3>Notifications</h3>
-          <div class="notification-container">
-            <% if (notifications && Array.isArray(notifications)) { %> <%
-            notifications.forEach(notification => { %>
-            <div
-              class="notification-card"
-              data-notification-id="<%= notification._id %>"
-            >
-              <div class="notification-header">
-                <h4><%= notification.type || 'Booking Request' %></h4>
-                <span
-                  class="notification-status <%= (notification.status || 'pending').toLowerCase() %>"
-                >
-                  <%= notification.status || 'Pending' %>
-                </span>
-              </div>
-              <div class="notification-details">
-                <p>
-                  <strong>Message:</strong> <%= notification.message || 'N/A' %>
-                </p>
-                <p>
-                  <strong>Recipient:</strong> <%= notification.recipientName ||
-                  'N/A' %>
-                </p>
-                <p>
-                  <strong>Property:</strong> <%= notification.propertyName ||
-                  'N/A' %>
-                </p>
-                <p>
-                  <strong>Date:</strong> <%= notification.createdDate ? new
-                  Date(notification.createdDate).toLocaleDateString() : 'N/A' %>
-                </p>
-              </div>
-              <% if (notification.status === 'Pending') { %>
-              <div class="notification-actions">
-                <button
-                  class="action-button approve-button"
-                  onclick="handleNotificationAction('<%= notification._id %>', 'approve')"
-                >
-                  Approve
-                </button>
-                <button
-                  class="action-button reject-button"
-                  onclick="handleNotificationAction('<%= notification._id %>', 'reject')"
-                >
-                  Reject
-                </button>
-              </div>
-              <% } %>
-            </div>
-            <% }) %> <% } else { %>
-            <p>No notifications available.</p>
-            <% } %>
-          </div>
-        </div>
+  <h3>Notifications</h3>
+  <div class="notification-container">
+    <% if (notifications && Array.isArray(notifications)) { %> <%
+    notifications.forEach(notification => { %>
+    <div
+      class="notification-card"
+      data-notification-id="<%= notification._id %>"
+    >
+      <div class="notification-header">
+        <h4><%= notification.type || 'Notification' %></h4>
+        <span
+          class="notification-status <%= (notification.status || 'pending').toLowerCase() %>"
+        >
+          <%= notification.status || 'Pending' %>
+        </span>
       </div>
+      <div class="notification-details">
+        <% if (notification.type === 'Query') { %>
+          <%
+            // Parse the message to extract query and contact details
+            const message = notification.message || '';
+            const parts = message.split('\n\n');
+            const queryText = parts[0] || 'N/A';
+            const contactInfo = parts[1] || '';
+            
+            // Extract contact details using regex
+            const nameMatch = contactInfo.match(/Contact:\s*(.+)/);
+            const phoneMatch = contactInfo.match(/Phone:\s*(.+)/);
+            const emailMatch = contactInfo.match(/Email:\s*(.+)/);
+            
+            const contactName = nameMatch ? nameMatch[1].trim() : notification.recipientName;
+            const contactPhone = phoneMatch ? phoneMatch[1].trim() : '';
+            const contactEmail = emailMatch ? emailMatch[1].trim() : '';
+          %>
+          <p>
+            <strong>Query:</strong><br>
+            <%= queryText %>
+          </p>
+          <p>
+            <strong>Contact Name:</strong> <%= contactName %>
+          </p>
+          <% if (contactPhone) { %>
+          <p>
+            <strong>Phone:</strong> <%= contactPhone %>
+          </p>
+          <% } %>
+          <% if (contactEmail) { %>
+          <p>
+            <strong>Email:</strong> <%= contactEmail %>
+          </p>
+          <% } %>
+        <% } else { %>
+          <p>
+            <strong>Message:</strong> <%= notification.message || 'N/A' %>
+          </p>
+          <p>
+            <strong>Recipient:</strong> <%= notification.recipientName || 'N/A' %>
+          </p>
+        <% } %>
+        <p>
+          <strong>Property:</strong> <%= notification.propertyName ||
+          'N/A' %>
+        </p>
+        <p>
+          <strong>Date:</strong> <%= notification.createdDate ? new
+          Date(notification.createdDate).toLocaleDateString() : 'N/A' %>
+        </p>
+      </div>
+      <!-- Only show action buttons if status is Pending AND type is NOT Query -->
+      <% if (notification.status === 'Pending' && notification.type !== 'Query') { %>
+      <div class="notification-actions">
+        <button
+          class="action-button approve-button"
+          onclick="handleNotificationAction('<%= notification._id %>', 'approve')"
+        >
+          Approve
+        </button>
+        <button
+          class="action-button reject-button"
+          onclick="handleNotificationAction('<%= notification._id %>', 'reject')"
+        >
+          Reject
+        </button>
+      </div>
+      <% } %>
     </div>
+    <% }) %> <% } else { %>
+    <p>No notifications available.</p>
+    <% } %>
+  </div>
+</div>
 
     <script>
             // Handle delete account button click
@@ -892,110 +926,140 @@
         document.getElementById("deleteAccountPasswordError").textContent = ""; // Clear error
       });
 
-      // Close delete account overlay when clicking outside
-      window.addEventListener("click", function (event) {
-        const deleteAccountOverlay = document.getElementById("deleteAccountOverlay");
-        if (event.target === deleteAccountOverlay) {
-          deleteAccountOverlay.style.display = "none";
-          document.getElementById("deleteAccountPassword").value = ""; // Clear password input
-          document.getElementById("deleteAccountPasswordError").textContent = ""; // Clear error
-        }
-      });
+// Close delete account overlay when clicking outside
+window.addEventListener("click", function (event) {
+  const deleteAccountOverlay = document.getElementById("deleteAccountOverlay");
+  if (event.target === deleteAccountOverlay) {
+    deleteAccountOverlay.style.display = "none";
+    document.getElementById("deleteAccountPassword").value = ""; // Clear password input
+    document.getElementById("deleteAccountPasswordError").textContent = ""; // Clear error
+  }
+});
 
-
-            // Function to refresh notifications section
-            function refreshNotifications() {
-              fetch("/api/owner/notifications", {
-                method: "GET",
-                headers: { "Content-Type": "application/json" },
-                credentials: "include",
-              })
-                .then((response) => {
-                  if (!response.ok) {
-                    throw new Error("Failed to fetch notifications");
-                  }
-                  return response.json();
-                })
-                .then((data) => {
-                  const notificationContainer = document.querySelector(
-                    ".notification-container"
-                  );
-                  notificationContainer.innerHTML = ""; // Clear existing notifications
-                  if (data.notifications && data.notifications.length > 0) {
-                    data.notifications.forEach((notification) => {
-                      const notificationCard = document.createElement("div");
-                      notificationCard.className = "notification-card";
-                      notificationCard.setAttribute(
-                        "data-notification-id",
-                        notification._id
-                      );
-                      notificationCard.setAttribute(
-                        "data-notification-id",
-                        notification._id || ""
-                      );
-                      notificationCard.setAttribute(
-                        "data-property-id",
-                        notification.propertyId || ""
-                      );
-                      notificationCard.setAttribute(
-                        "data-tenant-id",
-                        notification.tenantId || ""
-                      );
-                      notificationCard.innerHTML = `
-                  <div class="notification-header">
-                    <h4>${notification.type || "Booking Request"}</h4>
-                    <span class="notification-status ${(
-                      notification.status || "pending"
-                    ).toLowerCase()}">
-                      ${notification.status || "Pending"}
-                    </span>
-                  </div>
-                  <div class="notification-details">
-                    <p><strong>Message:</strong> ${notification.message || "N/A"}</p>
-                    <p><strong>Recipient:</strong> ${
-                      notification.recipientName || "N/A"
-                    }</p>
-                    <p><strong>Property:</strong> ${
-                      notification.propertyName || "N/A"
-                    }</p>
-                    <p><strong>Date:</strong> ${
-                      notification.createdDate
-                        ? new Date(notification.createdDate).toLocaleDateString()
-                        : "N/A"
-                    }</p>
-                  </div>
-                  ${
-                    notification.status === "Pending"
-                      ? `
-                        <div class="notification-actions">
-                          <button class="action-button approve-button" onclick="handleNotificationAction('${notification._id}', 'approve')">
-                            Approve
-                          </button>
-                          <button class="action-button reject-button" onclick="handleNotificationAction('${notification._id}', 'reject')">
-                            Reject
-                          </button>
-                        </div>`
-                      : ""
-                  }
-                `;
-                      notificationContainer.appendChild(notificationCard);
-                    });
-                  } else {
-                    notificationContainer.innerHTML =
-                      "<p>No notifications available.</p>";
-                  }
-                })
-                .catch((error) => {
-                  console.error("Error refreshing notifications:", error);
-                });
+// Function to refresh notifications section
+function refreshNotifications() {
+  fetch("/api/owner/notifications", {
+    method: "GET",
+    headers: { "Content-Type": "application/json" },
+    credentials: "include",
+  })
+    .then((response) => {
+      if (!response.ok) {
+        throw new Error("Failed to fetch notifications");
+      }
+      return response.json();
+    })
+    .then((data) => {
+      const notificationContainer = document.querySelector(
+        ".notification-container"
+      );
+      notificationContainer.innerHTML = ""; // Clear existing notifications
+      if (data.notifications && data.notifications.length > 0) {
+        data.notifications.forEach((notification) => {
+          const notificationCard = document.createElement("div");
+          notificationCard.className = "notification-card";
+          notificationCard.setAttribute(
+            "data-notification-id",
+            notification._id
+          );
+          notificationCard.setAttribute(
+            "data-notification-id",
+            notification._id || ""
+          );
+          notificationCard.setAttribute(
+            "data-property-id",
+            notification.propertyId || ""
+          );
+          notificationCard.setAttribute(
+            "data-tenant-id",
+            notification.tenantId || ""
+          );
+          
+          // Check if this is a Query notification - if so, don't show action buttons
+          const showActions = notification.status === "Pending" && notification.type !== "Query";
+          
+          // Parse Query notification message
+          let queryDetails = '';
+          if (notification.type === 'Query') {
+            const message = notification.message || '';
+            const parts = message.split('\n\n');
+            const queryText = parts[0] || 'N/A';
+            const contactInfo = parts[1] || '';
+            
+            // Extract contact details
+            const nameMatch = contactInfo.match(/Contact:\s*(.+)/);
+            const phoneMatch = contactInfo.match(/Phone:\s*(.+)/);
+            const emailMatch = contactInfo.match(/Email:\s*(.+)/);
+            
+            const contactName = nameMatch ? nameMatch[1].trim() : notification.recipientName;
+            const contactPhone = phoneMatch ? phoneMatch[1].trim() : '';
+            const contactEmail = emailMatch ? emailMatch[1].trim() : '';
+            
+            queryDetails = `
+              <p><strong>Query:</strong><br>${queryText}</p>
+              <p><strong>Contact Name:</strong> ${contactName}</p>
+              ${contactPhone ? `<p><strong>Phone:</strong> ${contactPhone}</p>` : ''}
+              ${contactEmail ? `<p><strong>Email:</strong> ${contactEmail}</p>` : ''}
+            `;
+          }
+          
+          notificationCard.innerHTML = `
+            <div class="notification-header">
+              <h4>${notification.type || "Notification"}</h4>
+              <span class="notification-status ${(
+                notification.status || "pending"
+              ).toLowerCase()}">
+                ${notification.status || "Pending"}
+              </span>
+            </div>
+            <div class="notification-details">
+              ${notification.type === 'Query' ? queryDetails : `
+                <p><strong>Message:</strong> ${notification.message || "N/A"}</p>
+                <p><strong>Recipient:</strong> ${notification.recipientName || "N/A"}</p>
+              `}
+              <p><strong>Property:</strong> ${
+                notification.propertyName || "N/A"
+              }</p>
+              <p><strong>Date:</strong> ${
+                notification.createdDate
+                  ? new Date(notification.createdDate).toLocaleDateString()
+                  : "N/A"
+              }</p>
+            </div>
+            ${
+              showActions
+                ? `
+                  <div class="notification-actions">
+                    <button class="action-button approve-button" onclick="handleNotificationAction('${notification._id}', 'approve')">
+                      Approve
+                    </button>
+                    <button class="action-button reject-button" onclick="handleNotificationAction('${notification._id}', 'reject')">
+                      Reject
+                    </button>
+                  </div>`
+                : ""
             }
-            let propertyToDelete = null;
-            function showDeleteConfirmation(propertyId, isRented) {
-              // Check if the property is currently rented
-              if (isRented) {
-                alert("Cannot delete this property because it is currently rented.");
-                return;
-              }
+          `;
+          notificationContainer.appendChild(notificationCard);
+        });
+      } else {
+        notificationContainer.innerHTML =
+          "<p>No notifications available.</p>";
+      }
+    })
+    .catch((error) => {
+      console.error("Error refreshing notifications:", error);
+    });
+}
+
+
+      let propertyToDelete = null;
+      function showDeleteConfirmation(propertyId, isRented) {
+        // Check if the property is currently rented
+        if (isRented) {
+          alert("Cannot delete this property because it is currently rented.");
+          return;
+        }
 
               // Set the property ID for deletion
               propertyToDelete = propertyId;

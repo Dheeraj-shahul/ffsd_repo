@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>RentEase</title>
     <link rel="stylesheet" type="text/css" href="css/index.css" />
-    <!-- <link rel="stylesheet" href="styles.css" /> -->
     <link
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.0/css/all.min.css"
@@ -27,7 +26,7 @@
 
     <!-- Background Container -->
     <div class="background-container">
-      <img src="images/login.jpg" alt="" />
+      <img src="images/login.jpg" alt="Background Image" />
       <main class="main-section">
         <div class="main-overlay">
           <h1>Welcome to RentEase</h1>
@@ -90,63 +89,7 @@
       </section>
     </div>
 
-    <!-- Feature Container -->
-    <!-- <div class="hidden-section feature-container">
-      <section class="features">
-        <h2 class="side-heading">Simplify Your Home Needs</h2>
-        <div class="feature-boxes">
-          <div class="feature-item">
-            <div
-              class="feature-box"
-              style="
-                background-image: url('https://thumbs.dreamstime.com/b/wooden-house-blue-background-inscription-rent-rental-property-apartments-services-realtor-affordable-hou-housing-124267048.jpg');
-              "
-              onclick="loadContent('renthome.html', 'Rent Home')"
-            ></div>
-            <p class="feature-label">Rent Home</p>
-          </div>
-          <div class="feature-item">
-            <div
-              class="feature-box"
-              style="
-                background-image: url('https://wallpapers.com/images/hd/real-estate-digital-art-0kmi22tcj2x60lim.jpg');
-              "
-              onclick="loadContent('listproperty.html', 'List Your Properties')"
-            ></div>
-            <p class="feature-label">List Your Properties</p>
-          </div>
-          <div class="feature-item">
-            <div
-              class="feature-box"
-              style="
-                background-image: url('https://img.freepik.com/free-photo/man-doing-professional-home-cleaning-service_23-2150359014.jpg');
-              "
-              onclick="loadContent('domesticServices.html', 'Book Domestic Services')"
-            ></div>
-            <p class="feature-label">Book Domestic Services</p>
-          </div>
-          <div class="feature-item">
-            <div
-              class="feature-box"
-              style="
-                background-image: url('https://img.freepik.com/premium-photo/rent-text-with-house-model-property-insurance-business-real-estate_384948-14218.jpg');
-              "
-              onclick="loadContent('payrent.html', 'Pay Rent Online')"
-            ></div>
-            <p class="feature-label">Pay Rent Online</p>
-          </div>
-        </div>
-      </section>
-    </div> -->
-
-    <!-- Iframe Container -->
-    <!-- <div class="iframe-container" id="iframeSection">
-      <p class="iframe-label" id="iframeLabel"></p>
-      <iframe id="contentFrame"></iframe>
-    </div> -->
-
-    <!-- feature section -->
-
+    <!-- Features Section -->
     <section class="features-section">
       <div class="container">
         <div class="section-header">
@@ -197,105 +140,102 @@
       </div>
     </section>
 
-<!-- Backend data passed from the route -->
-<% 
-  const properties = propertiesData || []; // Popular listings (is_popular: true, isVerified: true, isRented: false)
-  const sliderProperties = sliderPropertiesData || []; // Slider properties
-%>
+    <!-- Backend data passed from the route -->
+    <% 
+      const properties = propertiesData || []; // Popular listings
+      const sliderProperties = sliderPropertiesData || []; // Slider properties
+    %>
 
-<!-- Popular Listings -->
-<div class="hidden-section listings">
-  <h2 class="side-heading">Popular Listings</h2>
-  <div class="listing-container">
-    <div class="info" id="property-info">
-      <% if (properties.length > 0) { %>
-        <h2><%= properties[0].location %></h2>
-        <p><%= properties[0].subtype %></p>
-      <% } else { %>
-        <h2>No Popular Properties</h2>
-        <p>Please check back later</p>
-      <% } %>
-    </div>
-    <div class="image">
-      <% if (properties.length > 0 && properties[0].images && properties[0].images.length > 0 && properties[0].images[0]) { %>
-        <img id="property-image" src="<%= properties[0].images[0] %>" alt="Property Image" />
-      <% } else { %>
-        <img id="property-image" src="/images/placeholder.jpg" alt="Property Image" />
-      <% } %>
-    </div>
-    <div class="price-container">
-      <% if (properties.length > 0) { %>
-        <div class="price">&#8377; <%= properties[0].price.toLocaleString('en-IN') %></div>
-      <% } else { %>
-        <div class="price">&#8377; 0</div>
-      <% } %>
-      <button class="contact-btn" data-id="<%= properties[0]._id %>">Contact Now</button>
-
-    </div>
-    <div class="controls">
-      <button onclick="prevProperty()">&#8249;</button>
-      <button onclick="nextProperty()">&#8250;</button>
-    </div>
-  </div>
-</div>
-
-    <!-- Slider-container-->
-    <div class="hidden-section slider-container">
-  <button class="nav-button prev" onclick="prevSlide1()">&#10094;</button>
-  <div class="slider">
-    <% if (sliderProperties.length > 0) { %>
-      <% sliderProperties.forEach(property => { %>
-        <div class="card">
-          <div
-            class="slider-image"
-            style="
-              background-image: url('<%= property.images && property.images.length > 0 ? property.images[0] : '/images/placeholder.jpg' %>');
-            "
-          ></div>
-          <div class="content">
-            <h2><%= property.name %></h2>
-            <p><%= property.description || 'No description available' %></p>
-            <a class="button" href="/property?id=<%= property._id %>">View Details</a>
+    <!-- Popular Listings -->
+    <div class="hidden-section listings">
+      <h2 class="side-heading">Popular Listings</h2>
+      <div class="listing-container">
+        <div class="info" id="property-info">
+          <% if (properties.length > 0) { %>
+            <h2><%= properties[0].location || 'Unknown Location' %></h2>
+            <p><%= properties[0].subtype || 'N/A' %></p>
+          <% } else { %>
+            <h2>No Popular Properties</h2>
+            <p>Nothing to display</p>
+          <% } %>
+        </div>
+        <div class="image">
+          <% if (properties.length > 0 && properties[0].images && properties[0].images.length > 0 && properties[0].images[0]) { %>
+            <img id="property-image" src="<%= properties[0].images[0] %>" alt="Property Image" />
+          <% } else { %>
+            <img id="property-image" src="/images/placeholder.jpg" alt="No Property Image" />
+          <% } %>
+        </div>
+        <div class="price-container">
+          <% if (properties.length > 0) { %>
+            <div class="price">&#8377; <%= properties[0].price ? properties[0].price.toLocaleString('en-IN') : '0' %></div>
+            <button class="contact-btn" data-id="<%= properties[0]._id || '' %>" <%= properties[0]._id ? '' : 'disabled' %>>Contact Now</button>
+          <% } else { %>
+            <div class="price">&#8377; 0</div>
+            <button class="contact-btn" disabled>Contact Now</button>
+          <% } %>
+        </div>
+        <% if (properties.length > 1) { %>
+          <div class="controls">
+            <button onclick="prevProperty()">&#8249;</button>
+            <button onclick="nextProperty()">&#8250;</button>
           </div>
-        </div>
-      <% }) %>
-    <% } else { %>
-      <div class="card">
-        <div
-          class="slider-image"
-          style="
-            background-image: url('/images/placeholder.jpg');
-          "
-        ></div>
-        <div class="content">
-          <h2>No Properties Available</h2>
-          <p>Please check back later</p>
-          <a class="button" href="#">View Details</a>
-        </div>
+        <% } %>
       </div>
-    <% } %>
-  </div>
-  <button class="nav-button next" onclick="nextSlide1()">&#10095;</button>
-</div>
-    <!--news section-->
+    </div>
 
+    <!-- Slider-container -->
+    <div class="hidden-section slider-container">
+      <% if (sliderProperties.length > 1) { %>
+        <button class="nav-button prev" onclick="prevSlide1()">&#10094;</button>
+      <% } %>
+      <div class="slider">
+        <% if (sliderProperties.length > 0) { %>
+          <% sliderProperties.forEach(property => { %>
+            <div class="card">
+              <div
+                class="slider-image"
+                style="
+                  background-image: url('<%= property.images && property.images.length > 0 ? property.images[0] : '/images/placeholder.jpg' %>');
+                "
+              ></div>
+              <div class="content">
+                <h2><%= property.name || 'No Name Available' %></h2>
+                <p><%= property.description || 'No description available' %></p>
+                <a class="button" href="/property?id=<%= property._id || '#' %>" <%= property._id ? '' : 'onclick="return false;"' %>>View Details</a>
+              </div>
+            </div>
+          <% }) %>
+        <% } else { %>
+          <div class="card">
+            <div
+              class="slider-image"
+              style="background-image: url('/images/placeholder.jpg');"
+            ></div>
+            <div class="content">
+              <h2>No Properties Available</h2>
+              <p>Nothing to display</p>
+              <a class="button" href="#" onclick="return false;">View Details</a>
+            </div>
+          </div>
+        <% } %>
+      </div>
+      <% if (sliderProperties.length > 1) { %>
+        <button class="nav-button next" onclick="nextSlide1()">&#10095;</button>
+      <% } %>
+    </div>
+
+    <!-- News Section -->
     <div class="hidden-section news-container">
       <div class="news-heading">
         <h2>Latest News</h2>
       </div>
       <div class="news-content">
         <marquee behavior="scroll" direction="left" scrollamount="5">
-          <span class="news-item"
-            >🌟 New properties added in Hyderabad! Check them out now. 🌟</span
-          >
-          <span class="news-item"
-            >🔥 Exclusive offer: Get 10% off on domestic services this week!
-            🔥</span
-          >
+          <span class="news-item">🌟 New properties added in Hyderabad! Check them out now. 🌟</span>
+          <span class="news-item">🔥 Exclusive offer: Get 10% off on domestic services this week! 🔥</span>
           <span class="news-item">🏡 RentEase now available in Mumbai! 🏡</span>
-          <span class="news-item"
-            >🎉 Pay your rent online and win exciting prizes! 🎉</span
-          >
+          <span class="news-item">🎉 Pay your rent online and win exciting prizes! 🎉</span>
         </marquee>
       </div>
     </div>
@@ -324,8 +264,7 @@
               href="https://e-rockwell.com/top-10-renting-tips-for-tenants/"
               target="_blank"
               class="read-more"
-              >Read More</a
-            >
+            >Read More</a>
           </div>
         </div>
 
@@ -347,8 +286,7 @@
               href="https://timesproperty.com/news/post/once-abandoned-and-almost-forgotten-blid9331?offset=1"
               target="_blank"
               class="read-more"
-              >Read More</a
-            >
+            >Read More</a>
           </div>
         </div>
 
@@ -370,8 +308,7 @@
               href="https://taylors.com.au/articles/5-must-have-features-in-a-rental-property"
               target="_blank"
               class="read-more"
-              >Read More</a
-            >
+            >Read More</a>
           </div>
         </div>
 
@@ -393,8 +330,7 @@
               href="https://legaleye.co.in/blog_news/know-about-rental-agreements/"
               target="_blank"
               class="read-more"
-              >Read More</a
-            >
+            >Read More</a>
           </div>
         </div>
 
@@ -416,8 +352,7 @@
               href="https://homelet.co.uk/tenants/tips-for-tenants/moving-checklist"
               target="_blank"
               class="read-more"
-              >Read More</a
-            >
+            >Read More</a>
           </div>
         </div>
 
@@ -438,8 +373,7 @@
               href="https://www.incharge.org/financial-literacy/budgeting-saving/how-to-save-money-on-electric-gas-water-bill/"
               target="_blank"
               class="read-more"
-              >Read More</a
-            >
+            >Read More</a>
           </div>
         </div>
       </div>
@@ -449,6 +383,7 @@
       <button class="nav-button right" onclick="moveRight()">&#8250;</button>
     </div>
 
+    <!-- CTA Section -->
     <div class="hidden-section cta">
       <section class="cta-section">
         <h2>Ready to Find Your Perfect Home?</h2>
@@ -473,18 +408,10 @@
               experience seamless and hassle-free.
             </p>
             <div class="footer-social">
-              <a href="#" aria-label="Facebook"
-                ><i class="fab fa-facebook-f"></i
-              ></a>
-              <a href="#" aria-label="Twitter"
-                ><i class="fab fa-twitter"></i
-              ></a>
-              <a href="" aria-label="Instagram"
-                ><i class="fab fa-instagram"></i
-              ></a>
-              <a href="#" aria-label="LinkedIn"
-                ><i class="fab fa-linkedin-in"></i
-              ></a>
+              <a href="#" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
+              <a href="#" aria-label="Twitter"><i class="fab fa-twitter"></i></a>
+              <a href="#" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+              <a href="#" aria-label="LinkedIn"><i class="fab fa-linkedin-in"></i></a>
             </div>
           </div>
           <div class="footer-column">
@@ -504,18 +431,13 @@
               <li><a href="/property_listing_page">List Your Property</a></li>
               <li><a href="/workerDetails">Domestic Services</a></li>
               <li><a href="/tenant_dashboard">Online Rent Payment</a></li>
-              <li>
-                <a href="property-management.html">Property Management</a>
-              </li>
+              <li><a href="property-management.html">Property Management</a></li>
             </ul>
           </div>
           <div class="footer-column">
             <h3>Contact Us</h3>
             <ul class="footer-contact">
-              <li>
-                <i class="fas fa-map-marker-alt"></i> Sri City, Andhra Pradesh,
-                India
-              </li>
+              <li><i class="fas fa-map-marker-alt"></i> Sri City, Andhra Pradesh, India</li>
               <li><i class="fas fa-phone"></i> +91 9949169887</li>
               <li><i class="fas fa-envelope"></i> contact@rentease.com</li>
             </ul>
@@ -545,197 +467,137 @@
 
     <!-- Scripts -->
     <script>
-      // document.addEventListener("DOMContentLoaded", function () {
-      //   fetch("./navbar2.html")
-      //     .then((response) => response.text())
-      //     .then((data) => {
-      //       const navbarContainer = document.getElementById("navbar-container");
-      //       navbarContainer.innerHTML = data;
-
-      //       // Execute scripts inside navbar.html
-      //       navbarContainer.querySelectorAll("script").forEach((oldScript) => {
-      //         const newScript = document.createElement("script");
-      //         newScript.textContent = oldScript.textContent;
-      //         document.body.appendChild(newScript);
-      //       });
-      //     })
-      //     .catch((error) => console.error("Error loading navbar:", error));
-      // });
-
-      // document.addEventListener("DOMContentLoaded", function () {
-      //   fetch("./dynamic_navbar.html")
-      //     .then((response) => response.text())
-      //     .then((data) => {
-      //       const navbarContainer = document.getElementById("navbar-container");
-      //       navbarContainer.innerHTML = data;
-
-      //       navbarContainer.querySelectorAll("script").forEach((oldScript) => {
-      //         const newScript = document.createElement("script");
-      //         newScript.textContent = oldScript.textContent;
-      //         document.body.appendChild(newScript);
-      //       });
-      //     })
-      //     .catch((error) => console.error("Error loading navbar:", error));
-      // });
-
-      // Fetch and insert the header
-      // Fetch and insert navbar inside a Shadow DOM
-
+      // Properties array for the Popular Listings carousel
       const properties = [
-  <% if (properties.length > 0) { %>
-    <% properties.forEach((property, index) => { %>
-      {
-        place: "<%= property.location %>",
-        type: "<%= property.subtype %>",
-        image: "<%= property.images && property.images.length > 0 && property.images[0] ? property.images[0] : '/images/placeholder.jpg' %>",
-        price: "₹ <%= property.price.toLocaleString('en-IN') %>"
-      }<%= index < properties.length - 1 ? ',' : '' %>
-    <% }) %>
-  <% } else { %>
-    {
-      place: "No Popular Properties",
-      type: "N/A",
-      image: "/images/placeholder.jpg",
-      price: "₹ 0"
-    }
-  <% } %>
-];
+        <% if (properties.length > 0) { %>
+          <% properties.forEach((property, index) => { %>
+            {
+              place: "<%= property.location || 'Unknown Location' %>",
+              type: "<%= property.subtype || 'N/A' %>",
+              image: "<%= property.images && property.images.length > 0 && property.images[0] ? property.images[0] : '/images/placeholder.jpg' %>",
+              price: "₹ <%= property.price ? property.price.toLocaleString('en-IN') : '0' %>",
+              id: "<%= property._id || '' %>"
+            }<%= index < properties.length - 1 ? ',' : '' %>
+          <% }) %>
+        <% } else { %>
+          {
+            place: "No Popular Properties",
+            type: "N/A",
+            image: "/images/placeholder.jpg",
+            price: "₹ 0",
+            id: ""
+          }
+        <% } %>
+      ];
 
- document.addEventListener("DOMContentLoaded", () => {
-    const buttons = document.querySelectorAll(".contact-btn");
-
-    buttons.forEach(button => {
-      button.addEventListener("click", () => {
-        const propertyId = button.getAttribute("data-id");
-        if (propertyId) {
-          // Redirect to property details page
-          window.location.href = `/property?id=${propertyId}`;
-        }
+      document.addEventListener("DOMContentLoaded", () => {
+        const buttons = document.querySelectorAll(".contact-btn");
+        buttons.forEach(button => {
+          button.addEventListener("click", () => {
+            const propertyId = button.getAttribute("data-id");
+            if (propertyId) {
+              window.location.href = `/property?id=${propertyId}`;
+            }
+          });
+        });
       });
-    });
-  });
 
       let currentIndex1 = 0;
       let carouselInterval1;
       let touchStartX1 = 0;
       let touchEndX1 = 0;
-      let lastScrollTime1 = 0; // Track the last scroll time for throttling
-      const scrollThreshold1 = 10; // Minimum horizontal scroll distance to trigger a swipe
-      const throttleTime1 = 500; // Minimum time (in milliseconds) between swipes
-      const swipeThreshold1 = 10; // Consistent threshold for swipe detection
+      let lastScrollTime1 = 0;
+      const scrollThreshold1 = 10;
+      const throttleTime1 = 500;
+      const swipeThreshold1 = 10;
 
-      // Ensure 'properties' array exists before proceeding
-      if (typeof properties === "undefined" || properties.length === 0) {
-        console.error("Error: 'properties' array is not defined or empty.");
+      // Check if properties array is valid and has items
+      if (!properties || properties.length === 0) {
+        console.warn("Properties array is empty or undefined.");
       } else {
-        // Function to update the displayed property
         function updateProperty() {
-          document.getElementById(
-            "property-info"
-          ).innerHTML = `<h2>${properties[currentIndex1].place}</h2><p>${properties[currentIndex1].type}</p>`;
-          document.getElementById("property-image").src =
-            properties[currentIndex1].image;
-          document.querySelector(".price").textContent =
-            properties[currentIndex1].price;
+          const propertyInfo = document.getElementById("property-info");
+          const propertyImage = document.getElementById("property-image");
+          const priceElement = document.querySelector(".price");
+          if (propertyInfo && propertyImage && priceElement) {
+            propertyInfo.innerHTML = `<h2>${properties[currentIndex1].place}</h2><p>${properties[currentIndex1].type}</p>`;
+            propertyImage.src = properties[currentIndex1].image;
+            priceElement.textContent = properties[currentIndex1].price;
+          }
         }
 
-        // Function to go to the next property
         function nextProperty() {
-          stopCarousel(); // Stop the carousel first
+          if (properties.length <= 1) return; // No navigation if only one or no items
+          stopCarousel();
           currentIndex1 = (currentIndex1 + 1) % properties.length;
           updateProperty();
-          startCarousel(); // Restart the carousel after changing property
+          startCarousel();
         }
 
-        // Function to go to the previous property
         function prevProperty() {
-          stopCarousel(); // Stop the carousel first
-          currentIndex1 =
-            (currentIndex1 - 1 + properties.length) % properties.length;
+          if (properties.length <= 1) return; // No navigation if only one or no items
+          stopCarousel();
+          currentIndex1 = (currentIndex1 - 1 + properties.length) % properties.length;
           updateProperty();
-          startCarousel(); // Restart the carousel after changing property
+          startCarousel();
         }
 
-        // Function to start the carousel
         function startCarousel() {
-          stopCarousel(); // Clear any existing intervals before starting
+          if (properties.length <= 1) return; // No carousel if only one or no items
+          stopCarousel();
           carouselInterval1 = setInterval(nextProperty, 10000000);
         }
 
-        // Function to stop the carousel
         function stopCarousel() {
           clearInterval(carouselInterval1);
         }
 
-        // REMOVED: Don't add event listeners since we're using inline onclick attributes
-        // The inline onclick attributes will call prevProperty() and nextProperty() directly
-
-        // Get listing container safely
         const listingContainer = document.querySelector(".listing-container");
-
         if (listingContainer) {
-          // Touch event listeners for mobile devices
-          listingContainer.addEventListener(
-            "touchstart",
-            (e) => {
-              touchStartX1 = e.touches[0].clientX;
-              stopCarousel(); // Stop during user interaction
-            },
-            { passive: true }
-          );
+          listingContainer.addEventListener("touchstart", (e) => {
+            if (properties.length <= 1) return;
+            touchStartX1 = e.touches[0].clientX;
+            stopCarousel();
+          }, { passive: true });
 
-          listingContainer.addEventListener(
-            "touchend",
-            (e) => {
-              touchEndX1 = e.changedTouches[0].clientX;
-              handleSwipe();
-              startCarousel(); // Restart carousel after interaction
-            },
-            { passive: true }
-          );
+          listingContainer.addEventListener("touchend", (e) => {
+            if (properties.length <= 1) return;
+            touchEndX1 = e.changedTouches[0].clientX;
+            handleSwipe();
+            startCarousel();
+          }, { passive: true });
 
-          // Mouse event listeners for desktops
           listingContainer.addEventListener("mousedown", (e) => {
+            if (properties.length <= 1) return;
             touchStartX1 = e.clientX;
             stopCarousel();
           });
 
           listingContainer.addEventListener("mouseup", (e) => {
+            if (properties.length <= 1) return;
             touchEndX1 = e.clientX;
             handleSwipe();
             startCarousel();
           });
 
-          // Wheel event listener for two-finger gestures on laptops
-          listingContainer.addEventListener(
-            "wheel",
-            (e) => {
-              const currentTime = Date.now();
-
-              // Check if horizontal scroll is significant
-              if (Math.abs(e.deltaX) > Math.abs(e.deltaY)) {
-                // Don't use preventDefault here - use passive listener instead
-
-                if (currentTime - lastScrollTime1 > throttleTime1) {
-                  if (e.deltaX > scrollThreshold1) {
-                    prevProperty();
-                  } else if (e.deltaX < -scrollThreshold1) {
-                    nextProperty();
-                  }
-                  lastScrollTime1 = currentTime; // Update last scroll time
+          listingContainer.addEventListener("wheel", (e) => {
+            if (properties.length <= 1) return;
+            const currentTime = Date.now();
+            if (Math.abs(e.deltaX) > Math.abs(e.deltaY)) {
+              if (currentTime - lastScrollTime1 > throttleTime1) {
+                if (e.deltaX > scrollThreshold1) {
+                  prevProperty();
+                } else if (e.deltaX < -scrollThreshold1) {
+                  nextProperty();
                 }
+                lastScrollTime1 = currentTime;
               }
-            },
-            { passive: true }
-          );
-        } else {
-          console.error(
-            "Error: '.listing-container' not found in the document."
-          );
+            }
+          }, { passive: true });
         }
 
-        // Function to handle swipe gestures
         function handleSwipe() {
+          if (properties.length <= 1) return;
           if (touchStartX1 - touchEndX1 > swipeThreshold1) {
             nextProperty();
           } else if (touchEndX1 - touchStartX1 > swipeThreshold1) {
@@ -743,23 +605,21 @@
           }
         }
 
-        // Initialize the first property and start the carousel
+        // Initialize only if there are properties
         updateProperty();
         startCarousel();
       }
 
-      // Make the functions available globally
       window.prevProperty = prevProperty;
       window.nextProperty = nextProperty;
 
       // Slider functionality
-      let currentIndex2 = 0; // Renamed from currentIndexone for consistency
+      let currentIndex2 = 0;
 
       function getVisibleCards() {
         const screenWidth = window.innerWidth;
         if (screenWidth >= 1024) return 2;
         if (screenWidth >= 768) return 1;
-        if (screenWidth <= 480) return 1; // Explicitly handle 480px and smaller screens
         return 1;
       }
 
@@ -770,26 +630,20 @@
         const cards = document.querySelectorAll(".card");
         if (cards.length === 0) return;
 
-        // Get the actual width of a card including margin
         const card = cards[0];
         const cardStyle = window.getComputedStyle(card);
         const marginRight = parseInt(cardStyle.marginRight) || 0;
         const marginLeft = parseInt(cardStyle.marginLeft) || 0;
-
-        // Calculate total width including margins
         const totalCardWidth = card.offsetWidth + marginRight + marginLeft;
 
-        // Apply the transform with the proper width calculation
-        slider.style.transform = `translateX(-${
-          currentIndex2 * totalCardWidth
-        }px)`;
+        slider.style.transform = `translateX(-${currentIndex2 * totalCardWidth}px)`;
       }
 
       function nextSlide1() {
         const totalCards = document.querySelectorAll(".card").length;
         const visibleCards = getVisibleCards();
         const maxIndex = Math.max(0, totalCards - visibleCards);
-
+        if (totalCards <= 1) return; // No navigation if only one card
         if (currentIndex2 < maxIndex) {
           currentIndex2++;
           updateSlider1();
@@ -803,22 +657,17 @@
         }
       }
 
-      // Initialize slider on page load and window resize
       window.addEventListener("load", updateSlider1);
       window.addEventListener("resize", () => {
-        // Reset index if we're beyond the max index after resize
         const totalCards = document.querySelectorAll(".card").length;
         const visibleCards = getVisibleCards();
         const maxIndex = Math.max(0, totalCards - visibleCards);
-
         if (currentIndex2 > maxIndex) {
           currentIndex2 = maxIndex;
         }
-
         updateSlider1();
       });
 
-      // Make the functions available globally
       window.prevSlide1 = prevSlide1;
       window.nextSlide1 = nextSlide1;
       window.updateSlider1 = updateSlider1;
@@ -830,17 +679,16 @@
       let totalArticles = 0;
       let articlesPerPage;
 
-      // Check if articlesGrid exists before continuing
       if (articlesGrid) {
         totalArticles = document.querySelectorAll(".article-card").length;
 
         function updateArticlesPerPage() {
           if (window.innerWidth <= 480) {
-            articlesPerPage = 1; // Mobile: 1 per view
+            articlesPerPage = 1;
           } else if (window.innerWidth <= 768) {
-            articlesPerPage = 2; // Tablet: 2 per view
+            articlesPerPage = 2;
           } else {
-            articlesPerPage = 4; // Desktop: 4 per view
+            articlesPerPage = 4;
           }
         }
 
@@ -864,157 +712,102 @@
           articlesGrid.style.transform = `translateX(${offset}%)`;
         }
 
-        // Improved Touch Event Listeners
         let touchStartX = 0;
         let touchStartY = 0;
         let touchEndX = 0;
         let touchEndY = 0;
 
-        articlesGrid.addEventListener(
-          "touchstart",
-          (e) => {
-            touchStartX = e.touches[0].clientX;
-            touchStartY = e.touches[0].clientY;
-          },
-          { passive: true }
-        );
+        articlesGrid.addEventListener("touchstart", (e) => {
+          touchStartX = e.touches[0].clientX;
+          touchStartY = e.touches[0].clientY;
+        }, { passive: true });
 
-        articlesGrid.addEventListener(
-          "touchmove",
-          (e) => {
-            touchEndX = e.touches[0].clientX;
-            touchEndY = e.touches[0].clientY;
-          },
-          { passive: true }
-        );
+        articlesGrid.addEventListener("touchmove", (e) => {
+          touchEndX = e.touches[0].clientX;
+          touchEndY = e.touches[0].clientY;
+        }, { passive: true });
 
-        articlesGrid.addEventListener(
-          "touchend",
-          () => {
-            handleArticlesSwipe();
-          },
-          { passive: true }
-        );
+        articlesGrid.addEventListener("touchend", () => {
+          handleArticlesSwipe();
+        }, { passive: true });
 
         function handleArticlesSwipe() {
           const xDiff = touchStartX - touchEndX;
           const yDiff = touchStartY - touchEndY;
-
-          // Only trigger swipe if the horizontal movement is greater than vertical movement
           if (Math.abs(xDiff) > Math.abs(yDiff)) {
             if (xDiff > swipeThreshold1) {
-              // Swipe left → Load next articles
               moveRight();
             } else if (xDiff < -swipeThreshold1) {
-              // Swipe right → Load previous articles
               moveLeft();
             }
           }
-          // Otherwise, allow vertical scrolling
         }
 
-        // Update articles per page on window resize
         window.addEventListener("resize", () => {
           updateArticlesPerPage();
           updateGrid();
         });
 
-        // Initialize
         updateArticlesPerPage();
       }
 
-      // Function to observe sections
       function observeSections() {
         const sections = document.querySelectorAll(".hidden-section");
+        if (sections.length === 0) return;
 
-        if (sections.length === 0) {
-          return; // No sections to observe
-        }
-
-        // Options for the observer
         const options = {
-          root: null, // Use the viewport as the root
-          rootMargin: "0px", // No margin
-          threshold: 0.09, // Trigger when 9% of the section is visible
+          root: null,
+          rootMargin: "0px",
+          threshold: 0.09,
         };
 
-        // Callback function for the observer
         const callback = (entries, observer) => {
           entries.forEach((entry) => {
             if (entry.isIntersecting) {
-              // Add the "show" class when the section is in view
               entry.target.classList.add("show");
-              // Optionally stop observing after the section is shown
               observer.unobserve(entry.target);
             }
           });
         };
 
-        // Create the observer
         const observer = new IntersectionObserver(callback, options);
-
-        // Observe each section
-        sections.forEach((section) => {
-          observer.observe(section);
-        });
+        sections.forEach((section) => observer.observe(section));
       }
 
-      // Run the observer when the page loads
       window.addEventListener("load", observeSections);
 
-      // Add touch swipe functionality to the slider
       function addTouchSwipeToSlider() {
         const sliderContainer = document.querySelector(".slider-container");
         if (!sliderContainer) return;
 
         let touchStartX = 0;
         let touchEndX = 0;
-        const swipeThreshold = 10; // Minimum distance required for swipe
+        const swipeThreshold = 10;
 
-        // Touch event listeners
-        sliderContainer.addEventListener(
-          "touchstart",
-          (e) => {
-            touchStartX = e.touches[0].clientX;
-          },
-          { passive: true }
-        );
+        sliderContainer.addEventListener("touchstart", (e) => {
+          touchStartX = e.touches[0].clientX;
+        }, { passive: true });
 
-        sliderContainer.addEventListener(
-          "touchmove",
-          (e) => {
-            touchEndX = e.touches[0].clientX;
-          },
-          { passive: true }
-        );
+        sliderContainer.addEventListener("touchmove", (e) => {
+          touchEndX = e.touches[0].clientX;
+        }, { passive: true });
 
-        sliderContainer.addEventListener(
-          "touchend",
-          () => {
-            handleSliderSwipe();
-          },
-          { passive: true }
-        );
+        sliderContainer.addEventListener("touchend", () => {
+          handleSliderSwipe();
+        }, { passive: true });
 
-        // Function to handle swipe
         function handleSliderSwipe() {
-          // Calculate swipe distance
           const swipeDistance = touchStartX - touchEndX;
-
-          // Check if swipe was significant enough
           if (Math.abs(swipeDistance) > swipeThreshold) {
             if (swipeDistance > 0) {
-              // Swiped left - go to next slide
               nextSlide1();
             } else {
-              // Swiped right - go to previous slide
               prevSlide1();
             }
           }
         }
       }
 
-      // Call the function when the document is loaded
       document.addEventListener("DOMContentLoaded", () => {
         addTouchSwipeToSlider();
       });
