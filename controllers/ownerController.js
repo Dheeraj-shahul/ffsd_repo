@@ -123,10 +123,11 @@ exports.getOwnerDashboard = async (req, res) => {
     })
       .select("firstName lastName")
       .lean();
+
     tenantsForRequests.forEach((tenant) => {
       tenantMap.set(
         tenant._id.toString(),
-        `${tenant.firstName} ${tenant.lastName}`
+        `${tenant.firstName} ${tenant.lastName}` // Added backticks for template literal
       );
     });
     // Fetch properties
@@ -325,6 +326,7 @@ exports.updateMaintenanceRequestStatus = async (req, res) => {
     maintenanceRequest.status = status;
     await maintenanceRequest.save();
 
+    // Optionally, create a notification for the tenant
     return res.status(200).json({
       success: true,
       message: "Maintenance request status updated successfully",
@@ -340,6 +342,7 @@ exports.updateMaintenanceRequestStatus = async (req, res) => {
   }
 };
 
+// Delete owner account if no tenants and no rented properties
 exports.deleteOwnerAccount = async (req, res) => {
   try {
     const ownerId = req.session.user?._id;
@@ -367,6 +370,7 @@ exports.deleteOwnerAccount = async (req, res) => {
         .json({ success: false, message: "Password is required" });
     }
 
+    // if password does not match with owner's password
     if (password !== owner.password) {
       return res
         .status(400)
@@ -377,6 +381,8 @@ exports.deleteOwnerAccount = async (req, res) => {
     const tenants = await Tenant.find({
       ownerId: new mongoose.Types.ObjectId(ownerId),
     });
+
+    // If there are tenants, prevent deletion
     if (tenants.length > 0) {
       return res.status(400).json({
         success: false,
@@ -393,6 +399,8 @@ exports.deleteOwnerAccount = async (req, res) => {
     const hasRentedProperties = properties.some(
       (property) => property.isRented
     );
+
+    // If any property is rented, prevent deletion
     if (hasRentedProperties) {
       return res.status(400).json({
         success: false,
@@ -539,6 +547,7 @@ exports.updateOwnerSettings = async (req, res) => {
   }
 };
 
+// Approve or reject unrent property request
 exports.approveUnrentProperty = async (req, res) => {
   try {
     const { unrentRequestId, action } = req.body;
@@ -656,14 +665,20 @@ exports.approveUnrentProperty = async (req, res) => {
   }
 };
 
+// Owner login
 exports.login = async (req, res) => {
   const { email, password } = req.body;
   try {
     const owner = await Owner.findOne({ email }).select("+password");
-    if (!owner) return res.status(401).render("pages/login", { error: "Account not found" });
+    if (!owner)
+      return res
+        .status(401)
+        .render("pages/login", { error: "Account not found" });
     // Plain-text comparison
     if (owner.password !== password) {
-      return res.status(401).render("pages/login", { error: "Incorrect password" });
+      return res
+        .status(401)
+        .render("pages/login", { error: "Incorrect password" });
     }
     // Set session and redirect as needed
     req.session.user = owner.toObject();

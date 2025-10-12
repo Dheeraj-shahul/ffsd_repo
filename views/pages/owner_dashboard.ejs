@@ -409,7 +409,8 @@
             </div>
           </div>
         </div>
-
+         
+       <!-- Delete Account Overlay -->
         <div id="deleteAccountOverlay" class="popup-overlay">
           <div class="popup-container">
             <h4 class="popup-title">Delete Account?</h4>
@@ -871,17 +872,18 @@ document.getElementById("deleteAccountBtn")?.addEventListener("click", function 
 });
 
 // Handle delete account confirmation
-// Handle delete account confirmation
 document.getElementById("confirmDeleteAccount")?.addEventListener("click", function () {
   const password = document.getElementById("deleteAccountPassword").value;
   const errorElement = document.getElementById("deleteAccountPasswordError");
 
+  // Clear previous error
   if (!password) {
     errorElement.textContent = "Please enter your password";
     alert("Please enter your password");
     return;
   }
 
+  // Send DELETE request to server
   fetch("/owner/delete-account", {
     method: "DELETE",
     headers: {
@@ -1100,7 +1102,7 @@ function refreshNotifications() {
 
       // Function to send delete request to the server
       function deleteProperty(propertyId) {
-        fetch(`/api/property/${propertyId}`, {
+        fetch(/api/property/${propertyId}, {
           method: "DELETE",
           headers: {
             "Content-Type": "application/json",
@@ -1115,7 +1117,7 @@ function refreshNotifications() {
 
               // Remove the property card from the DOM
               const propertyCard = document.querySelector(
-                `[data-property-id="${propertyId}"]`
+                [data-property-id="${propertyId}"]
               );
               if (propertyCard) {
                 propertyCard.remove();
@@ -1132,6 +1134,8 @@ function refreshNotifications() {
             alert("An error occurred while deleting the property.");
           });
       }
+
+      // Function to handle notification actions
       function showSection(sectionId) {
         const sections = document.querySelectorAll(".section");
         sections.forEach((section) => {
@@ -1471,7 +1475,7 @@ function refreshNotifications() {
                 // Update the displayed name in the sidebar
                 document.getElementById(
                   "house_owner_name"
-                ).textContent = `Hey, ${formData.firstName} ${formData.lastName}`;
+                ).textContent = Hey, ${formData.firstName} ${formData.lastName};
               } else {
                 // Show error message
                 alert(data.message || "Failed to update settings");
@@ -1508,7 +1512,7 @@ function refreshNotifications() {
             if (!response.ok) {
               return response.json().then((errorData) => {
                 throw new Error(
-                  errorData.message || `HTTP error! Status: ${response.status}`
+                  errorData.message || HTTP error! Status: ${response.status}
                 );
               });
             }
@@ -1524,7 +1528,7 @@ function refreshNotifications() {
           })
           .catch((error) => {
             console.error("Error processing unrent request:", error);
-            alert(`Failed to process the request: ${error.message}`);
+            alert(Failed to process the request: ${error.message});
           });
       }
 
@@ -1541,7 +1545,7 @@ function refreshNotifications() {
             if (!response.ok) {
               return response.json().then((errorData) => {
                 throw new Error(
-                  errorData.message || `HTTP error! Status: ${response.status}`
+                  errorData.message || HTTP error! Status: ${response.status}
                 );
               });
             }
@@ -1566,7 +1570,7 @@ function refreshNotifications() {
           })
           .catch((error) => {
             console.error("Error handling notification action:", error);
-            alert(`Failed to process the request: ${error.message}`);
+            alert(Failed to process the request: ${error.message});
           });
       }
 
@@ -1635,7 +1639,7 @@ function refreshNotifications() {
             if (!response.ok) {
               return response.json().then((errorData) => {
                 throw new Error(
-                  errorData.message || `HTTP error! Status: ${response.status}`
+                  errorData.message || HTTP error! Status: ${response.status}
                 );
               });
             }
@@ -1644,7 +1648,7 @@ function refreshNotifications() {
           .then((data) => {
             if (data.success) {
               const notificationCard = document.querySelector(
-                `.notification-card[data-notification-id="${notificationId}"]`
+                .notification-card[data-notification-id="${notificationId}"]
               );
               const statusElement = notificationCard.querySelector(
                 ".notification-status"
@@ -1680,7 +1684,7 @@ function refreshNotifications() {
           })
           .catch((error) => {
             console.error("Error handling notification action:", error);
-            alert(`Failed to process the request: ${error.message}`);
+            alert(Failed to process the request: ${error.message});
           });
       }
     </script>
