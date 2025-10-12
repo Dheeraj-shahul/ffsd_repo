@@ -8,6 +8,7 @@ const WorkerBooking = require("../models/workerBooking");
 const Notification = require("../models/notification");
 const formidable = require("formidable");
 const fs = require("fs");
+const workerBooking = require("../models/workerBooking");
 
 // Middleware to check if user is authenticated
 exports.isAuthenticated = (req, res, next) => {

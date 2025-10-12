@@ -510,9 +510,9 @@
             </div>
             
             <div class="worker-payment-section">
+              <h6>Payment</h6>
               <!-- <p>Last Payment: <span class="last-payment-date"><%= worker.lastPaymentDate ? new Date(worker.lastPaymentDate).toLocaleDateString() : 'Never' %></span></p> -->
               <!-- <p>Status: <span class="payment-status <%= worker.paymentStatus === 'paid' ? 'status-paid' : 'status-pending' %>"><%= worker.paymentStatus === 'paid' ? 'Paid' : 'Pending' %></span></p> -->
-
               <button class="pay-worker-btn" onclick="showWorkerPaymentPopup(this)" <%= worker.paymentStatus === 'paid' ? 'disabled' : '' %>>
                 <%= worker.paymentStatus === 'paid' ? 'Paid' : 'Pay Worker' %>
               </button>
@@ -634,7 +634,7 @@
           <div class="review-form">
             <h5>Review Your Current Property</h5>
             <div class="star-rating">
-              <span>Rate your experience: </span>
+             <span>Rate your experience: </span>
              <div class="stars" id="star-rating" data-property-id="<%= currentProperty._id %>">
                <span class="star" data-rating="1"><i class="far fa-star"></i></span>
                <span class="star" data-rating="2"><i class="far fa-star"></i></span>
@@ -1221,7 +1221,7 @@ if (deleteAccountForm) {
             const reviewText = document.getElementById("review-text");
             if (!starRating || !reviewText) return;
             const propertyId = starRating.dataset.propertyId;
-            const rating=selectedRating;
+            const rating = selectedRating;
             const review = reviewText.value;
 
             if (!rating) {
@@ -1242,8 +1242,8 @@ if (deleteAccountForm) {
                 showNotification(result.message, "success");
                 addNewReview(result.rating);
                 reviewText.value = "";
-                selectedRating=0;
-                updateStarDisplay(0,true);
+                selectedRating = 0;
+                updateStarDisplay(0, true);
               } else {
                 showNotification(result.message || "Error submitting review", "error");
               }
@@ -1455,7 +1455,7 @@ if (deleteAccountForm) {
           }
         });
 
-        const stars = document.querySelectorAll("#star-rating .star");
+       const stars = document.querySelectorAll("#star-rating .star");
 let selectedRating = 0;
 
 stars.forEach((star, index) => {
