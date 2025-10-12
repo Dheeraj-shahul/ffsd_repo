@@ -731,6 +731,10 @@ app.get("/privacy_policy", (req, res) => {
   res.render("pages/privacy_policy");
 });
 
+app.get("/termsofservice", (req, res) => {
+  res.render("pages/termsofservice");
+});
+
 app.get("/contact_us", (req, res) => {
   res.render("pages/contact_us");
 });
