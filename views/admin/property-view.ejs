@@ -12,7 +12,7 @@
       <p><strong>Name:</strong> <%= property.name %></p>
       <p><strong>Owner:</strong> 
         <% if (property.owner && property.owner._id) { %>
-          <a href="/admin/owner/<%= property.owner._id %>">
+          <a href="/admin/user/<%= property.owner._id %>/owner">
             <%= property.owner.firstName %> <%= property.owner.lastName %>
           </a>
         <% } else { %>
@@ -30,13 +30,15 @@
       <h3>Rental Information</h3>
       <p><strong>Status:</strong> <%= property.status %></p>
       <p><strong>Rented:</strong> <%= property.isRented ? 'Yes' : 'No' %></p>
-      <% if (property.tenant) { %>
+      <% if (property.tenantId && property.tenantId._id) { %>
         <p><strong>Tenant:</strong> 
-            <a href="/admin/tenant/<%= property.tenant._id %>">
-                <%= property.tenant.firstName %> <%= property.tenant.lastName %>
-              </a>
+            <a href="/admin/user/<%= property.tenantId._id %>/tenant">
+                <%= property.tenantId.firstName %> <%= property.tenantId.lastName %>
+            </a>
         </p>
-      <p><strong>Tenant Email:</strong> <%= property.tenant.email %></p>
+        <p><strong>Tenant Email:</strong> <%= property.tenantId.email %></p>
+      <% } else { %>
+        <p><strong>Tenant:</strong> Available</p>
       <% } %>
       <p><strong>Price:</strong> ₹<%= Number(property.price).toFixed(2) %></p>
       <p><strong>Security Deposit:</strong> ₹<%= Number(property.securityDeposit).toFixed(2) %></p>
@@ -50,7 +52,7 @@
       <p><strong>Beds:</strong> <%= property.beds %></p>
       <p><strong>Baths:</strong> <%= property.baths %></p>
       <p><strong>Furnished:</strong> <%= property.furnished %></p>
-      <p><strong>Amenities:</strong> <%= property.amenities.join(', ') %></p>
+      <p><strong>Amenities:</strong> <%= Array.isArray(property.amenities) ? property.amenities.join(', ') : property.amenities %></p>
       <p><strong>Description:</strong> <%= property.description %></p>
     </div>
 
@@ -81,7 +83,6 @@
   </div>
 
   <div class="action-buttons">
-    <a href="/admin/property-management" class="btn">Back to List</a>
+    <a href="/admin" class="btn">Back to List</a>
   </div>
 </div>
-

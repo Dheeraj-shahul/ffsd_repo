@@ -9,63 +9,85 @@
   <div class="user-details">
     <div class="detail-group">
       <h3>Basic Information</h3>
-      <p><strong>ID:</strong> <%= user._id %></p>
+      <p><strong>ID:</strong> <%= user.id %></p>
       <p><strong>Name:</strong> <%= user.firstName %> <%= user.lastName %></p>
       <p><strong>Email:</strong> <%= user.email %></p>
       <p><strong>Phone:</strong> <%= user.phone %></p>
-      <p><strong>Location:</strong> <%= user.location %></p>
+      <p><strong>Address:</strong> <%= user.address %></p>
       <p><strong>Status:</strong> <%= user.status %></p>
-      
+      <p><strong>Registered:</strong> <%= user.createdAt ? new Date(user.createdAt).toLocaleDateString() : 'N/A' %></p>
     </div>
 
-    <% if (userType === 'owner') { %>
-    <div class="detail-group">
-      <h3>Owner Information</h3>
-      <p><strong>Properties:</strong> <%= user.propertyIds?.length || 0 %></p>
-      <p><strong>Tenants:</strong> <%= user.tenantIds?.length || 0 %></p>
-    </div>
-    <% } else if (userType === 'tenant') { %>
+    <% if (userType === 'tenant') { %>
     <div class="detail-group">
       <h3>Tenant Information</h3>
-      <% if (user.ownerId) { %>
-      <p>
-        <strong>Owner:</strong>
-        <a href="/admin/user/<%= user.ownerId._id %>/owner">
-          <%= user.ownerId.firstName %> <%= user.ownerId.lastName %>
-        </a>
-      </p>
+      <p><strong>Properties Rented:</strong> <%= tenantProperty ? 1 : 0 %></p>
+      <% if (tenantProperty) { %>
+        <div class="relationship-item">
+          <h4>Current Rental</h4>
+          <p><strong>Property:</strong> 
+            <a href="/admin/property/<%= tenantProperty._id %>">
+              <%= tenantProperty.name %>
+            </a>
+          </p>
+          <p><strong>Location:</strong> <%= tenantProperty.location %></p>
+          <p><strong>Owner:</strong> 
+            <a href="/admin/user/<%= tenantProperty.ownerId._id %>/owner">
+              <%= tenantProperty.ownerId.firstName %> <%= tenantProperty.ownerId.lastName %>
+            </a>
+          </p>
+          <p><strong>Rent:</strong> ₹<%= Number(tenantProperty.price).toFixed(0) %>/month</p>
+        </div>
+      <% } else { %>
+        <p><strong>Status:</strong> Not renting any property</p>
       <% } %>
-      <p>
-        <strong>Saved Properties:</strong> <%= user.savedListings?.length || 0
-        %>
-      </p>
+    </div>
+    <% } else if (userType === 'owner') { %>
+    <div class="detail-group">
+      <h3>Owner Information</h3>
+      <p><strong>Total Properties:</strong> <%= ownerProperties.length %></p>
+      <p><strong>Tenants:</strong> <%= ownerProperties.filter(p => p.tenantId).length %></p>
     </div>
     <% } else if (userType === 'worker') { %>
     <div class="detail-group">
       <h3>Worker Information</h3>
-      <p><strong>Service Type:</strong> <%= user.serviceType %></p>
-      <p><strong>Experience:</strong> <%= user.experience %> years</p>
-      <p><strong>Service Status:</strong> <%= user.serviceStatus %></p>
-      <p><strong>Bookings:</strong> <%= user.bookingIds?.length || 0 %></p>
+      <p><strong>Service Type:</strong> <%= user.serviceType || 'N/A' %></p>
+      <p><strong>Experience:</strong> <%= user.experience ? user.experience + ' years' : 'N/A' %></p>
+      <p><strong>Active Clients:</strong> <%= workerBookings.length %></p>
+      <% if (workerBookings.length > 0) { %>
+        <h4>Active Clients</h4>
+        <% workerBookings.forEach(booking => { %>
+          <div class="relationship-item">
+            <p><strong>Client:</strong> 
+              <a href="/admin/user/<%= booking.tenantId._id %>/tenant">
+                <%= booking.tenantId.firstName %> <%= booking.tenantId.lastName %>
+              </a>
+            </p>
+            <p><strong>Property:</strong> <%= booking.propertyId.name %></p>
+            <p><strong>Location:</strong> <%= booking.propertyId.location %></p>
+          </div>
+        <% }) %>
+      <% } else { %>
+        <p><strong>Status:</strong> No active clients</p>
+      <% } %>
     </div>
     <% } %>
 
     <div class="detail-group">
       <h3>Account Actions</h3>
       <div class="action-buttons">
-        <!-- <button
-          onclick="suspendUser('<%= user._id %>', '<%= userType %>', '<%= user.status === 'Active' ? 'Suspended' : 'Active' %>')"
-        >
-          <%= user.status === 'Active' ? 'Suspend' : 'Activate' %>
-        </button> -->
-        <!-- <button
-          class="danger"
-          onclick="deleteUser('<%= user._id %>', '<%= userType %>')"
-        >
-          Delete Account
-        </button> -->
         <a href="/admin" class="btn">Back to List</a>
       </div>
     </div>
   </div>
 </div>
+
+<style>
+.relationship-item {
+  border: 1px solid #ddd;
+  padding: 10px;
+  margin: 5px 0;
+  border-radius: 5px;
+  background: #f9f9f9;
+}
+</style>

@@ -507,10 +507,18 @@
             <strong>Rating:</strong> <%= property.rating %>/5 (<%=
             property.reviews %> Reviews)
           </p>
+          <p class="property-rating-reviews">
+            <strong>Owner:</strong> <%= property.owner %>
+          </p>
         </div>
         <div class="property-price-section">
           <p class="price" id="property-price"><%= property.price %></p>
-          <button class="contact-now" onclick="location.href='/book-property?id=<%= property._id %>'">Book Now</button>
+          <button
+            class="contact-now"
+            onclick="location.href='/book-property?id=<%= property._id %>'"
+          >
+            Book Now
+          </button>
         </div>
       </div>
 
@@ -574,175 +582,175 @@
       </section>
 
       <!-- Contact Form -->
-<section class="section">
-  <h2 class="section-title">Send Query to Owner</h2>
-  <form
-    id="contact-form"
-    class="contact-form"
-    action="/api/property/<%= property._id %>/contact"
-    method="POST"
-  >
-    <div class="form-field">
-      <input
-        type="text"
-        id="name"
-        name="name"
-        placeholder="Your Name"
-        required
-      />
+      <section class="section">
+        <h2 class="section-title">Send Query to Owner</h2>
+        <form
+          id="contact-form"
+          class="contact-form"
+          action="/api/property/<%= property._id %>/contact"
+          method="POST"
+        >
+          <div class="form-field">
+            <input
+              type="text"
+              id="name"
+              name="name"
+              placeholder="Your Name"
+              required
+            />
+          </div>
+          <div class="form-field">
+            <input
+              type="tel"
+              id="phone"
+              name="phone"
+              placeholder="Your Phone Number"
+              required
+            />
+          </div>
+          <div class="form-field full-width">
+            <input
+              type="email"
+              id="email"
+              name="email"
+              placeholder="Your Email"
+              required
+            />
+          </div>
+          <div class="form-field full-width">
+            <textarea
+              id="query"
+              name="query"
+              rows="4"
+              placeholder="Your Query"
+              required
+            ></textarea>
+          </div>
+          <div class="form-field full-width">
+            <button type="submit" class="submit-btn">Send Query</button>
+          </div>
+        </form>
+      </section>
     </div>
-    <div class="form-field">
-      <input
-        type="tel"
-        id="phone"
-        name="phone"
-        placeholder="Your Phone Number"
-        required
-      />
-    </div>
-    <div class="form-field full-width">
-      <input
-        type="email"
-        id="email"
-        name="email"
-        placeholder="Your Email"
-        required
-      />
-    </div>
-    <div class="form-field full-width">
-      <textarea
-        id="query"
-        name="query"
-        rows="4"
-        placeholder="Your Query"
-        required
-      ></textarea>
-    </div>
-    <div class="form-field full-width">
-      <button type="submit" class="submit-btn">Send Query</button>
-    </div>
-  </form>
-</section>
-</div>
 
-<script>
-  // Pass property.images from EJS to JavaScript
-  const images = <%- JSON.stringify(property.images) %>;
+    <script>
+      // Pass property.images from EJS to JavaScript
+      const images = <%- JSON.stringify(property.images) %>;
 
-  document.addEventListener('DOMContentLoaded', function() {
-    // Handle contact form submission
-    document.getElementById('contact-form').addEventListener('submit', async function(event) {
-      event.preventDefault();
-      
-      const formData = {
-        name: document.getElementById('name').value,
-        phone: document.getElementById('phone').value,
-        email: document.getElementById('email').value,
-        query: document.getElementById('query').value
-      };
+      document.addEventListener('DOMContentLoaded', function() {
+        // Handle contact form submission
+        document.getElementById('contact-form').addEventListener('submit', async function(event) {
+          event.preventDefault();
 
-      try {
-        const response = await fetch(this.action, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify(formData)
+          const formData = {
+            name: document.getElementById('name').value,
+            phone: document.getElementById('phone').value,
+            email: document.getElementById('email').value,
+            query: document.getElementById('query').value
+          };
+
+          try {
+            const response = await fetch(this.action, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json'
+              },
+              body: JSON.stringify(formData)
+            });
+
+            if (response.ok) {
+              alert('Your query has been sent to the owner!');
+              this.reset();
+            } else {
+              alert('Failed to send query. Please try again.');
+            }
+          } catch (error) {
+            console.error('Error:', error);
+            alert('An error occurred. Please try again.');
+          }
         });
 
-        if (response.ok) {
-          alert('Your query has been sent to the owner!');
-          this.reset();
-        } else {
-          alert('Failed to send query. Please try again.');
+        // Image navigation functionality
+        let currentImageIndex = 0;
+
+        function setupImageNavigation(images) {
+          const prevButton = document.getElementById("prev-button");
+          const nextButton = document.getElementById("next-button");
+          const mainImage = document.getElementById("main-image");
+
+          function updateMainImage(index) {
+            mainImage.src = images[index];
+            document.querySelectorAll(".thumbnail").forEach((thumb, i) => {
+              thumb.classList.toggle("active", i === index);
+            });
+            currentImageIndex = index;
+          }
+
+          // Navigation buttons for laptop
+          prevButton.addEventListener("click", function() {
+            let newIndex = currentImageIndex - 1;
+            if (newIndex < 0) newIndex = images.length - 1;
+            updateMainImage(newIndex);
+          });
+
+          nextButton.addEventListener("click", function() {
+            let newIndex = currentImageIndex + 1;
+            if (newIndex >= images.length) newIndex = 0;
+            updateMainImage(newIndex);
+          });
+
+          // Touch swipe for mobile
+          const mainImageContainer = document.querySelector(".main-image-container");
+          let touchStartX = 0;
+          let touchMoveX = 0;
+          let isSwiping = false;
+
+          mainImageContainer.addEventListener("touchstart", e => {
+            touchStartX = e.touches[0].clientX;
+            isSwiping = true;
+          });
+
+          mainImageContainer.addEventListener("touchmove", e => {
+            if (!isSwiping) return;
+            touchMoveX = e.touches[0].clientX;
+            const diffX = touchStartX - touchMoveX;
+            mainImage.style.transform = `translateX(${-diffX}px)`;
+          });
+
+          mainImageContainer.addEventListener("touchend", e => {
+            if (!isSwiping) return;
+            isSwiping = false;
+            const diffX = touchStartX - touchMoveX;
+            const swipeThreshold = 50;
+
+            if (diffX > swipeThreshold) {
+              let newIndex = currentImageIndex + 1;
+              if (newIndex >= images.length) newIndex = 0;
+              updateMainImage(newIndex);
+            } else if (diffX < -swipeThreshold) {
+              let newIndex = currentImageIndex - 1;
+              if (newIndex < 0) newIndex = images.length - 1;
+              updateMainImage(newIndex);
+            }
+            mainImage.style.transform = "translateX(0)";
+          });
+
+          mainImageContainer.addEventListener("touchcancel", () => {
+            isSwiping = false;
+            mainImage.style.transform = "translateX(0)";
+          });
+
+          // Thumbnail click functionality
+          document.querySelectorAll(".thumbnail").forEach((thumbnail, index) => {
+            thumbnail.addEventListener("click", function() {
+              updateMainImage(index);
+            });
+          });
         }
-      } catch (error) {
-        console.error('Error:', error);
-        alert('An error occurred. Please try again.');
-      }
-    });
 
-    // Image navigation functionality
-    let currentImageIndex = 0;
-
-    function setupImageNavigation(images) {
-      const prevButton = document.getElementById("prev-button");
-      const nextButton = document.getElementById("next-button");
-      const mainImage = document.getElementById("main-image");
-
-      function updateMainImage(index) {
-        mainImage.src = images[index];
-        document.querySelectorAll(".thumbnail").forEach((thumb, i) => {
-          thumb.classList.toggle("active", i === index);
-        });
-        currentImageIndex = index;
-      }
-
-      // Navigation buttons for laptop
-      prevButton.addEventListener("click", function() {
-        let newIndex = currentImageIndex - 1;
-        if (newIndex < 0) newIndex = images.length - 1;
-        updateMainImage(newIndex);
+        // Initialize image navigation
+        setupImageNavigation(images);
       });
-
-      nextButton.addEventListener("click", function() {
-        let newIndex = currentImageIndex + 1;
-        if (newIndex >= images.length) newIndex = 0;
-        updateMainImage(newIndex);
-      });
-
-      // Touch swipe for mobile
-      const mainImageContainer = document.querySelector(".main-image-container");
-      let touchStartX = 0;
-      let touchMoveX = 0;
-      let isSwiping = false;
-
-      mainImageContainer.addEventListener("touchstart", e => {
-        touchStartX = e.touches[0].clientX;
-        isSwiping = true;
-      });
-
-      mainImageContainer.addEventListener("touchmove", e => {
-        if (!isSwiping) return;
-        touchMoveX = e.touches[0].clientX;
-        const diffX = touchStartX - touchMoveX;
-        mainImage.style.transform = `translateX(${-diffX}px)`;
-      });
-
-      mainImageContainer.addEventListener("touchend", e => {
-        if (!isSwiping) return;
-        isSwiping = false;
-        const diffX = touchStartX - touchMoveX;
-        const swipeThreshold = 50;
-
-        if (diffX > swipeThreshold) {
-          let newIndex = currentImageIndex + 1;
-          if (newIndex >= images.length) newIndex = 0;
-          updateMainImage(newIndex);
-        } else if (diffX < -swipeThreshold) {
-          let newIndex = currentImageIndex - 1;
-          if (newIndex < 0) newIndex = images.length - 1;
-          updateMainImage(newIndex);
-        }
-        mainImage.style.transform = "translateX(0)";
-      });
-
-      mainImageContainer.addEventListener("touchcancel", () => {
-        isSwiping = false;
-        mainImage.style.transform = "translateX(0)";
-      });
-
-      // Thumbnail click functionality
-      document.querySelectorAll(".thumbnail").forEach((thumbnail, index) => {
-        thumbnail.addEventListener("click", function() {
-          updateMainImage(index);
-        });
-      });
-    }
-
-    // Initialize image navigation
-    setupImageNavigation(images);
-  });
-</script>
-</body>
+    </script>
+  </body>
 </html>

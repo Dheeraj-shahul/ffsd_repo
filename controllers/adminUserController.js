@@ -11,20 +11,15 @@ exports.getUserDetails = async (req, res) => {
 
     switch (userType) {
       case 'owner':
-        user = await Owner.findById(id)
-          .populate('propertyIds')
-          .populate('tenantIds');
+        user = await Owner.findById(id).lean();
         break;
       case 'tenant':
         user = await Tenant.findById(id)
-          .populate('ownerId')
-          .populate('savedListings')
-          .populate('domesticWorkerId');
+          .populate('ownerId', 'firstName lastName email')
+          .lean();
         break;
       case 'worker':
-        user = await Worker.findById(id)
-          .populate('bookingIds')
-          .populate('clientIds');
+        user = await Worker.findById(id).lean();
         break;
       default:
         return res.status(400).json({ message: 'Invalid user type' });
@@ -34,7 +29,47 @@ exports.getUserDetails = async (req, res) => {
       return res.status(404).json({ message: 'User not found' });
     }
 
-    res.render('admin/user-view', { user, userType });
+    // 🚨 NEW: GET RELATIONSHIPS
+    let tenantProperty = null;
+    let workerBookings = [];
+    let ownerProperties = [];
+
+    if (userType === 'tenant') {
+      // TENANT: Find their PROPERTY
+      tenantProperty = await Property.findOne({ tenantId: id })
+        .populate('ownerId', 'firstName lastName email')
+        .lean();
+    } else if (userType === 'worker') {
+      // WORKER: Find ACTIVE BOOKINGS
+      workerBookings = await Booking.find({ 
+        assignedWorker: id, 
+        status: 'Active' 
+      })
+        .populate('tenantId', 'firstName lastName email')
+        .populate('propertyId', 'name location')
+        .lean();
+    } else if (userType === 'owner') {
+      // OWNER: Find their PROPERTIES
+      ownerProperties = await Property.find({ ownerId: id })
+        .populate('tenantId', 'firstName lastName email')
+        .lean();
+    }
+
+    // Format user
+    user.id = user._id.toString();
+    user.address = user.location;
+
+    console.log('🚨 USER:', userType, user.firstName);
+    console.log('🚨 TENANT PROPERTY:', tenantProperty);
+    console.log('🚨 WORKER BOOKINGS:', workerBookings.length);
+
+    res.render('admin/user-view', { 
+      user, 
+      userType, 
+      tenantProperty,
+      workerBookings,
+      ownerProperties 
+    });
   } catch (error) {
     console.error('getUserDetails error:', error);
     res.status(500).json({ message: 'Server Error', error: error.message });
