@@ -15,7 +15,7 @@ router.delete("/owner/delete-account", ownerController.deleteOwnerAccount);
 
 router.post("/owner/update-settings", ownerController.updateOwnerSettings);
 router.post(
-  "/approve-unrent-property",
+  "/api/owner/approve-unrent-property",
   isAuthenticated,
   ownerController.approveUnrentProperty
 );
