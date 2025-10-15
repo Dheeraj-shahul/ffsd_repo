@@ -131,7 +131,6 @@
         font-weight: bold;
       }
 
-      /* Modal styles for a better user experience */
       .modal {
         display: none;
         position: fixed;
@@ -176,35 +175,26 @@
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
     />
   </head>
-
   <body>
-    <%- include('../partials/header') %>
-    <button class="filter-toggle-btn" onclick="toggleFilters()">
-      ☰ Filters
-    </button>
     <div class="whole_container">
       <div class="container">
         <div class="contact-section">
           <div class="contact-info">
             <h2>Get in Touch</h2>
-
             <div class="info-item">
               <h3>Address</h3>
               <p>Sri City, Andhra Pradesh, India</p>
               <p>194025</p>
             </div>
-
             <div class="info-item">
               <h3>Phone</h3>
               <p>Customer Support: +91 9949169887</p>
               <p>Business Inquiries: +91 890-765-4321</p>
             </div>
-
             <div class="info-item">
               <h3>Email</h3>
               <p>contact@rentease.com</p>
             </div>
-
             <div class="info-item">
               <h3>Office Hours</h3>
               <p>Monday to Friday: 9:00 AM - 6:00 PM</p>
@@ -212,7 +202,6 @@
               <p>Sunday: Closed</p>
             </div>
           </div>
-
           <div class="contact-form">
             <h2>Send us a Message</h2>
             <form id="contactForm">
@@ -220,120 +209,122 @@
                 <label for="name">Your Name</label>
                 <input type="text" id="name" class="form-control" required />
               </div>
-
               <div class="form-group">
                 <label for="email">Email Address</label>
                 <input type="email" id="email" class="form-control" required />
               </div>
-
               <div class="form-group">
                 <label for="phone">Phone Number</label>
                 <input type="tel" id="phone" class="form-control" />
               </div>
-
               <div class="form-group">
                 <label for="subject">Subject</label>
                 <input type="text" id="subject" class="form-control" required />
               </div>
-
               <div class="form-group">
                 <label for="message">Your Message</label>
                 <textarea id="message" class="form-control" required></textarea>
               </div>
-
               <button type="submit" class="btn">Submit Message</button>
             </form>
           </div>
         </div>
       </div>
     </div>
-
-    <!-- Success/Error Message Modal -->
     <div id="statusModal" class="modal">
       <div class="modal-content">
         <span class="close-button">&times;</span>
         <p id="modalMessage"></p>
       </div>
     </div>
-
     <script>
-      document
-        .getElementById("contactForm")
-        .addEventListener("submit", async function (e) {
-          e.preventDefault();
+      document.getElementById("contactForm").addEventListener("submit", function (e) {
+        e.preventDefault();
 
-          const email = document.getElementById("email").value;
-          const phone = document.getElementById("phone").value;
-          const modal = document.getElementById("statusModal");
-          const modalMessage = document.getElementById("modalMessage");
-          const closeButton = document.querySelector(".close-button");
+        const email = document.getElementById("email").value;
+        const phone = document.getElementById("phone").value;
+        const modal = document.getElementById("statusModal");
+        const modalMessage = document.getElementById("modalMessage");
+        const closeButton = document.querySelector(".close-button");
 
-          // Validate email (must be a Gmail address)
-          const emailRegex = /^[a-zA-Z0-9._%+-]+@gmail\.com$/;
-          if (!emailRegex.test(email)) {
-            modalMessage.textContent = "Please enter a valid Gmail address.";
-            modal.style.display = "flex";
-            return;
-          }
-
-          // Validate phone number (must be 10 digits)
-          const phoneRegex = /^\d{10}$/;
-          if (phone && !phoneRegex.test(phone)) {
-            modalMessage.textContent =
-              "Please enter a valid 10-digit phone number.";
-            modal.style.display = "flex";
-            return;
-          }
-
-          // Gather form data
-          const formData = {
-            name: document.getElementById("name").value,
-            email: email,
-            phone: phone,
-            subject: document.getElementById("subject").value,
-            message: document.getElementById("message").value,
-          };
-
-          modalMessage.textContent = "Submitting your message...";
+        // Validate email (must be a Gmail address)
+        const emailRegex = /^[a-zA-Z0-9._%+-]+@gmail\.com$/;
+        if (!emailRegex.test(email)) {
+          modalMessage.textContent = "Please enter a valid Gmail address.";
           modal.style.display = "flex";
+          return;
+        }
 
-          try {
-            const response = await fetch("/submit-form", {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/json",
-              },
-              body: JSON.stringify(formData),
-            });
+        // Validate phone number (must be 10 digits)
+        const phoneRegex = /^\d{10}$/;
+        if (phone && !phoneRegex.test(phone)) {
+          modalMessage.textContent = "Please enter a valid 10-digit phone number.";
+          modal.style.display = "flex";
+          return;
+        }
 
-            const result = await response.json();
+        // Gather form data
+        const formData = {
+          name: document.getElementById("name").value,
+          email: email,
+          phone: phone,
+          subject: document.getElementById("subject").value,
+          message: document.getElementById("message").value
+        };
 
-            if (response.ok) {
-              modalMessage.textContent =
-                "Thank you for your message! We will get back to you shortly.";
-              e.target.reset();
+        modalMessage.textContent = "Submitting your message...";
+        modal.style.display = "flex";
+
+        // Create XMLHttpRequest
+        const xhr = new XMLHttpRequest();
+        xhr.open("POST", "/submit-form", true);
+        xhr.setRequestHeader("Content-Type", "application/json");
+
+        // Handle response
+        xhr.onreadystatechange = function () {
+          if (xhr.readyState === XMLHttpRequest.DONE) {
+            if (xhr.status === 200) {
+              try {
+                const result = JSON.parse(xhr.responseText);
+                modalMessage.textContent = "Thank you for your message! We will get back to you shortly.";
+                document.getElementById("contactForm").reset();
+              } catch (e) {
+                modalMessage.textContent = "Error: Invalid response from server.";
+                console.error("Parse error:", e);
+              }
             } else {
-              modalMessage.textContent = `Error: ${
-                result.error || "Failed to submit form."
-              }`;
+              let errorMessage = "Failed to submit form.";
+              try {
+                const result = JSON.parse(xhr.responseText);
+                if (result.error) {
+                  errorMessage = result.error;
+                }
+              } catch (e) {
+                if (xhr.status === 0) {
+                  errorMessage = "Network error. Please ensure the backend server is running.";
+                }
+              }
+              modalMessage.textContent = `Error: ${errorMessage}`;
+              console.error("XHR error:", xhr.status, xhr.statusText);
             }
-          } catch (error) {
-            modalMessage.textContent =
-              "Network error. Please ensure the backend server is running.";
-            console.error("Fetch error:", error);
           }
+        };
 
-          // Close the modal when the user clicks on 'x'
-          closeButton.onclick = function () {
+        // Send request
+        xhr.send(JSON.stringify(formData));
+
+        // Close the modal when the user clicks on 'x'
+        closeButton.onclick = function () {
+          modal.style.display = "none";
+        };
+
+        // Close the modal when the user clicks anywhere outside of the modal
+        window.onclick = function (event) {
+          if (event.target === modal) {
             modal.style.display = "none";
-          };
-          // Close the modal when the user clicks anywhere outside of the modal
-          window.onclick = function (event) {
-            if (event.target == modal) {
-              modal.style.display = "none";
-            }
-          };
-        });
+          }
+        };
+      });
     </script>
   </body>
 </html>

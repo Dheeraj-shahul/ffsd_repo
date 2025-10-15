@@ -287,7 +287,9 @@ app.post("/login", async (req, res) => {
     }
 
     if (!user.password) {
-      return res.status(401).json({ error: "Password not set for this account" });
+      return res
+        .status(401)
+        .json({ error: "Password not set for this account" });
     }
 
     if (user.password !== password) {
@@ -324,7 +326,6 @@ app.post("/login", async (req, res) => {
     return res.status(500).json({ error: "Server error" });
   }
 });
-
 
 // Registration Route
 app.post("/register", async (req, res) => {
@@ -729,11 +730,8 @@ app.post("/admin/login", async (req, res) => {
   }
 });
 
-// In app.js, update the admin route
 app.get("/admin", isAuthenticate, async (req, res) => {
   try {
-    
-
     // Existing dashboard logic remains unchanged
     const totalProperties = await Property.countDocuments();
     const totalRenters = await Tenant.countDocuments();
@@ -783,7 +781,7 @@ app.get("/admin", isAuthenticate, async (req, res) => {
       status: "Pending",
     });
     const workersAvailable = await Worker.countDocuments({
-      availability: true,
+      status: "Active",
     });
 
     const userGrowth =
@@ -817,36 +815,53 @@ app.get("/admin", isAuthenticate, async (req, res) => {
       bookingStatusDistribution,
     };
 
+    // FIXED: Properties - Proper population with owner/tenant IDs
     const properties = await Property.find()
-      .populate("ownerId", "firstName lastName")
-      .populate("tenantId", "firstName lastName")
+      .populate("ownerId", "firstName lastName email _id")
+      .populate("tenantId", "firstName lastName email _id")
       .populate({
         path: "activeWorkers",
-        select: "firstName lastName",
-        match: { _id: { $exists: true } },
+        select: "firstName lastName _id",
+        match: { status: "Active" }, // Only active workers
       })
       .lean();
+
     properties.forEach((p) => {
       p.id = p._id.toString();
-      p.owner = p.ownerId
+      p.ownerName = p.ownerId
         ? `${p.ownerId.firstName} ${p.ownerId.lastName}`
         : "N/A";
-      p.tenant = p.tenantId
+      p.ownerIdStr = p.ownerId?._id?.toString() || null;
+      p.tenantName = p.tenantId
         ? `${p.tenantId.firstName} ${p.tenantId.lastName}`
         : "N/A";
+      p.tenantIdStr = p.tenantId?._id?.toString() || null;
       p.activeWorkers =
         p.activeWorkers?.map((w) => ({
-          name:
-            w.firstName && w.lastName ? `${w.firstName} ${w.lastName}` : "N/A",
+          name: `${w.firstName} ${w.lastName}`,
+          id: w._id.toString(),
         })) || [];
     });
 
-    const tenants = await Tenant.find().lean();
-    const workers = await Worker.find().lean();
-    const owners = await Owner.find().lean();
+    // FIXED: Users - Add renting/property details
+    const tenants = await Tenant.find()
+      .populate("ownerId", "firstName lastName")
+      .lean();
+    const workers = await Worker.find({ status: "Active" }).lean(); // Only active
+    const owners = await Owner.find().populate("propertyIds").lean();
+
+    // ADD PROPERTY COUNTS SEPARATELY (FIXED)
+    const tenantPropertyCounts = await Promise.all(
+      tenants.map((t) => Property.countDocuments({ tenantId: t._id }))
+    );
+    const workerClientCounts = await Promise.all(
+      workers.map((w) =>
+        Booking.countDocuments({ assignedWorker: w._id, status: "Active" })
+      )
+    );
 
     const users = [
-      ...tenants.map((t) => ({
+      ...tenants.map((t, index) => ({
         id: t._id.toString(),
         firstName: t.firstName,
         lastName: t.lastName,
@@ -862,8 +877,12 @@ app.get("/admin", isAuthenticate, async (req, res) => {
         numProperties: null,
         accountNo: null,
         upiid: null,
+        ownerName: t.ownerId
+          ? `${t.ownerId.firstName} ${t.ownerId.lastName}`
+          : "None",
+        propertyCount: tenantPropertyCounts[index], // ✅ FIXED
       })),
-      ...workers.map((w) => ({
+      ...workers.map((w, index) => ({
         id: w._id.toString(),
         firstName: w.firstName,
         lastName: w.lastName,
@@ -879,6 +898,7 @@ app.get("/admin", isAuthenticate, async (req, res) => {
         numProperties: null,
         accountNo: null,
         upiid: null,
+        clientCount: workerClientCounts[index], // ✅ FIXED
       })),
       ...owners.map((o) => ({
         id: o._id.toString(),
@@ -899,34 +919,33 @@ app.get("/admin", isAuthenticate, async (req, res) => {
       })),
     ];
 
-    for (let user of users) {
-      if (user.userType === "tenant") {
-        user.tenantBookings = await Booking.countDocuments({
-          tenantId: user.id,
-        });
-      }
-    }
-
+    // FIXED: Bookings - Proper tenant/worker links
     const bookings = await Booking.find()
-      .populate("tenantId", "firstName lastName")
-      .populate("propertyId", "name")
-      .populate("assignedWorker", "firstName lastName")
+      .populate("tenantId", "firstName lastName _id")
+      .populate("propertyId", "name ownerId")
+      .populate("assignedWorker", "firstName lastName _id")
+      .populate("propertyId.ownerId", "firstName lastName")
       .lean();
+
     bookings.forEach((b) => {
       b.id = b._id.toString();
       b.userName = b.tenantId
         ? `${b.tenantId.firstName} ${b.tenantId.lastName}`
         : "N/A";
+      b.userId = b.tenantId?._id?.toString();
       b.propertyName = b.propertyId?.name || "N/A";
+      b.propertyIdStr = b.propertyId?._id?.toString();
+      b.ownerName = b.propertyId?.ownerId
+        ? `${b.propertyId.ownerId.firstName} ${b.propertyId.ownerId.lastName}`
+        : "N/A";
       b.workerName = b.assignedWorker
         ? `${b.assignedWorker.firstName} ${b.assignedWorker.lastName}`
-        : "N/A";
-      b.user = b.tenantId?._id;
-      b.property = b.propertyId?._id;
+        : "None";
+      b.workerId = b.assignedWorker?._id?.toString();
     });
 
     const payments = await Payment.find()
-      .populate("tenantId", "firstName lastName")
+      .populate("tenantId", "firstName lastName _id")
       .lean();
     payments.forEach((p) => {
       p.id = p._id.toString();
@@ -950,26 +969,25 @@ app.get("/admin", isAuthenticate, async (req, res) => {
         : "N/A";
     });
 
+    // FIXED: Maintenance - Proper owner lookup
     const maintenanceRequests = await MaintenanceRequest.find()
       .populate("propertyId", "name ownerId")
-      .populate({
-        path: "propertyId.ownerId",
-        select: "firstName lastName",
-      })
-      .populate("tenantId", "firstName lastName")
+      .populate("propertyId.ownerId", "firstName lastName")
+      .populate("tenantId", "firstName lastName _id")
       .lean();
     maintenanceRequests.forEach((m) => {
       m.id = m._id.toString();
       m.propertyName = m.propertyId?.name || "N/A";
+      m.propertyIdStr = m.propertyId?._id?.toString();
       m.tenantName = m.tenantId
         ? `${m.tenantId.firstName} ${m.tenantId.lastName}`
         : "N/A";
+      m.tenantIdStr = m.tenantId?._id?.toString();
       m.ownerName = m.propertyId?.ownerId
         ? `${m.propertyId.ownerId.firstName} ${m.propertyId.ownerId.lastName}`
         : "N/A";
     });
 
-    // Add contact submissions
     const contactSubmissions = await Contact.find().lean();
     contactSubmissions.forEach((s) => {
       s.id = s._id.toString();
@@ -978,10 +996,9 @@ app.get("/admin", isAuthenticate, async (req, res) => {
         : "N/A";
     });
 
-    // Add workerPayments
     const workerPayments = await WorkerPayment.find()
-      .populate("tenantId", "firstName lastName")
-      .populate("workerId", "firstName lastName")
+      .populate("tenantId", "firstName lastName _id")
+      .populate("workerId", "firstName lastName _id")
       .sort({ createdAt: -1 })
       .lean();
     workerPayments.forEach((p) => {
@@ -989,11 +1006,11 @@ app.get("/admin", isAuthenticate, async (req, res) => {
       p.paidByName = p.tenantId
         ? `${p.tenantId.firstName} ${p.tenantId.lastName}`
         : p.userName || "N/A";
-      p.paidById = p.tenantId?._id;
+      p.paidById = p.tenantId?._id?.toString();
       p.receivedByName = p.workerId
         ? `${p.workerId.firstName} ${p.workerId.lastName}`
         : "N/A";
-      p.receivedById = p.workerId?._id;
+      p.receivedById = p.workerId?._id?.toString();
     });
 
     res.render("pages/admin1", {

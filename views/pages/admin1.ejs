@@ -287,8 +287,6 @@
         { title: 'Total Owners', value: stats.totalOwners },
         { title: 'Total Workers', value: stats.totalWorkers },
         { title: 'Active Rentals', value: stats.activeRentals },
-        { title: 'Pending Bookings', value: stats.pendingBookings },
-        { title: 'Cancelled Bookings', value: stats.cancelledBookings },
         { title: 'Active Users', value: stats.activeUsers },
         { title: 'Total Revenue', value: `₹${stats.totalRevenue?.toFixed(2)}` },
         { title: 'Daily Revenue', value: `₹${stats.revenueDaily?.toFixed(2)}` },
@@ -334,17 +332,17 @@
           <tr>
             <td><%= p.id %></td>
             <td><%= p.name %></td>
-            <td><a href="/admin/user/<%= p.ownerId %>/owner"><%= p.owner || 'N/A' %></a></td>
+            <td><a href="/admin/user/<%= p.ownerIdStr %>/owner"><%= p.ownerName %></a></td>
             <td><%= p.location %></td>
             <td><%= p.type %></td>
             <td><%= p.subtype %></td>
             <td><%= p.status %></td>
             <td><%= p.isRented ? 'Yes' : 'No' %></td>
             <td>
-              <% if (p.tenantId) { %>
-                <a href="/admin/user/<%= p.tenantId %>/tenant"><%= p.tenant || 'N/A' %></a>
+              <% if (p.tenantIdStr) { %>
+                <a href="/admin/user/<%= p.tenantIdStr %>/tenant"><%= p.tenantName %></a>
               <% } else { %>
-                N/A
+                Available
               <% } %>
             </td>
             <td><%= p.activeWorkers?.length ? p.activeWorkers.map(w => w.name).join(', ') : 'None' %></td>
@@ -355,7 +353,7 @@
             <td>
               <div class="action-buttons">
                 <a href="/admin/property/<%= p.id %>">View</a>
-                <a href="/property?id=<%= p.id %>" >Site</a>
+                <a href="/property?id=<%= p.id %>">Site</a>
                 <button class="success" onclick="toggleVerify('<%= p._id %>', <%= p.isVerified ? 'false' : 'true' %>)">
                   <%= p.isVerified ? 'Unverify' : 'Verify' %>
                 </button>
@@ -382,13 +380,14 @@
           <th style="width: 10%;">Address</th>
           <th style="width: 8%;">Registered</th>
           <th style="width: 8%;">Status</th>
-          <th style="width: 8%;">Service Bookings</th>
-          <th style="width: 8%;">Domestic Service</th>
-          <th style="width: 8%;">Experience</th>
+          <th style="width: 8%;">Bookings</th>
+          <th style="width: 8%;">Service</th>
+          <th style="width: 8%;">Exp</th>
           <th style="width: 8%;">Properties</th>
+          <th style="width: 8%;">Owner/House</th>
           <th style="width: 8%;">Account</th>
           <th style="width: 8%;">UPI</th>
-          <th style="width: 20%;">Actions</th>
+          <th style="width: 18%;">Actions</th>
         </tr>
       </thead>
       <tbody>
@@ -402,10 +401,11 @@
             <td><%= u.address || 'N/A' %></td>
             <td><%= u.createdAt ? new Date(u.createdAt).toLocaleDateString() : 'N/A' %></td>
             <td><%= u.status %></td>
-            <td><%= u.tenantBookings || 'N/A' %></td>
+            <td><%= u.tenantBookings || u.clientCount || 'N/A' %></td>
             <td><%= u.serviceType || 'N/A' %></td>
             <td><%= u.experience ? u.experience + ' yrs' : 'N/A' %></td>
-            <td><%= u.numProperties || 'N/A' %></td>
+            <td><%= u.numProperties || u.propertyCount || 'N/A' %></td>
+            <td><%= u.ownerName || 'N/A' %></td>
             <td><%= u.accountNo || 'N/A' %></td>
             <td><%= u.upiid || 'N/A' %></td>
             <td>
@@ -425,33 +425,33 @@
 
   <!-- Service Bookings -->
   <section id="service-bookings" class="service-bookings">
-    <h2>Service Bookings</h2>
+    <h2>Bookings</h2>
     <table>
       <thead>
         <tr>
           <th style="width: 8%;">ID</th>
-          <th style="width: 10%;">User</th>
-          <th style="width: 10%;">Property</th>
-          <th style="width: 10%;">Worker</th>
+          <th style="width: 12%;">Tenant</th>
+          <th style="width: 12%;">Property</th>
+          <th style="width: 12%;">Worker</th>
           <th style="width: 8%;">Status</th>
           <th style="width: 8%;">Booked</th>
           <th style="width: 8%;">Start</th>
           <th style="width: 8%;">End</th>
           <th style="width: 8%;">Amount</th>
-          <th style="width: 20%;">Actions</th>
+          <th style="width: 16%;">Actions</th>
         </tr>
       </thead>
       <tbody>
         <% bookings.forEach(b => { %>
           <tr>
             <td><%= b.id %></td>
-            <td><a href="/admin/user/<%= b.user %>/tenant"><%= b.userName || 'N/A' %></a></td>
-            <td><a href="/admin/property/<%= b.property %>"><%= b.propertyName || 'N/A' %></a></td>
+            <td><a href="/admin/user/<%= b.userId %>/tenant"><%= b.userName %></a></td>
+            <td><a href="/admin/property/<%= b.propertyIdStr %>"><%= b.propertyName %></a></td>
             <td>
-              <% if (b.assignedWorker) { %>
-                <a href="/admin/user/<%= b.assignedWorker %>/worker"><%= b.workerName || 'N/A' %></a>
+              <% if (b.workerId) { %>
+                <a href="/admin/user/<%= b.workerId %>/worker"><%= b.workerName %></a>
               <% } else { %>
-                None
+                None Assigned
               <% } %>
             </td>
             <td><%= b.status %></td>
@@ -513,51 +513,51 @@
   </section>
 
   <!-- Worker Payments -->
-<section id="worker-payments" class="worker-payments">
-  <h2>Worker Payments</h2>
-  <table>
-    <thead>
-      <tr>
-        <th style="width: 8%;">ID</th>
-        <th style="width: 10%;">Paid By</th>
-        <th style="width: 10%;">Received By</th>
-        <th style="width: 10%;">Amount</th>
-        <th style="width: 10%;">Status</th>
-        <th style="width: 10%;">Date</th>
-        <th style="width: 10%;">Method</th>
-        <th style="width: 10%;">Transaction</th>
-        <th style="width: 20%;">Actions</th>
-      </tr>
-    </thead>
-    <tbody>
-      <% workerPayments.forEach(p => { %>
+  <section id="worker-payments" class="worker-payments">
+    <h2>Worker Payments</h2>
+    <table>
+      <thead>
         <tr>
-          <td><%= p.id %></td>
-          <td>
-            <a href="/admin/user/<%= p.paidById %>/tenant">
-              <%= p.paidByName ? p.paidByName.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;') : 'N/A' %>
-            </a>
-          </td>
-          <td>
-            <a href="/admin/user/<%= p.receivedById %>/worker">
-              <%= p.receivedByName ? p.receivedByName.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;') : 'N/A' %>
-            </a>
-          </td>
-          <td>₹<%= p.amount ? p.amount.toFixed(2) : 'N/A' %></td>
-          <td><%= p.status || 'N/A' %></td>
-          <td><%= p.paymentDate ? new Date(p.paymentDate).toLocaleDateString() : 'N/A' %></td>
-          <td><%= p.paymentMethod ? p.paymentMethod.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;') : 'N/A' %></td>
-          <td><%= p.transactionId ? p.transactionId.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;') : 'N/A' %></td>
-          <td>
-            <div class="action-buttons">
-              <a href="/admin/worker-payment/<%= p.id %>">View</a>
-            </div>
-          </td>
+          <th style="width: 8%;">ID</th>
+          <th style="width: 10%;">Paid By</th>
+          <th style="width: 10%;">Received By</th>
+          <th style="width: 10%;">Amount</th>
+          <th style="width: 10%;">Status</th>
+          <th style="width: 10%;">Date</th>
+          <th style="width: 10%;">Method</th>
+          <th style="width: 10%;">Transaction</th>
+          <th style="width: 20%;">Actions</th>
         </tr>
-      <% }) %>
-    </tbody>
-  </table>
-</section>
+      </thead>
+      <tbody>
+        <% workerPayments.forEach(p => { %>
+          <tr>
+            <td><%= p.id %></td>
+            <td>
+              <a href="/admin/user/<%= p.paidById %>/tenant">
+                <%= p.paidByName ? p.paidByName.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;') : 'N/A' %>
+              </a>
+            </td>
+            <td>
+              <a href="/admin/user/<%= p.receivedById %>/worker">
+                <%= p.receivedByName ? p.receivedByName.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;') : 'N/A' %>
+              </a>
+            </td>
+            <td>₹<%= p.amount ? p.amount.toFixed(2) : 'N/A' %></td>
+            <td><%= p.status || 'N/A' %></td>
+            <td><%= p.paymentDate ? new Date(p.paymentDate).toLocaleDateString() : 'N/A' %></td>
+            <td><%= p.paymentMethod ? p.paymentMethod.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;') : 'N/A' %></td>
+            <td><%= p.transactionId ? p.transactionId.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;') : 'N/A' %></td>
+            <td>
+              <div class="action-buttons">
+                <a href="/admin/worker-payment/<%= p.id %>">View</a>
+              </div>
+            </td>
+          </tr>
+        <% }) %>
+      </tbody>
+    </table>
+  </section>
 
   <!-- Notifications -->
   <section id="notifications" class="notifications">
@@ -597,90 +597,82 @@
       <thead>
         <tr>
           <th style="width: 8%;">ID</th>
-          <th style="width: 10%;">Issue Type</th>
+          <th style="width: 10%;">Issue</th>
           <th style="width: 10%;">Property</th>
           <th style="width: 10%;">Tenant</th>
+          <th style="width: 10%;">Owner</th>
           <th style="width: 10%;">Location</th>
-          <th style="width: 10%;">Date Reported</th>
+          <th style="width: 10%;">Date</th>
           <th style="width: 10%;">Status</th>
-          <th style="width: 20%;">Actions</th>
+          <th style="width: 12%;">Actions</th>
         </tr>
       </thead>
       <tbody>
         <% if (maintenanceRequests && Array.isArray(maintenanceRequests)) { %>
           <% maintenanceRequests.forEach(m => { %>
             <tr>
-              <td><%= m._id %></td>
+              <td><%= m.id %></td>
               <td><%= m.issueType %></td>
-              <td><a href="/admin/property/<%= m.propertyId %>"><%= m.propertyName || 'N/A' %></a></td>
-              <td>
-                <% if (m.tenantId) { %>
-                  <a href="/admin/user/<%= m.tenantId %>/tenant"><%= m.tenantName || 'N/A' %></a>
-                <% } else { %>
-                  None
-                <% } %>
-              </td>
+              <td><a href="/admin/property/<%= m.propertyIdStr %>"><%= m.propertyName %></a></td>
+              <td><a href="/admin/user/<%= m.tenantIdStr %>/tenant"><%= m.tenantName %></a></td>
+              <td><%= m.ownerName %></td>
               <td><%= m.location %></td>
               <td><%= m.dateReported ? new Date(m.dateReported).toLocaleDateString() : 'N/A' %></td>
               <td><%= m.status %></td>
               <td>
                 <div class="action-buttons">
-                  <a href="/admin/maintenance/<%= m._id %>">View</a>
+                  <a href="/admin/maintenance/<%= m.id %>">View</a>
                 </div>
               </td>
             </tr>
           <% }) %>
         <% } else { %>
           <tr>
-            <td colspan="10" class="no-data">No maintenance requests available</td>
+            <td colspan="9" class="no-data">No maintenance requests available</td>
           </tr>
         <% } %>
       </tbody>
     </table>
   </section>
 
-  <!-- Previous sections unchanged -->
-
-<!-- Messages (Contact Us Submissions) -->
-<section id="messages" class="messages">
-  <h2>Contact Us Messages</h2>
-  <table>
-    <thead>
-      <tr>
-        <th style="width: 10%;">ID</th>
-        <th style="width: 20%;">Name</th>
-        <th style="width: 20%;">Email</th>
-        <th style="width: 15%;">Phone</th>
-        <th style="width: 15%;">Subject</th>
-        <th style="width: 20%;">Actions</th>
-      </tr>
-    </thead>
-    <tbody id="messagesTableBody">
-      <% if (contactSubmissions && Array.isArray(contactSubmissions)) { %>
-        <% contactSubmissions.forEach(s => { %>
-          <tr>
-            <td><%= s.id %></td>
-            <td><%= s.name %></td>
-            <td><%= s.email %></td>
-            <td><%= s.phone || 'N/A' %></td>
-            <td><%= s.subject %></td>
-            <td>
-              <div class="action-buttons">
-                <a href="/admin/message/<%= s.id %>" >View</a>
-              </div>
-            </td>
-          </tr>
-        <% }) %>
-      <% } else { %>
+  <!-- Messages (Contact Us Submissions) -->
+  <section id="messages" class="messages">
+    <h2>Contact Us Messages</h2>
+    <table>
+      <thead>
         <tr>
-          <td colspan="6" class="no-data">No messages available</td>
+          <th style="width: 10%;">ID</th>
+          <th style="width: 20%;">Name</th>
+          <th style="width: 20%;">Email</th>
+          <th style="width: 15%;">Phone</th>
+          <th style="width: 15%;">Subject</th>
+          <th style="width: 20%;">Actions</th>
         </tr>
-      <% } %>
-    </tbody>
-  </table>
-</section>
-
-<!-- Reports and Analytics section unchanged -->
+      </thead>
+      <tbody id="messagesTableBody">
+        <% if (contactSubmissions && Array.isArray(contactSubmissions)) { %>
+          <% contactSubmissions.forEach(s => { %>
+            <tr>
+              <td><%= s.id %></td>
+              <td><%= s.name %></td>
+              <td><%= s.email %></td>
+              <td><%= s.phone || 'N/A' %></td>
+              <td><%= s.subject %></td>
+              <td>
+                <div class="action-buttons">
+                  <a href="/admin/message/<%= s.id %>">View</a>
+                </div>
+              </td>
+            </tr>
+          <% }) %>
+        <% } else { %>
+          <tr>
+            <td colspan="6" class="no-data">No messages available</td>
+          </tr>
+        <% } %>
+      </tbody>
+    </table>
+  </section>
 
   <!-- Reports and Analytics -->
   <section id="reports" class="reports">
@@ -727,40 +719,6 @@
           '<%= chart.xLabel || "" %>'
         );
       <% }); %>
-
-      // Fetch contact submissions
-      fetch('/api/contact-submissions')
-        .then(response => response.json())
-        .then(data => {
-          const tableBody = document.getElementById('messagesTableBody');
-          tableBody.innerHTML = '';
-          if (data.length > 0) {
-            data.forEach(submission => {
-              const row = `
-                <tr>
-                  <td>${submission.id}</td>
-                  <td>${submission.name}</td>
-                  <td>${submission.email}</td>
-                  <td>${submission.phone || 'N/A'}</td>
-                  <td>${submission.subject}</td>
-                  <td>
-                    <div class="action-buttons">
-                      <button class="success" onclick="viewMessage('${submission.id}')">View</button>
-                    </div>
-                  </td>
-                </tr>
-              `;
-              tableBody.innerHTML += row;
-            });
-          } else {
-            tableBody.innerHTML = '<tr><td colspan="6" class="no-data">No messages available</td></tr>';
-          }
-        })
-        .catch(error => {
-          console.error('Error fetching contact submissions:', error);
-          document.getElementById('messagesTableBody').innerHTML = 
-            '<tr><td colspan="6" class="no-data">Error loading messages</td></tr>';
-        });
     });
 
     function initChart(canvasId, type, labels, data, title, colors, yLabel, xLabel) {
@@ -832,29 +790,6 @@
       };
       
       new Chart(ctx, config);
-    }
-
-    function viewMessage(id) {
-      fetch(`/api/contact-submission/${id}`)
-        .then(response => response.json())
-        .then(data => {
-          document.getElementById('modalId').textContent = data.id;
-          document.getElementById('modalName').textContent = data.name;
-          document.getElementById('modalEmail').textContent = data.email;
-          document.getElementById('modalPhone').textContent = data.phone || 'N/A';
-          document.getElementById('modalSubject').textContent = data.subject;
-          document.getElementById('modalMessage').textContent = data.message;
-          document.getElementById('modalSubmittedAt').textContent = data.submittedAt;
-          document.getElementById('messageModal').style.display = 'flex';
-        })
-        .catch(error => {
-          console.error('Error fetching message:', error);
-          alert('Error loading message details');
-        });
-    }
-
-    function closeModal() {
-      document.getElementById('messageModal').style.display = 'none';
     }
   </script>
 </body>
