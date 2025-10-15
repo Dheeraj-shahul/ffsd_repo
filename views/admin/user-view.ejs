@@ -47,6 +47,29 @@
       <h3>Owner Information</h3>
       <p><strong>Total Properties:</strong> <%= ownerProperties.length %></p>
       <p><strong>Tenants:</strong> <%= ownerProperties.filter(p => p.tenantId).length %></p>
+      <% if (ownerProperties.filter(p => p.tenantId).length > 0) { %>
+        <h4>Current Tenants</h4>
+        <% ownerProperties.forEach(property => { %>
+          <% if (property.tenantId) { %>
+            <div class="relationship-item">
+              <p><strong>Tenant:</strong> 
+                <a href="/admin/user/<%= property.tenantId._id %>/tenant">
+                  <%= property.tenantId.firstName %> <%= property.tenantId.lastName %>
+                </a>
+              </p>
+              <p><strong>Property:</strong> 
+                <a href="/admin/property/<%= property._id %>">
+                  <%= property.name %>
+                </a>
+              </p>
+              <p><strong>Location:</strong> <%= property.location %></p>
+              <p><strong>Rent:</strong> ₹<%= Number(property.price).toFixed(0) %>/month</p>
+            </div>
+          <% } %>
+        <% }) %>
+      <% } else { %>
+        <p><strong>Status:</strong> No current tenants</p>
+      <% } %>
     </div>
     <% } else if (userType === 'worker') { %>
     <div class="detail-group">

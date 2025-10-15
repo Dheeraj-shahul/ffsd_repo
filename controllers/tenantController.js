@@ -943,14 +943,17 @@ exports.submitPayment = async (req, res) => {
 
     await newPayment.save();
 
-    // Update tenant's payment records
+    // 🚨 FIX: UPDATE ALL ARRAYS
     await Tenant.findByIdAndUpdate(tenantId, {
       $push: { paymentIds: newPayment._id },
+      ownerId: property.ownerId,
     });
 
-    // Update property owner's payment records
     await Owner.findByIdAndUpdate(property.ownerId, {
-      $push: { paymentIds: newPayment._id },
+      $push: {
+        tenantIds: tenantId,
+        paymentIds: newPayment._id,
+      },
     });
 
     // Update next payment status (if exists)
