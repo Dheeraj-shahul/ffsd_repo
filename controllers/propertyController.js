@@ -2,6 +2,7 @@ const Property = require("../models/property");
 const formidable = require("formidable");
 const fs = require("fs");
 const mongoose = require("mongoose");
+const Owner = require("../models/owner");
 
 exports.listProperty = async (req, res) => {
   try {
@@ -153,6 +154,12 @@ exports.listProperty = async (req, res) => {
 
     await property.save();
 
+    // 🚨 FIX: UPDATE OWNER propertyIds
+    await Owner.findByIdAndUpdate(req.session.user._id, {
+      $push: { propertyIds: property._id },
+      $inc: { numProperties: 1 }
+    });
+
     res.status(201).json({ message: "Property listed successfully", property });
   } catch (error) {
     console.error("Error listing property:", error);
@@ -192,6 +199,12 @@ exports.deleteProperty = async (req, res) => {
 
     // Delete the property
     await Property.findByIdAndDelete(propertyId);
+
+    // 🚨 FIX: UPDATE OWNER propertyIds
+    await Owner.findByIdAndUpdate(property.ownerId, {
+      $pull: { propertyIds: propertyId },
+      $inc: { numProperties: -1 }
+    });
 
     return res.status(200).json({
       success: true,
