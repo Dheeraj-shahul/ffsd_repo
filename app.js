@@ -775,11 +775,17 @@ app.get("/admin", isAuthenticate, async (req, res) => {
     const revenueMonthly = revenueMonthlyResult[0]?.total || 0;
 
     const propertiesActive = await Property.countDocuments({
-      status: "Active",
-    });
-    const propertiesPending = await Property.countDocuments({
-      status: "Pending",
-    });
+  isVerified: true,
+  isRented: true
+});
+const propertiesPending = await Property.countDocuments({
+  isVerified: false
+});
+const propertiesAvailable = await Property.countDocuments({
+  isVerified: true,
+  isRented: false
+});
+
     const workersAvailable = await Worker.countDocuments({
       status: "Active",
     });
@@ -810,6 +816,7 @@ app.get("/admin", isAuthenticate, async (req, res) => {
       revenueMonthly,
       propertiesActive,
       propertiesPending,
+      propertiesAvailable,
       workersAvailable,
       userGrowth,
       bookingStatusDistribution,
