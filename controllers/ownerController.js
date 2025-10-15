@@ -149,9 +149,58 @@ exports.getOwnerDashboard = async (req, res) => {
 
     const complaints = await Complaint.find({ tenantId: { $in: tenantIds } });
     const agreements = await Agreement.find({ ownerId: objectId });
-    const notifications = await Notification.find({
-      _id: { $in: owner.notificationIds },
-    });
+    // Fetch notifications from Notification model
+let notifications = await Notification.find({
+  _id: { $in: owner.notificationIds },
+}).lean();
+
+// Fetch pending unrent requests
+const unrentRequests = await UnrentRequest.find({
+  ownerId: objectId,
+  status: "Pending"
+}).lean();
+
+// Create a Set of notification IDs that have corresponding pending unrent requests
+const unrentNotificationIds = new Set(
+  unrentRequests
+    .filter(req => req.notificationId)
+    .map(req => req.notificationId.toString())
+);
+
+// Filter out notifications that are pending unrent requests
+// (because we'll show them from UnrentRequest model instead)
+notifications = notifications.filter(notification => {
+  // If this notification is linked to a pending unrent request, exclude it
+  if (unrentNotificationIds.has(notification._id.toString())) {
+    return false;
+  }
+  // Keep all other notifications
+  return true;
+});
+
+// Now add unrent requests as notification objects
+for (const request of unrentRequests) {
+  const property = await Property.findById(request.propertyId).select('name').lean();
+  const tenant = await Tenant.findById(request.tenantId).select('firstName lastName').lean();
+  
+  // Add unrent request as a notification object
+  notifications.push({
+    _id: request._id,
+    type: "Unrent Request",
+    message: `${tenant ? tenant.firstName + ' ' + tenant.lastName : 'Tenant'} has requested to unrent the property.${request.reason ? '\nReason: ' + request.reason : ''}`,
+    recipientName: tenant ? `${tenant.firstName} ${tenant.lastName}` : 'N/A',
+    propertyName: property ? property.name : 'N/A',
+    status: request.status,
+    createdDate: request.createdDate,
+    propertyId: request.propertyId,
+    tenantId: request.tenantId,
+    isUnrentRequest: true,
+    originalNotificationId: request.notificationId // Keep track of the original notification
+  });
+}
+
+// Sort notifications by date
+notifications.sort((a, b) => new Date(b.createdDate) - new Date(a.createdDate));
 
     // Sample reports data
     const reports = {
