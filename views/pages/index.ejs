@@ -167,14 +167,9 @@
           <% } %>
         </div>
         <div class="price-container">
-          <% if (properties.length > 0) { %>
-            <div class="price">&#8377; <%= properties[0].price ? properties[0].price.toLocaleString('en-IN') : '0' %></div>
-            <button class="contact-btn" data-id="<%= properties[0]._id || '' %>" <%= properties[0]._id ? '' : 'disabled' %>>Contact Now</button>
-          <% } else { %>
-            <div class="price">&#8377; 0</div>
-            <button class="contact-btn" disabled>Contact Now</button>
-          <% } %>
-        </div>
+ <div class="price">&#8377; <%= properties[0]?.price?.toLocaleString('en-IN') || '0' %></div>
+<button class="contact-btn" data-id="<%= properties[0]?._id || '' %>" <%= properties[0]?._id ? '' : 'disabled' %>>Contact Now</button>
+</div>
         <% if (properties.length > 1) { %>
           <div class="controls">
             <button onclick="prevProperty()">&#8249;</button>
@@ -475,7 +470,7 @@
               place: "<%= property.location || 'Unknown Location' %>",
               type: "<%= property.subtype || 'N/A' %>",
               image: "<%= property.images && property.images.length > 0 && property.images[0] ? property.images[0] : '/images/placeholder.jpg' %>",
-              price: "₹ <%= property.price ? property.price.toLocaleString('en-IN') : '0' %>",
+              price: "<%= property.price || 0 %>",
               id: "<%= property._id || '' %>"
             }<%= index < properties.length - 1 ? ',' : '' %>
           <% }) %>
@@ -516,15 +511,20 @@
         console.warn("Properties array is empty or undefined.");
       } else {
         function updateProperty() {
-          const propertyInfo = document.getElementById("property-info");
-          const propertyImage = document.getElementById("property-image");
-          const priceElement = document.querySelector(".price");
-          if (propertyInfo && propertyImage && priceElement) {
-            propertyInfo.innerHTML = `<h2>${properties[currentIndex1].place}</h2><p>${properties[currentIndex1].type}</p>`;
-            propertyImage.src = properties[currentIndex1].image;
-            priceElement.textContent = properties[currentIndex1].price;
-          }
-        }
+  const propertyInfo = document.getElementById("property-info");
+  const propertyImage = document.getElementById("property-image");
+  const priceElement = document.querySelector(".price");
+  const contactBtn = document.querySelector(".contact-btn");
+  if (propertyInfo && propertyImage && priceElement) {
+    propertyInfo.innerHTML = `<h2>${properties[currentIndex1].place}</h2><p>${properties[currentIndex1].type}</p>`;
+    propertyImage.src = properties[currentIndex1].image;
+    priceElement.textContent = `₹ ${properties[currentIndex1].price?.toLocaleString('en-IN') || '0'}`;
+    if (contactBtn) {
+      contactBtn.setAttribute('data-id', properties[currentIndex1].id || '');
+      contactBtn.disabled = !properties[currentIndex1].id;
+    }
+  }
+}
 
         function nextProperty() {
           if (properties.length <= 1) return; // No navigation if only one or no items
