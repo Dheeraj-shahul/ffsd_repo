@@ -555,6 +555,15 @@ exports.deleteWorkerService = async (req, res) => {
       return res.status(403).json({ error: "Unauthorized" });
     }
 
+    // ✅ NEW CHECK: Cannot delete if has active clients
+    if (worker.clientIds && worker.clientIds.length > 0) {
+      return res.status(400).json({ 
+        error: "Cannot delete service while you have active clients",
+        clientCount: worker.clientIds.length,
+        hasClients: true 
+      });
+    }
+
     worker.serviceType = null;
     worker.experience = null;
     worker.price = null;
