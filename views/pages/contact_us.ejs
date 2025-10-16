@@ -267,17 +267,14 @@
           // Validate email (must be a Gmail address)
           const emailRegex = /^[a-zA-Z0-9._%+-]+@gmail\.com$/;
           if (!emailRegex.test(email)) {
-            modalMessage.textContent = "Please enter a valid Gmail address.";
-            modal.style.display = "flex";
+            alert("Please enter a valid Gmail address.");
             return;
           }
 
           // Validate phone number (must be 10 digits)
           const phoneRegex = /^\d{10}$/;
           if (phone && !phoneRegex.test(phone)) {
-            modalMessage.textContent =
-              "Please enter a valid 10-digit phone number.";
-            modal.style.display = "flex";
+            alert("Please enter a valid 10-digit phone number.");
             return;
           }
 

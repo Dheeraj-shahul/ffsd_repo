@@ -6,6 +6,29 @@
     <link rel="stylesheet" href="css/property_listing_page.css" />
     <style>
       @import url("https://fonts.googleapis.com/css2?family=Poppins:wght@700&display=swap");
+
+      /* Override the problematic CSS rule */
+      .form-group label::after {
+        content: "" !important;
+      }
+
+      /* Error styling */
+      .form-group.has-error input,
+      .form-group.has-error select,
+      .form-group.has-error textarea {
+        border-color: #e74c3c !important;
+      }
+
+      .error-message {
+        color: #e74c3c;
+        font-size: 0.85rem;
+        margin-top: 5px;
+        display: none;
+      }
+
+      .form-group.has-error .error-message {
+        display: block;
+      }
     </style>
     <title>RENT EASE - List Your Property</title>
     <link
@@ -41,6 +64,7 @@
                   <option value="pg">PG/Hostel</option>
                   <option value="commercial">Commercial Space</option>
                 </select>
+                <span class="error-message">Please select a property type</span>
               </div>
               <div class="form-group">
                 <label for="property-subtype">Property Subtype*</label>
@@ -55,6 +79,9 @@
                   <option value="studio">Studio</option>
                   <option value="other">Other</option>
                 </select>
+                <span class="error-message"
+                  >Please select a property subtype</span
+                >
               </div>
             </div>
 
@@ -63,12 +90,15 @@
                 <label for="bedrooms">Bedrooms*</label>
                 <select id="bedrooms" name="bedrooms" required>
                   <option value="">Select</option>
-                  <option value="1">1 </option>
-                  <option value="2">2 </option>
-                  <option value="3">3 </option>
-                  <option value="4">4 </option>
-                  <option value="5+">5+ </option>
+                  <option value="1">1</option>
+                  <option value="2">2</option>
+                  <option value="3">3</option>
+                  <option value="4">4</option>
+                  <option value="5+">5+</option>
                 </select>
+                <span class="error-message"
+                  >Please select number of bedrooms</span
+                >
               </div>
               <div class="form-group">
                 <label for="bathrooms">Bathrooms*</label>
@@ -79,6 +109,9 @@
                   <option value="3">3</option>
                   <option value="4+">4+</option>
                 </select>
+                <span class="error-message"
+                  >Please select number of bathrooms</span
+                >
               </div>
               <div class="form-group">
                 <label for="furnishing">Furnishing Status</label>
@@ -101,6 +134,9 @@
                   required
                   placeholder="Describe your property in detail, including special features and nearby amenities"
                 ></textarea>
+                <span class="error-message"
+                  >Please provide a property description</span
+                >
               </div>
             </div>
           </div>
@@ -117,6 +153,7 @@
                   required
                   placeholder="Street address"
                 />
+                <span class="error-message">Please enter the address</span>
               </div>
               <div class="form-group">
                 <label for="landmark">Landmark</label>
@@ -139,6 +176,7 @@
                   required
                   placeholder="City"
                 />
+                <span class="error-message">Please enter the city</span>
               </div>
               <div class="form-group">
                 <label for="state">State*</label>
@@ -149,6 +187,7 @@
                   required
                   placeholder="State"
                 />
+                <span class="error-message">Please enter the state</span>
               </div>
               <div class="form-group">
                 <label for="pincode">Pincode*</label>
@@ -159,9 +198,8 @@
                   required
                   placeholder="Pincode"
                 />
+                <span class="error-message">Please enter the pincode</span>
               </div>
-
-              
             </div>
             <div class="form-row">
               <div class="form-group full-width">
@@ -188,6 +226,7 @@
                   required
                   placeholder="e.g., 15000"
                 />
+                <span class="error-message">Please enter the monthly rent</span>
               </div>
               <div class="form-group">
                 <label for="security-deposit">Security Deposit (₹)*</label>
@@ -198,6 +237,9 @@
                   required
                   placeholder="e.g., 30000"
                 />
+                <span class="error-message"
+                  >Please enter the security deposit</span
+                >
               </div>
               <div class="form-group">
                 <label for="maintenance">Maintenance Charges (₹)</label>
@@ -219,6 +261,9 @@
                   name="available-from"
                   required
                 />
+                <span class="error-message"
+                  >Please select availability date</span
+                >
               </div>
               <div class="form-group">
                 <label for="preferred-tenants">Preferred Tenants</label>
@@ -239,6 +284,7 @@
                   <option value="12">12 months</option>
                   <option value="24">24 months</option>
                 </select>
+                <span class="error-message">Please select lease duration</span>
               </div>
             </div>
           </div>
@@ -365,6 +411,9 @@
                     <span>Choose Files</span>
                   </div>
                 </div>
+                <span class="error-message"
+                  >Please upload at least one image</span
+                >
                 <div id="preview-container" class="preview-container"></div>
               </div>
             </div>
@@ -382,6 +431,7 @@
                   required
                   placeholder="Full Name"
                 />
+                <span class="error-message">Please enter owner name</span>
               </div>
               <div class="form-group">
                 <label for="contact-number">Contact Number*</label>
@@ -393,6 +443,9 @@
                   placeholder="10-digit mobile number"
                   pattern="[0-9]{10}"
                 />
+                <span class="error-message"
+                  >Please enter a valid 10-digit contact number</span
+                >
               </div>
               <div class="form-group">
                 <label for="alternative-number">Alternative Number</label>
@@ -415,6 +468,9 @@
                   required
                   placeholder="Email address"
                 />
+                <span class="error-message"
+                  >Please enter a valid email address</span
+                >
               </div>
             </div>
             <div class="form-row">
@@ -432,6 +488,9 @@
                     <a href="#">Privacy Policy</a>*</label
                   >
                 </div>
+                <span class="error-message"
+                  >Please agree to the terms and conditions</span
+                >
               </div>
             </div>
           </div>
@@ -455,180 +514,220 @@
       function toggleNav() {
         const navMenu = document.getElementById("nav-menu");
         const overlay = document.getElementById("overlay");
-    
-        if (navMenu.classList.contains("active")) {
-          navMenu.classList.remove("active");
-          overlay.classList.remove("active");
-        } else {
-          navMenu.classList.add("active");
-          overlay.classList.add("active");
+
+        if (navMenu && overlay) {
+          if (navMenu.classList.contains("active")) {
+            navMenu.classList.remove("active");
+            overlay.classList.remove("active");
+          } else {
+            navMenu.classList.add("active");
+            overlay.classList.add("active");
+          }
         }
       }
-    
+
       // Add event listener to overlay
-      document.getElementById("overlay").addEventListener("click", function () {
-        const navMenu = document.getElementById("nav-menu");
-        navMenu.classList.remove("active");
-        this.classList.remove("active");
-      });
-    
+      const overlay = document.getElementById("overlay");
+      if (overlay) {
+        overlay.addEventListener("click", function () {
+          const navMenu = document.getElementById("nav-menu");
+          if (navMenu) {
+            navMenu.classList.remove("active");
+            this.classList.remove("active");
+          }
+        });
+      }
+
       // Function to reset the form
       function resetForm() {
         document.getElementById("property-listing-form").reset();
         document.getElementById("preview-container").innerHTML = "";
-        selectedFiles = []; // Clear selected files
+        selectedFiles = [];
+
+        // Remove all error classes
+        document.querySelectorAll(".form-group").forEach((group) => {
+          group.classList.remove("has-error");
+        });
       }
-    
+
       // Store selected files globally
       let selectedFiles = [];
-    
+
       // Function to handle file uploads and create previews
       document
         .getElementById("property-photos")
         .addEventListener("change", function (event) {
           const files = event.target.files;
           const previewContainer = document.getElementById("preview-container");
-    
+          const formGroup = this.closest(".form-group");
+
+          // Remove error if files are selected
+          if (files.length > 0) {
+            formGroup.classList.remove("has-error");
+          }
+
           // Add new files to selectedFiles, ensuring no duplicates
           const newFiles = Array.from(files).filter(
-            file => !selectedFiles.some(existing => existing.name === file.name && existing.size === file.size)
+            (file) =>
+              !selectedFiles.some(
+                (existing) =>
+                  existing.name === file.name && existing.size === file.size
+              )
           );
           selectedFiles = [...selectedFiles, ...newFiles].slice(0, 10); // Limit to 10
-    
+
           // Update previews
           previewContainer.innerHTML = ""; // Clear existing previews
-    
+
           selectedFiles.forEach((file, index) => {
             if (!file.type.match("image.*")) {
               return;
             }
-    
+
             const reader = new FileReader();
             reader.onload = function (e) {
               const previewWrapper = document.createElement("div");
               previewWrapper.className = "preview-item";
-    
+
               const img = document.createElement("img");
               img.src = e.target.result;
               img.title = file.name;
               img.style.maxWidth = "100px"; // Ensure visibility
-    
+
               const removeBtn = document.createElement("span");
               removeBtn.className = "remove-preview";
               removeBtn.innerHTML = "×";
               removeBtn.addEventListener("click", function () {
-                previewWrapper.remove();
-                selectedFiles.splice(index, 1); // Remove from selectedFiles
-                // Refresh previews
-                previewContainer.innerHTML = "";
-                selectedFiles.forEach((f, i) => {
-                  const r = new FileReader();
-                  r.onload = function (ev) {
-                    const wrapper = document.createElement("div");
-                    wrapper.className = "preview-item";
-                    const img = document.createElement("img");
-                    img.src = ev.target.result;
-                    img.title = f.name;
-                    img.style.maxWidth = "100px";
-                    const btn = document.createElement("span");
-                    btn.className = "remove-preview";
-                    btn.innerHTML = "×";
-                    btn.addEventListener("click", function () {
-                      wrapper.remove();
-                      selectedFiles.splice(i, 1);
-                      previewContainer.innerHTML = "";
-                      selectedFiles.forEach((f2) => {
-                        const r2 = new FileReader();
-                        r2.onload = function (ev2) {
-                          const w = document.createElement("div");
-                          w.className = "preview-item";
-                          const img2 = document.createElement("img");
-                          img2.src = ev2.target.result;
-                          img2.title = f2.name;
-                          img2.style.maxWidth = "100px";
-                          w.appendChild(img2);
-                          previewContainer.appendChild(w);
-                        };
-                        r2.readAsDataURL(f2);
-                      });
-                    });
-                    wrapper.appendChild(img);
-                    wrapper.appendChild(btn);
-                    previewContainer.appendChild(wrapper);
-                  };
-                  r.readAsDataURL(f);
-                });
+                selectedFiles.splice(index, 1);
+                updatePreviews();
               });
-    
+
               previewWrapper.appendChild(img);
               previewWrapper.appendChild(removeBtn);
               previewContainer.appendChild(previewWrapper);
             };
             reader.readAsDataURL(file);
           });
-    
+
           if (selectedFiles.length > 10) {
-            alert("You can only upload a maximum of 10 images. The first 10 images have been selected.");
+            alert(
+              "You can only upload a maximum of 10 images. The first 10 images have been selected."
+            );
           }
         });
-    
+
+      function updatePreviews() {
+        const previewContainer = document.getElementById("preview-container");
+        previewContainer.innerHTML = "";
+
+        selectedFiles.forEach((file, index) => {
+          if (!file.type.match("image.*")) return;
+
+          const reader = new FileReader();
+          reader.onload = function (e) {
+            const previewWrapper = document.createElement("div");
+            previewWrapper.className = "preview-item";
+
+            const img = document.createElement("img");
+            img.src = e.target.result;
+            img.title = file.name;
+            img.style.maxWidth = "100px";
+
+            const removeBtn = document.createElement("span");
+            removeBtn.className = "remove-preview";
+            removeBtn.innerHTML = "×";
+            removeBtn.addEventListener("click", function () {
+              selectedFiles.splice(index, 1);
+              updatePreviews();
+            });
+
+            previewWrapper.appendChild(img);
+            previewWrapper.appendChild(removeBtn);
+            previewContainer.appendChild(previewWrapper);
+          };
+          reader.readAsDataURL(file);
+        });
+      }
+
       // Form validation and submission
       document
         .getElementById("property-listing-form")
         .addEventListener("submit", async function (event) {
           event.preventDefault();
-    
-          // Log form submission
+
+          // Clear all previous errors
+          document.querySelectorAll(".form-group").forEach((group) => {
+            group.classList.remove("has-error");
+          });
+
           console.log("Form submitted");
-    
-          // Simple form validation
-          const requiredFields = document.querySelectorAll("[required]");
+
           let isValid = true;
-    
+
+          // Validate required fields
+          const requiredFields = document.querySelectorAll("[required]");
           requiredFields.forEach((field) => {
-            if (!field.value) {
+            const formGroup = field.closest(".form-group");
+
+            if (field.type === "checkbox") {
+              if (!field.checked) {
+                isValid = false;
+                if (formGroup) formGroup.classList.add("has-error");
+              }
+            } else if (!field.value || field.value.trim() === "") {
               isValid = false;
-              field.classList.add("error");
-            } else {
-              field.classList.remove("error");
+              if (formGroup) formGroup.classList.add("has-error");
             }
           });
-    
+
+          // Validate images
+          const photoFormGroup = document
+            .getElementById("property-photos")
+            .closest(".form-group");
+          if (selectedFiles.length === 0) {
+            isValid = false;
+            photoFormGroup.classList.add("has-error");
+          }
+
           if (!isValid) {
             alert("Please fill in all required fields marked with *");
+            // Scroll to first error
+            const firstError = document.querySelector(".form-group.has-error");
+            if (firstError) {
+              firstError.scrollIntoView({
+                behavior: "smooth",
+                block: "center",
+              });
+            }
             return;
           }
-    
-          // Validate images
-          if (selectedFiles.length === 0) {
-            alert("Please upload at least one image");
-            return;
-          }
-    
+
           // Prepare form data
           const formData = new FormData();
-    
+
           // Append images
           selectedFiles.forEach((file, index) => {
             if (file.type.match("image.*")) {
               formData.append("property-photos", file);
             }
           });
-    
+
           // Append other form fields
           for (const [key, value] of new FormData(this).entries()) {
             if (key !== "property-photos") {
               formData.append(key, value);
             }
           }
-    
+
           // Log FormData entries for debugging
-          const formDataEntries = [...formData.entries()].map(([key, value]) => ({
-            key,
-            value: key === "property-photos" ? value.name : value,
-          }));
+          const formDataEntries = [...formData.entries()].map(
+            ([key, value]) => ({
+              key,
+              value: key === "property-photos" ? value.name : value,
+            })
+          );
           console.log("FormData entries:", formDataEntries);
-    
+
           // Submit to backend
           console.log("Sending fetch to /api/property/list-property");
           try {
@@ -636,9 +735,9 @@
               method: "POST",
               body: formData,
             });
-    
+
             const result = await response.json();
-    
+
             if (response.ok) {
               alert(
                 "Property listing submitted successfully! Our team will review your listing and it will be live soon."
@@ -652,7 +751,24 @@
             alert(`Error submitting form: ${error.message}`);
           }
         });
-    
+
+      // Remove error styling on input
+      document.querySelectorAll("input, select, textarea").forEach((field) => {
+        field.addEventListener("input", function () {
+          const formGroup = this.closest(".form-group");
+          if (formGroup && this.value.trim() !== "") {
+            formGroup.classList.remove("has-error");
+          }
+        });
+
+        field.addEventListener("change", function () {
+          const formGroup = this.closest(".form-group");
+          if (formGroup && (this.value.trim() !== "" || this.checked)) {
+            formGroup.classList.remove("has-error");
+          }
+        });
+      });
+
       // Custom styling for file input
       document
         .querySelector(".file-upload-button")
