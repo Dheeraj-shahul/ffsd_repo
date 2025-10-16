@@ -92,7 +92,12 @@
             transition: background-color 0.3s;
         }
 
-        button:hover {
+        button:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+        }
+
+        button:hover:not(:disabled) {
             background-color: #ff6f00;
         }
 
@@ -321,7 +326,7 @@
                 <div id="confirmPasswordError" class="error"></div>
             </div>
             
-            <button type="submit">Register</button>
+            <button type="submit" id="registerButton" disabled>Register</button>
             <div id="serverError" class="error"></div>
             
             <div class="divider">
@@ -342,168 +347,309 @@
     </div>
 
     <script>
+        // Function to toggle user type specific fields
         function handleUserTypeChange() {
             const userType = document.getElementById('userType').value;
-            
-            // Hide all specific fields first
             document.getElementById('workerFields').style.display = 'none';
             document.getElementById('homeownerFields').style.display = 'none';
             
-            // Show fields based on user type
             if (userType === 'worker') {
                 document.getElementById('workerFields').style.display = 'block';
             } else if (userType === 'owner') {
                 document.getElementById('homeownerFields').style.display = 'block';
             }
+            validateForm();
         }
-        
-        // Run on page load to set initial state
+
+        // Function to validate a single field
+        function validateField(field) {
+            const id = field.id;
+            const value = field.value.trim();
+            const errorElement = document.getElementById(`${id}Error`);
+
+            // Skip validation if the field hasn't been touched
+            if (!field.dataset.touched) return true;
+
+            if (id === 'firstName') {
+                if (!value) {
+                    errorElement.textContent = 'First name is required';
+                    errorElement.classList.add('visible');
+                    return false;
+                } else if (!/^[A-Za-z\s-]+$/.test(value)) {
+                    errorElement.textContent = 'First name must contain only letters, spaces';
+                    errorElement.classList.add('visible');
+                    return false;
+                } else {
+                    errorElement.classList.remove('visible');
+                    return true;
+                }
+            }
+
+            if (id === 'lastName') {
+                if (!value) {
+                    errorElement.textContent = 'Last name is required';
+                    errorElement.classList.add('visible');
+                    return false;
+                } else if (!/^[A-Za-z\s-]+$/.test(value)) {
+                    errorElement.textContent = 'Last name must contain only letters, spaces';
+                    errorElement.classList.add('visible');
+                    return false;
+                } else {
+                    errorElement.classList.remove('visible');
+                    return true;
+                }
+            }
+
+            if (id === 'email') {
+                if (!value) {
+                    errorElement.textContent = 'Email is required';
+                    errorElement.classList.add('visible');
+                    return false;
+                } else if (!/^[a-zA-Z][a-zA-Z0-9._%+-]*@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(value)) {
+                    errorElement.textContent = 'Please enter a valid email address (e.g., user@gmail.com)';
+                    errorElement.classList.add('visible');
+                    return false;
+                } else {
+                    errorElement.classList.remove('visible');
+                    return true;
+                }
+            }
+
+            if (id === 'phone') {
+                if (!value) {
+                    errorElement.textContent = 'Phone number is required';
+                    errorElement.classList.add('visible');
+                    return false;
+                } else if (!/^[0-9]{10}$/.test(value)) {
+                    errorElement.textContent = 'Please enter a valid 10-digit phone number';
+                    errorElement.classList.add('visible');
+                    return false;
+                } else {
+                    errorElement.classList.remove('visible');
+                    return true;
+                }
+            }
+
+            if (id === 'location') {
+                if (!value) {
+                    errorElement.textContent = 'Location is required';
+                    errorElement.classList.add('visible');
+                    return false;
+                } else {
+                    errorElement.classList.remove('visible');
+                    return true;
+                }
+            }
+
+            if (id === 'serviceType') {
+                if (!value) {
+                    errorElement.textContent = 'Please select a service type';
+                    errorElement.classList.add('visible');
+                    return false;
+                } else {
+                    errorElement.classList.remove('visible');
+                    return true;
+                }
+            }
+
+            if (id === 'experience') {
+                if (!value || value < 0) {
+                    errorElement.textContent = 'Please enter valid years of experience';
+                    errorElement.classList.add('visible');
+                    return false;
+                } else {
+                    errorElement.classList.remove('visible');
+                    return true;
+                }
+            }
+
+            if (id === 'numProperties') {
+                if (!value || value < 1) {
+                    errorElement.textContent = 'Please enter a valid number of properties';
+                    errorElement.classList.add('visible');
+                    return false;
+                } else {
+                    errorElement.classList.remove('visible');
+                    return true;
+                }
+            }
+
+            if (id === 'password') {
+                if (!value) {
+                    errorElement.textContent = 'Password is required';
+                    errorElement.classList.add('visible');
+                    return false;
+                } else if (value.length < 8) {
+                    errorElement.textContent = 'Password must be at least 8 characters';
+                    errorElement.classList.add('visible');
+                    return false;
+                } else if (!/[A-Z]/.test(value) || !/[a-z]/.test(value) || !/[0-9]/.test(value)) {
+                    errorElement.textContent = 'Password must contain uppercase, lowercase letters, and numbers';
+                    errorElement.classList.add('visible');
+                    return false;
+                } else {
+                    errorElement.classList.remove('visible');
+                    return true;
+                }
+            }
+
+            if (id === 'confirmPassword') {
+                const password = document.getElementById('password').value;
+                if (!value) {
+                    errorElement.textContent = 'Please confirm your password';
+                    errorElement.classList.add('visible');
+                    return false;
+                } else if (value !== password) {
+                    errorElement.textContent = 'Passwords do not match';
+                    errorElement.classList.add('visible');
+                    return false;
+                } else {
+                    errorElement.classList.remove('visible');
+                    return true;
+                }
+            }
+
+            return true;
+        }
+
+        // Function to validate the entire form for button enabling
+        function validateForm() {
+            let isValid = true;
+
+            const fields = [
+                'firstName', 'lastName', 'email', 'phone', 'location', 'password', 'confirmPassword'
+            ];
+
+            const userType = document.getElementById('userType').value;
+            if (userType === 'worker') {
+                fields.push('serviceType', 'experience');
+            } else if (userType === 'owner') {
+                fields.push('numProperties');
+            }
+
+            fields.forEach(id => {
+                const field = document.getElementById(id);
+                if (field) {
+                    const value = field.value.trim();
+                    if (id === 'firstName' || id === 'lastName') {
+                        if (!value || !/^[A-Za-z\s-]+$/.test(value)) {
+                            isValid = false;
+                        }
+                    } else if (id === 'email') {
+                        if (!value || !/^[a-zA-Z][a-zA-Z0-9._%+-]*@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(value)) {
+                            isValid = false;
+                        }
+                    } else if (id === 'phone') {
+                        if (!value || !/^[0-9]{10}$/.test(value)) {
+                            isValid = false;
+                        }
+                    } else if (id === 'location') {
+                        if (!value) {
+                            isValid = false;
+                        }
+                    } else if (id === 'serviceType') {
+                        if (!value) {
+                            isValid = false;
+                        }
+                    } else if (id === 'experience') {
+                        if (!value || value < 0) {
+                            isValid = false;
+                        }
+                    } else if (id === 'numProperties') {
+                        if (!value || value < 1) {
+                            isValid = false;
+                        }
+                    } else if (id === 'password') {
+                        if (!value || value.length < 8 || !/[A-Z]/.test(value) || !/[a-z]/.test(value) || !/[0-9]/.test(value)) {
+                            isValid = false;
+                        }
+                    } else if (id === 'confirmPassword') {
+                        const password = document.getElementById('password').value;
+                        if (!value || value !== password) {
+                            isValid = false;
+                        }
+                    }
+                }
+            });
+
+            document.getElementById('registerButton').disabled = !isValid;
+        }
+
+        // Add event listeners for validation on focus and blur
+        const inputs = document.querySelectorAll('input, select');
+        inputs.forEach(input => {
+            // Mark field as touched when it gains focus
+            input.addEventListener('focus', () => {
+                input.dataset.touched = 'true';
+            });
+
+            // Validate on blur (when leaving the field via click, tab, or other navigation)
+            input.addEventListener('blur', () => {
+                validateField(input);
+                validateForm();
+            });
+
+            // Update button state on input
+            input.addEventListener('input', validateForm);
+        });
+
+        // Initial setup
         handleUserTypeChange();
-        
+        validateForm();
+
+        // Form submission
         document.getElementById('registerForm').addEventListener('submit', async function(event) {
             event.preventDefault();
             let isValid = true;
-            
-            // Reset errors
-            document.querySelectorAll('.error').forEach(error => error.classList.remove('visible'));
-            
-            // Gather form data
-            const firstName = document.getElementById('firstName').value.trim();
-            const lastName = document.getElementById('lastName').value.trim();
-            const email = document.getElementById('email').value.trim();
-            const phone = document.getElementById('phone').value.trim();
-            const location = document.getElementById('location').value.trim();
-            const password = document.getElementById('password').value;
-            const confirmPassword = document.getElementById('confirmPassword').value;
+
+            // Validate all fields and show errors
+            const fields = [
+                'firstName', 'lastName', 'email', 'phone', 'location', 'password', 'confirmPassword'
+            ];
+
             const userType = document.getElementById('userType').value;
-            const serviceType = document.getElementById('serviceType')?.value || '';
-            const experience = document.getElementById('experience')?.value || '';
-            const numProperties = document.getElementById('numProperties')?.value || '';
-            
-            // Log password for debugging
-            console.log("Password entered:", JSON.stringify(password));
-            
-            // First Name validation
-            if (!firstName) {
-                document.getElementById('firstNameError').textContent = 'First name is required';
-                document.getElementById('firstNameError').classList.add('visible');
-                isValid = false;
-            }
-            
-            // Last Name validation
-            if (!lastName) {
-                document.getElementById('lastNameError').textContent = 'Last name is required';
-                document.getElementById('lastNameError').classList.add('visible');
-                isValid = false;
-            }
-            
-            // Email validation
-            if (!email) {
-                document.getElementById('emailError').textContent = 'Email is required';
-                document.getElementById('emailError').classList.add('visible');
-                isValid = false;
-            } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-                document.getElementById('emailError').textContent = 'Please enter a valid email address';
-                document.getElementById('emailError').classList.add('visible');
-                isValid = false;
-            }
-            
-            // Phone validation
-            if (!phone) {
-                document.getElementById('phoneError').textContent = 'Phone number is required';
-                document.getElementById('phoneError').classList.add('visible');
-                isValid = false;
-            } else if (!/^[0-9]{10}$/.test(phone)) {
-                document.getElementById('phoneError').textContent = 'Please enter a valid 10-digit phone number';
-                document.getElementById('phoneError').classList.add('visible');
-                isValid = false;
-            }
-            
-            // Location validation
-            if (!location) {
-                document.getElementById('locationError').textContent = 'Location is required';
-                document.getElementById('locationError').classList.add('visible');
-                isValid = false;
-            }
-            
-            // Worker-specific validation
             if (userType === 'worker') {
-                if (!serviceType) {
-                    document.getElementById('serviceTypeError').textContent = 'Please select a service type';
-                    document.getElementById('serviceTypeError').classList.add('visible');
-                    isValid = false;
-                }
-                if (!experience || experience < 0) {
-                    document.getElementById('experienceError').textContent = 'Please enter valid years of experience';
-                    document.getElementById('experienceError').classList.add('visible');
-                    isValid = false;
-                }
+                fields.push('serviceType', 'experience');
+            } else if (userType === 'owner') {
+                fields.push('numProperties');
             }
-            
-            // Owner-specific validation
-            if (userType === 'owner') {
-                if (!numProperties || numProperties < 1) {
-                    document.getElementById('numPropertiesError').textContent = 'Please enter a valid number of properties';
-                    document.getElementById('numPropertiesError').classList.add('visible');
-                    isValid = false;
-                }
-            }
-            
-            // Password validation
-            if (!password) {
-                document.getElementById('passwordError').textContent = 'Password is required';
-                document.getElementById('passwordError').classList.add('visible');
-                isValid = false;
-            } else if (password.length < 8) {
-                document.getElementById('passwordError').textContent = 'Password must be at least 8 characters';
-                document.getElementById('passwordError').classList.add('visible');
-                isValid = false;
-            } else if (!/[A-Z]/.test(password) || !/[a-z]/.test(password) || !/[0-9]/.test(password)) {
-                document.getElementById('passwordError').textContent = 'Password must contain uppercase, lowercase letters, and numbers';
-                document.getElementById('passwordError').classList.add('visible');
-                isValid = false;
-            }
-            
-            // Confirm Password validation
-            if (!confirmPassword) {
-                document.getElementById('confirmPasswordError').textContent = 'Please confirm your password';
-                document.getElementById('confirmPasswordError').classList.add('visible');
-                isValid = false;
-            } else if (confirmPassword !== password) {
-                document.getElementById('confirmPasswordError').textContent = 'Passwords do not match';
-                document.getElementById('confirmPasswordError').classList.add('visible');
-                isValid = false;
-            }
-            
-            if (!isValid) return;
 
-            // Gather form data
-            const form = event.target;
-            const formData = new FormData(form);
-            const data = Object.fromEntries(formData.entries());
+            fields.forEach(id => {
+                const field = document.getElementById(id);
+                if (field) {
+                    field.dataset.touched = 'true'; // Mark as touched for submission
+                    if (!validateField(field)) {
+                        isValid = false;
+                    }
+                }
+            });
 
-            // Remove confirmPassword before sending to server
-            delete data.confirmPassword;
+            if (isValid) {
+                const form = event.target;
+                const formData = new FormData(form);
+                const data = Object.fromEntries(formData.entries());
+                delete data.confirmPassword;
 
-            try {
-                const res = await fetch('/register', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(data)
-                });
-                const result = await res.json();
-                if (res.ok && result.redirectUrl) {
-                    window.location.href = result.redirectUrl;
-                } else {
-                    document.getElementById('serverError').textContent = result.error || 'Registration failed';
+                try {
+                    const res = await fetch('/register', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(data)
+                    });
+                    const result = await res.json();
+                    if (res.ok && result.redirectUrl) {
+                        window.location.href = result.redirectUrl;
+                    } else {
+                        document.getElementById('serverError').textContent = result.error || 'Registration failed';
+                        document.getElementById('serverError').classList.add('visible');
+                    }
+                } catch (err) {
+                    document.getElementById('serverError').textContent = 'Network error';
                     document.getElementById('serverError').classList.add('visible');
                 }
-            } catch (err) {
-                document.getElementById('serverError').textContent = 'Network error';
-                document.getElementById('serverError').classList.add('visible');
             }
         });
-        
+
         function registerWithGoogle() {
             console.log('Register with Google clicked');
             // Implement Google OAuth here if needed
