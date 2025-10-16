@@ -1253,154 +1253,262 @@ if (deleteAccountForm) {
             }
           });
         }
+         if (profileForm) {
+  profileForm.addEventListener("submit", async function (event) {
+    event.preventDefault();
+    let isValid = true;
+    
+    const fullname = document.getElementById("fullname")?.value.trim();
+    const email = document.getElementById("email")?.value.trim();
+    const phone = document.getElementById("phone")?.value.trim();
+    const location = document.getElementById("address")?.value.trim();
 
-        if (profileForm) {
-          profileForm.addEventListener("submit", async function () {
-            const fullname = document.getElementById("fullname")?.value.trim();
-            const email = document.getElementById("email")?.value.trim();
-            const phone = document.getElementById("phone")?.value.trim();
-            const location = document.getElementById("address")?.value.trim();
+    const errorElements = profileForm.querySelectorAll('.error');
+    errorElements.forEach(el => el.remove());
 
-            if (!fullname || !email) {
-              showNotification("Full name and email are required", "error");
-              return;
-            }
-            const nameParts = fullname.split(" ").filter(part => part);
-            if (nameParts.length < 2) {
-              showNotification("Please provide both first and last names", "error");
-              return;
-            }
-            if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-              showNotification("Please provide a valid email address", "error");
-              return;
-            }
-
-            const firstName = nameParts[0];
-            const lastName = nameParts.slice(1).join(" ");
-
-            console.log("Submitting profile update:", { firstName, lastName, email, phone, location });
-            try {
-              const response = await fetch("/tenant/profile", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                  firstName,
-                  lastName,
-                  email,
-                  phone,
-                  location,
-                }),
-              });
-              const result = await response.json();
-              console.log("Profile update response:", result);
-              if (result.success) {
-                showNotification(result.message, "success");
-                document.getElementById("fullname").value = `${result.user.firstName} ${result.user.lastName}`;
-                document.getElementById("email").value = result.user.email;
-                document.getElementById("phone").value = result.user.phone || '';
-                document.getElementById("address").value = result.user.location || '';
-                showSection('settings');
-                window.location.hash = 'settings';
-              } else {
-                showNotification(result.message || "Error updating profile", "error");
-              }
-            } catch (error) {
-              console.error("Profile form error:", error);
-              showNotification("Error updating profile", "error");
-            }
-          });
+    if (!fullname) {
+      showFieldError('fullname', 'Full name is required');
+      isValid = false;
+    } else {
+      const nameParts = fullname.split(" ").filter(part => part);
+      if (nameParts.length < 2) {
+        showFieldError('fullname', 'Please provide both first and last names');
+        isValid = false;
+      } else {
+        const namePattern = /^[A-Za-z\s'-]+$/;
+        if (!namePattern.test(fullname)) {
+          showFieldError('fullname', 'Name can only contain letters, spaces, hyphens, and apostrophes');
+          isValid = false;
+        } else if (fullname.length < 2 || fullname.length > 100) {
+          showFieldError('fullname', 'Name must be between 2 and 100 characters');
+          isValid = false;
         }
+      }
+    }
 
-        if (passwordForm) {
-          passwordForm.addEventListener("submit", async function () {
-            const currentPassword = document.getElementById("current-password")?.value;
-            const newPassword = document.getElementById("new-password")?.value;
-            const confirmPassword = document.getElementById("confirm-password")?.value;
+    if (!email) {
+      showFieldError('email', 'Email is required');
+      isValid = false;
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      showFieldError('email', 'Please provide a valid email address');
+      isValid = false;
+    }
 
-            if (!currentPassword || !newPassword || !confirmPassword) {
-              showNotification("All password fields are required", "error");
-              return;
-            }
-            if (newPassword !== confirmPassword) {
-              showNotification("New passwords do not match", "error");
-              return;
-            }
-            if (newPassword.length < 6) {
-              showNotification("New password must be at least 6 characters", "error");
-              return;
-            }
+    if (phone && !/^[0-9]{10}$/.test(phone)) {
+      showFieldError('phone', 'Please enter a valid 10-digit phone number');
+      isValid = false;
+    }
 
-            console.log("Submitting password change:", { currentPassword, newPassword });
-            try {
-              const response = await fetch("/tenant/password", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ currentPassword, newPassword }),
-              });
-              const result = await response.json();
-              console.log("Password change response:", result);
-              if (result.success) {
-                showNotification(result.message, "success");
-                passwordForm.reset();
-                showSection('settings');
-                window.location.hash = 'settings';
-              } else {
-                showNotification(result.message || "Error changing password", "error");
-              }
-            } catch (error) {
-              console.error("Password form error:", error);
-              showNotification("Error changing password", "error");
-            }
-          });
-        }
+    if (location && location.length < 3) {
+      showFieldError('address', 'Location must be at least 3 characters');
+      isValid = false;
+    }
 
-        if (notificationForm) {
-          notificationForm.addEventListener("submit", async function () {
-            const emailNotifications = document.getElementById("email-notifications")?.checked;
-            const smsNotifications = document.getElementById("sms-notifications")?.checked;
-            const rentReminders = document.getElementById("rent-reminders")?.checked;
-            const maintenanceUpdates = document.getElementById("maintenance-updates")?.checked;
-            const newListings = document.getElementById("new-listings")?.checked;
+    if (!isValid) {
+      return;
+    }
 
-            console.log("Submitting notification preferences:", {
-              emailNotifications,
-              smsNotifications,
-              rentReminders,
-              maintenanceUpdates,
-              newListings,
-            });
-            try {
-              const response = await fetch("/tenant/notifications", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                  emailNotifications,
-                  smsNotifications,
-                  rentReminders,
-                  maintenanceUpdates,
-                  newListings,
-                }),
-              });
-              const result = await response.json();
-              console.log("Notification preferences response:", result);
-              if (result.success) {
-                showNotification(result.message, "success");
-                document.getElementById("email-notifications").checked = result.user.emailNotifications;
-                document.getElementById("sms-notifications").checked = result.user.smsNotifications;
-                document.getElementById("rent-reminders").checked = result.user.rentReminders;
-                document.getElementById("maintenance-updates").checked = result.user.maintenanceUpdates;
-                document.getElementById("new-listings").checked = result.user.newListings;
-                showSection('settings');
-                window.location.hash = 'settings';
-              } else {
-                showNotification(result.message || "Error updating preferences", "error");
-              }
-            } catch (error) {
-              console.error("Notification form error:", error);
-              showNotification("Error updating preferences", "error");
-            }
-          });
-        }
+    const nameParts = fullname.split(" ").filter(part => part);
+    const firstName = nameParts[0];
+    const lastName = nameParts.slice(1).join(" ");
+
+    console.log("Submitting profile update:", { firstName, lastName, email, phone, location });
+    try {
+      const response = await fetch("/tenant/profile", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          firstName,
+          lastName,
+          email,
+          phone,
+          location,
+        }),
+      });
+      const result = await response.json();
+      console.log("Profile update response:", result);
+      if (result.success) {
+        showNotification(result.message || "Profile updated successfully", "success");
+        document.getElementById("fullname").value = `${result.user.firstName} ${result.user.lastName}`;
+        document.getElementById("email").value = result.user.email;
+        document.getElementById("phone").value = result.user.phone || '';
+        document.getElementById("address").value = result.user.location || '';
+        showSection('settings');
+        window.location.hash = 'settings';
+      } else {
+        showNotification(result.message || "Error updating profile", "error");
+      }
+    } catch (error) {
+      console.error("Profile form error:", error);
+      showNotification("Error updating profile", "error");
+    }
+  });
+}
+
+if (passwordForm) {
+  passwordForm.addEventListener("submit", async function (event) {
+    event.preventDefault();
+    let isValid = true;
+    
+    const currentPassword = document.getElementById("current-password")?.value;
+    const newPassword = document.getElementById("new-password")?.value;
+    const confirmPassword = document.getElementById("confirm-password")?.value;
+
+    const errorElements = passwordForm.querySelectorAll('.error');
+    errorElements.forEach(el => el.remove());
+
+    if (!currentPassword) {
+      showFieldError('current-password', 'Current password is required');
+      isValid = false;
+    }
+
+    if (!newPassword) {
+      showFieldError('new-password', 'New password is required');
+      isValid = false;
+    } else if (newPassword.length < 8) {
+      showFieldError('new-password', 'Password must be at least 8 characters');
+      isValid = false;
+    } else if (!/[A-Z]/.test(newPassword)) {
+      showFieldError('new-password', 'Password must contain at least one uppercase letter');
+      isValid = false;
+    } else if (!/[a-z]/.test(newPassword)) {
+      showFieldError('new-password', 'Password must contain at least one lowercase letter');
+      isValid = false;
+    } else if (!/[0-9]/.test(newPassword)) {
+      showFieldError('new-password', 'Password must contain at least one number');
+      isValid = false;
+    } else if (!/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(newPassword)) {
+      showFieldError('new-password', 'Password must contain at least one special character');
+      isValid = false;
+    } else if (currentPassword === newPassword) {
+      showFieldError('new-password', 'New password must be different from current password');
+      isValid = false;
+    }
+
+    if (!confirmPassword) {
+      showFieldError('confirm-password', 'Please confirm your new password');
+      isValid = false;
+    } else if (newPassword !== confirmPassword) {
+      showFieldError('confirm-password', 'Passwords do not match');
+      isValid = false;
+    }
+
+    if (!isValid) {
+      return;
+    }
+
+    console.log("Submitting password change");
+    try {
+      const response = await fetch("/tenant/password", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ currentPassword, newPassword }),
+      });
+      const result = await response.json();
+      console.log("Password change response:", result);
+      if (result.success) {
+        showNotification(result.message || "Password changed successfully", "success");
+        passwordForm.reset();
+        showSection('settings');
+        window.location.hash = 'settings';
+      } else {
+        showNotification(result.message || "Error changing password", "error");
+      }
+    } catch (error) {
+      console.error("Password form error:", error);
+      showNotification("Error changing password", "error");
+    }
+  });
+}
+
+function showFieldError(fieldId, message) {
+  const field = document.getElementById(fieldId);
+  if (field) {
+    const existingError = field.parentElement.querySelector('.error');
+    if (existingError) {
+      existingError.remove();
+    }
+    
+    const errorDiv = document.createElement('div');
+    errorDiv.className = 'error visible';
+    errorDiv.textContent = message;
+    errorDiv.style.color = '#ff4444';
+    errorDiv.style.fontSize = '12px';
+    errorDiv.style.marginTop = '5px';
+    field.parentElement.appendChild(errorDiv);
+    
+    field.style.borderColor = '#ff4444';
+    field.style.border = '1px solid #ff4444';
+    
+    field.addEventListener('input', function() {
+      errorDiv.remove();
+      field.style.borderColor = '';
+      field.style.border = '';
+    }, { once: true });
+  }
+}
+
+const fullnameInput = document.getElementById("fullname");
+if (fullnameInput) {
+  fullnameInput.addEventListener('input', function(e) {
+    const value = e.target.value;
+    e.target.value = value.replace(/[^A-Za-z\s'-]/g, '');
+  });
+}
+
+const phoneInput = document.getElementById("phone");
+if (phoneInput) {
+  phoneInput.addEventListener('input', function(e) {
+    const value = e.target.value;
+    e.target.value = value.replace(/[^0-9]/g, '').slice(0, 10);
+  });
+}
+
+const newPasswordInput = document.getElementById("new-password");
+if (newPasswordInput) {
+  newPasswordInput.addEventListener('input', function(e) {
+    const password = e.target.value;
+    let strength = 0;
+    
+    if (password.length >= 8) strength++;
+    if (/[A-Z]/.test(password)) strength++;
+    if (/[a-z]/.test(password)) strength++;
+    if (/[0-9]/.test(password)) strength++;
+    if (/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password)) strength++;
+    
+    const existingIndicator = newPasswordInput.parentElement.querySelector('.password-strength');
+    if (existingIndicator) {
+      existingIndicator.remove();
+    }
+    
+    if (password.length > 0) {
+      const indicator = document.createElement('div');
+      indicator.className = 'password-strength';
+      indicator.style.marginTop = '5px';
+      indicator.style.fontSize = '12px';
+      
+      let strengthText = '';
+      let strengthColor = '';
+      
+      if (strength <= 2) {
+        strengthText = 'Weak';
+        strengthColor = '#ff4444';
+      } else if (strength <= 3) {
+        strengthText = 'Medium';
+        strengthColor = '#ffa500';
+      } else if (strength <= 4) {
+        strengthText = 'Good';
+        strengthColor = '#90EE90';
+      } else {
+        strengthText = 'Strong';
+        strengthColor = '#4caf50';
+      }
+      
+      indicator.innerHTML = `Password Strength: <span style="color: ${strengthColor}; font-weight: bold;">${strengthText}</span>`;
+      newPasswordInput.parentElement.appendChild(indicator);
+    }
+  });
+}
 
         if (paymentForm) {
           paymentForm.addEventListener("submit", async function () {

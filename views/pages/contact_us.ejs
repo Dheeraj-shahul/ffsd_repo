@@ -176,6 +176,10 @@
     />
   </head>
   <body>
+    <%- include('../partials/header') %>
+    <button class="menu-toggle" onclick="toggleMenu()">
+      <strong>></strong>
+    </button>
     <div class="whole_container">
       <div class="container">
         <div class="contact-section">
@@ -238,93 +242,109 @@
       </div>
     </div>
     <script>
-      document.getElementById("contactForm").addEventListener("submit", function (e) {
-        e.preventDefault();
-
-        const email = document.getElementById("email").value;
-        const phone = document.getElementById("phone").value;
-        const modal = document.getElementById("statusModal");
-        const modalMessage = document.getElementById("modalMessage");
-        const closeButton = document.querySelector(".close-button");
-
-        // Validate email (must be a Gmail address)
-        const emailRegex = /^[a-zA-Z0-9._%+-]+@gmail\.com$/;
-        if (!emailRegex.test(email)) {
-          modalMessage.textContent = "Please enter a valid Gmail address.";
-          modal.style.display = "flex";
-          return;
+      function toggleMenu() {
+        const sidebar = document.querySelector(".sidebar");
+        const menuButton = document.querySelector(".menu-toggle");
+        if (sidebar && menuButton) {
+          sidebar.classList.toggle("active");
+          menuButton.innerHTML = sidebar.classList.contains("active")
+            ? "<strong><</strong>"
+            : "<strong>></strong>";
         }
+      }
+      document
+        .getElementById("contactForm")
+        .addEventListener("submit", function (e) {
+          e.preventDefault();
 
-        // Validate phone number (must be 10 digits)
-        const phoneRegex = /^\d{10}$/;
-        if (phone && !phoneRegex.test(phone)) {
-          modalMessage.textContent = "Please enter a valid 10-digit phone number.";
+          const email = document.getElementById("email").value;
+          const phone = document.getElementById("phone").value;
+          const modal = document.getElementById("statusModal");
+          const modalMessage = document.getElementById("modalMessage");
+          const closeButton = document.querySelector(".close-button");
+
+          // Validate email (must be a Gmail address)
+          const emailRegex = /^[a-zA-Z0-9._%+-]+@gmail\.com$/;
+          if (!emailRegex.test(email)) {
+            modalMessage.textContent = "Please enter a valid Gmail address.";
+            modal.style.display = "flex";
+            return;
+          }
+
+          // Validate phone number (must be 10 digits)
+          const phoneRegex = /^\d{10}$/;
+          if (phone && !phoneRegex.test(phone)) {
+            modalMessage.textContent =
+              "Please enter a valid 10-digit phone number.";
+            modal.style.display = "flex";
+            return;
+          }
+
+          // Gather form data
+          const formData = {
+            name: document.getElementById("name").value,
+            email: email,
+            phone: phone,
+            subject: document.getElementById("subject").value,
+            message: document.getElementById("message").value,
+          };
+
+          modalMessage.textContent = "Submitting your message...";
           modal.style.display = "flex";
-          return;
-        }
 
-        // Gather form data
-        const formData = {
-          name: document.getElementById("name").value,
-          email: email,
-          phone: phone,
-          subject: document.getElementById("subject").value,
-          message: document.getElementById("message").value
-        };
+          // Create XMLHttpRequest
+          const xhr = new XMLHttpRequest();
+          xhr.open("POST", "/submit-form", true);
+          xhr.setRequestHeader("Content-Type", "application/json");
 
-        modalMessage.textContent = "Submitting your message...";
-        modal.style.display = "flex";
-
-        // Create XMLHttpRequest
-        const xhr = new XMLHttpRequest();
-        xhr.open("POST", "/submit-form", true);
-        xhr.setRequestHeader("Content-Type", "application/json");
-
-        // Handle response
-        xhr.onreadystatechange = function () {
-          if (xhr.readyState === XMLHttpRequest.DONE) {
-            if (xhr.status === 200) {
-              try {
-                const result = JSON.parse(xhr.responseText);
-                modalMessage.textContent = "Thank you for your message! We will get back to you shortly.";
-                document.getElementById("contactForm").reset();
-              } catch (e) {
-                modalMessage.textContent = "Error: Invalid response from server.";
-                console.error("Parse error:", e);
-              }
-            } else {
-              let errorMessage = "Failed to submit form.";
-              try {
-                const result = JSON.parse(xhr.responseText);
-                if (result.error) {
-                  errorMessage = result.error;
+          // Handle response
+          xhr.onreadystatechange = function () {
+            if (xhr.readyState === XMLHttpRequest.DONE) {
+              if (xhr.status === 200) {
+                try {
+                  const result = JSON.parse(xhr.responseText);
+                  modalMessage.textContent =
+                    "Thank you for your message! We will get back to you shortly.";
+                  document.getElementById("contactForm").reset();
+                } catch (e) {
+                  modalMessage.textContent =
+                    "Error: Invalid response from server.";
+                  console.error("Parse error:", e);
                 }
-              } catch (e) {
-                if (xhr.status === 0) {
-                  errorMessage = "Network error. Please ensure the backend server is running.";
+              } else {
+                let errorMessage = "Failed to submit form.";
+                try {
+                  const result = JSON.parse(xhr.responseText);
+                  if (result.error) {
+                    errorMessage = result.error;
+                  }
+                } catch (e) {
+                  if (xhr.status === 0) {
+                    errorMessage =
+                      "Network error. Please ensure the backend server is running.";
+                  }
                 }
+                modalMessage.textContent = `Error: ${errorMessage}`;
+                console.error("XHR error:", xhr.status, xhr.statusText);
               }
-              modalMessage.textContent = `Error: ${errorMessage}`;
-              console.error("XHR error:", xhr.status, xhr.statusText);
             }
-          }
-        };
+          };
 
-        // Send request
-        xhr.send(JSON.stringify(formData));
+          // Send request
+          xhr.send(JSON.stringify(formData));
 
-        // Close the modal when the user clicks on 'x'
-        closeButton.onclick = function () {
-          modal.style.display = "none";
-        };
-
-        // Close the modal when the user clicks anywhere outside of the modal
-        window.onclick = function (event) {
-          if (event.target === modal) {
+          // Close the modal when the user clicks on 'x'
+          closeButton.onclick = function () {
             modal.style.display = "none";
-          }
-        };
-      });
+          };
+
+          // Close the modal when the user clicks anywhere outside of the modal
+          window.onclick = function (event) {
+            if (event.target === modal) {
+              modal.style.display = "none";
+            }
+          };
+        });
     </script>
   </body>
 </html>
