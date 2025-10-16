@@ -258,6 +258,22 @@
       cursor: pointer;
       color: #333;
     }
+
+    /* ✅ CHART FIXES */
+.chart-container canvas {
+  max-height: 250px !important;
+  height: 250px !important;
+}
+
+.charts {
+  max-height: 1200px !important;
+  overflow: visible !important;
+}
+
+.chart-container {
+  position: relative !important;
+  height: 300px !important;
+}
   </style>
 </head>
 <body>
@@ -294,6 +310,7 @@
         { title: 'Monthly Revenue', value: `₹${stats.revenueMonthly?.toFixed(2)}` },
         { title: 'Active Properties', value: stats.propertiesActive },
         { title: 'Pending Properties', value: stats.propertiesPending },
+        { title: 'Available Properties', value: stats.propertiesAvailable },
         { title: 'Available Workers', value: stats.workersAvailable },
       ].forEach(stat => { %>
         <div class="stat-card">
@@ -458,7 +475,7 @@
             <td><%= b.bookingDate ? new Date(b.bookingDate).toLocaleDateString() : 'N/A' %></td>
             <td><%= b.startDate ? new Date(b.startDate).toLocaleDateString() : 'N/A' %></td>
             <td><%= b.endDate ? new Date(b.endDate).toLocaleDateString() : 'N/A' %></td>
-            <td>₹<%= b.amount ? b.amount.toFixed(2) : 'N/A' %></td>
+            <td>₹<%= b.price ? b.price.toFixed(2) : 'N/A' %></td>
             <td>
               <div class="action-buttons">
                 <a href="/admin/booking/<%= b.id %>">View</a>
@@ -675,123 +692,259 @@
   </section>
 
   <!-- Reports and Analytics -->
-  <section id="reports" class="reports">
-    <h2>Reports and Analytics</h2>
-    <div class="charts">
-      <% const charts = [
-        { 
-          id: 'bookingStatusChart', 
-          title: 'Booking Status', 
-          type: 'pie', 
-          labels: ['Active', 'Pending', 'Cancelled'],
-          data: [
-            stats.bookingStatusDistribution?.active || 0,
-            stats.bookingStatusDistribution?.pending || 0,
-            stats.bookingStatusDistribution?.cancelled || 0
-          ],
-          color: ['#007bff', '#ffc107', '#dc3545']
-        }
-      ]; %>
-      
-      <% charts.forEach(chart => { %>
-        <div class="chart-container">
-          <h3><%= chart.title %></h3>
-          <canvas id="<%= chart.id %>" height="300"></canvas>
-        </div>
-      <% }); %>
+<section id="reports" class="reports">
+  <h2>📊 Reports & Analytics (2025)</h2>
+  <div class="charts" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 25px; max-height: 800px; overflow-y: auto;">
+    
+    <!-- BAR CHARTS (Top Row) -->
+    <div class="chart-container">
+      <h3>🏠 New Properties</h3>
+      <canvas id="propertiesChart" height="250"></canvas>
     </div>
-  </section>
 
-  <!-- Chart.js Script -->
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <script>
-    document.addEventListener('DOMContentLoaded', function() {
-      // Initialize all charts
-      <% charts.forEach(chart => { %>
-        initChart(
-          '<%= chart.id %>', 
-          '<%= chart.type %>', 
-          <%= JSON.stringify(chart.labels) %>, 
-          <%= JSON.stringify(chart.data) %>, 
-          '<%= chart.title %>',
-          <%= JSON.stringify(chart.color) %>,
-          '<%= chart.yLabel || "" %>',
-          '<%= chart.xLabel || "" %>'
-        );
-      <% }); %>
-    });
+    <div class="chart-container">
+      <h3>👥 New Tenants</h3>
+      <canvas id="tenantsChart" height="250"></canvas>
+    </div>
 
-    function initChart(canvasId, type, labels, data, title, colors, yLabel, xLabel) {
-      const ctx = document.getElementById(canvasId).getContext('2d');
-      
-      const backgroundColors = Array.isArray(colors) ? 
-        colors : 
-        Array(data.length).fill(colors);
-      
-      const chartData = {
-        labels: labels,
+    <div class="chart-container">
+      <h3>🔧 New Workers</h3>
+      <canvas id="workersChart" height="250"></canvas>
+    </div>
+
+    <div class="chart-container">
+      <h3>👨‍💼 New Owners</h3>
+      <canvas id="ownersChart" height="250"></canvas>
+    </div>
+
+    <!-- ✅ FIXED: ADD THIS LINE -->
+    <div class="chart-container">
+      <h3>🛠️ New Services</h3>
+      <canvas id="servicesChart" height="250"></canvas>
+    </div>
+
+    <!-- PIE CHARTS (Bottom Row) -->
+    <div class="chart-container">
+      <h3>🥧 User Types</h3>
+      <canvas id="userTypeChart" height="250"></canvas>
+    </div>
+
+    <div class="chart-container">
+      <h3>🥧 Property Status</h3>
+      <canvas id="propertyStatusChart" height="250"></canvas>
+    </div>
+
+    <!-- REVENUE CHART (Full Width) -->
+    <div class="chart-container" style="grid-column: 1 / -1;">
+      <h3>💰 Total Revenue (₹)</h3>
+      <canvas id="revenueChart" height="300"></canvas>
+    </div>
+
+  </div>
+</section>
+
+<!-- FIXED JavaScript -->
+<!-- Chart.js Script -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+let chartsInitialized = false; // ✅ FIX: Prevent infinite loop
+
+document.addEventListener('DOMContentLoaded', function() {
+  if (chartsInitialized) return; // ✅ STOP RE-RUNNING
+  chartsInitialized = true;
+  
+  const analytics = <%- JSON.stringify(analyticsData) %>;
+  
+  console.log('🧮 Analytics Data:', analytics); // ✅ DEBUG
+  
+  if (analytics && analytics.quarters && analytics.quarters.length > 0) {
+    // ✅ SINGLE CALL - NO LOOPS!
+    initAllCharts(analytics);
+  } else {
+    console.error('❌ No analytics data!');
+  }
+});
+
+function initAllCharts(analytics) {
+  // BAR CHARTS (5x)
+  initBarChart('propertiesChart', analytics.quarters, analytics.newProperties, 'New Properties', '#28a745');
+  initBarChart('tenantsChart', analytics.quarters, analytics.newTenants, 'New Tenants', '#007bff');
+  initBarChart('workersChart', analytics.quarters, analytics.newWorkers, 'New Workers', '#ffc107');
+  initBarChart('ownersChart', analytics.quarters, analytics.newOwners, 'New Owners', '#6f42c1');
+  initBarChart('servicesChart', analytics.quarters, analytics.newServices, 'New Services', '#fd7e14');
+  
+  // REVENUE CHART
+  initRevenueChart('revenueChart', analytics.quarters, analytics.totalRevenue);
+  
+  // PIE CHARTS (2x)
+  initPieChart('userTypeChart', 
+    ['Tenants', 'Owners', 'Workers'], 
+    [analytics.userTypeDistribution.tenants, 
+     analytics.userTypeDistribution.owners, 
+     analytics.userTypeDistribution.workers]
+  );
+  
+  initPieChart('propertyStatusChart', 
+    ['Rented', 'Available', 'Pending'], 
+    [analytics.propertyStatusDistribution.rented, 
+     analytics.propertyStatusDistribution.available, 
+     analytics.propertyStatusDistribution.pending]
+  );
+  
+  console.log('✅ ALL 8 CHARTS LOADED!');
+}
+
+function initBarChart(canvasId, labels, data, title, color) {
+  try {
+    const canvas = document.getElementById(canvasId);
+    if (!canvas) {
+      console.error(`❌ Canvas ${canvasId} not found!`);
+      return;
+    }
+    
+    const ctx = canvas.getContext('2d');
+    // ✅ DESTROY OLD CHART IF EXISTS
+    if (window[`chart_${canvasId}`]) {
+      window[`chart_${canvasId}`].destroy();
+    }
+    
+    window[`chart_${canvasId}`] = new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels: labels || [],
         datasets: [{
           label: title,
-          data: data,
-          backgroundColor: backgroundColors,
-          borderColor: type === 'line' ? backgroundColors : undefined,
-          borderWidth: type === 'line' ? 3 : 1,
-          fill: type === 'line',
-          tension: type === 'line' ? 0.4 : 0
+          data: data || [],
+          backgroundColor: color + '30',
+          borderColor: color,
+          borderWidth: 2,
+          borderRadius: 6,
+          maxBarThickness: 40
         }]
-      };
-      
-      const config = {
-        type: type,
-        data: chartData,
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          plugins: {
-            legend: {
-              position: type === 'pie' || type === 'doughnut' ? 'right' : 'top',
-            },
-            title: {
-              display: true,
-              text: title,
-              font: {
-                size: 16
-              }
-            },
-            tooltip: {
-              callbacks: {
-                label: function(context) {
-                  let label = context.dataset.label || '';
-                  if (label) {
-                    label += ': ';
-                  }
-                  label += context.raw;
-                  return label;
-                }
-              }
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        animation: false, // ✅ STOP MOVING!
+        plugins: { 
+          legend: { display: false },
+          tooltip: {
+            callbacks: {
+              label: (context) => `${context.dataset.label}: ${context.parsed.y}`
+            }
+          }
+        },
+        scales: {
+          y: {
+            beginAtZero: true,
+            ticks: { font: { size: 11 } }
+          },
+          x: {
+            ticks: { font: { size: 10 }, maxRotation: 45 }
+          }
+        }
+      }
+    });
+    console.log(`✅ ${canvasId} LOADED`);
+  } catch (err) {
+    console.error(`❌ ${canvasId} ERROR:`, err);
+  }
+}
+
+function initRevenueChart(canvasId, labels, data) {
+  try {
+    const canvas = document.getElementById(canvasId);
+    if (!canvas) return;
+    
+    const ctx = canvas.getContext('2d');
+    if (window[`chart_${canvasId}`]) {
+      window[`chart_${canvasId}`].destroy();
+    }
+    
+    window[`chart_${canvasId}`] = new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels: labels || [],
+        datasets: [{
+          label: 'Revenue',
+          data: data || [],
+          backgroundColor: '#dc354530',
+          borderColor: '#dc3545',
+          borderWidth: 3,
+          borderRadius: 6
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        animation: false, // ✅ STOP MOVING!
+        plugins: { 
+          legend: { display: false },
+          tooltip: {
+            callbacks: {
+              label: (context) => `₹${context.parsed.y.toLocaleString()}`
+            }
+          }
+        },
+        scales: {
+          y: {
+            beginAtZero: true,
+            ticks: { 
+              font: { size: 11 },
+              callback: (value) => `₹${value.toLocaleString()}` 
             }
           },
-          scales: type !== 'pie' && type !== 'doughnut' ? {
-            y: {
-              beginAtZero: true,
-              title: {
-                display: !!yLabel,
-                text: yLabel
-              }
-            },
-            x: {
-              title: {
-                display: !!xLabel,
-                text: xLabel
-              }
-            }
-          } : undefined
+          x: { ticks: { font: { size: 10 }, maxRotation: 45 } }
         }
-      };
-      
-      new Chart(ctx, config);
+      }
+    });
+    console.log(`✅ ${canvasId} LOADED`);
+  } catch (err) {
+    console.error(`❌ ${canvasId} ERROR:`, err);
+  }
+}
+
+function initPieChart(canvasId, labels, data) {
+  try {
+    const canvas = document.getElementById(canvasId);
+    if (!canvas) return;
+    
+    const ctx = canvas.getContext('2d');
+    if (window[`chart_${canvasId}`]) {
+      window[`chart_${canvasId}`].destroy();
     }
-  </script>
+    
+    const colors = ['#007bff', '#28a745', '#ffc107', '#dc3545', '#6f42c1'];
+    
+    window[`chart_${canvasId}`] = new Chart(ctx, {
+      type: 'pie',
+      data: {
+        labels: labels || [],
+        datasets: [{
+          data: data || [],
+          backgroundColor: colors.slice(0, labels.length),
+          borderWidth: 2,
+          borderColor: '#fff'
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        animation: false, // ✅ STOP MOVING!
+        plugins: {
+          legend: { 
+            position: 'bottom',
+            labels: { font: { size: 11 } }
+          }
+        }
+      }
+    });
+    console.log(`✅ ${canvasId} LOADED`);
+  } catch (err) {
+    console.error(`❌ ${canvasId} ERROR:`, err);
+  }
+}
+</script>
 </body>
 <script src="js/admin.js"></script>
 </html>

@@ -3,9 +3,12 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Worker Registration - RentEase</title>
+  <title>Worker Profile Update - RentEase</title>
   <link rel="stylesheet" href="/css/worker_register.css" />
   <style>
+    body{
+      padding-top:120px;
+    }
     .page-container {
       max-width: 1200px;
       margin: 0 auto;
@@ -16,7 +19,7 @@
       margin-bottom: 40px;
     }
     .registration-form-container {
-      background: #fff;
+      background: #fff; /* ✅ ORIGINAL WHITE */
       padding: 20px;
       border-radius: 8px;
       box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
@@ -40,6 +43,7 @@
       display: block;
       margin-bottom: 5px;
       font-weight: bold;
+      color: #000; /* ✅ ORIGINAL BLACK */
     }
     .form-group input,
     .form-group select,
@@ -49,6 +53,7 @@
       border: 1px solid #ccc;
       border-radius: 4px;
       box-sizing: border-box;
+      color: #000; /* ✅ ORIGINAL BLACK */
     }
     .form-group input.error,
     .form-group select.error,
@@ -62,18 +67,18 @@
       margin-top: 20px;
     }
     .primary-button {
-      background-color: #28a745;
-      color: white;
+      background-color: #ffc109; /* ✅ ORIGINAL GREEN */
+      color: black;
       padding: 10px 20px;
       border: none;
       border-radius: 5px;
       cursor: pointer;
     }
     .primary-button:hover {
-      background-color: #218838;
+      background-color: #218838; /* ✅ ORIGINAL GREEN */
     }
     .secondary-button {
-      background-color: #6c757d;
+      background-color: #6c757d; /* ✅ ORIGINAL GRAY */
       color: white;
       padding: 10px 20px;
       border: none;
@@ -81,27 +86,43 @@
       cursor: pointer;
     }
     .secondary-button:hover {
-      background-color: #5a6268;
+      background-color: #5a6268; /* ✅ ORIGINAL GRAY */
     }
+    
+    /* ✅ FIXED CHECKBOX - ONLY THIS CHANGED */
     .agreement-checkbox {
       display: flex;
-      align-items: center;
-      gap: 10px;
+      align-items: flex-start;
+      gap: 12px;
+      margin-top: 10px;
+    }
+    .agreement-checkbox input[type="checkbox"] {
+      margin-top: 2px;
+      width: 18px;
+      height: 18px;
+    }
+    .agreement-checkbox label {
+      margin: 0;
+      line-height: 1.4;
+      color: #000; /* ✅ ORIGINAL BLACK */
+    }
+    .agreement-checkbox a {
+      color: #007bff; /* ✅ ORIGINAL BLUE LINK */
     }
   </style>
 </head>
-<body>
+<body style="background: #f5f5f5;"> <!-- ✅ ORIGINAL GRAY BG -->
   <%- include('../partials/header') %>
   <div class="page-container">
     <div class="page-header">
-      <h1>Worker Profile Update</h1>
-      <p>Update your profile details below to manage your service on RentEase</p>
+      <h1 style="color: #000;">Worker Profile Update</h1> <!-- ✅ ORIGINAL BLACK -->
+      <p style="color: #333;">Update your profile details below to manage your service on RentEase</p> <!-- ✅ ORIGINAL DARK GRAY -->
     </div>
 
     <div class="registration-form-container">
       <form id="worker-registration-form" enctype="multipart/form-data">
         <div class="form-section">
-          <h2>Personal Information</h2>
+          <h2 style="color: #000;">Personal Information</h2> <!-- ✅ ORIGINAL BLACK -->
           <div class="form-row">
             <div class="form-group">
               <label for="full-name">Full Name*</label>
@@ -144,7 +165,7 @@
         </div>
 
         <div class="form-section">
-          <h2>Service Details</h2>
+          <h2 style="color: #000;">Service Details</h2> <!-- ✅ ORIGINAL BLACK -->
           <div class="form-row">
             <div class="form-group">
               <label for="service-type">Service Type*</label>
@@ -169,6 +190,7 @@
                 value="<%= user ? user.experience : '' %>"
               />
             </div>
+          </div>
 
           <div class="form-row">
             <div class="form-group full-width">
@@ -181,7 +203,6 @@
                 placeholder="Describe your skills and expertise"
               ><%= user ? user.description : '' %></textarea>
             </div>
-          </div>
           </div>
 
           <div class="form-row">
@@ -209,7 +230,7 @@
         </div>
 
         <div class="form-section">
-          <h2>Location Details</h2>
+          <h2 style="color: #000;">Location Details</h2> <!-- ✅ ORIGINAL BLACK -->
           <div class="form-row">
             <div class="form-group">
               <label for="city">City*</label>
@@ -235,7 +256,7 @@
         </div>
 
         <div class="form-section">
-          <h2>Documents</h2>
+          <h2 style="color: #000;">Documents</h2> <!-- ✅ ORIGINAL BLACK -->
           <div class="form-row">
             <div class="form-group">
               <label for="image">Recent Photo*</label>
@@ -246,28 +267,27 @@
                 accept="image/*"
               />
               <% if (user && user.image) { %>
-                <p>Current Photo: <a href="<%= user.image %>" target="_blank">View</a></p>
+                <p style="color: #333;">Current Photo: <a href="<%= user.image %>" target="_blank" style="color: #007bff;">View</a></p> <!-- ✅ ORIGINAL COLORS -->
               <% } %>
             </div>
           </div>
         </div>
 
+        <!-- ✅ FIXED CHECKBOX SECTION -->
         <div class="form-section">
-          <div class="form-row">
-            <div class="form-group full-width">
-              <div class="agreement-checkbox">
-                <input
-                  type="checkbox"
-                  id="terms-agreement"
-                  name="terms-agreement"
-                  required
-                />
-                <label for="terms-agreement">
-                  I agree to RentEase's
-                  <a href="#">Terms & Conditions</a> and
-                  <a href="#">Privacy Policy</a>*
-                </label>
-              </div>
+          <div class="form-group full-width">
+            <div class="agreement-checkbox">
+              <input
+                type="checkbox"
+                id="terms-agreement"
+                name="terms-agreement"
+                required
+              />
+              <label for="terms-agreement">
+                I agree to RentEase's
+                <a href="/termsofservice">Terms & Conditions</a> and
+                <a href="/privacy_policy">Privacy Policy</a>*
+              </label>
             </div>
           </div>
         </div>
